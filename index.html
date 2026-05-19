@@ -1171,24 +1171,26 @@ restartChat();
 
 /* ── SCROLL REVEALS — désactivés ── */
 
-/* ── FOND SECTIONS — piloté par le scroll ── */
+/* ── FOND SECTIONS — piloté par le scroll, fondu haut ET bas ── */
 (()=>{
-  // Sections alternées opaques : le fond apparaît en entrant dans le viewport
   const SEC_BG=[
     document.getElementById('problem'),
     document.getElementById('features'),
     document.getElementById('faq'),
   ].filter(Boolean);
-  const FADE=140; // pixels d'entrée pour atteindre l'opacité max
+  const FADE=280; // px de fondu sur chaque bord (haut et bas)
   const MAX_ALPHA=0.93;
 
   function updateSecBg(){
     const vh=window.innerHeight;
     SEC_BG.forEach(sec=>{
       const rect=sec.getBoundingClientRect();
-      // ratio 0→1 quand le haut de la section passe de vh à (vh - FADE)
-      const ratio=Math.max(0,Math.min(1,(vh-rect.top)/FADE));
-      sec.style.setProperty('--sbg', ratio*MAX_ALPHA);
+      // Entrée par le bas : ratio 0→1 quand rect.top passe de vh à (vh-FADE)
+      const enter=Math.max(0,Math.min(1,(vh-rect.top)/FADE));
+      // Sortie par le haut : ratio 1→0 quand rect.bottom passe de FADE à 0
+      const exit=Math.max(0,Math.min(1,rect.bottom/FADE));
+      // L'opacité est le minimum des deux côtés — fondu symétrique
+      sec.style.setProperty('--sbg',(Math.min(enter,exit)*MAX_ALPHA).toFixed(3));
     });
   }
   window.addEventListener('scroll',updateSecBg,{passive:true});

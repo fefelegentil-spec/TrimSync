@@ -169,7 +169,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
 /* problem */
 .prob-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
-.pain{padding:2.4rem 2.2rem;border-radius:18px;background:oklch(0.14 0.009 220/.80);border:1px solid var(--bd2);position:relative;overflow:hidden}
+.pain{padding:2.4rem 2.2rem;border-radius:18px;background:oklch(0.10 0.008 222/.92);border:1px solid var(--bd2);position:relative;overflow:hidden}
 .pain::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,oklch(0.76 0.13 193/.35),transparent);pointer-events:none}
 .pain-n{display:none}
 .pain-ico{margin-bottom:1.3rem;color:var(--a);display:block;line-height:0}
@@ -178,7 +178,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 /* solution */
 .sol-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:3rem}
 .sol-steps::after{display:none}
-.step{padding:2.4rem 2.2rem;border-radius:18px;background:oklch(0.14 0.009 220/.80);border:1px solid var(--bd2);position:relative;overflow:hidden}
+.step{padding:2.4rem 2.2rem;border-radius:18px;background:oklch(0.10 0.008 222/.92);border:1px solid var(--bd2);position:relative;overflow:hidden}
 .step::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,oklch(0.76 0.13 193/.35),transparent);pointer-events:none}
 .step-ico{margin-bottom:1.2rem;color:oklch(0.76 0.13 193/.75);display:block;line-height:0}
 .step-n{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;font-family:var(--fd);font-size:.88rem;font-weight:800;margin-bottom:1.3rem;position:relative;z-index:1}
@@ -188,7 +188,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
 /* features */
 .feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
-.feat{background:oklch(0.14 0.009 220/.80);border:1px solid var(--bd2);border-radius:18px;padding:2.4rem 2.4rem;position:relative;overflow:hidden}
+.feat{background:oklch(0.10 0.008 222/.92);border:1px solid var(--bd2);border-radius:18px;padding:2.4rem 2.4rem;position:relative;overflow:hidden}
 .feat::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,oklch(0.76 0.13 193/.35),transparent);pointer-events:none}
 .feat-ico{margin-bottom:1.2rem;color:var(--a);display:block;line-height:0}
 .feat-tag{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--a);display:block;margin-bottom:.75rem}
@@ -349,42 +349,9 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   .cta-acts .btn,.cta-acts button{justify-content:center;text-align:center}
 }
 
-/* ─── SÉPARATION SECTIONS — transitions douces ─── */
-#home,#solution,#cta{background:transparent}
+/* ─── SECTIONS — toutes transparentes, vagues visibles partout ─── */
+#home,#problem,#solution,#features,#faq,#cta{background:transparent}
 .div{display:none}
-
-/* Sections opaques : top transparent → opaque pour fondre depuis les vagues */
-#problem,#features,#faq{
-  background:linear-gradient(to bottom,
-    transparent 0,
-    oklch(0.11 0.007 222/.92) 18rem
-  );
-  border:none;
-}
-
-/* Section solution (transparente entre 2 opaques) :
-   gradient haut/bas sur le canvas WebGL — z-index:-1 = derrière le contenu,
-   mais rendu au-dessus du canvas (stacking context z-index:1 du body) */
-#solution::before{
-  content:'';position:absolute;top:0;left:0;right:0;
-  height:180px;
-  background:linear-gradient(to bottom,oklch(0.11 0.007 222/.92),transparent);
-  z-index:-1;pointer-events:none;
-}
-#solution::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;
-  height:180px;
-  background:linear-gradient(to top,oklch(0.11 0.007 222/.92),transparent);
-  z-index:-1;pointer-events:none;
-}
-
-/* Hero : fondu bas → dégradé vers dark avant la bande marquee */
-#home::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;
-  height:200px;
-  background:linear-gradient(to bottom,transparent,var(--bg));
-  z-index:-1;pointer-events:none;
-}
 
 /* ─── SPOTLIGHT CARD — pointer-reactive glow (SpotlightCard vanilla port) ─── */
 [data-glow] {

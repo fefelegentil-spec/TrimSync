@@ -431,6 +431,32 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .modal-book-btn:hover{opacity:.88}
 .modal-no-commit{font-size:.78rem;color:var(--fg3);text-align:center;margin:0}
 @media(max-width:560px){.plan-modal{padding:2rem 1.4rem;border-radius:16px}}
+
+/* ── DEVIS MODAL ── */
+.devis-overlay{position:fixed;inset:0;z-index:9100;background:oklch(0.06 0.01 222/.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity .3s ease;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.devis-overlay.open{opacity:1;pointer-events:all}
+.devis-modal{position:relative;background:oklch(0.12 0.008 222);border:1px solid oklch(0.76 0.13 193/.20);border-radius:22px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;padding:2.4rem 2.6rem;transform:translateY(28px) scale(0.96);transition:transform .4s cubic-bezier(0.16,1,0.3,1)}
+.devis-overlay.open .devis-modal{transform:none}
+.devis-modal .modal-close{position:absolute;top:1.2rem;right:1.2rem;width:32px;height:32px;background:oklch(1 0 0/.06);border:1px solid oklch(1 0 0/.12);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--fg2);transition:background .2s,color .2s;font-size:.88rem;line-height:1}
+.devis-modal .modal-close:hover{background:oklch(1 0 0/.14);color:var(--fg)}
+.devis-h{font-family:var(--fd);font-size:1.5rem;font-weight:800;color:var(--fg);margin:0 0 .35rem}
+.devis-sub{font-size:.88rem;color:var(--fg2);margin:0 0 1.8rem;line-height:1.5}
+.devis-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:480px){.devis-grid{grid-template-columns:1fr}}
+.devis-field{display:flex;flex-direction:column;gap:5px}
+.devis-field.full{grid-column:1/-1}
+.devis-label{font-size:.75rem;font-weight:600;color:var(--fg2);letter-spacing:.04em;text-transform:uppercase}
+.devis-input,.devis-select,.devis-textarea{background:oklch(0.09 0.006 222);border:1px solid oklch(1 0 0/.13);border-radius:10px;padding:.65rem .9rem;font-size:.88rem;color:var(--fg);font-family:inherit;outline:none;transition:border-color .2s;width:100%;box-sizing:border-box}
+.devis-input:focus,.devis-select:focus,.devis-textarea:focus{border-color:oklch(0.76 0.13 193/.6)}
+.devis-textarea{resize:vertical;min-height:88px}
+.devis-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23a0aec0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .9rem center}
+.devis-submit{margin-top:1.4rem;width:100%;padding:.9rem 1.4rem;background:oklch(0.76 0.13 193);color:oklch(0.12 0.02 222);border:none;border-radius:100px;font-family:var(--fd);font-weight:800;font-size:.92rem;cursor:pointer;transition:opacity .2s,transform .2s var(--ex);display:flex;align-items:center;justify-content:center;gap:.5rem}
+.devis-submit:hover{opacity:.88;transform:scale(1.02)}
+.devis-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.devis-msg{margin-top:1rem;padding:.8rem 1rem;border-radius:10px;font-size:.85rem;text-align:center;display:none}
+.devis-msg.success{display:block;background:oklch(0.76 0.13 193/.12);border:1px solid oklch(0.76 0.13 193/.3);color:oklch(0.76 0.13 193)}
+.devis-msg.error{display:block;background:oklch(0.6 0.18 25/.12);border:1px solid oklch(0.6 0.18 25/.3);color:oklch(0.7 0.15 25)}
+@media(max-width:560px){.devis-modal{padding:2rem 1.4rem;border-radius:16px}}
 </style>
 </head>
 <body>
@@ -839,7 +865,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <span data-en="Book a free demo" data-fr="Réserver une démo gratuite">Book a free demo</span>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
-      <a href="mailto:felix@trimsync.tech" class="btn btn-b mag">felix@trimsync.tech</a>
+      <button class="btn btn-b mag" onclick="openDevis()" data-en="Request a quote" data-fr="Demander un devis">Request a quote</button>
     </div>
   </div>
 </section>
@@ -886,8 +912,59 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <span data-en="Book your free demo" data-fr="Réserver votre démo gratuite">Book your free demo</span>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
+      <button class="modal-book-btn" id="modal-devis-btn" style="background:oklch(0.76 0.13 193/.12);color:oklch(0.76 0.13 193);border:1px solid oklch(0.76 0.13 193/.3)" data-en="Get a quote" data-fr="Demander un devis">Get a quote</button>
       <p class="modal-no-commit" data-en="No commitment — cancel anytime." data-fr="Sans engagement — résiliez quand vous voulez.">No commitment — cancel anytime.</p>
     </div>
+  </div>
+</div>
+
+<!-- DEVIS MODAL -->
+<div id="devis-overlay" class="devis-overlay" role="dialog" aria-modal="true" aria-labelledby="devis-title">
+  <div class="devis-modal">
+    <button class="modal-close" aria-label="Close" onclick="closeDevis()">✕</button>
+    <h2 class="devis-h" id="devis-title" data-en="Request a quote" data-fr="Demander un devis">Request a quote</h2>
+    <p class="devis-sub"
+      data-en="Tell us about your barbershop — we'll get back within 24h."
+      data-fr="Parlez-nous de votre salon — nous revenons vers vous sous 24h."
+    >Tell us about your barbershop — we'll get back within 24h.</p>
+
+    <form id="devis-form" onsubmit="return false">
+      <div class="devis-grid">
+        <div class="devis-field">
+          <label class="devis-label" for="dv-nom" data-en="Name" data-fr="Nom">Name</label>
+          <input class="devis-input" id="dv-nom" type="text" placeholder="Félix Martin" required autocomplete="name"/>
+        </div>
+        <div class="devis-field">
+          <label class="devis-label" for="dv-email" data-en="Email" data-fr="Email">Email</label>
+          <input class="devis-input" id="dv-email" type="email" placeholder="felix@monsalon.fr" required autocomplete="email"/>
+        </div>
+        <div class="devis-field">
+          <label class="devis-label" for="dv-shop" data-en="Barbershop name" data-fr="Nom du salon">Barbershop name</label>
+          <input class="devis-input" id="dv-shop" type="text" placeholder="Felix Cuts" required/>
+        </div>
+        <div class="devis-field">
+          <label class="devis-label" for="dv-ville" data-en="City" data-fr="Ville">City</label>
+          <input class="devis-input" id="dv-ville" type="text" placeholder="Paris"/>
+        </div>
+        <div class="devis-field full">
+          <label class="devis-label" for="dv-plan" data-en="Plan you're interested in" data-fr="Plan qui vous intéresse">Plan you're interested in</label>
+          <select class="devis-select" id="dv-plan">
+            <option value="starter" data-en="Starter — €29/mo" data-fr="Starter — 29 €/mois">Starter — €29/mo</option>
+            <option value="pro" data-en="Pro — €59/mo" data-fr="Pro — 59 €/mois">Pro — €59/mo</option>
+            <option value="max" data-en="Max — €99/mo" data-fr="Max — 99 €/mois">Max — €99/mo</option>
+          </select>
+        </div>
+        <div class="devis-field full">
+          <label class="devis-label" for="dv-msg" data-en="Message (optional)" data-fr="Message (facultatif)">Message (optional)</label>
+          <textarea class="devis-textarea" id="dv-msg" placeholder="Any questions or specific needs..."></textarea>
+        </div>
+      </div>
+      <button class="devis-submit" id="dv-submit" type="button" onclick="submitDevis()">
+        <span data-en="Send request" data-fr="Envoyer la demande">Send request</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="devis-msg" id="dv-msg-status"></div>
+    </form>
   </div>
 </div>
 
@@ -1223,6 +1300,111 @@ document.querySelectorAll('.faq-item').forEach(item=>{
       el.style.setProperty('--yp',yp);
     });
   },{passive:true});
+})();
+
+/* ── DEVIS MODAL ── */
+const DEVIS_BACKEND = 'https://trimsync-backend-production.up.railway.app';
+
+function openDevis(planKey) {
+  const overlay = document.getElementById('devis-overlay');
+  if (!overlay) return;
+  if (planKey) document.getElementById('dv-plan').value = planKey;
+  /* Appliquer la langue courante sur les options select */
+  document.querySelectorAll('#dv-plan option').forEach(opt => {
+    const v = opt.getAttribute('data-' + (lang || 'en'));
+    if (v) opt.textContent = v;
+  });
+  /* Appliquer la langue sur les labels devis */
+  overlay.querySelectorAll('[data-en]').forEach(el => {
+    const v = el.getAttribute('data-' + (lang || 'en'));
+    if (v) el.textContent = v;
+  });
+  document.getElementById('dv-msg-status').className = 'devis-msg';
+  document.getElementById('dv-submit').disabled = false;
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('dv-nom').focus(), 120);
+}
+window.openDevis = openDevis;
+
+function closeDevis() {
+  const overlay = document.getElementById('devis-overlay');
+  if (overlay) { overlay.classList.remove('open'); document.body.style.overflow = ''; }
+}
+window.closeDevis = closeDevis;
+
+async function submitDevis() {
+  const get = id => document.getElementById(id).value.trim();
+  const nom = get('dv-nom'), email = get('dv-email'), barbershop = get('dv-shop');
+  const ville = get('dv-ville'), plan = get('dv-plan'), message = get('dv-msg');
+  const status = document.getElementById('dv-msg-status');
+  const btn = document.getElementById('dv-submit');
+
+  if (!nom || !email || !barbershop) {
+    status.textContent = lang === 'fr'
+      ? 'Veuillez remplir les champs obligatoires.'
+      : 'Please fill in required fields.';
+    status.className = 'devis-msg error';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.querySelector('span').textContent = lang === 'fr' ? 'Envoi en cours…' : 'Sending…';
+  status.className = 'devis-msg';
+
+  try {
+    const res = await fetch(DEVIS_BACKEND + '/api/devis', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nom, email, barbershop, ville, plan, message }),
+    });
+    const json = await res.json();
+    if (!res.ok || !json.ok) throw new Error(json.error || 'Erreur serveur');
+
+    status.textContent = lang === 'fr'
+      ? '✓ Demande envoyée ! Nous revenons vers vous sous 24h.'
+      : '✓ Request sent! We\'ll get back to you within 24h.';
+    status.className = 'devis-msg success';
+    document.getElementById('devis-form').reset();
+    btn.querySelector('span').textContent = lang === 'fr' ? 'Envoyer la demande' : 'Send request';
+    btn.disabled = false;
+  } catch(err) {
+    status.textContent = lang === 'fr'
+      ? 'Erreur lors de l\'envoi. Réessayez ou écrivez à felix@trimsync.tech'
+      : 'Send failed. Try again or email felix@trimsync.tech';
+    status.className = 'devis-msg error';
+    btn.querySelector('span').textContent = lang === 'fr' ? 'Envoyer la demande' : 'Send request';
+    btn.disabled = false;
+  }
+}
+window.submitDevis = submitDevis;
+
+/* Fermer sur clic extérieur ou Escape */
+document.getElementById('devis-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('devis-overlay')) closeDevis();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('devis-overlay').classList.contains('open')) closeDevis();
+});
+
+/* Bouton "Get a quote" dans la plan detail modal → ouvre devis avec plan pré-sélectionné */
+(()=>{
+  let currentPlanKey = 'pro';
+  /* Intercepter l'ouverture de la plan modal pour mémoriser le plan */
+  const origRenderPlan = window._renderPlanKey;
+  /* On surcharge le clic sur data-plan pour capturer la clé */
+  document.querySelectorAll('[data-plan]').forEach(btn => {
+    btn.addEventListener('click', () => { currentPlanKey = btn.dataset.plan; }, true);
+  });
+  const devisBtn = document.getElementById('modal-devis-btn');
+  if (devisBtn) {
+    devisBtn.addEventListener('click', () => {
+      /* Ferme la plan modal avant d'ouvrir devis */
+      const planOverlay = document.getElementById('plan-modal-overlay');
+      if (planOverlay) planOverlay.classList.remove('open');
+      openDevis(currentPlanKey);
+    });
+  }
 })();
 </script>
 </body>

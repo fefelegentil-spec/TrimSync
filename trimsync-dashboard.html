@@ -69,6 +69,7 @@ img{max-width:100%;display:block}
 .login-logo-sub{font-size:11px;color:var(--t3);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
 .login-h{font-family:var(--fd);font-size:24px;font-weight:700;color:var(--t);margin-bottom:6px}
 .login-sub{font-size:13px;color:var(--t3);margin-bottom:28px}
+.demo-badge{margin-top:16px;padding:8px 12px;border-radius:8px;font-size:12px;color:oklch(0.76 0.13 193);background:oklch(0.76 0.13 193/.1);border:1px solid oklch(0.76 0.13 193/.25);text-align:center}
 .field-group{display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
 .field-label{font-size:12px;color:var(--t2);margin-bottom:5px;font-weight:500}
 .field-input{
@@ -401,6 +402,9 @@ tbody td{padding:11px 12px;vertical-align:middle}
     </div>
     <button class="btn-login" id="btn-login" onclick="doLogin()">Se connecter</button>
     <div class="login-err" id="login-err"></div>
+    <div id="demo-mode-badge" class="demo-badge" style="display:none">
+      Mode démo — identifiants fictifs acceptés
+    </div>
   </div>
 </div>
 
@@ -800,6 +804,17 @@ async function init() {
   if (SUPABASE_URL && SUPABASE_KEY) {
     try {
       supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      /* Écoute les changements de session (refresh token, logout distant, etc.) */
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_OUT' || !session) {
+          showLoginWall();
+        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          demoMode = false;
+          showApp(session.user);
+        }
+      });
+
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         demoMode = false;
@@ -812,7 +827,14 @@ async function init() {
   }
   // Pas de Supabase configuré → mode démo avec login fictif
   demoMode = true;
+  updateDemoBadge();
   showLoginWall();
+}
+
+function updateDemoBadge() {
+  const badge = document.getElementById('demo-mode-badge');
+  if (!badge) return;
+  badge.style.display = demoMode ? 'block' : 'none';
 }
 
 function showLoginWall() {
@@ -828,6 +850,7 @@ function showApp(user) {
   document.getElementById('user-email').textContent = email;
   document.getElementById('user-avatar').textContent = email[0].toUpperCase();
 
+  updateDemoBadge();
   renderAll();
 }
 

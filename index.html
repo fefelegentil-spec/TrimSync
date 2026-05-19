@@ -349,16 +349,42 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   .cta-acts .btn,.cta-acts button{justify-content:center;text-align:center}
 }
 
-/* ─── SÉPARATION SECTIONS — alternance transparent / opaque ─── */
+/* ─── SÉPARATION SECTIONS — transitions douces ─── */
 #home,#solution,#cta{background:transparent}
-/* sections paires opaques → rupture visuelle nette */
-#problem,#features,#faq{
-  background:oklch(0.11 0.007 222/.92);
-  border-top:1px solid oklch(0.76 0.13 193/.07);
-  border-bottom:1px solid oklch(0.76 0.13 193/.07);
-}
-/* dividers masqués — l'alternance des fonds suffit */
 .div{display:none}
+
+/* Sections opaques : top transparent → opaque pour fondre depuis les vagues */
+#problem,#features,#faq{
+  background:linear-gradient(to bottom,
+    transparent 0,
+    oklch(0.11 0.007 222/.92) 18rem
+  );
+  border:none;
+}
+
+/* Section solution (transparente entre 2 opaques) :
+   gradient haut/bas sur le canvas WebGL — z-index:-1 = derrière le contenu,
+   mais rendu au-dessus du canvas (stacking context z-index:1 du body) */
+#solution::before{
+  content:'';position:absolute;top:0;left:0;right:0;
+  height:180px;
+  background:linear-gradient(to bottom,oklch(0.11 0.007 222/.92),transparent);
+  z-index:-1;pointer-events:none;
+}
+#solution::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;
+  height:180px;
+  background:linear-gradient(to top,oklch(0.11 0.007 222/.92),transparent);
+  z-index:-1;pointer-events:none;
+}
+
+/* Hero : fondu bas → dégradé vers dark avant la bande marquee */
+#home::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;
+  height:200px;
+  background:linear-gradient(to bottom,transparent,var(--bg));
+  z-index:-1;pointer-events:none;
+}
 
 /* ─── SPOTLIGHT CARD — pointer-reactive glow (SpotlightCard vanilla port) ─── */
 [data-glow] {

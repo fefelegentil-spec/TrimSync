@@ -881,17 +881,16 @@ if(sprog)scroll(info=>{const p=typeof info==='number'?info:(info?.y?.progress??0
 (()=>{
   const container=document.getElementById('page-bg');
   if(!container)return;
-  const mr=(v,fl,fh,tl,th)=>tl+(v-fl)/(fh-fl)*(th-tl);
-  /* scale=82 → ondulation plus marquée ; speed=85 → cycle ~8s */
-  const sc=82,sp=85;
-  const dis=Math.round(mr(sc,1,100,20,100));
-  const dur=mr(sp,1,100,1000,50)/25;
+  /* speed=85 → cycle ~8s */
+  const sp=85;
+  const dur=((1000-85)/100*85+50)/25;
   const id='sv'+Math.random().toString(36).slice(2,7);
-  const bfx=mr(sc,0,100,0.001,0.0005).toFixed(5);
-  const bfy=mr(sc,0,100,0.004,0.002).toFixed(5);
-  container.insertAdjacentHTML('afterbegin',`<svg style="position:absolute;width:0;height:0" aria-hidden="true"><defs><filter id="${id}"><feTurbulence result="u" numOctaves="2" baseFrequency="${bfx},${bfy}" seed="0" type="turbulence"/><feColorMatrix id="${id}h" in="u" type="hueRotate" values="180"/><feColorMatrix in="d" result="c" type="matrix" values="4 0 0 0 1 4 0 0 0 1 4 0 0 0 1 1 0 0 0 0"/><feDisplacementMap in="SourceGraphic" in2="c" scale="${dis}" result="d"/><feDisplacementMap in="d" in2="u" scale="${dis}"/></filter></defs></svg>`);
+  /* Fixed filter chain: turbulence → hueRotate → single displacement (no feedback loop) */
+  /* x/y/width/height extended to -40%/180% so displaced pixels don't get clipped at edges */
+  container.insertAdjacentHTML('afterbegin',`<svg style="position:absolute;width:0;height:0" aria-hidden="true"><defs><filter id="${id}" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB"><feTurbulence result="noise" numOctaves="2" baseFrequency="0.00060,0.00260" seed="3" type="turbulence"/><feColorMatrix id="${id}h" in="noise" result="shifted" type="hueRotate" values="0"/><feDisplacementMap in="SourceGraphic" in2="shifted" scale="72" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg>`);
   const wrap=document.createElement('div');
-  wrap.style.cssText=`position:absolute;inset:-${dis}px;filter:url(#${id}) blur(2px);pointer-events:none`;
+  /* inset -24px ensures no gap if filter extends slightly inward */
+  wrap.style.cssText='position:absolute;inset:-24px;filter:url(#'+id+') blur(3px);pointer-events:none';
   const blob=document.createElement('div');
   blob.style.cssText=`width:100%;height:100%;background:oklch(0.65 0.19 193/.72);mask-image:url('https://framerusercontent.com/images/ceBGguIpUU8luwByxuQz79t7To.png');-webkit-mask-image:url('https://framerusercontent.com/images/ceBGguIpUU8luwByxuQz79t7To.png');mask-size:cover;-webkit-mask-size:cover;mask-repeat:no-repeat;-webkit-mask-repeat:no-repeat;mask-position:center;-webkit-mask-position:center`;
   wrap.appendChild(blob);container.appendChild(wrap);
@@ -1021,10 +1020,26 @@ restartChat();
 
 /* ── SCROLL REVEALS ── */
 if(!pref){
+  const CUB=[0.16,1,0.3,1];
+  /* Initialiser toutes les .rv à opacity:0 avant la première vue */
+  document.querySelectorAll('.rv').forEach(el=>{el.style.opacity='0';});
   inView('.rv',({target})=>{
-    const d=parseInt((target.className.match(/\bd(\d)\b/)||[,'0'])[1])*0.08;
-    animate(target,{opacity:[0,1],y:[28,0]},{delay:d,duration:0.6,easing:[0.22,1,0.36,1]});
-  },{margin:'-5% 0px -10% 0px'});
+    const d=parseInt((target.className.match(/\bd(\d)\b/)||[,'0'])[1])*0.12;
+    const isCard=target.matches('.pain,.feat,.plan,.pricing-card,.roi-row');
+    if(isCard){
+      /* Cards : spring léger + scale + blur-in → sensation physique */
+      animate(target,
+        {opacity:[0,1],y:[44,0],scale:[0.91,1],filter:['blur(10px)','blur(0px)']},
+        {delay:d,duration:0.9,easing:spring({stiffness:80,damping:14})}
+      );
+    } else {
+      /* Texte/icônes : slide up propre sans rebond */
+      animate(target,
+        {opacity:[0,1],y:[26,0]},
+        {delay:d,duration:0.65,easing:CUB}
+      );
+    }
+  },{margin:'-4% 0px -6% 0px'});
 }else{
   document.querySelectorAll('.rv').forEach(el=>{el.style.opacity='1';el.style.transform='none';});
 }

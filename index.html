@@ -349,17 +349,13 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   .cta-acts .btn,.cta-acts button{justify-content:center;text-align:center}
 }
 
-/* ─── SECTIONS — alternance transparente / opaque avec micro-fondu ─── */
+/* ─── SECTIONS — fond piloté par le scroll ─── */
 #home,#solution,#cta{background:transparent}
 .div{display:none}
 
-/* Sections opaques : fondu de 60px en tête seulement — adoucit la coupure
-   sans fusionner les sections entre elles */
+/* Sections opaques : opacité injectée par JS via --sbg au scroll */
 #problem,#features,#faq{
-  background:linear-gradient(to bottom,
-    transparent 0,
-    oklch(0.10 0.007 222/.93) 60px
-  );
+  background:oklch(0.10 0.007 222/var(--sbg,0));
 }
 
 /* ─── SPOTLIGHT CARD — coordonnées relatives à l'élément (tous les bords s'illuminent) ─── */
@@ -1174,6 +1170,30 @@ function restartChat(){
 restartChat();
 
 /* ── SCROLL REVEALS — désactivés ── */
+
+/* ── FOND SECTIONS — piloté par le scroll ── */
+(()=>{
+  // Sections alternées opaques : le fond apparaît en entrant dans le viewport
+  const SEC_BG=[
+    document.getElementById('problem'),
+    document.getElementById('features'),
+    document.getElementById('faq'),
+  ].filter(Boolean);
+  const FADE=140; // pixels d'entrée pour atteindre l'opacité max
+  const MAX_ALPHA=0.93;
+
+  function updateSecBg(){
+    const vh=window.innerHeight;
+    SEC_BG.forEach(sec=>{
+      const rect=sec.getBoundingClientRect();
+      // ratio 0→1 quand le haut de la section passe de vh à (vh - FADE)
+      const ratio=Math.max(0,Math.min(1,(vh-rect.top)/FADE));
+      sec.style.setProperty('--sbg', ratio*MAX_ALPHA);
+    });
+  }
+  window.addEventListener('scroll',updateSecBg,{passive:true});
+  updateSecBg();
+})();
 
 /* ── ORBES — intensité variable selon section au scroll ── */
 if(!pref){

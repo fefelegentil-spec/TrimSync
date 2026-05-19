@@ -999,27 +999,6 @@ if(sprog)scroll(info=>{const p=typeof info==='number'?info:(info?.y?.progress??0
   });
 })();
 
-/* ── TEXT SCRAMBLE ── */
-(()=>{
-  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%&';
-  function scramble(el,target,dur=900){
-    const len=target.length;const t0=performance.now();
-    function tick(now){
-      const t=Math.min((now-t0)/dur,1);
-      let out='';
-      for(let i=0;i<len;i++){
-        const prog=(t-i/(len*1.5));
-        if(prog>=1)out+=target[i]==='<'?'<':target[i];
-        else if(prog>0)out+=`<span style="opacity:.35;color:var(--a)">${chars[Math.floor(Math.random()*chars.length)]}</span>`;
-        else out+=target[i]==='<'?'':' ';
-      }
-      el.innerHTML=out;
-      if(t<1)requestAnimationFrame(tick);else el.innerHTML=target;
-    }
-    requestAnimationFrame(tick);
-  }
-  if(!pref){setTimeout(()=>{const hl=document.querySelector('#hero-headline span');if(hl)scramble(hl,hl.getAttribute('data-'+lang));},400);}
-})();
 
 
 /* ── MAGNETIC BUTTONS ── */

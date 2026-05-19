@@ -346,7 +346,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
 <!-- HERO -->
 <section class="hero" id="home">
-  <div class="shadow-bg" id="shadow-bg" aria-hidden="true"></div>
+  <!-- shadow-bg : effet déplacé vers #page-bg (fixed full-site) -->
   <div class="hero-inner wrap">
     <div class="hero-content">
       <div class="badge" data-hero="1">
@@ -780,12 +780,13 @@ window.addEventListener('scroll',()=>navEl.classList.toggle('scrolled',scrollY>4
 const sprog=document.getElementById('sprog');
 if(sprog)scroll(info=>{const p=typeof info==='number'?info:(info?.y?.progress??0);sprog.style.transform=`scaleX(${p})`;});
 
-/* ── SHADOW OVERLAY ── */
+/* ── SHADOW OVERLAY (full-site fixed background) ── */
 (()=>{
-  const container=document.getElementById('shadow-bg');
+  const container=document.getElementById('page-bg');
   if(!container)return;
   const mr=(v,fl,fh,tl,th)=>tl+(v-fl)/(fh-fl)*(th-tl);
-  const sc=42,sp=22;
+  /* scale=65 → effet visible mais subtil ; speed=70 → rotation lente */
+  const sc=65,sp=70;
   const dis=Math.round(mr(sc,1,100,20,100));
   const dur=mr(sp,1,100,1000,50)/25;
   const id='sv'+Math.random().toString(36).slice(2,7);
@@ -793,9 +794,9 @@ if(sprog)scroll(info=>{const p=typeof info==='number'?info:(info?.y?.progress??0
   const bfy=mr(sc,0,100,0.004,0.002).toFixed(5);
   container.insertAdjacentHTML('afterbegin',`<svg style="position:absolute;width:0;height:0" aria-hidden="true"><defs><filter id="${id}"><feTurbulence result="u" numOctaves="2" baseFrequency="${bfx},${bfy}" seed="0" type="turbulence"/><feColorMatrix id="${id}h" in="u" type="hueRotate" values="180"/><feColorMatrix in="d" result="c" type="matrix" values="4 0 0 0 1 4 0 0 0 1 4 0 0 0 1 1 0 0 0 0"/><feDisplacementMap in="SourceGraphic" in2="c" scale="${dis}" result="d"/><feDisplacementMap in="d" in2="u" scale="${dis}"/></filter></defs></svg>`);
   const wrap=document.createElement('div');
-  wrap.style.cssText=`position:absolute;inset:-${dis}px;filter:url(#${id}) blur(6px);pointer-events:none`;
+  wrap.style.cssText=`position:absolute;inset:-${dis}px;filter:url(#${id}) blur(4px);pointer-events:none`;
   const blob=document.createElement('div');
-  blob.style.cssText=`width:100%;height:100%;background:oklch(0.62 0.17 193/.50);mask-image:url('https://framerusercontent.com/images/ceBGguIpUU8luwByxuQz79t7To.png');-webkit-mask-image:url('https://framerusercontent.com/images/ceBGguIpUU8luwByxuQz79t7To.png');mask-size:cover;-webkit-mask-size:cover;mask-repeat:no-repeat;-webkit-mask-repeat:no-repeat;mask-position:center;-webkit-mask-position:center`;
+  blob.style.cssText=`width:100%;height:100%;background:oklch(0.62 0.17 193/.55);mask-image:url('https://framerusercontent.com/images/ceBGguIpUU8luwByxuQz79t7To.png');-webkit-mask-image:url('https://framerusercontent.com/images/ceBGguIpUU8luwByxuQz79t7To.png');mask-size:cover;-webkit-mask-size:cover;mask-repeat:no-repeat;-webkit-mask-repeat:no-repeat;mask-position:center;-webkit-mask-position:center`;
   wrap.appendChild(blob);container.appendChild(wrap);
   const hue=container.querySelector('#'+id+'h');
   if(!pref&&hue)animate(0,360,{duration:dur,repeat:Infinity,repeatType:'loop',ease:'linear',onUpdate:v=>hue.setAttribute('values',String(v))});

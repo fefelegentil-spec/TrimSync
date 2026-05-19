@@ -160,6 +160,10 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
 /* sections */
 .section{padding:7rem 0;position:relative;z-index:1}
+@media(min-width:961px){
+  .section{min-height:100svh;display:flex;flex-direction:column;justify-content:center}
+  .hero{min-height:100svh}
+}
 .sec-hd{margin-bottom:4rem}
 .sec-hd .label{margin-bottom:.7rem;display:block}
 
@@ -232,7 +236,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .plan-feats li{font-size:.83rem;color:oklch(0.88 0.04 200);padding-left:1.1rem;position:relative;line-height:1.4}
 .plan-feats li::before{content:'';position:absolute;left:0;top:.5rem;width:6px;height:6px;border-radius:50%;background:oklch(0.76 0.13 193/.5)}
 .plan-pop .plan-feats li::before{background:var(--on-a)}
-.plan-cta{display:flex;justify-content:center;align-items:center;padding:.85rem 1rem;border:1.5px solid oklch(1 0 0/.22);border-radius:100px;font-family:var(--fd);font-weight:800;font-size:.82rem;color:oklch(0.92 0.04 200);transition:border-color .2s,background .2s,color .2s,transform .2s var(--ex);text-align:center;text-decoration:none}
+.plan-cta{display:flex;justify-content:center;align-items:center;padding:.85rem 1rem;border:1.5px solid oklch(1 0 0/.22);border-radius:100px;font-family:var(--fd);font-weight:800;font-size:.82rem;color:oklch(0.92 0.04 200);transition:border-color .2s,background .2s,color .2s,transform .2s var(--ex);text-align:center;text-decoration:none;background:none;cursor:pointer}
 .plan-cta:hover{border-color:oklch(1 0 0/.5);color:var(--on-a);transform:scale(1.02)}
 .plan-pop .plan-cta{background:var(--on-a);color:var(--adrench);border-color:var(--on-a)}
 .plan-pop .plan-cta:hover{background:oklch(0.92 0.01 200);border-color:oklch(0.92 0.01 200)}
@@ -302,20 +306,20 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 }
 
 /* ─── SÉPARATION SECTIONS — alternance transparent / opaque ─── */
-/* hero + solution + features + cta : transparent → fond animé visible */
-#home    { background: transparent; }
-#solution{ background: transparent; }
-#features{ background: transparent; }
-#cta     { background: transparent; }
-
-/* problem + faq : quasi-opaques → rupture visuelle nette */
-#problem { background: oklch(0.11 0.007 222 / .94); }
-#faq     { background: oklch(0.11 0.007 222 / .94); }
+#home,#solution,#cta{background:transparent}
+/* sections paires opaques → rupture visuelle nette */
+#problem,#features,#faq{
+  background:oklch(0.11 0.007 222/.92);
+  border-top:1px solid oklch(0.76 0.13 193/.07);
+  border-bottom:1px solid oklch(0.76 0.13 193/.07);
+}
+/* dividers masqués — l'alternance des fonds suffit */
+.div{display:none}
 
 /* ─── SPOTLIGHT CARD — pointer-reactive glow (SpotlightCard vanilla port) ─── */
 [data-glow] {
   --base: 193;
-  --spread: 180;
+  --spread: 40;
   --radius: 14;
   --border: 2;
   --backdrop: oklch(0.76 0.13 193 / 0.05);
@@ -395,6 +399,38 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   inset: -10px;
   border-width: 10px;
 }
+
+/* ── PLAN DETAIL MODAL ── */
+.plan-modal-overlay{position:fixed;inset:0;z-index:9000;background:oklch(0.06 0.01 222/.84);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity .3s ease;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.plan-modal-overlay.open{opacity:1;pointer-events:all}
+.plan-modal{position:relative;background:oklch(0.12 0.008 222);border:1px solid oklch(0.76 0.13 193/.20);border-radius:22px;max-width:540px;width:100%;max-height:88vh;overflow-y:auto;padding:2.4rem 2.8rem;transform:translateY(28px) scale(0.96);transition:transform .4s cubic-bezier(0.16,1,0.3,1)}
+.plan-modal-overlay.open .plan-modal{transform:none}
+.modal-close{position:absolute;top:1.2rem;right:1.2rem;width:32px;height:32px;background:oklch(1 0 0/.06);border:1px solid oklch(1 0 0/.12);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--fg2);transition:background .2s,color .2s;font-size:.88rem;line-height:1}
+.modal-close:hover{background:oklch(1 0 0/.14);color:var(--fg)}
+.modal-badge-row{display:flex;align-items:center;gap:.6rem;margin-bottom:1.2rem}
+.modal-plan-badge{display:inline-flex;align-items:center;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--a);background:oklch(0.76 0.13 193/.14);border:1px solid oklch(0.76 0.13 193/.25);border-radius:6px;padding:.28rem .7rem}
+.modal-hot-tag{display:inline-flex;align-items:center;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.12 0.005 220);background:var(--on-a);border-radius:6px;padding:.28rem .7rem}
+.modal-price-block{margin-bottom:.4rem}
+.modal-price{font-family:var(--fd);font-size:3rem;font-weight:800;letter-spacing:-.04em;color:var(--on-a);line-height:1}
+.modal-price-mo{font-size:.85rem;font-weight:500;color:var(--fg3)}
+.modal-tagline{font-size:.9rem;color:var(--fg2);margin-bottom:2rem;line-height:1.55}
+.modal-section-lbl{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--fg3);margin:1.8rem 0 .9rem}
+.modal-feat-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.5rem}
+.modal-feat-list li{display:flex;align-items:flex-start;gap:.65rem;font-size:.88rem;color:var(--fg2);line-height:1.45}
+.modal-feat-list li::before{content:'';flex-shrink:0;width:17px;height:17px;margin-top:.12rem;background:oklch(0.76 0.13 193/.14) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 17'%3E%3Cpath d='M4 8.5l3 3 6-6' stroke='%2360c4c8' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain;border:1px solid oklch(0.76 0.13 193/.28);border-radius:4px}
+.modal-feat-list li.mh{color:var(--fg);font-weight:500}
+.modal-steps-list{display:flex;flex-direction:column;gap:.9rem}
+.modal-step-row{display:flex;align-items:flex-start;gap:.75rem}
+.modal-step-num{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--a),oklch(0.52 0.12 196));display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;color:oklch(0.1 0.01 220)}
+.modal-step-body{font-size:.86rem;color:var(--fg2);line-height:1.45}
+.modal-step-body strong{color:var(--fg);display:block;font-weight:600;margin-bottom:.1rem}
+.modal-setup-note{margin-top:1.8rem;padding:.85rem 1.1rem;background:oklch(1 0 0/.04);border:1px solid var(--bd);border-radius:10px;font-size:.82rem;color:var(--fg3);line-height:1.5}
+.modal-setup-note strong{color:var(--fg2)}
+.modal-cta-row{margin-top:1.8rem;padding-top:1.8rem;border-top:1px solid var(--bd);display:flex;flex-direction:column;gap:.75rem;align-items:stretch}
+.modal-book-btn{display:flex;justify-content:center;align-items:center;gap:.5rem;padding:1rem 2rem;background:var(--on-a);color:oklch(0.12 0.01 220);font-family:var(--fd);font-weight:800;font-size:.95rem;letter-spacing:-.02em;border-radius:100px;text-decoration:none;transition:opacity .2s}
+.modal-book-btn:hover{opacity:.88}
+.modal-no-commit{font-size:.78rem;color:var(--fg3);text-align:center;margin:0}
+@media(max-width:560px){.plan-modal{padding:2rem 1.4rem;border-radius:16px}}
 </style>
 </head>
 <body>
@@ -650,7 +686,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
             <li data-en="Unlimited DMs" data-fr="DMs illimités">Unlimited DMs</li>
             <li data-en="Auto confirmations" data-fr="Confirmations automatiques">Auto confirmations</li>
           </ul>
-          <a href="trimsync-booking.html" class="plan-cta" data-en="Get started" data-fr="Commencer">Get started</a>
+          <button class="plan-cta" data-plan="starter" data-en="Get started" data-fr="Commencer">Get started</button>
         </div>
 
         <!-- Pro — le plus populaire -->
@@ -666,7 +702,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
             <li data-en="Agenda management" data-fr="Gestion agenda">Agenda management</li>
             <li data-en="Client management" data-fr="Gestion clients">Client management</li>
           </ul>
-          <a href="trimsync-booking.html" class="plan-cta" data-en="Get started" data-fr="Commencer">Get started</a>
+          <button class="plan-cta" data-plan="pro" data-en="Get started" data-fr="Commencer">Get started</button>
         </div>
 
         <!-- Max -->
@@ -683,7 +719,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
             <li data-en="Marketing tools" data-fr="Outils marketing">Marketing tools</li>
             <li data-en="SumUp integration" data-fr="Intégration SumUp">SumUp integration</li>
           </ul>
-          <a href="trimsync-booking.html" class="plan-cta" data-en="Get started" data-fr="Commencer">Get started</a>
+          <button class="plan-cta" data-plan="max" data-en="Get started" data-fr="Commencer">Get started</button>
         </div>
 
       </div><!-- /plans-grid -->
@@ -824,6 +860,36 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     </div>
   </div>
 </footer>
+
+<!-- PLAN DETAIL MODAL -->
+<div id="plan-modal-overlay" class="plan-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-plan-title">
+  <div class="plan-modal">
+    <button class="modal-close" aria-label="Close">✕</button>
+    <div class="modal-badge-row">
+      <span class="modal-plan-badge" id="modal-plan-title">Starter</span>
+      <span class="modal-hot-tag" id="modal-hot-tag" style="display:none">Most popular</span>
+    </div>
+    <div class="modal-price-block">
+      <span class="modal-price" id="modal-price">€59</span><span class="modal-price-mo">/mo</span>
+    </div>
+    <p class="modal-tagline" id="modal-tagline"></p>
+    <div class="modal-section-lbl" data-en="What's included" data-fr="Ce qui est inclus">What's included</div>
+    <ul class="modal-feat-list" id="modal-feat-list"></ul>
+    <div class="modal-section-lbl" data-en="Your onboarding" data-fr="Votre onboarding">Your onboarding</div>
+    <div class="modal-steps-list" id="modal-steps-list"></div>
+    <div class="modal-setup-note">
+      <strong data-en="One-time €300 setup fee" data-fr="Frais de mise en place unique 300 €">One-time €300 setup fee</strong>
+      — <span data-en="Platform access + full onboarding call included. Paid once, never again." data-fr="Accès plateforme + appel d'onboarding inclus. Payé une seule fois, jamais plus.">Platform access + full onboarding call included. Paid once, never again.</span>
+    </div>
+    <div class="modal-cta-row">
+      <a href="trimsync-booking.html" class="modal-book-btn" id="modal-book-btn">
+        <span data-en="Book your free demo" data-fr="Réserver votre démo gratuite">Book your free demo</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <p class="modal-no-commit" data-en="No commitment — cancel anytime." data-fr="Sans engagement — résiliez quand vous voulez.">No commitment — cancel anytime.</p>
+    </div>
+  </div>
+</div>
 
 <script type="module">
 import { animate, scroll, inView, spring } from "https://cdn.jsdelivr.net/npm/motion@11/+esm";
@@ -1078,6 +1144,73 @@ document.querySelectorAll('.faq-item').forEach(item=>{
   });
   q.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();q.click()}});
 });
+
+/* ── PLAN DETAIL MODAL ── */
+(()=>{
+  const PLANS={
+    starter:{
+      price:'€59',
+      en:{name:'Starter',hot:null,tagline:'Perfect to get started — automated bookings from day one.',
+        feats:[{t:'AI Instagram bot, 24/7',h:1},{t:'Unlimited DMs handled'},{t:'Auto booking + confirmations',h:1},{t:'Automatic reminders (24h + 2h before)'},{t:'Cancellation & reschedule handling'},{t:'Google Calendar sync',h:1},{t:'1 location — up to 200 bookings/month'},{t:'Email support (48h response)'}],
+        steps:[{n:'1',title:'Instagram connection',desc:'5-min setup via your Facebook Business account'},{n:'2',title:'AI training',desc:'We configure your services, hours, and bot tone'},{n:'3',title:'Go live',desc:'Your AI handles DMs from the very first day'}]},
+      fr:{name:'Starter',hot:null,tagline:'Idéal pour commencer — réservations automatisées dès le premier jour.',
+        feats:[{t:'Bot IA Instagram, 24h/24',h:1},{t:'DMs illimités traités'},{t:'Réservation + confirmations automatiques',h:1},{t:'Rappels automatiques (24h + 2h avant)'},{t:'Gestion des annulations et reports'},{t:'Sync Google Calendar',h:1},{t:"1 établissement — jusqu'à 200 RDV/mois"},{t:'Support email (réponse 48h)'}],
+        steps:[{n:'1',title:'Connexion Instagram',desc:'5 min via votre compte Facebook Business'},{n:'2',title:'Entraînement IA',desc:'On configure vos prestations, horaires et ton du bot'},{n:'3',title:'Mise en ligne',desc:'Votre IA prend les DMs dès le premier jour'}]}
+    },
+    pro:{
+      price:'€79',
+      en:{name:'Pro',hot:'Most popular',tagline:'The full toolkit for an ambitious barbershop.',
+        feats:[{t:'Everything in Starter',h:1},{t:'TrimSync dashboard',h:1},{t:'Full agenda management'},{t:'Client CRM — history, notes, profiles',h:1},{t:'WhatsApp + Instagram DM'},{t:'Smart slot-filling on cancellations'},{t:'Up to 3 locations — 1,000 bookings/month'},{t:'Priority support (same-day response)'}],
+        steps:[{n:'1',title:'Instagram + WhatsApp',desc:'Connect both channels in one onboarding session'},{n:'2',title:'Dashboard setup',desc:'CRM, agenda view, and notifications configured'},{n:'3',title:'Team briefing',desc:'Walkthrough for you and your barbers'}]},
+      fr:{name:'Pro',hot:'Le plus populaire',tagline:'La boîte à outils complète pour un barbershop ambitieux.',
+        feats:[{t:'Tout Starter',h:1},{t:'Dashboard TrimSync',h:1},{t:'Gestion agenda complète'},{t:'CRM clients — historique, notes, profils',h:1},{t:'WhatsApp + Instagram DM'},{t:'Remplissage auto des créneaux libérés'},{t:"Jusqu'à 3 établissements — 1 000 RDV/mois"},{t:'Support prioritaire (réponse le jour même)'}],
+        steps:[{n:'1',title:'Instagram + WhatsApp',desc:'Connexion des deux canaux en une session'},{n:'2',title:'Config dashboard',desc:'CRM, vue agenda et notifications configurés'},{n:'3',title:'Brief équipe',desc:'Prise en main pour vous et vos barbiers'}]}
+    },
+    max:{
+      price:'€99',
+      en:{name:'Max',hot:null,tagline:'Full power. For barbershops that want to scale.',
+        feats:[{t:'Everything in Pro',h:1},{t:'Native booking page (your own URL)',h:1},{t:'Advanced stats & analytics'},{t:'Loyalty program — points + rewards',h:1},{t:'Marketing tools & campaigns'},{t:'SumUp payment integration',h:1},{t:'Dedicated account manager'},{t:'Unlimited locations + bookings'}],
+        steps:[{n:'1',title:'Full platform onboarding',desc:'Dedicated 2-hour setup call with your account manager'},{n:'2',title:'Integrations & branding',desc:'Booking page, SumUp, loyalty — all wired up'},{n:'3',title:'Launch & monitor',desc:'Real-time analytics from day one, weekly check-ins'}]},
+      fr:{name:'Max',hot:null,tagline:'Pleine puissance. Pour les barbershops qui veulent scaler.',
+        feats:[{t:'Tout Pro',h:1},{t:'Page réservation native (votre URL)',h:1},{t:'Stats et analytics avancés'},{t:'Programme fidélité — points + récompenses',h:1},{t:'Outils marketing et campagnes'},{t:'Intégration paiement SumUp',h:1},{t:'Account manager dédié'},{t:'Établissements et RDV illimités'}],
+        steps:[{n:'1',title:'Onboarding plateforme complète',desc:'Appel de 2h dédié avec votre account manager'},{n:'2',title:'Intégrations et branding',desc:'Page réservation, SumUp, fidélité — tout configuré'},{n:'3',title:'Lancement et suivi',desc:'Analytics temps réel dès J1, points hebdo'}]}
+    }
+  };
+
+  const overlay=document.getElementById('plan-modal-overlay');
+  if(!overlay)return;
+  const modal=overlay.querySelector('.plan-modal');
+
+  function renderPlan(key){
+    const p=PLANS[key];if(!p)return;
+    const l=(lang==='fr')?'fr':'en';const d=p[l];
+    modal.querySelector('#modal-plan-title').textContent=d.name;
+    modal.querySelector('#modal-price').textContent=p.price;
+    modal.querySelector('#modal-tagline').textContent=d.tagline;
+    const hotEl=modal.querySelector('#modal-hot-tag');
+    d.hot?(hotEl.textContent=d.hot,hotEl.style.display=''):(hotEl.style.display='none');
+    modal.querySelector('#modal-feat-list').innerHTML=
+      d.feats.map(f=>`<li${f.h?' class="mh"':''}>${f.t}</li>`).join('');
+    modal.querySelector('#modal-steps-list').innerHTML=
+      d.steps.map(s=>`<div class="modal-step-row"><div class="modal-step-num">${s.n}</div><div class="modal-step-body"><strong>${s.title}</strong>${s.desc}</div></div>`).join('');
+    modal.querySelector('#modal-book-btn').href=`trimsync-booking.html?plan=${key}`;
+    /* traduire les strings statiques du modal */
+    modal.querySelectorAll('[data-en]').forEach(el=>{
+      const v=el.getAttribute('data-'+l);if(!v)return;
+      el.textContent=v;
+    });
+    overlay.classList.add('open');document.body.style.overflow='hidden';
+    modal.scrollTop=0;
+  }
+  function closePlan(){overlay.classList.remove('open');document.body.style.overflow='';}
+
+  document.querySelectorAll('[data-plan]').forEach(btn=>
+    btn.addEventListener('click',e=>{e.preventDefault();renderPlan(btn.dataset.plan);})
+  );
+  overlay.addEventListener('click',e=>{if(e.target===overlay)closePlan();});
+  modal.querySelector('.modal-close').addEventListener('click',closePlan);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('open'))closePlan();});
+})();
 
 /* ── SPOTLIGHT CARDS — pointer-reactive glow ── */
 (()=>{

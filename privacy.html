@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — TrimSync</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#0d0b09; --bg-raised:#141210; --bg-high:#1c1917;
+      --border:#2a2520; --border-hi:#3d3630;
+      --text:#f0ece5; --text-2:#b8b0a4; --text-3:#6b6560;
+      --accent:#c8692a; --accent-lo:rgba(200,105,42,0.1);
+      --font-serif:'Cormorant',Georgia,serif;
+      --font-sans:'DM Sans',system-ui,sans-serif;
+      --max:1160px; --radius:6px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(13,11,9,0.85);border-bottom:1px solid var(--border)}
+    .nav-inner{max-width:var(--max);margin:0 auto;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:64px}
+    .nav-logo{font-family:var(--font-serif);font-size:1.5rem;font-weight:700;letter-spacing:-0.03em;color:var(--text);text-decoration:none}
+    .nav-logo span{color:var(--accent)}
+    .nav-right{display:flex;align-items:center;gap:1rem}
+    .lang-toggle{display:flex;align-items:center;gap:0.3rem;padding:0.35rem 0.65rem;border:1px solid var(--border);border-radius:var(--radius);font-size:0.8rem;color:var(--text-3);transition:border-color 0.2s,color 0.2s;background:transparent;cursor:pointer;font-family:inherit}
+    .lang-toggle:hover{border-color:var(--border-hi);color:var(--text)}
+    .nav-back{font-size:0.875rem;color:var(--text-3);display:flex;align-items:center;gap:0.4rem;transition:color 0.2s}
+    .nav-back:hover{color:var(--text);text-decoration:none}
+    .content{max-width:720px;margin:0 auto;padding:8rem 2rem 6rem}
+    .content-header{margin-bottom:3.5rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+    .t-label{font-family:var(--font-sans);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:0.8rem;display:block}
+    h1{font-family:var(--font-serif);font-size:clamp(2.2rem,5vw,3.6rem);font-weight:600;letter-spacing:-0.02em;line-height:1.1;margin-bottom:1rem}
+    .content-meta{font-size:0.85rem;color:var(--text-3)}
+    h2{font-family:var(--font-serif);font-size:1.7rem;font-weight:600;line-height:1.2;letter-spacing:-0.01em;margin:2.8rem 0 1rem}
+    h3{font-family:var(--font-serif);font-size:1.2rem;font-weight:600;margin:1.8rem 0 0.6rem}
+    p{color:var(--text-2);margin-bottom:1.2rem;max-width:68ch;line-height:1.75}
+    ul,ol{color:var(--text-2);padding-left:1.4rem;margin-bottom:1.2rem}
+    ul li,ol li{margin-bottom:0.5rem;line-height:1.7}
+    .contact-box{margin-top:2.4rem;padding:1.6rem 2rem;border:1px solid var(--border);background:var(--bg-raised);border-radius:var(--radius)}
+    .contact-box p{margin:0}
+    .contact-box a{color:var(--accent)}
+    .footer-mini{border-top:1px solid var(--border);padding:2rem;text-align:center}
+    .footer-mini a{color:var(--text-3);font-size:0.85rem;margin:0 0.8rem;transition:color 0.2s}
+    .footer-mini a:hover{color:var(--text);text-decoration:none}
+    .footer-mini p{font-size:0.8rem;color:var(--text-3);margin-top:1rem}
+    .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:2.4rem 0}
+    @media(max-width:600px){.content{padding:6rem 1.2rem 4rem}}
+  </style>
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">Trim<span>Sync</span></a>
+    <div class="nav-right">
+      <button class="lang-toggle" id="langToggle" aria-label="Toggle language">
+        <span id="langFlag">🇫🇷</span><span id="langCode">FR</span>
+      </button>
+      <a href="index.html" class="nav-back">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span data-en="Back" data-fr="Retour"></span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="content">
+  <div class="content-header">
+    <span class="t-label" data-en="Legal" data-fr="Légal"></span>
+    <h1 data-en="Privacy Policy" data-fr="Politique de confidentialité"></h1>
+    <p class="content-meta" data-en="Last updated: January 1, 2025" data-fr="Dernière mise à jour : 1er janvier 2025"></p>
+  </div>
+
+  <h2 data-en="1. Who we are" data-fr="1. Qui sommes-nous"></h2>
+  <p data-en="TrimSync is a SaaS platform that automates appointment booking for barbershops via Instagram Direct Messages, using artificial intelligence." data-fr="TrimSync est une plateforme SaaS qui automatise la prise de rendez-vous pour les barbershops via les messages directs Instagram, grâce à l'intelligence artificielle."></p>
+  <p>
+    <span data-en="Contact: " data-fr="Contact : "></span>
+    <a href="mailto:felix@trimsync.tech">felix@trimsync.tech</a>
+  </p>
+
+  <div class="divider"></div>
+
+  <h2 data-en="2. Data we collect and why" data-fr="2. Données collectées et leur finalité"></h2>
+  <p data-en="In connection with the Meta / Instagram API, TrimSync collects only the minimum data necessary to operate the booking service:" data-fr="Dans le cadre de l'API Meta / Instagram, TrimSync ne collecte que les données strictement nécessaires au fonctionnement du service de réservation :"></p>
+
+  <h3 data-en="Client data (end users messaging the barbershop)" data-fr="Données clients (utilisateurs finaux envoyant des messages au barbershop)"></h3>
+  <ul>
+    <li data-en="Instagram display name (as provided by Meta's API)" data-fr="Nom d'affichage Instagram (fourni par l'API Meta)"></li>
+    <li data-en="Message content — read solely to understand booking intent and generate AI responses" data-fr="Contenu des messages — lu uniquement pour comprendre l'intention de réservation et générer des réponses IA"></li>
+    <li data-en="Appointment details: date, time, service type" data-fr="Détails du rendez-vous : date, heure, type de prestation"></li>
+  </ul>
+  <p><strong data-en="Purpose: appointment booking only." data-fr="Finalité : prise de rendez-vous uniquement."></strong>
+    <span data-en=" We do not use this data for advertising, profiling, or any secondary purposes." data-fr=" Nous n'utilisons pas ces données à des fins publicitaires, de profilage ou à toute autre fin secondaire."></span>
+  </p>
+
+  <h3 data-en="Barbershop owner data (our customers)" data-fr="Données propriétaires de barbershop (nos clients)"></h3>
+  <ul>
+    <li data-en="Name and email address (account registration)" data-fr="Nom et adresse e-mail (inscription au compte)"></li>
+    <li data-en="Instagram Business account connection (via Meta OAuth)" data-fr="Connexion au compte Instagram Business (via Meta OAuth)"></li>
+    <li data-en="Google Calendar authorization (if enabled)" data-fr="Autorisation Google Calendar (si activé)"></li>
+    <li data-en="Payment information (processed by Stripe; we do not store card details)" data-fr="Informations de paiement (traitées par Stripe ; nous ne stockons pas les coordonnées bancaires)"></li>
+  </ul>
+
+  <div class="divider"></div>
+
+  <h2 data-en="3. Legal basis for processing" data-fr="3. Base légale du traitement"></h2>
+  <ul>
+    <li data-en="Contractual necessity: processing required to deliver the service" data-fr="Nécessité contractuelle : traitement nécessaire à la fourniture du service"></li>
+    <li data-en="Legitimate interest: improving accuracy of the AI model using anonymized, aggregated patterns" data-fr="Intérêt légitime : amélioration de la précision du modèle IA sur la base de patterns agrégés et anonymisés"></li>
+    <li data-en="Consent: where required by applicable law, explicit consent is obtained" data-fr="Consentement : lorsque la loi applicable l'exige, un consentement explicite est recueilli"></li>
+  </ul>
+
+  <div class="divider"></div>
+
+  <h2 data-en="4. Data retention" data-fr="4. Durée de conservation"></h2>
+  <p data-en="Message content is retained for 90 days after the appointment date, then automatically deleted. Appointment records are kept for 12 months to support scheduling history. Account data is deleted within 30 days of account closure." data-fr="Le contenu des messages est conservé 90 jours après la date du rendez-vous, puis supprimé automatiquement. Les dossiers de rendez-vous sont conservés 12 mois pour l'historique de planification. Les données de compte sont supprimées dans les 30 jours suivant la fermeture du compte."></p>
+
+  <div class="divider"></div>
+
+  <h2 data-en="5. Third-party services" data-fr="5. Services tiers"></h2>
+  <ul>
+    <li><strong>Meta / Instagram API</strong> — <span data-en="used to read and send DMs. Governed by Meta's own Terms of Service." data-fr="utilisé pour lire et envoyer des DMs. Régi par les propres Conditions d'utilisation de Meta."></span></li>
+    <li><strong>Google Calendar API</strong> — <span data-en="optional integration for calendar sync." data-fr="intégration optionnelle pour la synchronisation du calendrier."></span></li>
+    <li><strong>Stripe</strong> — <span data-en="payment processing. PCI-DSS compliant." data-fr="traitement des paiements. Conforme PCI-DSS."></span></li>
+    <li><strong>OpenAI</strong> — <span data-en="AI model for message understanding. Data sent to OpenAI is subject to OpenAI's data processing agreement; we do not use data for training." data-fr="modèle IA pour la compréhension des messages. Les données envoyées à OpenAI sont soumises à leur accord de traitement des données ; nous n'utilisons pas les données pour l'entraînement."></span></li>
+  </ul>
+  <p data-en="We do not sell, rent, or share personal data with any third parties for commercial purposes." data-fr="Nous ne vendons, ne louons ni ne partageons aucune donnée personnelle avec des tiers à des fins commerciales."></p>
+
+  <div class="divider"></div>
+
+  <h2 data-en="6. Your rights" data-fr="6. Vos droits"></h2>
+  <p data-en="Under GDPR and applicable privacy laws, you have the right to:" data-fr="Conformément au RGPD et aux lois sur la protection de la vie privée applicables, vous avez le droit de :"></p>
+  <ul>
+    <li data-en="Access the personal data we hold about you" data-fr="Accéder aux données personnelles que nous détenons à votre sujet"></li>
+    <li data-en="Correct inaccurate data" data-fr="Corriger des données inexactes"></li>
+    <li data-en="Request deletion of your data" data-fr="Demander la suppression de vos données"></li>
+    <li data-en="Object to or restrict certain processing" data-fr="Vous opposer ou restreindre certains traitements"></li>
+    <li data-en="Receive your data in a portable format" data-fr="Recevoir vos données dans un format portable"></li>
+  </ul>
+  <p data-en="To exercise any of these rights, email us at:" data-fr="Pour exercer l'un de ces droits, envoyez-nous un e-mail à :"></p>
+  <div class="contact-box">
+    <p><a href="mailto:felix@trimsync.tech">felix@trimsync.tech</a> — <span data-en="We respond within 30 days." data-fr="Nous répondons sous 30 jours."></span></p>
+  </div>
+  <p style="margin-top:1.2rem" data-en="For data deletion instructions, see our dedicated page:" data-fr="Pour les instructions de suppression des données, voir notre page dédiée :"></p>
+  <p><a href="data-deletion.html" data-en="Data Deletion Instructions" data-fr="Instructions de suppression des données"></a></p>
+
+  <div class="divider"></div>
+
+  <h2 data-en="7. Security" data-fr="7. Sécurité"></h2>
+  <p data-en="All data is encrypted at rest (AES-256) and in transit (TLS 1.3). We conduct regular security reviews and limit data access to authorized personnel only." data-fr="Toutes les données sont chiffrées au repos (AES-256) et en transit (TLS 1.3). Nous effectuons des audits de sécurité réguliers et limitons l'accès aux données aux seuls personnels autorisés."></p>
+
+  <div class="divider"></div>
+
+  <h2 data-en="8. Changes to this policy" data-fr="8. Modifications de cette politique"></h2>
+  <p data-en="We may update this Privacy Policy from time to time. We will notify registered users by email of any material changes at least 14 days before they take effect." data-fr="Nous pouvons mettre à jour cette Politique de confidentialité. Nous informerons les utilisateurs inscrits par e-mail de tout changement significatif au moins 14 jours avant son entrée en vigueur."></p>
+
+  <div class="divider"></div>
+
+  <h2 data-en="9. Contact" data-fr="9. Contact"></h2>
+  <div class="contact-box">
+    <p>
+      <strong>TrimSync</strong><br />
+      <a href="mailto:felix@trimsync.tech">felix@trimsync.tech</a>
+    </p>
+  </div>
+</main>
+
+<footer class="footer-mini">
+  <a href="index.html"         data-en="Home"            data-fr="Accueil"></a>
+  <a href="terms.html"         data-en="Terms of Service" data-fr="Conditions d'utilisation"></a>
+  <a href="data-deletion.html" data-en="Data Deletion"   data-fr="Suppression des données"></a>
+  <a href="mailto:felix@trimsync.tech">felix@trimsync.tech</a>
+  <p>© 2025 TrimSync</p>
+</footer>
+
+<script>
+  const LANGS={en:{flag:'🇫🇷',code:'FR',next:'fr'},fr:{flag:'🇬🇧',code:'EN',next:'en'}};
+  let cur=localStorage.getItem('ts-lang')||'en';
+  function applyLang(l){
+    cur=l;localStorage.setItem('ts-lang',l);
+    document.documentElement.lang=l;
+    document.querySelectorAll('[data-en]').forEach(el=>{
+      const v=el.getAttribute('data-'+l);if(!v)return;
+      el.textContent=v;
+    });
+    document.getElementById('langFlag').textContent=LANGS[l].flag;
+    document.getElementById('langCode').textContent=LANGS[l].code;
+  }
+  document.getElementById('langToggle').addEventListener('click',()=>applyLang(LANGS[cur].next));
+  applyLang(cur);
+</script>
+</body>
+</html>

@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>TrimSync — AI Booking for Barbershops</title>
+<meta name="description" content="TrimSync automates Instagram DM bookings for barbershops with AI. Never miss a booking again."/>
+<meta property="og:title" content="TrimSync — AI Booking for Barbershops"/>
+<meta property="og:description" content="Your chair fills itself. Connect Instagram, let AI handle DMs, appointments booked automatically."/>
+<meta property="og:type" content="website"/>
+<meta property="og:locale" content="en_US"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet"/>
+<style>
+/* page ambient orbs */
+#page-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);will-change:transform}
+.orb-a{width:90vmax;height:90vmax;background:radial-gradient(circle,oklch(0.76 0.13 193/.24) 0%,transparent 62%);top:-20%;left:-22%;animation:orb-a 24s ease-in-out infinite alternate}
+.orb-b{width:70vmax;height:70vmax;background:radial-gradient(circle,oklch(0.52 0.18 193/.20) 0%,transparent 58%);bottom:-22%;right:-18%;animation:orb-b 30s ease-in-out infinite alternate}
+.orb-c{width:60vmax;height:60vmax;background:radial-gradient(circle,oklch(0.76 0.13 193/.16) 0%,transparent 60%);top:38%;left:28%;animation:orb-c 20s ease-in-out 6s infinite alternate}
+@keyframes orb-a{to{transform:translate(32%,48%) scale(1.35)}}
+@keyframes orb-b{to{transform:translate(-38%,-32%) scale(0.72)}}
+@keyframes orb-c{to{transform:translate(-25%,30%) scale(1.28)}}
+@media(prefers-reduced-motion:reduce){.orb{animation:none}}
+:root{
+  --bg:oklch(0.12 0.008 222);--bg2:oklch(0.16 0.009 220);--bg3:oklch(0.20 0.010 220);
+  --bd:oklch(0.24 0.011 218);--bd2:oklch(0.32 0.013 215);
+  --t:oklch(0.94 0.010 200);--t2:oklch(0.68 0.015 210);--t3:oklch(0.46 0.012 215);
+  --a:oklch(0.76 0.13 193);--alo:oklch(0.76 0.13 193/.10);--amid:oklch(0.76 0.13 193/.28);
+  --adrench:oklch(0.54 0.15 193);--on-a:oklch(0.97 0.006 200);
+  --fd:'Bricolage Grotesque',system-ui,sans-serif;
+  --fb:'Figtree',system-ui,sans-serif;
+  --ex:cubic-bezier(0.16,1,0.3,1);
+  --r:8px;--max:1240px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{background-color:var(--bg);color:var(--t);font-family:var(--fb);font-size:16px;line-height:1.65;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img,svg,canvas{display:block}
+button{cursor:pointer;border:none;background:none;font:inherit;color:inherit}
+@media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+:focus-visible{outline:2px solid var(--a);outline-offset:3px;border-radius:3px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+
+/* grain */
+body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.4;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")}
+
+
+/* scroll progress */
+.scroll-prog{position:fixed;top:0;left:0;width:100%;height:2px;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--a),oklch(0.84 0.10 190));z-index:9997;pointer-events:none}
+
+/* section nav dots */
+.sec-nav{position:fixed;right:1.5rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:.6rem;z-index:90}
+.sec-dot{width:7px;height:7px;border-radius:50%;background:oklch(0.24 0.010 218);border:1px solid oklch(0.33 0.012 215);cursor:pointer;transition:all .35s var(--ex);position:relative}
+.sec-dot.act{background:var(--a);border-color:var(--a);width:9px;height:9px;box-shadow:0 0 10px oklch(0.76 0.13 193/.5)}
+.sec-dot::after{content:attr(data-lbl);position:absolute;right:calc(100% + .85rem);top:50%;transform:translateY(-50%);font-size:.7rem;font-family:var(--fb);font-weight:500;white-space:nowrap;color:var(--t2);background:var(--bg2);border:1px solid var(--bd);border-radius:4px;padding:.2rem .55rem;opacity:0;transition:opacity .2s;pointer-events:none}
+.sec-dot:hover::after,.sec-dot:focus-visible::after{opacity:1}
+@media(max-width:1120px){.sec-nav{display:none}}
+
+/* shadow overlay */
+.shadow-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+
+/* layout */
+.wrap{max-width:var(--max);margin:0 auto;padding:0 2.5rem}
+
+/* type */
+.fd{font-family:var(--fd);font-optical-sizing:auto;font-weight:800;letter-spacing:-.03em;line-height:.95}
+.fd-xl{font-size:clamp(3.2rem,7.5vw,7rem)}
+.fd-lg{font-size:clamp(2.2rem,4vw,3.8rem);letter-spacing:-.025em;line-height:1.05}
+.fd-md{font-size:clamp(1.6rem,2.2vw,2.2rem);letter-spacing:-.02em;line-height:1.15}
+.label{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--a)}
+.body-t{font-size:1rem;color:var(--t2);line-height:1.75;max-width:60ch}
+.body-lg{font-size:1.1rem;color:var(--t2);line-height:1.75}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:100px;font-weight:700;font-family:var(--fd);letter-spacing:-.01em;white-space:nowrap;transition:background .2s,box-shadow .2s,transform .3s var(--ex)}
+.btn-a{padding:.875rem 1.75rem;background:var(--a);color:var(--on-a);font-size:.95rem}
+.btn-a:hover{background:oklch(0.82 0.11 190);box-shadow:0 8px 32px oklch(0.76 0.13 193/.38)}
+.btn-b{padding:.875rem 1.75rem;border:1px solid var(--bd2);color:var(--t2);font-family:var(--fb);font-weight:500;font-size:.95rem}
+.btn-b:hover{border-color:var(--bd2);color:var(--t)}
+.btn-nav{padding:.5rem 1.1rem;background:var(--a);color:var(--on-a);font-size:.83rem}
+.btn-nav:hover{background:oklch(0.82 0.11 190)}
+
+/* nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:oklch(0.12 0.008 222/.85);border-bottom:1px solid var(--bd);transition:border-color .3s}
+.nav.scrolled{border-bottom-color:var(--bd2)}
+.nav-inner{max-width:var(--max);margin:0 auto;padding:0 2.5rem;display:flex;align-items:center;justify-content:space-between;height:68px}
+.logo{font-family:var(--fd);font-size:1.35rem;font-weight:800;letter-spacing:-.04em}
+.logo em{color:var(--a);font-style:normal}
+.nav-links{display:flex;align-items:center;gap:2.5rem;list-style:none}
+.nav-links a{font-size:.875rem;font-weight:500;color:var(--t3);transition:color .2s}
+.nav-links a:hover{color:var(--t)}
+.nav-right{display:flex;align-items:center;gap:1rem}
+.lang-btn{display:flex;align-items:center;gap:.3rem;padding:.4rem .7rem;border:1px solid var(--bd);border-radius:var(--r);font-size:.78rem;font-weight:500;color:var(--t3);background:transparent;transition:border-color .2s,color .2s;min-height:44px}
+.lang-btn:hover{border-color:var(--bd2);color:var(--t)}
+.hbg{display:none;flex-direction:column;justify-content:center;gap:5px;width:44px;height:44px;padding:0 10px}
+.hbg span{display:block;height:1.5px;background:var(--t2);transition:transform .3s var(--ex),opacity .3s}
+.hbg[aria-expanded=true] span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.hbg[aria-expanded=true] span:nth-child(2){opacity:0}
+.hbg[aria-expanded=true] span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+.nav-mob{display:none;position:fixed;inset:68px 0 0;background:oklch(0.12 0.008 222/.97);backdrop-filter:blur(24px);padding:2rem 2.5rem;flex-direction:column;gap:.3rem;z-index:99}
+.nav-mob.open{display:flex}
+.nav-mob a{font-family:var(--fd);font-size:1.3rem;font-weight:700;letter-spacing:-.03em;padding:.9rem 0;border-bottom:1px solid var(--bd);color:var(--t2);transition:color .2s}
+.nav-mob a:hover{color:var(--t)}
+.nav-mob .btn-a{text-align:center;justify-content:center;margin-top:.5rem;border-bottom:none}
+
+/* hero */
+.hero{position:relative;z-index:1;min-height:100svh;min-height:100vh;display:flex;align-items:center;padding:7rem 0 4rem;overflow:hidden}
+#hbg2{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hero-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr 460px;gap:4rem;align-items:center}
+.badge{display:inline-flex;align-items:center;gap:.6rem;padding:.4rem .9rem;border:1px solid var(--bd2);border-radius:100px;font-size:.78rem;font-weight:500;color:var(--t2);margin-bottom:1.8rem}
+.badge-pulse{width:6px;height:6px;border-radius:50%;background:var(--a);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 oklch(0.76 0.13 193/.5)}50%{box-shadow:0 0 0 6px oklch(0.76 0.13 193/0)}}
+@media(prefers-reduced-motion:reduce){.badge-pulse{animation:none}}
+.hero-h{margin-bottom:1.4rem}
+.hero-h em{font-style:italic}
+.hero-sub{font-size:1.1rem;color:var(--t2);line-height:1.7;max-width:50ch;margin-bottom:2.2rem}
+.hero-ctas{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:2.6rem}
+.hero-proof{display:flex;flex-wrap:wrap;gap:.7rem 1.6rem}
+.proof-item{display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--t3)}
+.proof-item::before{content:'';display:block;width:14px;height:14px;flex-shrink:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Ccircle cx='7' cy='7' r='6' stroke='%2360c4c8' stroke-width='1.5' fill='none'/%3E%3Cpath d='M4 7l2 2 4-4' stroke='%2360c4c8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")}
+
+/* chat window */
+.chat-wrap{position:relative}
+.chat-wrap::before{content:'';position:absolute;inset:-40px -40px;background:radial-gradient(ellipse 80% 80% at 50% 50%,oklch(0.76 0.13 193/.07) 0%,transparent 70%);pointer-events:none}
+.chat-phone{background:oklch(0.16 0.009 220);border:1px solid var(--bd2);border-radius:24px;overflow:hidden;box-shadow:0 0 0 1px oklch(0.76 0.13 193/.12),0 40px 80px oklch(0.04 0.005 218/.6)}
+.chat-bar{display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;border-bottom:1px solid var(--bd);background:oklch(0.17 0.009 220)}
+.chat-av{width:36px;height:36px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,oklch(0.76 0.13 193),oklch(0.52 0.12 196));display:flex;align-items:center;justify-content:center;font-size:15px}
+.chat-info{flex:1;min-width:0}
+.chat-name{font-family:var(--fd);font-size:.88rem;font-weight:700;display:block}
+.chat-ai{display:inline-flex;align-items:center;gap:.25rem;font-size:9px;font-weight:700;color:var(--a);background:oklch(0.76 0.13 193/.12);border-radius:4px;padding:.1rem .35rem}
+.chat-msgs{padding:1rem 1.2rem;min-height:260px;display:flex;flex-direction:column;gap:.5rem}
+.msg{max-width:82%;padding:.55rem .9rem;border-radius:14px;font-size:.83rem;line-height:1.45;opacity:0;transform:translateY(8px);transition:opacity .35s var(--ex),transform .35s var(--ex)}
+.msg.in{opacity:1;transform:translateY(0)}
+.msg-u{align-self:flex-end;background:oklch(0.76 0.13 193/.2);border:1px solid oklch(0.76 0.13 193/.3);color:var(--t)}
+.msg-b{align-self:flex-start;background:oklch(0.22 0.010 218);border:1px solid var(--bd);color:var(--t2)}
+.msg-ok{border-color:oklch(0.76 0.13 193/.5)!important;background:oklch(0.76 0.13 193/.12)!important;color:var(--t)!important}
+.typing{align-self:flex-start;padding:.55rem .9rem;background:oklch(0.22 0.010 218);border:1px solid var(--bd);border-radius:14px;display:flex;gap:4px;align-items:center;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s var(--ex)}
+.typing.in{opacity:1;transform:translateY(0)}
+.tdot{width:5px;height:5px;border-radius:50%;background:var(--t3);animation:tb 1.2s ease-in-out infinite}
+.tdot:nth-child(2){animation-delay:.15s}.tdot:nth-child(3){animation-delay:.3s}
+@keyframes tb{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px);background:oklch(0.76 0.13 193/.7)}}
+@media(prefers-reduced-motion:reduce){.tdot{animation:none}}
+.chat-foot{padding:.75rem 1.2rem;border-top:1px solid var(--bd);display:flex;align-items:center;gap:.6rem}
+.chat-inp{flex:1;height:32px;background:oklch(0.20 0.010 220);border:1px solid var(--bd);border-radius:100px;display:flex;align-items:center;padding:0 .8rem;font-size:.78rem;color:var(--t3)}
+.chat-send{width:30px;height:30px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* marquee */
+.mq-wrap{overflow:hidden;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);background:var(--bg2);padding:.85rem 0}
+.mq-track{display:flex;width:max-content;animation:mqfwd 28s linear infinite}
+@media(prefers-reduced-motion:reduce){.mq-track{animation:none}}
+@keyframes mqfwd{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.mq-item{display:flex;align-items:center;gap:2rem;padding:0 2rem;font-family:var(--fd);font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--t3);white-space:nowrap}
+.mq-sep{width:4px;height:4px;border-radius:50%;background:var(--a);flex-shrink:0}
+
+/* sections */
+.section{padding:7rem 0;position:relative;z-index:1}
+.sec-hd{margin-bottom:4rem}
+.sec-hd .label{margin-bottom:.7rem;display:block}
+
+/* problem */
+.prob-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--bd)}
+.pain{padding:2.8rem 2.4rem;border-right:1px solid var(--bd)}
+.pain:last-child{border-right:none}
+.pain-n{display:block;font-family:var(--fd);font-size:clamp(3.5rem,7vw,6rem);font-weight:800;line-height:1;letter-spacing:-.04em;color:oklch(0.25 0.011 218);margin-bottom:1.4rem}
+.pain-ico{font-size:1.6rem;margin-bottom:.9rem}
+.pain h3{font-family:var(--fd);font-size:1.15rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.7rem;line-height:1.2}
+
+/* solution */
+.sol-steps{display:grid;grid-template-columns:repeat(3,1fr);position:relative;margin-top:3rem}
+.sol-steps::after{content:'';position:absolute;top:23px;left:18%;right:18%;height:1px;background:linear-gradient(90deg,transparent,var(--bd),var(--bd),transparent)}
+.step{padding:0 2rem}
+.step-n{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;font-family:var(--fd);font-size:1rem;font-weight:800;margin-bottom:1.4rem;position:relative;z-index:1}
+.step-n-a{background:var(--a);color:var(--on-a)}
+.step-n-b{background:var(--bg3);color:var(--a);border:1px solid oklch(0.76 0.13 193/.4)}
+.step h3{font-family:var(--fd);font-size:1.1rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.7rem}
+
+/* features */
+.feat-grid{display:grid;grid-template-columns:3fr 2fr;grid-template-rows:auto auto;gap:1px;background:var(--bd);border:1px solid var(--bd)}
+.feat{background:oklch(0.13 0.009 220/.82);padding:2.8rem 3rem}
+.feat-tag{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--a);display:block;margin-bottom:.9rem}
+.feat h3{font-family:var(--fd);font-size:1.3rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.75rem}
+.feat:first-child h3{font-size:1.65rem}
+.feat:nth-child(3){grid-column:1}
+.feat:nth-child(4){grid-column:2;grid-row:2}
+
+/* pricing DRENCHED */
+.pricing{background:var(--adrench);color:var(--on-a);padding:7rem 0}
+.pricing .label{color:oklch(0.88 0.07 193)}
+.price-big{font-family:var(--fd);font-size:clamp(6rem,17vw,14rem);font-weight:800;line-height:.9;letter-spacing:-.05em;color:var(--on-a);margin-bottom:.5rem}
+.price-tag{font-size:1.3rem;font-weight:600;color:oklch(0.85 0.05 200);margin-bottom:2.2rem}
+.price-layout{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
+.price-feats{list-style:none;display:flex;flex-direction:column;gap:.65rem;margin-bottom:2.2rem}
+.price-feats li{display:flex;align-items:center;gap:.7rem;font-size:.92rem;font-weight:500;color:oklch(0.90 0.04 200)}
+.price-feats li::before{content:'';display:block;width:15px;height:15px;flex-shrink:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'%3E%3Ccircle cx='7.5' cy='7.5' r='6.5' stroke='%2390e0d0' stroke-width='1.5' fill='none'/%3E%3Cpath d='M5 7.5l2 2 3.5-3.5' stroke='%2390e0d0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")}
+.btn-on-a{display:inline-flex;align-items:center;gap:.5rem;padding:1rem 2rem;background:var(--on-a);color:var(--adrench);font-family:var(--fd);font-weight:800;font-size:1rem;letter-spacing:-.02em;border-radius:100px;transition:opacity .2s}
+.btn-on-a:hover{opacity:.88}
+.price-free{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .95rem;border:1.5px solid oklch(0.78 0.09 193/.6);border-radius:100px;font-size:.83rem;font-weight:600;color:oklch(0.88 0.07 193);margin-top:1rem}
+.vs-lbl{font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:oklch(0.22 0.07 200);margin-bottom:1.1rem}
+.vs-row{display:flex;justify-content:space-between;align-items:center;padding:.8rem 0;border-bottom:1px solid oklch(0.28 0.10 200/.28);font-size:.88rem}
+.vs-row:last-child{border-bottom:none}
+.vs-row span:first-child{color:oklch(0.20 0.07 200)}
+.vs-old{text-decoration:line-through;color:oklch(0.35 0.09 200)}
+.vs-new{font-weight:700;font-family:var(--fd);color:var(--on-a)}
+
+/* setup fee + plans pricing */
+.setup-fee{background:oklch(1 0 0/.06);border:1px solid oklch(1 0 0/.16);border-radius:20px;padding:2rem 2.5rem;margin-bottom:3rem;display:flex;align-items:center;gap:2.5rem;flex-wrap:wrap}
+.setup-badge{padding:.3rem .85rem;background:var(--on-a);color:var(--adrench);font-family:var(--fd);font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;border-radius:100px;white-space:nowrap;align-self:flex-start;flex-shrink:0}
+.setup-amount{font-family:var(--fd);font-size:clamp(2.8rem,6vw,4.5rem);font-weight:800;letter-spacing:-.04em;color:var(--on-a);line-height:1}
+.setup-body{display:flex;flex-direction:column;gap:.3rem}
+.setup-desc{font-size:.9rem;color:oklch(0.90 0.05 200);max-width:36ch;line-height:1.5}
+.setup-checks{display:flex;flex-direction:column;gap:.3rem;margin-left:auto}
+.setup-checks span{font-size:.82rem;color:oklch(0.88 0.07 193);font-weight:500}
+.plans-wrap{display:grid;grid-template-columns:3fr 2fr;gap:4rem;align-items:start}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem}
+.plan{background:oklch(1 0 0/.06);border:1px solid oklch(1 0 0/.14);border-radius:18px;padding:1.75rem 1.5rem;display:flex;flex-direction:column;gap:1.3rem;position:relative;transition:transform .35s var(--ex),box-shadow .35s var(--ex),border-color .3s}
+.plan:hover{transform:translateY(-5px);box-shadow:0 24px 64px oklch(0 0 0/.25);border-color:oklch(1 0 0/.28)}
+.plan-pop{background:oklch(1 0 0/.10);border-color:oklch(1 0 0/.30);box-shadow:0 8px 32px oklch(0 0 0/.2)}
+.plan-pop:hover{transform:translateY(-7px);box-shadow:0 32px 80px oklch(0 0 0/.32)}
+.plan-hot{position:absolute;top:-13px;left:50%;transform:translateX(-50%);padding:.28rem .9rem;background:var(--on-a);color:var(--adrench);font-family:var(--fd);font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;border-radius:100px;white-space:nowrap}
+.plan-name{font-family:var(--fd);font-size:.75rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.80 0.08 193)}
+.plan-pop .plan-name{color:var(--on-a)}
+.plan-price{font-family:var(--fd);font-size:clamp(2rem,4vw,2.6rem);font-weight:800;letter-spacing:-.04em;color:var(--on-a);line-height:1.1}
+.plan-mo{font-size:.7rem;font-weight:500;color:oklch(0.75 0.06 193);vertical-align:super}
+.plan-feats{list-style:none;display:flex;flex-direction:column;gap:.5rem;flex:1}
+.plan-feats li{font-size:.83rem;color:oklch(0.88 0.04 200);padding-left:1.1rem;position:relative;line-height:1.4}
+.plan-feats li::before{content:'';position:absolute;left:0;top:.5rem;width:6px;height:6px;border-radius:50%;background:oklch(0.76 0.13 193/.5)}
+.plan-pop .plan-feats li::before{background:var(--on-a)}
+.plan-cta{display:flex;justify-content:center;align-items:center;padding:.85rem 1rem;border:1.5px solid oklch(1 0 0/.22);border-radius:100px;font-family:var(--fd);font-weight:800;font-size:.82rem;color:oklch(0.92 0.04 200);transition:border-color .2s,background .2s,color .2s,transform .2s var(--ex);text-align:center;text-decoration:none}
+.plan-cta:hover{border-color:oklch(1 0 0/.5);color:var(--on-a);transform:scale(1.02)}
+.plan-pop .plan-cta{background:var(--on-a);color:var(--adrench);border-color:var(--on-a)}
+.plan-pop .plan-cta:hover{background:oklch(0.92 0.01 200);border-color:oklch(0.92 0.01 200)}
+@media(max-width:960px){.plans-wrap{grid-template-columns:1fr}}
+@media(max-width:680px){.plans-grid{grid-template-columns:1fr;gap:.75rem}.plan-pop{margin-top:14px}}
+@media(max-width:560px){.setup-fee{flex-direction:column;gap:1.2rem;padding:1.5rem}.setup-checks{margin-left:0}}
+
+/* faq */
+.faq-list{max-width:760px;margin:0 auto}
+.faq-item{border-bottom:1px solid var(--bd)}
+.faq-q{display:flex;align-items:center;justify-content:space-between;padding:1.5rem 0;font-family:var(--fd);font-size:1.12rem;font-weight:700;letter-spacing:-.02em;cursor:pointer;user-select:none;transition:color .2s;gap:1rem}
+.faq-q:hover{color:var(--a)}
+.faq-ico{width:26px;height:26px;flex-shrink:0;border-radius:50%;border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;transition:border-color .2s,transform .3s var(--ex);position:relative}
+.faq-ico::before,.faq-ico::after{content:'';position:absolute;width:10px;height:1.5px;background:var(--t3);border-radius:2px;transition:opacity .25s,transform .25s}
+.faq-ico::after{transform:rotate(90deg)}
+.faq-item.open .faq-ico{border-color:var(--a);transform:rotate(45deg)}
+.faq-a{overflow:hidden;max-height:0;transition:max-height .4s var(--ex)}
+.faq-a-in{padding:0 0 1.4rem}
+.faq-item.open .faq-a{max-height:400px}
+
+/* cta final */
+.cta-final{background:transparent;text-align:center;position:relative;overflow:hidden}
+.cta-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 70% at 50% 50%,oklch(0.76 0.13 193/.07) 0%,transparent 70%)}
+.cta-final .wrap{position:relative}
+.cta-final h2{max-width:580px;margin:0 auto 1.3rem}
+.cta-final h2 em{font-style:italic;color:var(--a)}
+.cta-final .body-lg{max-width:420px;margin:0 auto 2.6rem}
+.cta-acts{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
+
+/* footer */
+.footer{border-top:1px solid var(--bd);padding:2.8rem 0}
+.foot-in{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem}
+.foot-logo{font-family:var(--fd);font-size:1.15rem;font-weight:800;letter-spacing:-.04em}
+.foot-logo em{color:var(--a);font-style:normal}
+.foot-links{display:flex;gap:2rem;flex-wrap:wrap}
+.foot-links a{font-size:.82rem;color:var(--t3);transition:color .2s}
+.foot-links a:hover{color:var(--t)}
+.foot-copy{font-size:.78rem;color:var(--t3)}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .7s var(--ex),transform .7s var(--ex)}
+.rv.on{opacity:1;transform:translateY(0)}
+@media(prefers-reduced-motion:reduce){.rv{opacity:1!important;transform:none!important}}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+
+/* divider */
+.div{height:1px;background:linear-gradient(90deg,transparent,var(--bd),transparent)}
+
+/* responsive */
+@media(max-width:960px){
+  .hero-inner{grid-template-columns:1fr;gap:2.8rem}
+  .chat-wrap{max-width:420px;margin:0 auto}
+  .prob-grid,.sol-steps{grid-template-columns:1fr}
+  .pain{border-right:none;border-bottom:1px solid var(--bd)}.pain:last-child{border-bottom:none}
+  .sol-steps::after{display:none}
+  .step{padding:0 0 2rem;border-bottom:1px solid var(--bd)}.step:last-child{border-bottom:none}
+  .feat-grid{grid-template-columns:1fr}.feat:nth-child(3),.feat:nth-child(4){grid-column:auto;grid-row:auto}
+  .price-layout{grid-template-columns:1fr;gap:3rem}
+  .nav-links,.btn-nav{display:none}
+  .hbg{display:flex}
+}
+@media(max-width:560px){
+  .section{padding:5rem 0}
+  .hero{padding:6rem 0 3rem}
+  .price-big{font-size:clamp(4.5rem,20vw,9rem)}
+  .hero-inner{gap:2rem}
+}
+</style>
+</head>
+<body>
+
+<div id="page-bg" aria-hidden="true"><div class="orb orb-a"></div><div class="orb orb-b"></div><div class="orb orb-c"></div></div>
+<div class="scroll-prog" id="sprog" aria-hidden="true"></div>
+<nav class="sec-nav" id="secnav" aria-label="Page sections"></nav>
+<div aria-live="polite" aria-atomic="true" class="sr-only" id="la"></div>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="/" class="logo">Trim<em>Sync</em></a>
+    <nav aria-label="Main navigation">
+      <ul class="nav-links">
+        <li><a href="#problem"  data-en="Problem"      data-fr="Problème">Problem</a></li>
+        <li><a href="#solution" data-en="How it works" data-fr="Comment ça marche">How it works</a></li>
+        <li><a href="#features" data-en="Features"     data-fr="Fonctionnalités">Features</a></li>
+        <li><a href="#pricing"  data-en="Pricing"      data-fr="Tarifs">Pricing</a></li>
+        <li><a href="#faq"      data-en="FAQ"          data-fr="FAQ">FAQ</a></li>
+      </ul>
+    </nav>
+    <div class="nav-right">
+      <button class="lang-btn" id="lt" aria-label="Switch to French">
+        <span id="lf" aria-hidden="true">🇫🇷</span><span id="lc">FR</span>
+      </button>
+      <a href="#cta" class="btn btn-nav" data-en="Get started" data-fr="Commencer">Get started</a>
+    </div>
+    <button class="hbg" id="hbg" aria-label="Open menu" aria-expanded="false" aria-controls="nm">
+      <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+    </button>
+  </div>
+  <nav class="nav-mob" id="nm" aria-label="Mobile navigation">
+    <a href="#problem"  data-en="Problem"            data-fr="Problème">Problem</a>
+    <a href="#solution" data-en="How it works"       data-fr="Comment ça marche">How it works</a>
+    <a href="#features" data-en="Features"           data-fr="Fonctionnalités">Features</a>
+    <a href="#pricing"  data-en="Pricing"            data-fr="Tarifs">Pricing</a>
+    <a href="#faq"      data-en="FAQ"                data-fr="FAQ">FAQ</a>
+    <a href="#cta" class="btn btn-a" data-en="Get started free" data-fr="Commencer gratuitement">Get started free</a>
+  </nav>
+</header>
+
+<main>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="shadow-bg" id="shadow-bg" aria-hidden="true"></div>
+  <div class="hero-inner wrap">
+    <div class="hero-content">
+      <div class="badge" data-hero="1">
+        <span class="badge-pulse" aria-hidden="true"></span>
+        <span data-en="AI-powered booking automation" data-fr="Automatisation IA des réservations">AI-powered booking automation</span>
+      </div>
+      <h1 class="fd fd-xl hero-h" data-hero="1" id="hero-headline">
+        <span data-en="Your chair<br><em>fills itself.</em>" data-fr="Votre chaise<br><em>se remplit seule.</em>">Your chair<br><em>fills itself.</em></span>
+      </h1>
+      <p class="hero-sub" data-hero="1"
+        data-en="TrimSync connects to your Instagram and books appointments automatically. While you cut, the AI handles the DMs."
+        data-fr="TrimSync se connecte à votre Instagram et prend les rendez-vous automatiquement. Pendant que vous coiffez, l'IA gère les DMs."
+      >TrimSync connects to your Instagram and books appointments automatically. While you cut, the AI handles the DMs.</p>
+      <div class="hero-ctas" data-hero="1">
+        <a href="#cta" class="btn btn-a mag">
+          <span data-en="Get started free" data-fr="Commencer gratuitement">Get started free</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="#solution" class="btn btn-b mag" data-en="See how it works" data-fr="Voir comment ça marche">See how it works</a>
+      </div>
+      <div class="hero-proof" data-hero="1">
+        <span class="proof-item" data-en="No credit card required" data-fr="Sans carte bancaire">No credit card required</span>
+        <span class="proof-item" data-en="First month free" data-fr="Premier mois gratuit">First month free</span>
+        <span class="proof-item" data-en="Setup in 10 minutes" data-fr="Configuré en 10 minutes">Setup in 10 minutes</span>
+      </div>
+    </div>
+
+    <!-- LIVE DM DEMO -->
+    <div class="chat-wrap" data-hero="1" aria-label="Live demo: AI automatically books appointments">
+      <div class="chat-phone">
+        <div class="chat-bar">
+          <div class="chat-av" aria-hidden="true" style="font-family:var(--fd);font-weight:800;font-size:12px;letter-spacing:-.02em">BP</div>
+          <div class="chat-info">
+            <span class="chat-name">BarberShop Pro</span>
+            <span class="chat-ai"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true"><circle cx="4" cy="4" r="3.5" fill="#c87c30" opacity=".4"/><circle cx="4" cy="4" r="1.5" fill="#c87c30"/></svg> AI Active</span>
+          </div>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-label="Instagram" role="img"><rect x="3" y="3" width="12" height="12" rx="3.5" stroke="oklch(0.50 0.007 58)" stroke-width="1.3"/><circle cx="9" cy="9" r="2.8" stroke="oklch(0.50 0.007 58)" stroke-width="1.3"/><circle cx="13" cy="5" r=".7" fill="oklch(0.50 0.007 58)"/></svg>
+        </div>
+        <div class="chat-msgs" id="chat-msgs" aria-live="polite" aria-label="Conversation demo"></div>
+        <div class="chat-foot" aria-hidden="true">
+          <div class="chat-inp" id="chat-inp-fake">
+            <span id="chat-inp-txt" data-en="Message..." data-fr="Message...">Message...</span>
+          </div>
+          <div class="chat-send">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="oklch(0.10 0.008 218)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="mq-wrap" aria-hidden="true">
+  <div class="mq-track">
+    <div class="mq-item">AI Booking<span class="mq-sep"></span>24/7 Availability<span class="mq-sep"></span>No Missed DMs<span class="mq-sep"></span>Instagram Native<span class="mq-sep"></span>300+ Barbers<span class="mq-sep"></span>Auto Reminders<span class="mq-sep"></span>Google Calendar<span class="mq-sep"></span>Zero Manual Work<span class="mq-sep"></span></div>
+    <div class="mq-item">AI Booking<span class="mq-sep"></span>24/7 Availability<span class="mq-sep"></span>No Missed DMs<span class="mq-sep"></span>Instagram Native<span class="mq-sep"></span>300+ Barbers<span class="mq-sep"></span>Auto Reminders<span class="mq-sep"></span>Google Calendar<span class="mq-sep"></span>Zero Manual Work<span class="mq-sep"></span></div>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section class="section" id="problem">
+  <div class="wrap">
+    <div class="sec-hd rv">
+      <span class="label" data-en="The reality" data-fr="La réalité">The reality</span>
+      <h2 class="fd fd-lg" style="margin-top:.6rem;max-width:580px"
+        data-en="Running a barbershop is a full-time job. Your phone shouldn't be too."
+        data-fr="Gérer un barbershop, c'est déjà un plein temps. Votre téléphone ne devrait pas l'être aussi."
+      >Running a barbershop is a full-time job. Your phone shouldn't be too.</h2>
+    </div>
+    <div class="prob-grid">
+      <div class="pain rv d1">
+        <span class="pain-n" aria-hidden="true">01</span>
+        <h3 data-en="Hours lost answering the same DMs" data-fr="Des heures perdues à répondre aux mêmes DMs">Hours lost answering the same DMs</h3>
+        <p class="body-t" data-en='"Available Friday? What time?" The same question, a dozen times a day, pulling you away from your chair.' data-fr='"Disponible vendredi ? À quelle heure ?" La même question, des dizaines de fois par jour, à chaque coup de ciseau.'>"Available Friday? What time?" The same question, a dozen times a day, pulling you away from your chair.</p>
+      </div>
+      <div class="pain rv d2">
+        <span class="pain-n" aria-hidden="true">02</span>
+        <h3 data-en="Bookings lost to slow replies" data-fr="Des RDV perdus à cause des réponses lentes">Bookings lost to slow replies</h3>
+        <p class="body-t" data-en="A client messages at 11pm and books the first barber who responds. If that's not you, it's your competition." data-fr="Un client écrit à 23h et réserve chez le premier barbier qui répond. Si ce n'est pas vous, c'est votre concurrent.">A client messages at 11pm and books the first barber who responds. If that's not you, it's your competition.</p>
+      </div>
+      <div class="pain rv d3">
+        <span class="pain-n" aria-hidden="true">03</span>
+        <h3 data-en="No-shows killing your revenue" data-fr="Les no-shows plombent votre CA">No-shows killing your revenue</h3>
+        <p class="body-t" data-en="An empty chair is lost money. Without proper confirmations and reminders, no-shows will keep haunting your schedule." data-fr="Une chaise vide, c'est de l'argent perdu. Sans confirmations automatiques, les no-shows vont continuer à hanter votre agenda.">An empty chair is lost money. Without proper confirmations and reminders, no-shows will keep haunting your schedule.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="div"></div>
+
+<!-- SOLUTION -->
+<section class="section" id="solution">
+  <div class="wrap">
+    <div class="sec-hd rv" style="text-align:center">
+      <span class="label" data-en="How it works" data-fr="Comment ça marche">How it works</span>
+      <h2 class="fd fd-lg" style="margin-top:.6rem"
+        data-en="Three steps. Zero friction."
+        data-fr="Trois étapes. Zéro friction."
+      >Three steps. Zero friction.</h2>
+    </div>
+    <div class="sol-steps">
+      <div class="step rv d1">
+        <div class="step-n step-n-a">1</div>
+        <h3 data-en="Connect your Instagram" data-fr="Connectez Instagram">Connect your Instagram</h3>
+        <p class="body-t" data-en="Link your Instagram business account in one click. No technical knowledge required." data-fr="Connectez votre compte Instagram professionnel en un clic. Aucune compétence technique requise.">Link your Instagram business account in one click. No technical knowledge required.</p>
+      </div>
+      <div class="step rv d2">
+        <div class="step-n step-n-b">2</div>
+        <h3 data-en="AI handles your DMs" data-fr="L'IA gère vos DMs">AI handles your DMs</h3>
+        <p class="body-t" data-en="Our AI reads every message, understands booking intent, and responds naturally on your behalf, 24/7." data-fr="Notre IA lit chaque message, comprend l'intention de réservation, et répond naturellement en votre nom, 24h/24.">Our AI reads every message, understands booking intent, and responds naturally on your behalf, 24/7.</p>
+      </div>
+      <div class="step rv d3">
+        <div class="step-n step-n-b">3</div>
+        <h3 data-en="Appointments booked, instantly" data-fr="RDV confirmés, instantanément">Appointments booked, instantly</h3>
+        <p class="body-t" data-en="Clients get confirmed bookings, automatic reminders, and calendar updates. You see everything in your dashboard." data-fr="Les clients reçoivent des confirmations, des rappels et des mises à jour calendrier. Vous voyez tout dans votre tableau de bord.">Clients get confirmed bookings, automatic reminders, and calendar updates. You see everything in your dashboard.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="div"></div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="wrap">
+    <div class="sec-hd rv" style="margin-bottom:3rem">
+      <span class="label" data-en="Built for barbers" data-fr="Conçu pour les barbiers">Built for barbers</span>
+      <h2 class="fd fd-lg" style="margin-top:.6rem;max-width:480px"
+        data-en="Everything you need. Nothing you don't."
+        data-fr="Tout ce dont vous avez besoin. Rien de plus."
+      >Everything you need. Nothing you don't.</h2>
+    </div>
+    <div class="feat-grid">
+      <div class="feat rv">
+        <span class="feat-tag" data-en="Core" data-fr="Essentiel">Core</span>
+        <h3 data-en="AI booking bot, 24/7" data-fr="Bot IA de réservation, 24h/24">AI booking bot, 24/7</h3>
+        <p class="body-t" data-en="Your AI never sleeps. It answers questions, checks availability, and books appointments at any hour, in any language." data-fr="Votre IA ne dort jamais. Elle répond aux questions, vérifie les disponibilités et prend les rendez-vous à toute heure, dans n'importe quelle langue.">Your AI never sleeps. It answers questions, checks availability, and books appointments at any hour, in any language.</p>
+      </div>
+      <div class="feat rv d1">
+        <span class="feat-tag" data-en="Automation" data-fr="Automatisation">Automation</span>
+        <h3 data-en="Auto booking &amp; confirmation" data-fr="Réservation et confirmation auto">Auto booking &amp; confirmation</h3>
+        <p class="body-t" data-en="Clients choose their slot and receive a booking notification, without you lifting a finger." data-fr="Les clients choisissent leur créneau et reçoivent une notification, sans que vous ayez à intervenir.">Clients choose their slot and receive a booking notification, without you lifting a finger.</p>
+      </div>
+      <div class="feat rv d1">
+        <span class="feat-tag" data-en="Smart" data-fr="Intelligent">Smart</span>
+        <h3 data-en="Smart cancellations and reschedules" data-fr="Annulations et déplacements intelligents">Smart cancellations and reschedules</h3>
+        <p class="body-t" data-en="When a client needs to cancel, the AI handles it gracefully, offers alternatives, and fills the slot with the next person." data-fr="Quand un client annule, l'IA gère ça avec élégance, propose des alternatives et comble le créneau avec la personne suivante.">When a client needs to cancel, the AI handles it gracefully, offers alternatives, and fills the slot with the next person.</p>
+      </div>
+      <div class="feat rv d2">
+        <span class="feat-tag" data-en="Integration" data-fr="Intégration">Integration</span>
+        <h3 data-en="Google Calendar sync" data-fr="Sync Google Calendar">Google Calendar sync</h3>
+        <p class="body-t" data-en="Every booking lands directly in your Google Calendar. No double entries, no manual updates." data-fr="Chaque réservation arrive directement dans votre Google Calendar. Pas de doublons, pas de mises à jour manuelles.">Every booking lands directly in your Google Calendar. No double entries, no manual updates.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING — 3 PLANS + SETUP FEE -->
+<section class="pricing section" id="pricing">
+  <div class="wrap">
+
+    <!-- En-tête section -->
+    <div class="rv" style="text-align:center;margin-bottom:2.5rem">
+      <span class="label" data-en="Transparent pricing" data-fr="Tarifs transparents">Transparent pricing</span>
+      <h2 class="fd fd-lg" style="margin-top:.6rem;max-width:540px;margin-left:auto;margin-right:auto"
+        data-en="Simple. Honest. No surprises."
+        data-fr="Simple. Honnête. Sans surprise."
+      >Simple. Honest. No surprises.</h2>
+    </div>
+
+    <!-- Frais de setup unique -->
+    <div class="setup-fee rv d1">
+      <div class="setup-badge" data-en="One-time fee" data-fr="Frais unique">One-time fee</div>
+      <div class="setup-body">
+        <div class="setup-amount">€300</div>
+        <div class="setup-desc"
+          data-en="Setup fee — Platform access + full onboarding included. Paid once, never again."
+          data-fr="Frais de mise en place — Accès plateforme + onboarding complet inclus. Payé une seule fois."
+        >Setup fee — Platform access + full onboarding included. Paid once, never again.</div>
+      </div>
+      <div class="setup-checks">
+        <span data-en="✓ Instagram API connection" data-fr="✓ Connexion API Instagram">✓ Instagram API connection</span>
+        <span data-en="✓ 1-on-1 onboarding call" data-fr="✓ Appel d'onboarding en direct">✓ 1-on-1 onboarding call</span>
+        <span data-en="✓ Bot training + full config" data-fr="✓ Entraînement + configuration complète">✓ Bot training + full config</span>
+      </div>
+    </div>
+
+    <!-- Plans + tableau ROI -->
+    <div class="plans-wrap">
+
+      <!-- Grille 3 plans -->
+      <div class="plans-grid">
+
+        <!-- Starter -->
+        <div class="plan rv d1">
+          <div>
+            <div class="plan-name" data-en="Starter" data-fr="Starter">Starter</div>
+            <div class="plan-price">€59<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
+          </div>
+          <ul class="plan-feats">
+            <li data-en="AI Instagram bot 24/7" data-fr="Bot IA Instagram 24h/24">AI Instagram bot 24/7</li>
+            <li data-en="Unlimited DMs" data-fr="DMs illimités">Unlimited DMs</li>
+            <li data-en="Auto confirmations" data-fr="Confirmations automatiques">Auto confirmations</li>
+          </ul>
+          <a href="trimsync-booking.html" class="plan-cta" data-en="Get started" data-fr="Commencer">Get started</a>
+        </div>
+
+        <!-- Pro — le plus populaire -->
+        <div class="plan plan-pop rv d2">
+          <div class="plan-hot" data-en="Most popular" data-fr="Le plus populaire">Most popular</div>
+          <div>
+            <div class="plan-name" data-en="Pro" data-fr="Pro">Pro</div>
+            <div class="plan-price">€79<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
+          </div>
+          <ul class="plan-feats">
+            <li data-en="Everything in Starter" data-fr="Tout Starter">Everything in Starter</li>
+            <li data-en="TrimSync dashboard" data-fr="Dashboard TrimSync">TrimSync dashboard</li>
+            <li data-en="Agenda management" data-fr="Gestion agenda">Agenda management</li>
+            <li data-en="Client management" data-fr="Gestion clients">Client management</li>
+          </ul>
+          <a href="trimsync-booking.html" class="plan-cta" data-en="Get started" data-fr="Commencer">Get started</a>
+        </div>
+
+        <!-- Max -->
+        <div class="plan rv d3">
+          <div>
+            <div class="plan-name" data-en="Max" data-fr="Max">Max</div>
+            <div class="plan-price">€99<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
+          </div>
+          <ul class="plan-feats">
+            <li data-en="Everything in Pro" data-fr="Tout Pro">Everything in Pro</li>
+            <li data-en="Native booking page" data-fr="Page réservation native">Native booking page</li>
+            <li data-en="Stats &amp; analytics" data-fr="Stats &amp; analytics">Stats &amp; analytics</li>
+            <li data-en="Loyalty program" data-fr="Programme fidélité">Loyalty program</li>
+            <li data-en="Marketing tools" data-fr="Outils marketing">Marketing tools</li>
+            <li data-en="SumUp integration" data-fr="Intégration SumUp">SumUp integration</li>
+          </ul>
+          <a href="trimsync-booking.html" class="plan-cta" data-en="Get started" data-fr="Commencer">Get started</a>
+        </div>
+
+      </div><!-- /plans-grid -->
+
+      <!-- Tableau ROI — conservé intact -->
+      <div class="price-right rv d3">
+        <p class="vs-lbl" data-en="Manual booking costs more than you think" data-fr="La gestion manuelle vous coûte plus cher que vous ne le pensez">Manual booking costs more than you think</p>
+        <div class="vs-row">
+          <span data-en="Time on DMs (est.)" data-fr="Temps passé sur DMs (estimation)">Time on DMs (est.)</span>
+          <span class="vs-old" data-en="~2h/day" data-fr="~2h/jour">~2h/day</span>
+        </div>
+        <div class="vs-row">
+          <span data-en="Missed bookings/month" data-fr="RDV manqués par mois">Missed bookings/month</span>
+          <span class="vs-old">8–15</span>
+        </div>
+        <div class="vs-row">
+          <span data-en="Revenue lost to no-shows" data-fr="CA perdu en no-shows">Revenue lost to no-shows</span>
+          <span class="vs-old" data-en="€200–400/mo" data-fr="200–400€/mois">€200–400/mo</span>
+        </div>
+        <div class="vs-row">
+          <span><strong data-en="TrimSync Starter" data-fr="TrimSync Starter">TrimSync Starter</strong></span>
+          <span class="vs-new">€59<span data-en="/mo" data-fr="/mois">/mo</span></span>
+        </div>
+        <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid oklch(0.28 0.10 200/.28)">
+          <a href="trimsync-booking.html" class="btn-on-a mag" style="display:inline-flex;gap:.5rem;align-items:center">
+            <span data-en="Book a free demo" data-fr="Réserver une démo gratuite">Book a free demo</span>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <div class="price-free" style="margin-top:.75rem">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="5" stroke="oklch(0.35 0.09 200)" stroke-width="1.2"/><path d="M4 6l1.5 1.5L8 4" stroke="oklch(0.35 0.09 200)" stroke-width="1.2" stroke-linecap="round"/></svg>
+            <span data-en="No commitment. Cancel anytime." data-fr="Sans engagement. Résiliez quand vous voulez.">No commitment. Cancel anytime.</span>
+          </div>
+        </div>
+      </div><!-- /price-right -->
+
+    </div><!-- /plans-wrap -->
+  </div>
+</section>
+
+<div class="div"></div>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="wrap">
+    <div class="sec-hd rv" style="text-align:center;margin-bottom:3.5rem">
+      <span class="label">FAQ</span>
+      <h2 class="fd fd-lg" style="margin-top:.6rem"
+        data-en="Questions barbers ask"
+        data-fr="Les questions des barbiers"
+      >Questions barbers ask</h2>
+    </div>
+    <div class="faq-list rv">
+      <div class="faq-item">
+        <div class="faq-q" tabindex="0" role="button" aria-expanded="false" aria-controls="fa1" id="fq1">
+          <span data-en="How does TrimSync connect to my Instagram?" data-fr="Comment TrimSync se connecte à mon Instagram ?">How does TrimSync connect to my Instagram?</span>
+          <span class="faq-ico" aria-hidden="true"></span>
+        </div>
+        <div class="faq-a" id="fa1" role="region" aria-labelledby="fq1"><div class="faq-a-in">
+          <p class="body-t" data-en="TrimSync uses Meta's official Instagram API. You authorize the connection through your Facebook Business account. No password sharing, no third-party access. Setup takes under 5 minutes." data-fr="TrimSync utilise l'API Instagram officielle de Meta. Vous autorisez la connexion via votre compte Facebook Business. Aucun partage de mot de passe. La configuration prend moins de 5 minutes.">TrimSync uses Meta's official Instagram API. You authorize the connection through your Facebook Business account. No password sharing, no third-party access. Setup takes under 5 minutes.</p>
+        </div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" tabindex="0" role="button" aria-expanded="false" aria-controls="fa2" id="fq2">
+          <span data-en="Do I need technical skills to set up TrimSync?" data-fr="Faut-il des compétences techniques pour configurer TrimSync ?">Do I need technical skills to set up TrimSync?</span>
+          <span class="faq-ico" aria-hidden="true"></span>
+        </div>
+        <div class="faq-a" id="fa2" role="region" aria-labelledby="fq2"><div class="faq-a-in">
+          <p class="body-t" data-en="Not at all. If you can post on Instagram, you can set up TrimSync. Our onboarding walks you through every step, and support is always available." data-fr="Pas du tout. Si vous savez poster sur Instagram, vous savez configurer TrimSync. Notre onboarding vous guide à chaque étape, et le support est toujours disponible.">Not at all. If you can post on Instagram, you can set up TrimSync. Our onboarding walks you through every step, and support is always available.</p>
+        </div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" tabindex="0" role="button" aria-expanded="false" aria-controls="fa3" id="fq3">
+          <span data-en="What if the AI doesn't understand a message?" data-fr="Que se passe-t-il si l'IA ne comprend pas un message ?">What if the AI doesn't understand a message?</span>
+          <span class="faq-ico" aria-hidden="true"></span>
+        </div>
+        <div class="faq-a" id="fa3" role="region" aria-labelledby="fq3"><div class="faq-a-in">
+          <p class="body-t" data-en="When the AI isn't confident, it flags the message for your review instead of guessing. You get a notification, reply manually if needed, and the AI learns from it." data-fr="Quand l'IA n'est pas sûre, elle vous signale le message pour révision au lieu de deviner. Vous recevez une notification, répondez manuellement si besoin, et l'IA en tire des leçons.">When the AI isn't confident, it flags the message for your review instead of guessing. You get a notification, reply manually if needed, and the AI learns from it.</p>
+        </div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" tabindex="0" role="button" aria-expanded="false" aria-controls="fa4" id="fq4">
+          <span data-en="Can I customize what the bot says?" data-fr="Puis-je personnaliser ce que dit le bot ?">Can I customize what the bot says?</span>
+          <span class="faq-ico" aria-hidden="true"></span>
+        </div>
+        <div class="faq-a" id="fa4" role="region" aria-labelledby="fq4"><div class="faq-a-in">
+          <p class="body-t" data-en="Absolutely. You set the tone, your services and pricing, your availability, and any specific instructions. The AI speaks in your voice, not a generic robot voice." data-fr="Absolument. Vous définissez le ton, vos prestations et tarifs, vos disponibilités, et toute instruction spécifique. L'IA parle avec votre voix, pas celle d'un robot générique.">Absolutely. You set the tone, your services and pricing, your availability, and any specific instructions. The AI speaks in your voice, not a generic robot voice.</p>
+        </div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" tabindex="0" role="button" aria-expanded="false" aria-controls="fa5" id="fq5">
+          <span data-en="Is my clients' data secure?" data-fr="Les données de mes clients sont-elles sécurisées ?">Is my clients' data secure?</span>
+          <span class="faq-ico" aria-hidden="true"></span>
+        </div>
+        <div class="faq-a" id="fa5" role="region" aria-labelledby="fq5"><div class="faq-a-in">
+          <p class="body-t" data-en="We only store what's needed for bookings: name and message content. Data is encrypted at rest and in transit. We never sell or share client data. Clients can request deletion at any time at felix@trimsync.tech." data-fr="Nous ne stockons que ce qui est nécessaire : nom et contenu des messages. Les données sont chiffrées au repos et en transit. Nous ne vendons ni ne partageons jamais les données clients. Suppression possible à tout moment via felix@trimsync.tech.">We only store what's needed for bookings: name and message content. Data is encrypted at rest and in transit. We never sell or share client data. Clients can request deletion at any time at felix@trimsync.tech.</p>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="section cta-final" id="cta">
+  <div class="cta-glow" aria-hidden="true"></div>
+  <div class="wrap">
+    <span class="label rv" data-en="Get started" data-fr="Commencer">Get started</span>
+    <h2 class="fd fd-lg rv d1" style="margin-top:.8rem"
+      data-en="Ready to stop answering<br><em>DMs at midnight?</em>"
+      data-fr="Prêt à arrêter de répondre<br><em>aux DMs à minuit ?</em>"
+    >Ready to stop answering<br><em>DMs at midnight?</em></h2>
+    <p class="body-lg rv d2"
+      data-en="Book a free demo. We'll show you exactly how TrimSync works for your barbershop."
+      data-fr="Réservez une démo gratuite. Nous vous montrons exactement comment TrimSync fonctionne pour votre barbershop."
+    >Book a free demo. We'll show you exactly how TrimSync works for your barbershop.</p>
+    <div class="cta-acts rv d3">
+      <a href="trimsync-booking.html" class="btn btn-a mag" style="font-size:1rem;padding:1rem 2.2rem">
+        <span data-en="Book a free demo" data-fr="Réserver une démo gratuite">Book a free demo</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="mailto:felix@trimsync.tech" class="btn btn-b mag">felix@trimsync.tech</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="foot-in">
+      <a href="/" class="foot-logo">Trim<em>Sync</em></a>
+      <nav class="foot-links" aria-label="Legal links">
+        <a href="privacy.html"       data-en="Privacy Policy"   data-fr="Politique de confidentialité">Privacy Policy</a>
+        <a href="terms.html"         data-en="Terms of Service" data-fr="Conditions d'utilisation">Terms of Service</a>
+        <a href="data-deletion.html" data-en="Data Deletion"    data-fr="Suppression des données">Data Deletion</a>
+        <a href="mailto:felix@trimsync.tech">felix@trimsync.tech</a>
+      </nav>
+      <p class="foot-copy">© 2025 TrimSync</p>
+    </div>
+  </div>
+</footer>
+
+<script type="module">
+import { animate, scroll, inView, spring } from "https://cdn.jsdelivr.net/npm/motion@11/+esm";
+const pref=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ── LANG ── */
+const LANGS={en:{flag:'',code:'FR',next:'fr',label:'Switch to French',ann:'Language: English'},fr:{flag:'',code:'EN',next:'en',label:'Switch to English',ann:'Langue : français'}};
+let lang=localStorage.getItem('ts-lang')||'en';
+var chatTimer=null;
+function applyLang(l){
+  lang=l;localStorage.setItem('ts-lang',l);
+  document.documentElement.lang=l;document.documentElement.dataset.lang=l;
+  document.querySelectorAll('[data-en]').forEach(el=>{
+    const v=el.getAttribute('data-'+l);if(!v)return;
+    el.innerHTML=v.includes('<')?v:(el.textContent=v,v);
+  });
+  const t=LANGS[l];
+  document.getElementById('lf').textContent=t.flag;
+  document.getElementById('lc').textContent=t.code;
+  document.getElementById('lt').setAttribute('aria-label',t.label);
+  document.getElementById('la').textContent=t.ann;
+}
+document.getElementById('lt').addEventListener('click',()=>{applyLang(LANGS[lang].next);restartChat();});
+applyLang(lang);
+
+/* ── MOBILE MENU ── */
+const hbg=document.getElementById('hbg'),nm=document.getElementById('nm');
+hbg.addEventListener('click',()=>{
+  const open=nm.classList.toggle('open');
+  hbg.setAttribute('aria-expanded',String(open));
+  hbg.setAttribute('aria-label',open?'Close menu':'Open menu');
+  document.body.style.overflow=open?'hidden':'';
+});
+nm.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
+  nm.classList.remove('open');hbg.setAttribute('aria-expanded','false');
+  hbg.setAttribute('aria-label','Open menu');document.body.style.overflow='';
+}));
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&nm.classList.contains('open')){
+    nm.classList.remove('open');hbg.setAttribute('aria-expanded','false');
+    hbg.setAttribute('aria-label','Open menu');document.body.style.overflow='';
+    hbg.focus();
+  }
+});
+
+/* ── NAV SCROLL ── */
+const navEl=document.getElementById('nav');
+window.addEventListener('scroll',()=>navEl.classList.toggle('scrolled',scrollY>40),{passive:true});
+
+/* ── SCROLL PROGRESS ── */
+const sprog=document.getElementById('sprog');
+if(sprog)scroll(info=>{const p=typeof info==='number'?info:(info?.y?.progress??0);sprog.style.transform=`scaleX(${p})`;});
+
+/* ── SHADOW OVERLAY ── */
+(()=>{
+  const container=document.getElementById('shadow-bg');
+  if(!container)return;
+  const mr=(v,fl,fh,tl,th)=>tl+(v-fl)/(fh-fl)*(th-tl);
+  const sc=42,sp=22;
+  const dis=Math.round(mr(sc,1,100,20,100));
+  const dur=mr(sp,1,100,1000,50)/25;
+  const id='sv'+Math.random().toString(36).slice(2,7);
+  const bfx=mr(sc,0,100,0.001,0.0005).toFixed(5);
+  const bfy=mr(sc,0,100,0.004,0.002).toFixed(5);
+  container.insertAdjacentHTML('afterbegin',`<svg style="position:absolute;width:0;height:0" aria-hidden="true"><defs><filter id="${id}"><feTurbulence result="u" numOctaves="2" baseFrequency="${bfx},${bfy}" seed="0" type="turbulence"/><feColorMatrix id="${id}h" in="u" type="hueRotate" values="180"/><feColorMatrix in="d" result="c" type="matrix" values="4 0 0 0 1 4 0 0 0 1 4 0 0 0 1 1 0 0 0 0"/><feDisplacementMap in="SourceGraphic" in2="c" scale="${dis}" result="d"/><feDisplacementMap in="d" in2="u" scale="${dis}"/></filter></defs></svg>`);
+  const wrap=document.createElement('div');
+  wrap.style.cssText=`position:absolute;inset:-${dis}px;filter:url(#${id}) blur(6px);pointer-events:none`;
+  const blob=document.createElement('div');
+  blob.style.cssText=`width:100%;height:100%;background:oklch(0.62 0.17 193/.50);mask-image:url('https://framerusercontent.com/images/ceBGguIpUU8luwByxuQz79t7To.png');-webkit-mask-image:url('https://framerusercontent.com/images/ceBGguIpUU8luwByxuQz79t7To.png');mask-size:cover;-webkit-mask-size:cover;mask-repeat:no-repeat;-webkit-mask-repeat:no-repeat;mask-position:center;-webkit-mask-position:center`;
+  wrap.appendChild(blob);container.appendChild(wrap);
+  const hue=container.querySelector('#'+id+'h');
+  if(!pref&&hue)animate(0,360,{duration:dur,repeat:Infinity,repeatType:'loop',ease:'linear',onUpdate:v=>hue.setAttribute('values',String(v))});
+})();
+
+/* ── HERO ENTRANCE ── */
+(()=>{
+  const SP1=[0.22,1,0.36,1],SP2=[0.16,1,0.3,1];
+  const items=[
+    ['.badge',{opacity:[0,1],y:[24,0]},{delay:0.22,duration:0.6,easing:SP1}],
+    ['.hero-h',{opacity:[0,1],y:[46,0]},{delay:0.40,duration:0.7,easing:SP2}],
+    ['.hero-sub',{opacity:[0,1],y:[22,0]},{delay:0.60,duration:0.65,easing:SP1}],
+    ['.hero-ctas',{opacity:[0,1],y:[18,0]},{delay:0.76,duration:0.65,easing:SP1}],
+    ['.hero-proof',{opacity:[0,1],y:[14,0]},{delay:0.90,duration:0.6,easing:SP1}],
+    ['.chat-wrap',{opacity:[0,1],x:[55,0]},{delay:0.50,duration:0.75,easing:SP2}],
+  ];
+  if(pref){items.forEach(([s])=>{const el=document.querySelector(s);if(el){el.style.opacity='1';el.style.transform='none';}});return;}
+  items.forEach(([s,kf,opts])=>{const el=document.querySelector(s);if(el){el.style.opacity='0';animate(el,kf,opts);}});
+})();
+
+/* ── SECTION NAV ── */
+(()=>{
+  const secNav=document.getElementById('secnav');
+  if(!secNav)return;
+  const SEC=[['home','Home','Accueil'],['problem','Problem','Problème'],['solution','How it works','Comment ça marche'],['features','Features','Fonctionnalités'],['pricing','Pricing','Tarifs'],['faq','FAQ','FAQ'],['cta','Get started','Commencer']];
+  SEC.forEach(([id,en,fr])=>{
+    const dot=document.createElement('button');
+    dot.className='sec-dot';
+    const lbl=lang==='fr'?fr:en;
+    dot.setAttribute('data-lbl',lbl);
+    dot.setAttribute('aria-label',lbl);
+    dot.addEventListener('click',()=>document.getElementById(id)?.scrollIntoView({behavior:'smooth'}));
+    secNav.appendChild(dot);
+    inView('#'+id,()=>{
+      document.querySelectorAll('.sec-dot').forEach(d=>d.classList.remove('act'));
+      dot.classList.add('act');
+    },{margin:'-40% 0px -40% 0px'});
+  });
+})();
+
+/* ── TEXT SCRAMBLE ── */
+(()=>{
+  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%&';
+  function scramble(el,target,dur=900){
+    const len=target.length;const t0=performance.now();
+    function tick(now){
+      const t=Math.min((now-t0)/dur,1);
+      let out='';
+      for(let i=0;i<len;i++){
+        const prog=(t-i/(len*1.5));
+        if(prog>=1)out+=target[i]==='<'?'<':target[i];
+        else if(prog>0)out+=`<span style="opacity:.35;color:var(--a)">${chars[Math.floor(Math.random()*chars.length)]}</span>`;
+        else out+=target[i]==='<'?'':' ';
+      }
+      el.innerHTML=out;
+      if(t<1)requestAnimationFrame(tick);else el.innerHTML=target;
+    }
+    requestAnimationFrame(tick);
+  }
+  if(!pref){setTimeout(()=>{const hl=document.querySelector('#hero-headline span');if(hl)scramble(hl,hl.getAttribute('data-'+lang));},400);}
+})();
+
+
+/* ── MAGNETIC BUTTONS ── */
+if(!pref)document.querySelectorAll('.mag').forEach(el=>{
+  el.addEventListener('mousemove',e=>{
+    const r=el.getBoundingClientRect();
+    animate(el,{x:(e.clientX-r.left-r.width/2)*.13,y:(e.clientY-r.top-r.height/2)*.18},{duration:0.3,easing:[0.22,1,0.36,1]});
+  });
+  el.addEventListener('mouseleave',()=>animate(el,{x:0,y:0},{duration:0.35,easing:[0.22,1,0.36,1]}));
+});
+
+/* ── CHAT ANIMATION ── */
+const CONV={
+  en:[
+    {t:'user',txt:'Hey! Any spots open tomorrow around 2pm?'},
+    {t:'type'},
+    {t:'bot',txt:'14:00 is available! What service are you looking for?'},
+    {t:'user',txt:'Haircut + beard please'},
+    {t:'type'},
+    {t:'bot',txt:'Done — Tomorrow at 14:00, Haircut + Beard. See you then.',ok:true},
+  ],
+  fr:[
+    {t:'user',txt:'Bonjour ! Vous avez de la dispo demain vers 14h ?'},
+    {t:'type'},
+    {t:'bot',txt:'14h est disponible ! Quelle prestation souhaitez-vous ?'},
+    {t:'user',txt:'Coupe + barbe stp'},
+    {t:'type'},
+    {t:'bot',txt:'Réservé — Demain à 14h, Coupe + Barbe. À bientôt.',ok:true},
+  ]
+};
+const DELAYS=[600,900,700,700,900,700];
+function restartChat(){
+  clearTimeout(chatTimer);
+  const box=document.getElementById('chat-msgs');
+  if(!box)return;
+  box.innerHTML='';
+  const conv=CONV[lang]||CONV.en;
+  let delay=400;
+  conv.forEach((step,i)=>{
+    chatTimer=setTimeout(()=>{
+      if(step.t==='type'){
+        const el=document.createElement('div');el.className='typing';
+        el.innerHTML='<span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>';
+        box.appendChild(el);requestAnimationFrame(()=>el.classList.add('in'));
+        box.scrollTop=box.scrollHeight;
+        setTimeout(()=>el.remove(),DELAYS[i]||800);
+      } else {
+        const el=document.createElement('div');
+        el.className=`msg ${step.t==='user'?'msg-u':'msg-b'}${step.ok?' msg-ok':''}`;
+        el.textContent=step.txt;
+        box.appendChild(el);requestAnimationFrame(()=>el.classList.add('in'));
+        box.scrollTop=box.scrollHeight;
+      }
+    },delay);
+    delay+=DELAYS[i]||700;
+  });
+  chatTimer=setTimeout(()=>{
+    const els=[...box.querySelectorAll('.msg,.typing')];
+    els.forEach((e,i)=>setTimeout(()=>{e.style.opacity='0';e.style.transform='translateY(-8px)';e.style.transition='all .3s ease-in';},i*60));
+    setTimeout(()=>restartChat(),els.length*60+400);
+  },delay+2200);
+}
+restartChat();
+
+/* ── SCROLL REVEALS ── */
+if(!pref){
+  inView('.rv',({target})=>{
+    const d=parseInt((target.className.match(/\bd(\d)\b/)||[,'0'])[1])*0.08;
+    animate(target,{opacity:[0,1],y:[28,0]},{delay:d,duration:0.6,easing:[0.22,1,0.36,1]});
+  },{margin:'-5% 0px -10% 0px'});
+}else{
+  document.querySelectorAll('.rv').forEach(el=>{el.style.opacity='1';el.style.transform='none';});
+}
+
+/* ── ORBES — intensité variable selon section au scroll ── */
+if(!pref){
+  const orbA=document.querySelector('.orb-a');
+  const orbB=document.querySelector('.orb-b');
+  const orbC=document.querySelector('.orb-c');
+  const pricingEl=document.getElementById('pricing');
+  function updateOrbOpacity(){
+    const sy=scrollY;
+    const wh=window.innerHeight;
+    /* hero : pleine intensité ; sections intermédiaires : 60% ; au dessus pricing : quasi invisible */
+    let intensity=1;
+    if(pricingEl){
+      const pt=pricingEl.getBoundingClientRect().top+sy;
+      if(sy>pt-wh*.5) intensity=0.18;           /* proche/dans pricing */
+      else if(sy>wh*.8) intensity=0.60;          /* sections intermédiaires */
+    }
+    const s=String(intensity);
+    if(orbA) orbA.style.opacity=s;
+    if(orbB) orbB.style.opacity=s;
+    if(orbC) orbC.style.opacity=s;
+  }
+  window.addEventListener('scroll',updateOrbOpacity,{passive:true});
+  updateOrbOpacity();
+}
+
+/* ── FAQ ── */
+document.querySelectorAll('.faq-item').forEach(item=>{
+  const q=item.querySelector('.faq-q');
+  q.addEventListener('click',()=>{
+    const open=item.classList.toggle('open');
+    q.setAttribute('aria-expanded',String(open));
+  });
+  q.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();q.click()}});
+});
+</script>
+</body>
+</html>

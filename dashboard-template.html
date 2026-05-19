@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#0E0F13">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="{{SALON_NAME}}">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" sizes="120x120" href="/img/logo-d-120.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/img/logo-d-152.png">
+<link rel="apple-touch-icon" sizes="167x167" href="/img/logo-d-167.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/img/logo-d-180.png"><link rel="icon" type="image/svg+xml" href="/img/logo-d.svg">
+<title>{{SALON_NAME}} — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="css/dashboard.css?v=2">
+<link rel="stylesheet" href="css/glass-button.css">
+<!-- Supabase JS — auth multi-tenant TrimSync -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
+<script src="js/background.js" defer></script>
+<script src="js/glass-filter.js" defer></script>
+<script src="js/spotlight-cards.js" defer></script>
+</head>
+<body>
+
+<!-- SIDEBAR MOBILE BURGER -->
+<button class="mnav-burger" id="burger" aria-label="Menu" onclick="toggleSidebar()">
+  <span class="burger-line"></span>
+  <span class="burger-line"></span>
+  <span class="burger-line"></span>
+</button>
+<div id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR — hors de .layout pour que z-index:200 soit dans le root stacking context -->
+<nav class="sidebar" id="sidebar" aria-label="Navigation principale">
+  <div class="sidebar-logo">
+    <button class="sidebar-close" id="sidebar-close" onclick="toggleSidebar()" aria-label="Fermer le menu">
+      <i class="ti ti-chevron-left"></i>
+    </button>
+    <!-- Logo salon : image si logo_url défini, sinon initiale -->
+    <div class="logo-mark" id="sidebar-logo-mark">{{SALON_INITIAL}}</div>
+    <img id="sidebar-logo-img" src="" alt="" style="display:none;width:40px;height:40px;object-fit:contain;border-radius:8px;margin-right:10px">
+    <div class="logo-text">
+      <div class="logo-name" id="sidebar-salon-name">{{SALON_NAME}}</div>
+      <div class="logo-sub">TrimSync</div>
+    </div>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item active" data-page="dashboard" onclick="nav('dashboard')" tabindex="0">
+      <i class="ti ti-layout-dashboard"></i><span>Dashboard</span>
+    </a>
+    <a class="nav-item" data-page="agenda" data-plan="pro" onclick="nav('agenda')" tabindex="0">
+      <i class="ti ti-calendar"></i><span>Agenda</span>
+    </a>
+    <a class="nav-item" data-page="clients" data-plan="pro" onclick="nav('clients')" tabindex="0">
+      <i class="ti ti-users"></i><span>Clients</span>
+    </a>
+    <a class="nav-item" data-page="encaissement" data-plan="max" onclick="nav('encaissement')" tabindex="0">
+      <i class="ti ti-cash"></i><span>Encaissement</span>
+    </a>
+
+    <div class="nav-section">Croissance</div>
+    <a class="nav-item" data-page="stats" data-plan="max" onclick="nav('stats')" tabindex="0">
+      <i class="ti ti-chart-bar"></i><span>Statistiques</span>
+    </a>
+    <a class="nav-item" data-page="fidelite" data-plan="max" onclick="nav('fidelite')" tabindex="0">
+      <i class="ti ti-diamond"></i><span>Fidélité</span>
+    </a>
+    <a class="nav-item" data-page="marketing" data-plan="max" onclick="nav('marketing')" tabindex="0">
+      <i class="ti ti-speakerphone"></i><span>Marketing</span>
+    </a>
+
+    <div class="nav-section">Gestion</div>
+    <a class="nav-item" data-page="disponibilites" data-plan="pro" onclick="nav('disponibilites')" tabindex="0">
+      <i class="ti ti-calendar-time"></i><span>Disponibilités</span>
+    </a>
+    <a class="nav-item" data-page="stock" data-plan="max" onclick="nav('stock')" tabindex="0">
+      <i class="ti ti-package"></i><span>Stock</span>
+    </a>
+    <a class="nav-item" data-page="parametres" onclick="nav('parametres')" tabindex="0">
+      <i class="ti ti-settings"></i><span>Paramètres</span>
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="barber-profile">
+      <div class="barber-avatar" id="barber-initials">{{SALON_INITIALS}}</div>
+      <div class="barber-meta">
+        <div class="barber-name" id="barber-name">{{SALON_NAME}}</div>
+        <div class="barber-role">Gérant · Admin</div>
+      </div>
+    </div>
+    <div class="backend-state offline" id="backend-state">
+      <span class="dot"></span><span id="backend-state-txt">Connexion…</span>
+    </div>
+  </div>
+</nav>
+
+<div class="layout">
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="burger-btn" id="burger-main" aria-label="Menu" onclick="toggleSidebar()">
+      <span class="burger-line"></span>
+      <span class="burger-line"></span>
+      <span class="burger-line"></span>
+    </button>
+    <div class="topbar-left">
+      <div class="page-title" id="topbar-title">Bonjour, <span class="accent" id="topbar-name">Fcutz</span></div>
+      <div class="page-subtitle" id="topbar-sub">—</div>
+    </div>
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div class="action-buttons">
+    <button class="action-btn action-btn-first" onclick="openModal('modal-rdv-new')" aria-label="Nouveau RDV"><i class="ti ti-plus"></i></button>
+    <button class="action-btn action-btn-mid" onclick="nav('encaissement')" aria-label="Encaisser"><i class="ti ti-cash"></i></button>
+    <button class="action-btn action-btn-last" onclick="toggleNotif()" aria-label="Notifications">
+      <i class="ti ti-bell"></i>
+      <span class="badge-count hidden" id="notif-count">0</span>
+    </button>
+  </div>
+
+  <!-- ═══════════ PAGE DASHBOARD ═══════════ -->
+  <section class="page active" id="page-dashboard">
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <i class="ti ti-calendar-check kpi-icon"></i>
+        <div class="kpi-label">RDV aujourd'hui</div>
+        <div class="kpi-value" id="kpi-rdv-today">0</div>
+        <div class="kpi-trend flat" id="kpi-rdv-today-trend"><i class="ti ti-minus"></i> —</div>
+      </div>
+      <div class="kpi-card">
+        <i class="ti ti-coin kpi-icon"></i>
+        <div class="kpi-label">CA aujourd'hui</div>
+        <div class="kpi-value"><span id="kpi-ca-today">0</span><span class="unit">€</span></div>
+        <div class="kpi-trend flat" id="kpi-ca-trend"><i class="ti ti-minus"></i> —</div>
+      </div>
+      <div class="kpi-card">
+        <i class="ti ti-calendar-stats kpi-icon"></i>
+        <div class="kpi-label">RDV ce mois</div>
+        <div class="kpi-value" id="kpi-rdv-month">0</div>
+        <div class="kpi-trend flat" id="kpi-rdv-trend"><i class="ti ti-minus"></i> —</div>
+      </div>
+      <div class="kpi-card">
+        <i class="ti ti-coin kpi-icon"></i>
+        <div class="kpi-label">CA ce mois</div>
+        <div class="kpi-value"><span id="kpi-ca-month">0</span><span class="unit">€</span></div>
+        <div class="kpi-trend flat" id="kpi-ca-month-trend"><i class="ti ti-minus"></i> —</div>
+      </div>
+    </div>
+
+    <div class="g-2-3">
+      <!-- Agenda compact -->
+      <div class="card">
+        <div class="card-h">
+          <div>
+            <div class="card-title">Agenda de la semaine</div>
+            <div class="card-sub" id="dash-week-label"></div>
+          </div>
+          <div class="card-action" onclick="nav('agenda')">Voir agenda <i class="ti ti-arrow-right" style="font-size:11px"></i></div>
+        </div>
+        <div id="dash-agenda-compact"></div>
+      </div>
+
+      <!-- Prochain client + Derniers paiements -->
+      <div class="col-stack">
+        <div class="next-client" id="next-client-card">
+          <div class="empty"><i class="ti ti-calendar-off"></i>Aucun RDV à venir</div>
+        </div>
+        <div class="card">
+          <div class="card-h">
+            <div class="card-title">Derniers paiements</div>
+            <div class="card-action" onclick="nav('encaissement')">Tout voir →</div>
+          </div>
+          <div id="dash-payments"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="g-2">
+      <!-- Chart CA -->
+      <div class="card">
+        <div class="card-h">
+          <div>
+            <div class="card-title">Chiffre d'affaires</div>
+            <div class="card-sub">7 derniers jours vs 7 jours précédents</div>
+          </div>
+          <div class="flex items-center gap-3" style="font-size:11px;color:var(--marble-2)">
+            <div class="flex items-center gap-2"><div style="width:18px;height:2.5px;background:var(--gold-0);border-radius:2px"></div>Cette sem.</div>
+            <div class="flex items-center gap-2"><div style="width:18px;height:2.5px;background:var(--marble-3);border-radius:2px"></div>Préc.</div>
+          </div>
+        </div>
+        <div style="position:relative;height:220px"><canvas id="chart-ca"></canvas></div>
+      </div>
+
+      <!-- Top prestations + Objectif mensuel -->
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title">Top prestations</div>
+        </div>
+        <div id="dash-top-prestas"></div>
+        <div class="objective-block">
+          <div class="obj-label">Objectif mensuel</div>
+          <div class="obj-row">
+            <span>CA mensuel</span>
+            <span class="val" id="obj-current">0 € / 5 000 €</span>
+          </div>
+          <div class="prog"><div class="prog-bar" id="obj-bar" style="width:0%"></div></div>
+          <div class="obj-projection" id="obj-projection">—</div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="g-3">
+      <!-- Clients actifs -->
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title">Clients actifs</div>
+          <div class="card-action" onclick="nav('clients')">CRM →</div>
+        </div>
+        <div id="dash-clients"></div>
+      </div>
+
+      <!-- Heatmap -->
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title">Heures de pointe</div>
+        </div>
+        <div id="heatmap"></div>
+        <div class="heat-legend">
+          <div class="heat-swatch" style="background:rgba(200,168,90,.1)"></div>Creux
+          <div class="heat-swatch" style="background:rgba(200,168,90,.4);margin-left:6px"></div>Chargé
+          <div class="heat-swatch" style="background:var(--gold-0);margin-left:6px"></div>Complet
+        </div>
+      </div>
+
+      <!-- Alertes stock + Fidélité -->
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title">Alertes stock</div>
+          <div class="card-action" onclick="nav('stock')">Gérer →</div>
+        </div>
+        <div id="dash-stock"></div>
+        <div class="objective-block">
+          <div class="obj-label">Fidélité</div>
+          <div id="dash-fidelite"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ PAGE AGENDA ═══════════ -->
+  <section class="page" id="page-agenda">
+    <div class="ag-toolbar">
+      <div class="ag-toolbar-main">
+        <div class="ag-date-nav">
+          <button class="btn-icon" onclick="agPrev()" aria-label="Précédent"><i class="ti ti-chevron-left"></i></button>
+          <div class="ag-cur-label" id="ag-cur-label">—</div>
+          <button class="btn-icon" onclick="agNext()" aria-label="Suivant"><i class="ti ti-chevron-right"></i></button>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="agToday()"><i class="ti ti-calendar-event"></i><span class="hide-xs">Aujourd'hui</span></button>
+      </div>
+      <div class="ag-toolbar-actions">
+        <div class="tab active" id="ag-tab-day" onclick="agSetView('day')">Jour</div>
+        <div class="tab" id="ag-tab-week" onclick="agSetView('week')">Semaine</div>
+      </div>
+    </div>
+
+    <div class="ag-legend" id="ag-legend"></div>
+    <div style="margin-top:var(--sp-4)" id="ag-container"></div>
+  </section>
+
+  <!-- ═══════════ PAGE CLIENTS ═══════════ -->
+  <section class="page" id="page-clients">
+    <div class="card">
+      <div class="card-h">
+        <div class="card-title">Classement clients</div>
+      </div>
+      <div class="client-sort-buttons">
+        <div class="client-sort-block">
+          <div class="tabs">
+            <div class="tab active" id="cli-tab-spent" onclick="cliSetSort('spent')">Dépenses</div>
+            <div class="tab" id="cli-tab-visits" onclick="cliSetSort('visits')">RDV</div>
+          </div>
+        </div>
+        <div class="client-sort-block">
+          <button class="btn btn-out btn-sm" onclick="openModal('modal-client-new')" style="flex:1"><i class="ti ti-user-plus"></i>Nouveau</button>
+          <button class="btn btn-ghost btn-sm" onclick="syncSumUp()" style="flex:1"><i class="ti ti-refresh"></i>SumUp</button>
+        </div>
+      </div>
+      <div class="search-wrap" style="margin-bottom:var(--sp-3)">
+        <i class="ti ti-search"></i>
+        <input class="input" id="cli-search" type="text" placeholder="Rechercher (nom, téléphone, email)…" oninput="renderClientsList()">
+      </div>
+      <div id="clients-list"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════ PAGE ENCAISSEMENT ═══════════ -->
+  <section class="page" id="page-encaissement">
+    <div class="cash-grid">
+      <div>
+        <div class="card">
+          <div class="card-h">
+            <div class="card-title">Prestation</div>
+          </div>
+          <div class="cash-services" id="cash-services"></div>
+          <div style="margin-top:var(--sp-4)">
+            <div class="card-title" style="font-size:13px;margin-bottom:8px">Options</div>
+            <div class="cash-addons" id="cash-addons"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cash-cart">
+        <div class="card-title" style="margin-bottom:var(--sp-3)">Panier</div>
+        <div id="cart-lines"><div class="empty" style="padding:var(--sp-4) 0"><i class="ti ti-shopping-cart-off"></i>Panier vide</div></div>
+        <div class="cart-total"><span>Total</span><span class="amount" id="cart-total">0 €</span></div>
+
+        <div style="margin-top:var(--sp-4)">
+          <label class="label">Client (optionnel)</label>
+          <input class="input" id="cart-client" type="text" placeholder="Nom client ou laisser vide" list="clientsDatalist">
+          <datalist id="clientsDatalist"></datalist>
+        </div>
+
+        <div style="margin-top:var(--sp-3)">
+          <label class="label">Méthode de paiement</label>
+          <div class="pay-methods">
+            <div class="pay-m sel" data-method="sumup" onclick="setPayMethod('sumup')"><i class="ti ti-credit-card"></i>SumUp</div>
+            <div class="pay-m" data-method="cash" onclick="setPayMethod('cash')"><i class="ti ti-cash"></i>Espèces</div>
+            <div class="pay-m" data-method="link" onclick="setPayMethod('link')"><i class="ti ti-link"></i>Lien</div>
+          </div>
+        </div>
+
+        <button class="btn btn-gold" style="width:100%;margin-top:var(--sp-4);padding:14px" onclick="encaisser()">
+          <i class="ti ti-check"></i>Encaisser <span id="encaisser-amount">0 €</span>
+        </button>
+        <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="resetCart()"><i class="ti ti-trash"></i>Vider</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:var(--sp-5)">
+      <div class="card-h">
+        <div class="card-title">Historique paiements</div>
+        <div class="flex items-center gap-2" style="flex-wrap:wrap">
+          <div class="tabs">
+            <div class="tab active" data-period="today" onclick="setPayPeriod('today')">Aujourd'hui</div>
+            <div class="tab" data-period="week" onclick="setPayPeriod('week')">Semaine</div>
+            <div class="tab" data-period="month" onclick="setPayPeriod('month')">Mois</div>
+            <div class="tab" data-period="all" onclick="setPayPeriod('all')">Tout</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="refreshPayHistory()" title="Actualiser depuis SumUp"><i class="ti ti-refresh"></i></button>
+        </div>
+      </div>
+      <div id="pay-history"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════ PAGE STOCK ═══════════ -->
+  <section class="page" id="page-stock">
+    <div class="card">
+      <div class="card-h">
+        <div class="card-title">Stock produits</div>
+        <button class="btn btn-out btn-sm" onclick="openModal('modal-stock-new')"><i class="ti ti-plus"></i>Article</button>
+      </div>
+      <div class="stock-grid" id="stock-grid"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════ PAGE DISPONIBILITÉS ═══════════ -->
+  <section class="page" id="page-disponibilites">
+    <div class="card">
+      <div class="card-h">
+        <div>
+          <div class="card-title">Heures disponibles pour réservations</div>
+          <div class="card-sub">Configurer les créneaux ouverts par jour</div>
+        </div>
+      </div>
+      <div id="dispo-rows"></div>
+    </div>
+
+    <div class="card" style="margin-top:var(--sp-5)">
+      <div class="card-h">
+        <div>
+          <div class="card-title">Jours fermés / Fermetures spéciales</div>
+          <div class="card-sub">Ajouter des dates fermées (jours fériés, congés, etc.)</div>
+        </div>
+      </div>
+      <button class="btn btn-out btn-sm" onclick="openModal('modal-dispo-closed')" style="margin-bottom:var(--sp-4)"><i class="ti ti-plus"></i>Ajouter une fermeture</button>
+      <div id="dispo-closed-list"></div>
+    </div>
+
+    <div style="margin-top:var(--sp-5)">
+      <button class="btn btn-out" onclick="saveDisponibilites()" style="width:100%"><i class="ti ti-device-floppy"></i>Enregistrer les disponibilités</button>
+    </div>
+  </section>
+
+  <!-- ═══════════ PAGE STATS ═══════════ -->
+  <section class="page" id="page-stats">
+    <div class="g-2">
+      <div class="card">
+        <div class="card-h"><div class="card-title">CA mensuel (12 derniers mois)</div></div>
+        <div style="position:relative;height:240px"><canvas id="chart-month"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><div class="card-title">Répartition prestations</div></div>
+        <div style="position:relative;height:240px"><canvas id="chart-presta"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:var(--sp-5)">
+      <div class="card-h"><div class="card-title">Statistiques globales</div></div>
+      <div id="global-stats" style="display:block;width:100%"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════ PAGE FIDÉLITÉ ═══════════ -->
+  <section class="page" id="page-fidelite">
+    <div class="g-3">
+      <div class="card">
+        <div class="card-h"><div class="card-title">Bronze</div><div style="color:#c0a060;font-family:'Unbounded';font-weight:900" id="fid-bronze-count">0</div></div>
+        <div class="card-sub">Clients avec ≥3 visites</div>
+        <div id="fid-bronze-list" style="margin-top:var(--sp-3)"></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><div class="card-title">Argent</div><div style="color:#b0b8c0;font-family:'Unbounded';font-weight:900" id="fid-argent-count">0</div></div>
+        <div class="card-sub">Clients avec ≥8 visites</div>
+        <div id="fid-argent-list" style="margin-top:var(--sp-3)"></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><div class="card-title">Or</div><div style="color:var(--gold-1);font-family:'Unbounded';font-weight:900" id="fid-or-count">0</div></div>
+        <div class="card-sub">Clients avec ≥15 visites</div>
+        <div id="fid-or-list" style="margin-top:var(--sp-3)"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ PAGE MARKETING ═══════════ -->
+  <section class="page" id="page-marketing">
+    <div class="mkt-grid" style="margin-bottom:var(--sp-5)">
+      <div class="mkt-card">
+        <div class="mkt-card-title">Clients inactifs</div>
+        <div class="mkt-card-stat" id="mkt-stat-inactive">0</div>
+        <div class="mkt-card-desc">N'ont pas pris RDV depuis 60+ jours</div>
+        <button class="btn btn-out btn-sm" style="width:100%" onclick="mktCampaign('inactive')"><i class="ti ti-message-2"></i>Relancer en masse</button>
+      </div>
+      <div class="mkt-card">
+        <div class="mkt-card-title">Anniversaires du mois</div>
+        <div class="mkt-card-stat" id="mkt-stat-birthday">0</div>
+        <div class="mkt-card-desc">Envoyer un message + offre fidélité</div>
+        <button class="btn btn-out btn-sm" style="width:100%" onclick="mktCampaign('birthday')"><i class="ti ti-cake"></i>Souhaiter</button>
+      </div>
+      <div class="mkt-card">
+        <div class="mkt-card-title">Nouveaux clients (30j)</div>
+        <div class="mkt-card-stat" id="mkt-stat-new">0</div>
+        <div class="mkt-card-desc">Bienvenue + invitation 2e visite</div>
+        <button class="btn btn-out btn-sm" style="width:100%" onclick="mktCampaign('welcome')"><i class="ti ti-confetti"></i>Souhaiter bienvenue</button>
+      </div>
+      <div class="mkt-card">
+        <div class="mkt-card-title">VIP (Or)</div>
+        <div class="mkt-card-stat" id="mkt-stat-vip">0</div>
+        <div class="mkt-card-desc">Offres exclusives + créneaux prioritaires</div>
+        <button class="btn btn-out btn-sm" style="width:100%" onclick="mktCampaign('vip')"><i class="ti ti-crown"></i>Récompenser</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h">
+        <div class="card-title">Modèles de message</div>
+      </div>
+      <div class="f-group">
+        <label class="label">Modèle relance inactif</label>
+        <textarea class="input" id="mkt-tpl-inactive" rows="3" placeholder="Salut {prenom}, ça fait un bail !..."></textarea>
+      </div>
+      <div class="f-group">
+        <label class="label">Modèle anniversaire</label>
+        <textarea class="input" id="mkt-tpl-birthday" rows="3" placeholder="Joyeux anniversaire {prenom} ! 🎉..."></textarea>
+      </div>
+      <div class="f-group">
+        <label class="label">Modèle bienvenue</label>
+        <textarea class="input" id="mkt-tpl-welcome" rows="3" placeholder="Merci pour ta visite {prenom} !..."></textarea>
+      </div>
+      <div class="modal-info"><i class="ti ti-info-circle"></i>Variables disponibles : <strong>{prenom}</strong>, <strong>{nom}</strong>, <strong>{visites}</strong></div>
+      <div class="modal-actions"><button class="btn btn-out" onclick="mktSaveTemplates()"><i class="ti ti-device-floppy"></i>Enregistrer les modèles</button></div>
+    </div>
+
+    <div class="card" style="margin-top:var(--sp-5)">
+      <div class="card-h"><div class="card-title">Liste des clients inactifs</div></div>
+      <div id="mkt-inactive-list"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════ PAGE PARAMÈTRES ═══════════ -->
+  <section class="page" id="page-parametres">
+    <div class="g-2">
+      <div class="card">
+        <div class="card-h"><div class="card-title">Profil barbier</div></div>
+        <div class="f-group"><label class="label">Nom affiché</label><input class="input" id="set-barber-name" type="text" placeholder="{{SALON_NAME}}"></div>
+        <div class="f-group"><label class="label">Initiales avatar</label><input class="input" id="set-barber-initials" type="text" maxlength="3" placeholder="{{SALON_INITIALS}}"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><div class="card-title">Objectif CA mensuel</div></div>
+        <div class="f-group"><label class="label">Cible (€)</label><input class="input" id="set-objective" type="number" min="0" step="100" placeholder="5000" inputmode="numeric"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><div class="card-title"><i class="ti ti-credit-card" style="color:var(--gold-0);margin-right:6px"></i>Configuration SumUp</div></div>
+        <div class="f-group"><label class="label">Clé API SumUp</label><input class="input" id="set-sumup-key" type="password" placeholder="sup_sk_..."></div>
+        <div class="f-group"><label class="label">Merchant Code</label><input class="input" id="set-sumup-merchant" type="text" placeholder="MXXXXXX"></div>
+        <div class="modal-info"><i class="ti ti-info-circle"></i>Configurées sur Railway ; cette saisie locale prend le pas si renseignée.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><div class="card-title">Sécurité</div></div>
+        <div class="f-group"><label class="label">Code PIN actuel</label><input class="input" id="set-pin-old" type="password" maxlength="6" inputmode="numeric" autocomplete="off"></div>
+        <div class="f-group"><label class="label">Nouveau code PIN (4-6 chiffres)</label><input class="input" id="set-pin-new" type="password" maxlength="6" inputmode="numeric" autocomplete="off"></div>
+        <div class="f-group" style="display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3)">
+          <div>
+            <div class="label" style="margin-bottom:2px">Biométrie (Face/Touch ID)</div>
+            <div style="font-size:11px;color:var(--marble-2)">Déverrouillage rapide via l'appareil</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="set-bio-enabled"><span class="slider"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:var(--sp-5)">
+      <div class="card-h"><div class="card-title">Notifications push</div></div>
+      <div class="f-group" style="display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3)">
+        <div>
+          <div class="label" style="margin-bottom:2px">Recevoir une alerte à chaque nouvelle réservation</div>
+          <div style="font-size:11px;color:var(--marble-2)" id="push-state-txt">Statut : non configuré</div>
+        </div>
+        <label class="switch"><input type="checkbox" id="set-push-enabled" onchange="togglePush(this.checked)"><span class="slider"></span></label>
+      </div>
+      <button class="btn btn-out" style="margin-top:var(--sp-3);width:100%" onclick="testPush()"><i class="ti ti-bell-ringing"></i>Envoyer un push de test</button>
+      <button class="btn btn-out" style="margin-top:var(--sp-2);width:100%" onclick="testDailySummary()"><i class="ti ti-chart-bar"></i>Tester le résumé journalier</button>
+    </div>
+
+    <div class="card" style="margin-top:var(--sp-5)">
+      <div class="card-h"><div class="card-title">Notifier les clients</div></div>
+      <div style="font-size:12px;color:var(--marble-2);margin-bottom:var(--sp-3)">Envoie un message push à tous les clients qui ont activé les notifications depuis la page de réservation.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:var(--sp-3)">
+        <button class="tab" type="button" onclick="applyBroadcastPreset(0)">💈 Dispo samedi</button>
+        <button class="tab" type="button" onclick="applyBroadcastPreset(1)">📩 Dispo DM 20€</button>
+        <button class="tab" type="button" onclick="applyBroadcastPreset(2)">📩 Dispo DM 15€</button>
+        <button class="tab" type="button" onclick="applyBroadcastPreset(3)">🚫 Fermeture</button>
+        <button class="tab" type="button" onclick="applyBroadcastPreset(4)">✅ Ouverture</button>
+      </div>
+      <div class="f-group">
+        <label class="label">Titre</label>
+        <input class="input" id="broadcast-title" placeholder="Ex : Fermeture exceptionnelle" maxlength="80">
+      </div>
+      <div class="f-group" style="margin-top:var(--sp-3)">
+        <label class="label">Message</label>
+        <textarea class="input" id="broadcast-body" rows="3" placeholder="Ex : Le salon sera fermé samedi 24 mai. Merci de votre compréhension." maxlength="200" style="resize:vertical;min-height:72px"></textarea>
+      </div>
+      <button class="btn btn-out" style="margin-top:var(--sp-3);width:100%" onclick="broadcastToClients()"><i class="ti ti-broadcast"></i>Envoyer à tous les clients</button>
+    </div>
+
+    <div class="card" style="margin-top:var(--sp-5)">
+      <div class="card-h"><div class="card-title">Données & sauvegarde</div></div>
+      <div class="flex flex-col gap-2">
+        <button class="btn btn-out" onclick="exportDB()"><i class="ti ti-download"></i>Exporter données (JSON)</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('import-file').click()"><i class="ti ti-upload"></i>Importer JSON</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importDB(event)">
+        <button class="btn btn-out" onclick="runDeduplicateClients()" style="border-color:var(--gold-0);color:var(--gold-0)"><i class="ti ti-users-minus"></i>Nettoyer les doublons clients</button>
+        <button class="btn btn-out" onclick="resetTransactions()" style="border-color:var(--warning);color:var(--warning)"><i class="ti ti-cash-off"></i>Vider transactions test</button>
+        <button class="btn btn-danger" onclick="resetDB()"><i class="ti ti-trash"></i>Réinitialiser tout (irréversible)</button>
+      </div>
+    </div>
+
+    <div style="margin-top:var(--sp-5)">
+      <button class="btn btn-out" onclick="saveSettings()" style="width:100%"><i class="ti ti-device-floppy"></i>Enregistrer les paramètres</button>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<!-- NOTIF PANEL -->
+<aside class="notif-panel" id="notif-panel" aria-label="Notifications">
+  <div class="notif-h">
+    <h3>Notifications</h3>
+    <div class="flex items-center gap-2">
+      <button class="btn-icon" onclick="clearNotifs()" aria-label="Tout effacer" style="width:32px;height:32px;font-size:14px" title="Tout effacer"><i class="ti ti-trash"></i></button>
+      <button class="btn-icon" onclick="toggleNotif()" aria-label="Fermer" style="width:32px;height:32px;font-size:14px"><i class="ti ti-x"></i></button>
+    </div>
+  </div>
+  <div id="notif-list"></div>
+</aside>
+
+<!-- ═══════════ MODAL : NOUVEAU RDV ═══════════ -->
+<div class="modal-bg" id="modal-rdv-new">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-rdv-new')" aria-label="Fermer"><i class="ti ti-x"></i></button>
+    <div class="modal-title">Nouveau rendez-vous</div>
+
+    <div class="f-group" style="position:relative">
+      <label class="label">Client</label>
+      <input class="input" id="rdv-client" type="text" placeholder="Rechercher ou saisir un nom…" oninput="filterClientsForRdv()">
+      <div id="rdv-client-suggestions" class="autocomplete-suggestions" style="display:none;position:absolute;background:var(--ink-2);border:1px solid rgba(200,168,90,.18);border-radius:10px;margin-top:4px;z-index:1000;max-height:200px;overflow-y:auto;width:calc(100% - 40px);box-shadow:0 8px 24px rgba(0,0,0,.3)"></div>
+    </div>
+    <div class="f-group"><label class="label">Téléphone (optionnel — évite les doublons)</label><input class="input" id="rdv-phone" type="tel" inputmode="tel" placeholder="06 12 34 56 78"></div>
+
+    <div class="f-group"><label class="label">Date</label><input class="input" id="rdv-date" type="date"></div>
+    <div class="f-group"><label class="label">Heure</label><input class="input" id="rdv-time" type="time" step="900"></div>
+
+    <div class="f-group">
+      <label class="label">Prestation</label>
+      <select class="input" id="rdv-service" onchange="rdvCheckConflict()"></select>
+    </div>
+
+    <div class="f-group hidden" id="rdv-conflict">
+      <div class="modal-info" style="background:rgba(224,80,80,.1);border-color:rgba(224,80,80,.3);color:#F0A0A0">
+        <i class="ti ti-alert-triangle"></i>Ce créneau chevauche un autre RDV
+      </div>
+    </div>
+
+    <div class="f-group">
+      <label class="label">Note (optionnel)</label>
+      <input class="input" id="rdv-note" type="text" placeholder="Fade court, ligne nette…">
+    </div>
+
+    <div class="modal-info"><i class="ti ti-device-mobile"></i>Notification push envoyée si client connu et inscrit</div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-rdv-new')">Annuler</button>
+      <button class="btn btn-gold" onclick="saveNewRdv()"><i class="ti ti-check"></i>Créer le RDV</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL : ÉDITION RDV ═══════════ -->
+<div class="modal-bg" id="modal-rdv-edit">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-rdv-edit')" aria-label="Fermer"><i class="ti ti-x"></i></button>
+    <div class="modal-title">Modifier le rendez-vous</div>
+    <div id="rdv-edit-paid-badge" class="hidden" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:var(--sp-3);padding:5px 12px;background:rgba(74,186,106,.12);border:1px solid rgba(74,186,106,.3);border-radius:20px;font-size:11px;font-weight:700;color:#8EE4C6;letter-spacing:.4px"><i class="ti ti-circle-check" style="font-size:14px;color:#4ABA6A"></i>Payé en ligne</div>
+
+    <input type="hidden" id="rdv-edit-id">
+
+    <div class="f-group" style="position:relative">
+      <label class="label">Client</label>
+      <input class="input" id="rdv-edit-client" type="text" list="clientsDatalist">
+    </div>
+
+    <div class="f-group"><label class="label">Date</label><input class="input" id="rdv-edit-date" type="date" onchange="rdvEditCheckConflict()"></div>
+    <div class="f-group"><label class="label">Heure</label><input class="input" id="rdv-edit-time" type="time" step="900" onchange="rdvEditCheckConflict()"></div>
+
+    <div class="f-group">
+      <label class="label">Prestation</label>
+      <select class="input" id="rdv-edit-service" onchange="rdvEditCheckConflict()"></select>
+    </div>
+
+    <div class="f-group">
+      <label class="label">Statut</label>
+      <select class="input" id="rdv-edit-status">
+        <option value="pending">En attente</option>
+        <option value="confirmed">Confirmé</option>
+        <option value="current">En cours</option>
+        <option value="done">Terminé</option>
+        <option value="noshow">Absent (no-show)</option>
+        <option value="cancelled">Annulé</option>
+      </select>
+    </div>
+
+    <div class="f-group">
+      <label class="label">Note</label>
+      <input class="input" id="rdv-edit-note" type="text">
+    </div>
+
+    <div class="f-group hidden" id="rdv-edit-conflict">
+      <div class="modal-info" style="background:rgba(224,80,80,.1);border-color:rgba(224,80,80,.3);color:#F0A0A0">
+        <i class="ti ti-alert-triangle"></i>Conflit avec un autre RDV
+      </div>
+    </div>
+
+    <div id="rdv-edit-contact" class="hidden" style="display:flex;gap:8px;margin-bottom:var(--sp-3)">
+      <a id="rdv-edit-call" href="#" class="btn btn-out" style="flex:1;text-decoration:none"><i class="ti ti-phone"></i>Appeler</a>
+      <a id="rdv-edit-sms" href="#" class="btn btn-out" style="flex:1;text-decoration:none"><i class="ti ti-message"></i>Message</a>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="deleteRdv()"><i class="ti ti-trash"></i>Supprimer</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-rdv-edit')">Fermer</button>
+      <button class="btn btn-out" onclick="saveEditRdv()"><i class="ti ti-check"></i>Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL : NOUVEAU CLIENT ═══════════ -->
+<div class="modal-bg" id="modal-client-new">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-client-new')" aria-label="Fermer"><i class="ti ti-x"></i></button>
+    <div class="modal-title">Nouveau client</div>
+    <div class="f-row">
+      <div class="f-group"><label class="label">Prénom</label><input class="input" id="cli-fname" type="text"></div>
+      <div class="f-group"><label class="label">Nom</label><input class="input" id="cli-lname" type="text"></div>
+    </div>
+    <div class="f-group"><label class="label">Téléphone</label><input class="input" id="cli-phone" type="tel" placeholder="06 12 34 56 78" inputmode="tel"></div>
+    <div class="f-group"><label class="label">Email (optionnel)</label><input class="input" id="cli-email" type="email" inputmode="email"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-client-new')">Annuler</button>
+      <button class="btn btn-gold" onclick="saveNewClient()"><i class="ti ti-check"></i>Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL : NOUVEAU ARTICLE STOCK ═══════════ -->
+<div class="modal-bg" id="modal-stock-new">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-stock-new')" aria-label="Fermer"><i class="ti ti-x"></i></button>
+    <div class="modal-title">Nouvel article</div>
+    <input type="hidden" id="stock-edit-id">
+    <div class="f-group"><label class="label">Nom de l'article</label><input class="input" id="stock-name" type="text" placeholder="Cire mate, huile à barbe…"></div>
+    <div class="f-row">
+      <div class="f-group"><label class="label">Quantité</label><input class="input" id="stock-qty" type="number" min="0" value="0" inputmode="numeric"></div>
+      <div class="f-group"><label class="label">Seuil alerte</label><input class="input" id="stock-threshold" type="number" min="0" value="3" inputmode="numeric"></div>
+    </div>
+    <div class="f-group"><label class="label">Prix de vente (€, optionnel)</label><input class="input" id="stock-price" type="number" step="0.5" min="0" inputmode="decimal"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-stock-new')">Annuler</button>
+      <button class="btn btn-out" onclick="saveStockItem()"><i class="ti ti-check"></i>Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL : JOUR FERMÉ ═══════════ -->
+<div class="modal-bg" id="modal-dispo-closed">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-dispo-closed')" aria-label="Fermer"><i class="ti ti-x"></i></button>
+    <div class="modal-title">Ajouter une fermeture</div>
+    <div class="f-group">
+      <label class="label">Date fermée</label>
+      <input class="input" id="dispo-closed-date" type="date">
+    </div>
+    <div class="f-group">
+      <label class="label">Raison (optionnel)</label>
+      <input class="input" id="dispo-closed-reason" type="text" placeholder="Jour férié, congé, etc.">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-dispo-closed')">Annuler</button>
+      <button class="btn btn-gold" onclick="addClosedDay()"><i class="ti ti-check"></i>Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL : LOGIN SUPABASE ═══════════ -->
+<div class="modal-bg open" id="modal-login">
+  <div class="modal" style="max-width:380px;padding:var(--sp-6)">
+    <!-- Logo du salon (image si logo_url, sinon lettre) -->
+    <div id="login-logo-mark" class="logo-mark" style="margin:0 auto var(--sp-4);width:54px;height:54px;font-size:18px">{{SALON_INITIAL}}</div>
+    <img id="login-logo-img" src="" alt="" style="display:none;width:54px;height:54px;object-fit:contain;border-radius:10px;margin:0 auto var(--sp-4)">
+
+    <div style="text-align:center;margin-bottom:var(--sp-5)">
+      <div style="font-family:'Unbounded',sans-serif;font-size:17px;font-weight:900;letter-spacing:-.5px" id="login-salon-title">Dashboard</div>
+      <div style="font-size:12px;color:var(--marble-2);margin-top:4px">Connexion à votre espace</div>
+    </div>
+
+    <div class="f-group">
+      <label class="label">Email</label>
+      <input class="input" id="login-email" type="email" inputmode="email" autocomplete="email" placeholder="vous@exemple.fr">
+    </div>
+    <div class="f-group" style="margin-top:var(--sp-3)">
+      <label class="label">Mot de passe</label>
+      <input class="input" id="login-password" type="password" autocomplete="current-password" placeholder="••••••••"
+             onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+
+    <div id="login-err" style="display:none;margin-top:var(--sp-3);padding:10px 14px;background:rgba(224,80,80,.1);border:1px solid rgba(224,80,80,.3);border-radius:var(--r-sm);font-size:12px;color:#F0A0A0"></div>
+
+    <button class="btn btn-gold" style="width:100%;margin-top:var(--sp-4);padding:14px" onclick="doLogin()" id="login-btn">
+      <i class="ti ti-login"></i>Se connecter
+    </button>
+
+    <div style="text-align:center;margin-top:var(--sp-4);font-size:11px;color:var(--marble-3)">
+      Propulsé par <strong style="color:var(--gold-0)">TrimSync</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL : CHECKOUT SUMUP ═══════════ -->
+<div class="modal-bg" id="modal-checkout">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-checkout')" aria-label="Fermer"><i class="ti ti-x"></i></button>
+    <div class="modal-title">Encaissement SumUp</div>
+    <div style="text-align:center;margin-bottom:var(--sp-4)">
+      <div style="font-size:11px;color:var(--marble-2);text-transform:uppercase;letter-spacing:2px">Montant</div>
+      <div style="font-family:'Unbounded';font-size:48px;font-weight:900;color:var(--gold-0);letter-spacing:-2px;margin-top:6px" id="ck-amount">0 €</div>
+    </div>
+    <div id="ck-status" style="text-align:center;color:var(--marble-1);font-size:13px;margin-bottom:var(--sp-3)">Création du checkout…</div>
+    <div id="ck-link-box" class="hidden" style="background:var(--ink-3);padding:14px;border-radius:var(--r-sm);border:1px solid rgba(200,168,90,.2);text-align:center">
+      <div style="font-size:11px;color:var(--marble-2);margin-bottom:8px">Scannez ce QR code ou ouvrez le lien :</div>
+      <div id="ck-qr" style="display:flex;justify-content:center;margin-bottom:8px"></div>
+      <a id="ck-link" href="#" target="_blank" rel="noopener" style="color:var(--gold-0);font-size:11px;word-break:break-all"></a>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-checkout')">Fermer</button>
+      <button class="btn btn-gold" id="ck-confirm" onclick="confirmCheckout()" disabled><i class="ti ti-check"></i>Marquer comme payé</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL : RÉSUMÉ JOURNALIER ═══════════ -->
+<div class="modal-bg" id="modal-daily-summary">
+  <div class="modal" style="max-width:380px">
+    <button class="modal-close" onclick="closeModal('modal-daily-summary')" aria-label="Fermer"><i class="ti ti-x"></i></button>
+    <div class="modal-title" style="font-size:17px">Résumé de la journée</div>
+    <div class="modal-sub" id="ds-date" style="margin-bottom:var(--sp-4)">—</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:var(--sp-4)">
+      <div style="text-align:center;padding:12px 6px;background:rgba(200,168,90,.06);border:1px solid rgba(200,168,90,.15);border-radius:var(--r-sm)">
+        <div style="font-size:26px;font-weight:900;font-family:'Unbounded',sans-serif;color:var(--gold-0);line-height:1" id="ds-rdv">0</div>
+        <div style="font-size:9px;color:var(--marble-2);text-transform:uppercase;letter-spacing:1.5px;margin-top:5px">RDV</div>
+      </div>
+      <div style="text-align:center;padding:12px 6px;background:rgba(200,168,90,.06);border:1px solid rgba(200,168,90,.15);border-radius:var(--r-sm)">
+        <div style="font-size:20px;font-weight:900;font-family:'Unbounded',sans-serif;color:var(--gold-0);line-height:1" id="ds-ca">0 €</div>
+        <div style="font-size:9px;color:var(--marble-2);text-transform:uppercase;letter-spacing:1.5px;margin-top:5px">CA total</div>
+      </div>
+      <div style="text-align:center;padding:12px 6px;background:rgba(200,168,90,.06);border:1px solid rgba(200,168,90,.15);border-radius:var(--r-sm)">
+        <div style="font-size:20px;font-weight:900;font-family:'Unbounded',sans-serif;color:var(--gold-0);line-height:1" id="ds-panier">0 €</div>
+        <div style="font-size:9px;color:var(--marble-2);text-transform:uppercase;letter-spacing:1.5px;margin-top:5px">Panier moy.</div>
+      </div>
+    </div>
+    <div id="ds-services"></div>
+    <div class="modal-actions" style="margin-top:var(--sp-4)">
+      <button class="btn btn-ghost" onclick="closeModal('modal-daily-summary')">Fermer</button>
+      <button class="btn btn-gold" onclick="nav('stats');closeModal('modal-daily-summary')"><i class="ti ti-chart-bar"></i>Statistiques</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script src="js/dashboard-template.js?v=1" defer></script>
+</body>
+</html>

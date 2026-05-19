@@ -1,0 +1,820 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {
+    "hyperedges": [
+      {
+        "id": "trimsync_legal_cluster",
+        "label": "TrimSync Legal Pages Cross-Linked Cluster",
+        "nodes": [
+          "trimsync_privacy",
+          "trimsync_terms",
+          "trimsync_datadeletion",
+          "trimsync_gdpr"
+        ],
+        "relation": "implement",
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "trimsync/privacy.html"
+      },
+      {
+        "id": "trimsync_third_party_integrations",
+        "label": "TrimSync External API Integrations",
+        "nodes": [
+          "trimsync_brand",
+          "trimsync_instagram_api",
+          "trimsync_google_calendar",
+          "trimsync_stripe",
+          "trimsync_openai"
+        ],
+        "relation": "participate_in",
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "trimsync/privacy.html"
+      },
+      {
+        "id": "trimsync_motion_effects",
+        "label": "Motion@11-Powered Visual Effects",
+        "nodes": [
+          "trimsync_motion11",
+          "trimsync_shadow_overlay",
+          "trimsync_scroll_reveals",
+          "trimsync_magnetic_buttons"
+        ],
+        "relation": "implement",
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "trimsync/index.html"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "label": "TrimSync Landing Page",
+      "file_type": "code",
+      "source_file": "trimsync/index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_index",
+      "community": 0,
+      "norm_label": "trimsync landing page"
+    },
+    {
+      "label": "TrimSync Privacy Policy",
+      "file_type": "document",
+      "source_file": "trimsync/privacy.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_privacy",
+      "community": 1,
+      "norm_label": "trimsync privacy policy"
+    },
+    {
+      "label": "TrimSync Terms of Service",
+      "file_type": "document",
+      "source_file": "trimsync/terms.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_terms",
+      "community": 1,
+      "norm_label": "trimsync terms of service"
+    },
+    {
+      "label": "TrimSync Data Deletion Instructions",
+      "file_type": "document",
+      "source_file": "trimsync/data-deletion.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_datadeletion",
+      "community": 1,
+      "norm_label": "trimsync data deletion instructions"
+    },
+    {
+      "label": "TrimSync SaaS Product",
+      "file_type": "rationale",
+      "source_file": "trimsync/index.html",
+      "source_location": "line 6",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_brand",
+      "community": 2,
+      "norm_label": "trimsync saas product"
+    },
+    {
+      "label": "Motion@11 Animation Library",
+      "file_type": "code",
+      "source_file": "trimsync/index.html",
+      "source_location": "line 634",
+      "source_url": "https://cdn.jsdelivr.net/npm/motion@11/+esm",
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_motion11",
+      "community": 0,
+      "norm_label": "motion@11 animation library"
+    },
+    {
+      "label": "Meta Instagram API Integration",
+      "file_type": "rationale",
+      "source_file": "trimsync/index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_instagram_api",
+      "community": 2,
+      "norm_label": "meta instagram api integration"
+    },
+    {
+      "label": "Google Calendar API Integration",
+      "file_type": "rationale",
+      "source_file": "trimsync/privacy.html",
+      "source_location": "line 127",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_google_calendar",
+      "community": 2,
+      "norm_label": "google calendar api integration"
+    },
+    {
+      "label": "Stripe Payment Processing",
+      "file_type": "rationale",
+      "source_file": "trimsync/privacy.html",
+      "source_location": "line 128",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_stripe",
+      "community": 2,
+      "norm_label": "stripe payment processing"
+    },
+    {
+      "label": "OpenAI AI Model",
+      "file_type": "rationale",
+      "source_file": "trimsync/privacy.html",
+      "source_location": "line 129",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_openai",
+      "community": 2,
+      "norm_label": "openai ai model"
+    },
+    {
+      "label": "Bilingual EN/FR Language Toggle",
+      "file_type": "rationale",
+      "source_file": "trimsync/index.html",
+      "source_location": "line 638",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_lang_system",
+      "community": 1,
+      "norm_label": "bilingual en/fr language toggle"
+    },
+    {
+      "label": "Live DM Demo Chat Animation",
+      "file_type": "code",
+      "source_file": "trimsync/index.html",
+      "source_location": "line 773",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_chat_demo",
+      "community": 2,
+      "norm_label": "live dm demo chat animation"
+    },
+    {
+      "label": "Animated Orb Background",
+      "file_type": "code",
+      "source_file": "trimsync/index.html",
+      "source_location": "line 18",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_orb_bg",
+      "community": 0,
+      "norm_label": "animated orb background"
+    },
+    {
+      "label": "SVG feTurbulence Shadow Overlay",
+      "file_type": "code",
+      "source_file": "trimsync/index.html",
+      "source_location": "line 686",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_shadow_overlay",
+      "community": 0,
+      "norm_label": "svg feturbulence shadow overlay"
+    },
+    {
+      "label": "Scroll Reveal Animations",
+      "file_type": "code",
+      "source_file": "trimsync/index.html",
+      "source_location": "line 826",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_scroll_reveals",
+      "community": 0,
+      "norm_label": "scroll reveal animations"
+    },
+    {
+      "label": "GDPR Compliance Framework",
+      "file_type": "rationale",
+      "source_file": "trimsync/privacy.html",
+      "source_location": "line 136",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_gdpr",
+      "community": 1,
+      "norm_label": "gdpr compliance framework"
+    },
+    {
+      "label": "Bricolage Grotesque + Figtree Fonts",
+      "file_type": "code",
+      "source_file": "trimsync/index.html",
+      "source_location": "line 15",
+      "source_url": "https://fonts.googleapis.com",
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_fonts_landing",
+      "community": 0,
+      "norm_label": "bricolage grotesque + figtree fonts"
+    },
+    {
+      "label": "Cormorant + DM Sans Fonts",
+      "file_type": "code",
+      "source_file": "trimsync/privacy.html",
+      "source_location": "line 9",
+      "source_url": "https://fonts.googleapis.com",
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_fonts_legal",
+      "community": 1,
+      "norm_label": "cormorant + dm sans fonts"
+    },
+    {
+      "label": "Flat 99/Month Pricing Model",
+      "file_type": "rationale",
+      "source_file": "trimsync/index.html",
+      "source_location": "line 483",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_pricing_model",
+      "community": 0,
+      "norm_label": "flat 99/month pricing model"
+    },
+    {
+      "label": "Magnetic Button Effect",
+      "file_type": "code",
+      "source_file": "trimsync/index.html",
+      "source_location": "line 764",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_magnetic_buttons",
+      "community": 0,
+      "norm_label": "magnetic button effect"
+    },
+    {
+      "label": "Text Scramble Hero Effect",
+      "file_type": "code",
+      "source_file": "trimsync/index.html",
+      "source_location": "line 741",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_text_scramble",
+      "community": 0,
+      "norm_label": "text scramble hero effect"
+    },
+    {
+      "label": "Fixed Section Nav Dots",
+      "file_type": "code",
+      "source_file": "trimsync/index.html",
+      "source_location": "line 721",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_section_nav",
+      "community": 0,
+      "norm_label": "fixed section nav dots"
+    },
+    {
+      "label": "felix@trimsync.tech Contact",
+      "file_type": "rationale",
+      "source_file": "trimsync/index.html",
+      "source_location": "line 607",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "trimsync_contact_email",
+      "community": 1,
+      "norm_label": "felix@trimsync.tech contact"
+    }
+  ],
+  "links": [
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 623",
+      "weight": 1.0,
+      "source": "trimsync_index",
+      "target": "trimsync_privacy"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 624",
+      "weight": 1.0,
+      "source": "trimsync_index",
+      "target": "trimsync_terms"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 624",
+      "weight": 1.0,
+      "source": "trimsync_index",
+      "target": "trimsync_datadeletion"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 634",
+      "weight": 1.0,
+      "source": "trimsync_index",
+      "target": "trimsync_motion11"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 15",
+      "weight": 1.0,
+      "source": "trimsync_index",
+      "target": "trimsync_fonts_landing"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 6",
+      "weight": 1.0,
+      "source": "trimsync_index",
+      "target": "trimsync_brand"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 638",
+      "weight": 1.0,
+      "source": "trimsync_index",
+      "target": "trimsync_lang_system"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 773",
+      "weight": 1.0,
+      "source": "trimsync_index",
+      "target": "trimsync_chat_demo"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 18",
+      "weight": 1.0,
+      "source": "trimsync_index",
+      "target": "trimsync_orb_bg"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 686",
+      "weight": 1.0,
+      "source": "trimsync_index",
+      "target": "trimsync_shadow_overlay"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 826",
+      "weight": 1.0,
+      "source": "trimsync_index",
+      "target": "trimsync_scroll_reveals"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 764",
+      "weight": 1.0,
+      "source": "trimsync_index",
+      "target": "trimsync_magnetic_buttons"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 741",
+      "weight": 1.0,
+      "source": "trimsync_index",
+      "target": "trimsync_text_scramble"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 721",
+      "weight": 1.0,
+      "source": "trimsync_index",
+      "target": "trimsync_section_nav"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 483",
+      "weight": 1.0,
+      "source": "trimsync_index",
+      "target": "trimsync_pricing_model"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 607",
+      "weight": 1.0,
+      "source": "trimsync_index",
+      "target": "trimsync_contact_email"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/data-deletion.html",
+      "source_location": "line 198",
+      "weight": 1.0,
+      "source": "trimsync_datadeletion",
+      "target": "trimsync_privacy"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/terms.html",
+      "source_location": "line 162",
+      "weight": 1.0,
+      "source": "trimsync_terms",
+      "target": "trimsync_privacy"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/privacy.html",
+      "source_location": "line 9",
+      "weight": 1.0,
+      "source": "trimsync_privacy",
+      "target": "trimsync_fonts_legal"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/privacy.html",
+      "source_location": "line 136",
+      "weight": 1.0,
+      "source": "trimsync_privacy",
+      "target": "trimsync_gdpr"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/privacy.html",
+      "source_location": "line 181",
+      "weight": 1.0,
+      "source": "trimsync_privacy",
+      "target": "trimsync_lang_system"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/privacy.html",
+      "source_location": "line 82",
+      "weight": 1.0,
+      "source": "trimsync_privacy",
+      "target": "trimsync_contact_email"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/data-deletion.html",
+      "source_location": "line 199",
+      "weight": 1.0,
+      "source": "trimsync_datadeletion",
+      "target": "trimsync_terms"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/terms.html",
+      "source_location": "line 9",
+      "weight": 1.0,
+      "source": "trimsync_terms",
+      "target": "trimsync_fonts_legal"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/terms.html",
+      "source_location": "line 112",
+      "weight": 1.0,
+      "source": "trimsync_terms",
+      "target": "trimsync_gdpr"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/terms.html",
+      "source_location": "line 169",
+      "weight": 1.0,
+      "source": "trimsync_terms",
+      "target": "trimsync_lang_system"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/terms.html",
+      "source_location": "line 100",
+      "weight": 1.0,
+      "source": "trimsync_terms",
+      "target": "trimsync_pricing_model"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/terms.html",
+      "source_location": "line 155",
+      "weight": 1.0,
+      "source": "trimsync_terms",
+      "target": "trimsync_contact_email"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/data-deletion.html",
+      "source_location": "line 10",
+      "weight": 1.0,
+      "source": "trimsync_datadeletion",
+      "target": "trimsync_fonts_legal"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/data-deletion.html",
+      "source_location": "line 112",
+      "weight": 1.0,
+      "source": "trimsync_datadeletion",
+      "target": "trimsync_instagram_api"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/data-deletion.html",
+      "source_location": "line 204",
+      "weight": 1.0,
+      "source": "trimsync_datadeletion",
+      "target": "trimsync_lang_system"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/data-deletion.html",
+      "source_location": "line 123",
+      "weight": 1.0,
+      "source": "trimsync_datadeletion",
+      "target": "trimsync_contact_email"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "trimsync/data-deletion.html",
+      "source_location": "line 112",
+      "weight": 0.95,
+      "source": "trimsync_gdpr",
+      "target": "trimsync_datadeletion"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/privacy.html",
+      "source_location": "line 88",
+      "weight": 1.0,
+      "source": "trimsync_brand",
+      "target": "trimsync_instagram_api"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/privacy.html",
+      "source_location": "line 104",
+      "weight": 1.0,
+      "source": "trimsync_brand",
+      "target": "trimsync_google_calendar"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/privacy.html",
+      "source_location": "line 105",
+      "weight": 1.0,
+      "source": "trimsync_brand",
+      "target": "trimsync_stripe"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/privacy.html",
+      "source_location": "line 129",
+      "weight": 1.0,
+      "source": "trimsync_brand",
+      "target": "trimsync_openai"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 826",
+      "weight": 1.0,
+      "source": "trimsync_scroll_reveals",
+      "target": "trimsync_motion11"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 768",
+      "weight": 1.0,
+      "source": "trimsync_magnetic_buttons",
+      "target": "trimsync_motion11"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 703",
+      "weight": 1.0,
+      "source": "trimsync_shadow_overlay",
+      "target": "trimsync_motion11"
+    },
+    {
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 773",
+      "weight": 0.75,
+      "source": "trimsync_chat_demo",
+      "target": "trimsync_instagram_api"
+    },
+    {
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
+      "source_file": "trimsync/index.html",
+      "source_location": "line 15",
+      "weight": 0.65,
+      "source": "trimsync_fonts_landing",
+      "target": "trimsync_fonts_legal"
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "trimsync_legal_cluster",
+      "label": "TrimSync Legal Pages Cross-Linked Cluster",
+      "nodes": [
+        "trimsync_privacy",
+        "trimsync_terms",
+        "trimsync_datadeletion",
+        "trimsync_gdpr"
+      ],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/privacy.html"
+    },
+    {
+      "id": "trimsync_third_party_integrations",
+      "label": "TrimSync External API Integrations",
+      "nodes": [
+        "trimsync_brand",
+        "trimsync_instagram_api",
+        "trimsync_google_calendar",
+        "trimsync_stripe",
+        "trimsync_openai"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/privacy.html"
+    },
+    {
+      "id": "trimsync_motion_effects",
+      "label": "Motion@11-Powered Visual Effects",
+      "nodes": [
+        "trimsync_motion11",
+        "trimsync_shadow_overlay",
+        "trimsync_scroll_reveals",
+        "trimsync_magnetic_buttons"
+      ],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "trimsync/index.html"
+    }
+  ],
+  "built_at_commit": "f5cc756f9d49525559601546db6df87a0b00c5d7"
+}

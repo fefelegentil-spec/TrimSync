@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,maximum-scale=1.0,user-scalable=no"/>
+<meta name="theme-color" content="#0e0f13"/>
+<title>Book a Demo — TrimSync</title>
+<meta name="description" content="Book a free 30-minute TrimSync demo. We'll show you exactly how AI booking automation works for your barbershop."/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>✂️</text></svg>"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+/* ═══════════════════════════════════════════════════════════
+   TRIMSYNC BOOKING — Dark teal · Bricolage Grotesque + Figtree
+   ═══════════════════════════════════════════════════════════ */
+:root{
+  --bg:oklch(0.12 0.008 222);--bg2:oklch(0.16 0.009 220);--bg3:oklch(0.20 0.010 220);
+  --bd:oklch(0.24 0.011 218);--bd2:oklch(0.32 0.013 215);
+  --t:oklch(0.94 0.010 200);--t2:oklch(0.68 0.015 210);--t3:oklch(0.46 0.012 215);
+  --a:oklch(0.76 0.13 193);--alo:oklch(0.76 0.13 193/.10);--amid:oklch(0.76 0.13 193/.28);
+  --adrench:oklch(0.54 0.15 193);--on-a:oklch(0.97 0.006 200);
+  --success:oklch(0.72 0.15 152);--danger:oklch(0.65 0.20 25);
+  --fd:'Bricolage Grotesque',system-ui,sans-serif;
+  --fb:'Figtree',system-ui,sans-serif;
+  --ex:cubic-bezier(0.16,1,0.3,1);
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+html{background:var(--bg);touch-action:manipulation}
+html,body{overscroll-behavior:none}
+body{background:transparent;color:var(--t);font-family:var(--fb);font-size:15px;line-height:1.55;min-height:100vh;min-height:100dvh;overflow-x:hidden;padding-bottom:env(safe-area-inset-bottom)}
+a{color:inherit;text-decoration:none}
+button{background:none;border:none;cursor:pointer;font:inherit;color:inherit}
+input,select,textarea{font-family:inherit;font-size:16px;color:inherit;outline:none}
+img{display:block;max-width:100%}
+
+/* fond animé orbes */
+#page-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);will-change:transform}
+.orb-a{width:90vmax;height:90vmax;background:radial-gradient(circle,oklch(0.76 0.13 193/.20) 0%,transparent 62%);top:-20%;left:-22%;animation:orb-a 24s ease-in-out infinite alternate}
+.orb-b{width:70vmax;height:70vmax;background:radial-gradient(circle,oklch(0.52 0.18 193/.15) 0%,transparent 58%);bottom:-22%;right:-18%;animation:orb-b 30s ease-in-out infinite alternate}
+@keyframes orb-a{to{transform:translate(32%,48%) scale(1.35)}}
+@keyframes orb-b{to{transform:translate(-38%,-32%) scale(0.72)}}
+@media(prefers-reduced-motion:reduce){.orb{animation:none}}
+
+/* grain */
+body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.35;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")}
+
+/* ── SPLASH */
+#splash{position:fixed;inset:0;z-index:9998;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;transition:opacity .5s var(--ease)}
+#splash.out{opacity:0;pointer-events:none}
+.splash-mark{width:72px;height:72px;border-radius:20px;background:var(--a);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:28px;font-weight:800;color:var(--bg);box-shadow:0 0 0 1px oklch(1 0 0/.08),0 20px 60px var(--amid);animation:splIn .6s var(--ex) both}
+@keyframes splIn{from{transform:scale(.5) translateY(20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.splash-name{font-family:var(--fd);font-size:1.5rem;font-weight:800;color:var(--t);opacity:0;animation:fadeUp .6s var(--ease) .25s both}
+.splash-sub{font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;color:var(--t3);opacity:0;animation:fadeUp .6s var(--ease) .4s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── HEADER */
+.header{position:relative;z-index:2;text-align:center;padding:calc(env(safe-area-inset-top) + 28px) 20px 12px;background:linear-gradient(180deg,oklch(0.12 0.008 222/.6),transparent)}
+.h-mark{width:48px;height:48px;border-radius:14px;background:var(--a);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-family:var(--fd);font-size:18px;font-weight:800;color:var(--bg);box-shadow:0 8px 28px var(--amid)}
+.h-name{font-family:var(--fd);font-size:1.3rem;font-weight:800;letter-spacing:-.03em;color:var(--t)}
+.h-name em{color:var(--a);font-style:normal}
+.h-sub{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-top:5px}
+.h-badge{display:inline-flex;align-items:center;gap:.4rem;margin-top:10px;padding:.3rem .8rem;background:var(--alo);border:1px solid var(--amid);border-radius:100px;font-size:.75rem;font-weight:600;color:var(--a)}
+.h-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--a);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 oklch(0.76 0.13 193/.5)}50%{box-shadow:0 0 0 5px oklch(0.76 0.13 193/0)}}
+
+/* ── STEPPER */
+.steps{display:flex;align-items:center;justify-content:center;padding:14px 12px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);background:oklch(0.13 0.008 220/.4);backdrop-filter:blur(20px);position:relative;z-index:2}
+.step{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;max-width:80px}
+.step-n{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--t3);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:11px;font-weight:800;color:var(--t3);background:var(--bg2);transition:.3s var(--ease)}
+.step.active .step-n{background:var(--a);border-color:var(--a);color:var(--bg);box-shadow:0 0 0 5px var(--alo),0 6px 18px var(--amid)}
+.step.done .step-n{background:oklch(0.54 0.15 193);border-color:var(--adrench);color:var(--on-a)}
+.step-l{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;color:var(--t3)}
+.step.active .step-l{color:var(--a)}
+.step.done .step-l{color:var(--t2)}
+.step-sep{flex:0 1 24px;height:1px;background:var(--bd);min-width:8px}
+
+/* ── WRAP */
+.wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:8px 18px 100px}
+.section{display:none;animation:secIn .35s var(--ease)}
+.section.active{display:block}
+@keyframes secIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.s-title{font-family:var(--fd);font-size:1.2rem;font-weight:800;letter-spacing:-.03em;margin-bottom:4px;margin-top:20px}
+.s-sub{font-size:.82rem;color:var(--t3);margin-bottom:20px;line-height:1.6}
+
+/* ── CALENDRIER */
+.cal-card{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 14px oklch(0 0 0/.3)}
+.cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-month{font-family:var(--fd);font-size:1rem;font-weight:800;letter-spacing:-.02em;text-transform:capitalize}
+.cal-nav{width:34px;height:34px;border-radius:10px;background:var(--bg3);border:1px solid var(--bd);color:var(--t);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:.2s var(--ease)}
+.cal-nav:hover{border-color:var(--a);color:var(--a);background:var(--alo)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-dn{font-size:9px;color:var(--t3);text-align:center;padding:4px 0;letter-spacing:1.5px;text-transform:uppercase;font-weight:700}
+.cal-d{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:13px;font-weight:600;color:var(--t);cursor:pointer;transition:.15s var(--ease);border:1px solid transparent;background:transparent;min-height:38px}
+.cal-d:hover:not(.past):not(.closed):not(.empty){background:var(--bg3);border-color:var(--bd)}
+.cal-d.today{color:var(--a);font-weight:700}
+.cal-d.past,.cal-d.closed{opacity:.25;pointer-events:none}
+.cal-d.empty{pointer-events:none;opacity:0}
+.cal-d.sel{background:var(--a);color:var(--bg);font-weight:800;border-color:var(--a);box-shadow:0 0 0 2px var(--amid),0 4px 14px var(--amid)}
+@media(max-width:500px){.cal-grid{gap:3px}.cal-d{font-size:12px;min-height:34px;border-radius:6px}}
+
+/* ── CRÉNEAUX */
+.slots-h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+.slots-h-t{font-family:var(--fd);font-size:.85rem;font-weight:800}
+.slots-h-d{font-size:.75rem;color:var(--t3)}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;animation:fadeSlots .22s var(--ease) both}
+@keyframes fadeSlots{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.slot{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:12px 6px;text-align:center;font-size:13px;cursor:pointer;font-family:var(--fd);font-weight:700;color:var(--t);transition:.15s var(--ease);min-height:44px;display:flex;align-items:center;justify-content:center}
+.slot:hover:not(.taken){border-color:var(--a);color:var(--a);background:var(--alo)}
+.slot.sel{background:var(--a);color:var(--bg);border-color:var(--a);font-weight:900;box-shadow:0 4px 14px var(--amid)}
+.slot.taken{opacity:.3;pointer-events:none;text-decoration:line-through}
+@media(min-width:400px){.slots{grid-template-columns:repeat(4,1fr)}}
+
+/* ── FORMULAIRE */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.68rem;letter-spacing:.14em;color:var(--t3);text-transform:uppercase;font-weight:700;margin-bottom:7px}
+.field input,.field select,.field textarea{width:100%;background:var(--bg2);border:1.5px solid var(--bd);border-radius:12px;color:var(--t);font-family:var(--fb);font-size:15px;padding:13px 15px;transition:.2s var(--ease);min-height:46px}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--a);background:var(--bg3)}
+.field input::placeholder{color:var(--t3)}
+.field textarea{resize:vertical;min-height:80px;line-height:1.5}
+.fields-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:420px){.fields-row{grid-template-columns:1fr}}
+
+/* ── RECAP */
+.recap{background:linear-gradient(135deg,var(--alo),oklch(0.76 0.13 193/.04));border:1px solid var(--amid);border-radius:14px;padding:14px;margin-bottom:16px;box-shadow:0 2px 14px oklch(0 0 0/.3)}
+.recap-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px dashed oklch(0.76 0.13 193/.15);font-size:.82rem;gap:10px}
+.recap-row:first-child{padding-top:0}
+.recap-row:last-child{border-bottom:none;padding-bottom:0}
+.recap-label{color:var(--t3);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.recap-val{color:var(--t);font-weight:600;text-align:right;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── BOUTONS */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 22px;border-radius:14px;font-family:var(--fd);font-size:.85rem;font-weight:800;letter-spacing:-.01em;cursor:pointer;transition:.25s var(--ease);min-height:50px}
+.btn-a{background:var(--a);color:var(--bg);box-shadow:0 8px 24px var(--amid)}
+.btn-a:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 12px 32px var(--amid)}
+.btn-a:disabled{opacity:.4;pointer-events:none}
+.btn-out{background:transparent;color:var(--t2);border:1px solid var(--bd);margin-top:8px}
+.btn-out:hover{border-color:var(--a);color:var(--a)}
+
+/* ── TOAST */
+#toast{position:fixed;top:calc(env(safe-area-inset-top) + 16px);left:50%;transform:translateX(-50%) translateY(-20px);background:var(--bg3);border:1px solid var(--amid);border-radius:12px;padding:11px 20px;font-size:.82rem;font-weight:600;z-index:9000;opacity:0;transition:all .3s var(--ease);pointer-events:none;white-space:nowrap;box-shadow:0 12px 28px oklch(0 0 0/.5)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.t-ok{border-left:3px solid var(--success);color:oklch(0.8 0.12 152);padding-left:16px}
+#toast.t-err{border-left:3px solid var(--danger);color:oklch(0.8 0.18 25);padding-left:16px}
+
+/* ── SUCCÈS */
+.success{text-align:center;padding:32px 12px 16px}
+.success-icon{width:88px;height:88px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:44px;color:var(--bg);box-shadow:0 16px 50px var(--amid),0 0 0 8px var(--alo);animation:splIn .6s var(--ex) both}
+.success h2{font-family:var(--fd);font-size:1.5rem;font-weight:800;letter-spacing:-.03em;margin-bottom:8px}
+.success p{color:var(--t2);font-size:.88rem;line-height:1.7;margin-bottom:20px}
+.success-card{background:var(--bg2);border:1px solid var(--amid);border-radius:16px;padding:16px;margin:0 auto 20px;max-width:360px;text-align:left;display:flex;flex-direction:column;gap:10px}
+.success-item{display:flex;align-items:center;gap:12px;font-size:.88rem;font-weight:600}
+.success-item i{font-size:17px;color:var(--a);flex-shrink:0;width:20px}
+</style>
+</head>
+<body>
+
+<div id="page-bg" aria-hidden="true"><div class="orb orb-a"></div><div class="orb orb-b"></div></div>
+<div id="toast" role="alert" aria-live="polite"></div>
+
+<!-- SPLASH -->
+<div id="splash" aria-hidden="true">
+  <div class="splash-mark">TS</div>
+  <div class="splash-name">TrimSync</div>
+  <div class="splash-sub">Book a demo</div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="h-mark">TS</div>
+  <div class="h-name">Trim<em>Sync</em></div>
+  <div class="h-sub">AI Booking for Barbershops</div>
+  <div class="h-badge">
+    <span class="h-badge-dot" aria-hidden="true"></span>
+    <span data-en="Free 30-min demo" data-fr="Démo gratuite 30 min">Free 30-min demo</span>
+  </div>
+</div>
+
+<!-- STEPPER -->
+<div class="steps" id="steps">
+  <div class="step active" data-step="1"><div class="step-n">1</div><div class="step-l" data-en="Slot" data-fr="Créneau">Slot</div></div>
+  <div class="step-sep"></div>
+  <div class="step" data-step="2"><div class="step-n">2</div><div class="step-l" data-en="Info" data-fr="Infos">Info</div></div>
+  <div class="step-sep"></div>
+  <div class="step" data-step="3"><div class="step-n">3</div><div class="step-l" data-en="Done" data-fr="Confirmé">Done</div></div>
+</div>
+
+<div class="wrap">
+
+  <!-- STEP 1 : CRÉNEAU -->
+  <section class="section active" id="s1">
+    <div class="s-title" data-en="Pick a time slot" data-fr="Choisis un créneau">Pick a time slot</div>
+    <div class="s-sub" data-en="30 minutes, fully free. We'll show you how TrimSync works." data-fr="30 minutes, entièrement gratuit. On vous montre comment TrimSync fonctionne.">30 minutes, fully free. We'll show you how TrimSync works.</div>
+
+    <div class="cal-card">
+      <div class="cal-h">
+        <button class="cal-nav" onclick="calChange(-1)" aria-label="Previous month"><i class="ti ti-chevron-left"></i></button>
+        <div class="cal-month" id="cal-month">—</div>
+        <button class="cal-nav" onclick="calChange(1)" aria-label="Next month"><i class="ti ti-chevron-right"></i></button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+
+    <div id="slots-wrap" style="display:none">
+      <div class="slots-h">
+        <div class="slots-h-t" data-en="Available slots" data-fr="Créneaux disponibles">Available slots</div>
+        <div class="slots-h-d" id="slots-h-d"></div>
+      </div>
+      <div class="slots" id="slots"></div>
+    </div>
+
+    <button class="btn btn-a" id="btn-step1" onclick="goStep(2)" disabled>
+      <span data-en="Continue" data-fr="Continuer">Continue</span>
+      <i class="ti ti-arrow-right"></i>
+    </button>
+  </section>
+
+  <!-- STEP 2 : INFOS CONTACT -->
+  <section class="section" id="s2">
+    <div class="s-title" data-en="Your details" data-fr="Vos coordonnées">Your details</div>
+    <div class="s-sub" data-en="We'll send the meeting link by email." data-fr="On vous envoie le lien de la réunion par email.">We'll send the meeting link by email.</div>
+
+    <div class="recap" id="recap-2"></div>
+
+    <div class="fields-row">
+      <div class="field"><label data-en="First name *" data-fr="Prénom *">First name *</label><input id="b-fname" type="text" autocomplete="given-name" placeholder="Felix"></div>
+      <div class="field"><label data-en="Last name" data-fr="Nom">Last name</label><input id="b-lname" type="text" autocomplete="family-name" placeholder="Martin"></div>
+    </div>
+    <div class="field"><label data-en="Email *" data-fr="Email *">Email *</label><input id="b-email" type="email" inputmode="email" autocomplete="email" placeholder="felix@barbershop.com"></div>
+    <div class="field"><label data-en="Phone" data-fr="Téléphone">Phone</label><input id="b-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+33 6 12 34 56 78"></div>
+    <div class="field"><label data-en="Barbershop name" data-fr="Nom du barbershop">Barbershop name</label><input id="b-shop" type="text" placeholder="BarberShop Pro"></div>
+    <div class="field"><label data-en="Any questions?" data-fr="Des questions ?">Any questions?</label><textarea id="b-note" placeholder="How many chairs? Current booking setup?"></textarea></div>
+
+    <button class="btn btn-a" id="btn-step2" onclick="confirmBooking()">
+      <i class="ti ti-calendar-check"></i>
+      <span data-en="Confirm my demo" data-fr="Confirmer ma démo">Confirm my demo</span>
+    </button>
+    <button class="btn btn-out" onclick="goStep(1)"><i class="ti ti-arrow-left"></i> <span data-en="Back" data-fr="Retour">Back</span></button>
+  </section>
+
+  <!-- STEP 3 : SUCCÈS -->
+  <section class="section" id="s3">
+    <div class="success">
+      <div class="success-icon"><i class="ti ti-check"></i></div>
+      <h2 data-en="Demo confirmed!" data-fr="Démo confirmée !">Demo confirmed!</h2>
+      <p id="success-msg" data-en="We'll send the meeting link to your email shortly." data-fr="On vous envoie le lien de la réunion par email très vite.">We'll send the meeting link to your email shortly.</p>
+      <div class="success-card" id="success-card"></div>
+      <button class="btn btn-a" id="cal-btn" onclick="addToCalendar()" style="max-width:340px;margin:0 auto 10px">
+        <i class="ti ti-calendar-plus"></i>
+        <span data-en="Add to Google Calendar" data-fr="Ajouter à Google Calendar">Add to Google Calendar</span>
+      </button>
+      <button class="btn btn-out" onclick="resetBooking()" style="max-width:340px;margin:0 auto">
+        <span data-en="Book another slot" data-fr="Réserver un autre créneau">Book another slot</span>
+      </button>
+    </div>
+  </section>
+
+</div><!-- /wrap -->
+
+<script>
+'use strict';
+
+/* ── CONFIG */
+const BACKEND = 'https://trimsync-backend-production.up.railway.app';
+const SERVICE = { name:'Démo TrimSync', duration:30, price:0 };
+
+/* ── Jours ouverts : lun-ven 9h-18h, 30min step, 15min granularité */
+const HOURS = {
+  mon:{open:true,start:'09:00',end:'18:00'},
+  tue:{open:true,start:'09:00',end:'18:00'},
+  wed:{open:true,start:'09:00',end:'18:00'},
+  thu:{open:true,start:'09:00',end:'18:00'},
+  fri:{open:true,start:'09:00',end:'18:00'},
+  sat:{open:false},
+  sun:{open:false},
+};
+/* Correspondance getDay() (0=dim) → clé HOURS */
+const JS_DAY=['sun','mon','tue','wed','thu','fri','sat'];
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTHS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const DAY_NAMES=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DAY_NAMES_FR=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+const FULL_DAYS_EN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const FULL_DAYS_FR=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+
+/* ── STATE */
+let selDate=null, selSlot=null;
+let lang=localStorage.getItem('ts-lang')||'en';
+const _now=new Date();
+let calYear=_now.getFullYear(), calMonth=_now.getMonth();
+const TODAY_STR=_now.toISOString().slice(0,10);
+let booking=null;
+
+/* ── LANG */
+function applyLang(l){
+  lang=l;
+  document.querySelectorAll('[data-en]').forEach(el=>{
+    const v=el.getAttribute('data-'+l);
+    if(!v)return;
+    if(el.tagName==='INPUT'||el.tagName==='TEXTAREA'){el.placeholder=v;}
+    else{el.innerHTML=v.includes('<')?v:(el.textContent=v,v);}
+  });
+}
+applyLang(lang);
+
+/* ── TOAST */
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='show t-'+(type||'ok');
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+/* ── FORMAT */
+function fmtDay(ds){
+  if(!ds)return'—';
+  const d=new Date(ds+'T12:00:00');
+  const dn=lang==='fr'?FULL_DAYS_FR[d.getDay()]:FULL_DAYS_EN[d.getDay()];
+  const mn=lang==='fr'?MONTHS_FR[d.getMonth()]:MONTHS[d.getMonth()];
+  return `${dn} ${d.getDate()} ${mn}`;
+}
+function toMins(t){const[h,m]=t.split(':').map(Number);return h*60+m;}
+
+/* ── CALENDRIER */
+function renderCal(){
+  const mArr=lang==='fr'?MONTHS_FR:MONTHS;
+  document.getElementById('cal-month').textContent=mArr[calMonth]+' '+calYear;
+  const grid=document.getElementById('cal-grid');
+  const dnArr=lang==='fr'?DAY_NAMES_FR:DAY_NAMES;
+  let html=dnArr.map(d=>`<div class="cal-dn">${d}</div>`).join('');
+  const first=new Date(calYear,calMonth,1).getDay();
+  /* Décalage : lundi = premier jour (JS: 0=dim → offset = (day+6)%7) */
+  const offset=(first+6)%7;
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  for(let i=0;i<offset;i++) html+='<div class="cal-d empty"></div>';
+  for(let d=1;d<=days;d++){
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dt=new Date(ds+'T12:00:00');
+    const isPast=dt<new Date(TODAY_STR+'T00:00:00');
+    const isToday=ds===TODAY_STR;
+    const isSel=ds===selDate;
+    const dk=JS_DAY[dt.getDay()];
+    const isOpen=HOURS[dk]&&HOURS[dk].open;
+    let cls='cal-d';
+    if(isPast) cls+=' past';
+    else if(!isOpen) cls+=' closed';
+    else if(isToday) cls+=' today';
+    if(isSel) cls+=' sel';
+    html+=`<div class="${cls}" onclick="selectDay('${ds}',this)">${d}</div>`;
+  }
+  grid.innerHTML=html;
+}
+function calChange(dir){
+  calMonth+=dir;
+  if(calMonth<0){calMonth=11;calYear--;}
+  if(calMonth>11){calMonth=0;calYear++;}
+  renderCal();
+}
+function selectDay(ds,el){
+  if(el.classList.contains('past')||el.classList.contains('closed')||el.classList.contains('empty'))return;
+  selDate=ds;selSlot=null;
+  document.getElementById('btn-step1').disabled=true;
+  document.querySelector('.cal-d.sel')?.classList.remove('sel');
+  el.classList.add('sel');
+  document.getElementById('slots-h-d').textContent=fmtDay(ds);
+  document.getElementById('slots-wrap').style.display='block';
+  renderSlots(ds);
+}
+
+/* ── CRÉNEAUX */
+function renderSlots(ds){
+  const grid=document.getElementById('slots');
+  const dt=new Date(ds+'T12:00:00');
+  const dk=JS_DAY[dt.getDay()];
+  const day=HOURS[dk];
+  if(!day||!day.open){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:16px;color:var(--t3);font-size:.8rem">Closed this day.</div>';return;}
+  const [oH,oM]=day.start.split(':').map(Number);
+  const [cH,cM]=day.end.split(':').map(Number);
+  const slots=[];
+  let h=oH,m=oM;
+  /* créneaux toutes les 30min */
+  while(h*60+m+SERVICE.duration<=cH*60+cM){
+    slots.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+    m+=30;h+=Math.floor(m/60);m%=60;
+  }
+  if(!slots.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:16px;color:var(--t3);font-size:.8rem">No slots available.</div>';return;}
+  /* Récupère les créneaux déjà pris depuis localStorage (bookings précédents) */
+  let takenSlots=[];
+  try{takenSlots=JSON.parse(localStorage.getItem('ts_taken_'+ds)||'[]');}catch(_){}
+  grid.innerHTML=slots.map(s=>{
+    const taken=takenSlots.includes(s);
+    const isSel=s===selSlot;
+    return`<div class="slot${taken?' taken':''}${isSel?' sel':''}" onclick="selectSlot(this,'${s}')">${s}</div>`;
+  }).join('');
+}
+function selectSlot(el,t){
+  if(el.classList.contains('taken'))return;
+  document.querySelector('.slot.sel')?.classList.remove('sel');
+  el.classList.add('sel');
+  selSlot=t;
+  document.getElementById('btn-step1').disabled=false;
+}
+
+/* ── NAVIGATION ÉTAPES */
+function goStep(n){
+  if(n===2){
+    if(!selDate||!selSlot){
+      toast(lang==='fr'?'Choisis une date et un créneau':'Pick a date and a slot','err');
+      return;
+    }
+    updateRecap();
+  }
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+  const stepsEl=document.getElementById('steps');
+  stepsEl.style.display=n===3?'none':'';
+  document.querySelectorAll('.step').forEach(s=>{
+    const i=parseInt(s.dataset.step);
+    s.classList.remove('active','done');
+    if(i===n) s.classList.add('active');
+    else if(i<n) s.classList.add('done');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateRecap(){
+  const el=document.getElementById('recap-2');
+  el.innerHTML=`
+    <div class="recap-row"><span class="recap-label">${lang==='fr'?'Prestation':'Service'}</span><span class="recap-val">${SERVICE.name} — ${SERVICE.duration} min</span></div>
+    <div class="recap-row"><span class="recap-label">${lang==='fr'?'Créneau':'Slot'}</span><span class="recap-val">${fmtDay(selDate)} · ${selSlot}</span></div>
+    <div class="recap-row"><span class="recap-label">${lang==='fr'?'Tarif':'Price'}</span><span class="recap-val" style="color:var(--a)">${lang==='fr'?'Gratuit':'Free'}</span></div>
+  `;
+}
+
+/* ── CONFIRMATION */
+async function confirmBooking(){
+  const fname=document.getElementById('b-fname').value.trim();
+  const email=document.getElementById('b-email').value.trim();
+  if(!fname||!email){
+    toast(lang==='fr'?'Prénom et email requis':'First name and email required','err');
+    return;
+  }
+  const btn=document.getElementById('btn-step2');
+  btn.disabled=true;
+  btn.innerHTML='<i class="ti ti-loader" style="animation:spin 1s linear infinite"></i>';
+
+  const lname=document.getElementById('b-lname').value.trim();
+  const phone=document.getElementById('b-phone').value.trim();
+  const shop=document.getElementById('b-shop').value.trim();
+  const note=document.getElementById('b-note').value.trim();
+
+  booking={fname,lname,email,phone,shop,note,date:selDate,time:selSlot,service:SERVICE.name,duration:SERVICE.duration,createdAt:new Date().toISOString()};
+
+  /* Sauvegarde locale */
+  try{localStorage.setItem('ts_last_demo',JSON.stringify(booking));}catch(_){}
+
+  /* Marque le créneau comme pris localement */
+  try{
+    const taken=JSON.parse(localStorage.getItem('ts_taken_'+selDate)||'[]');
+    if(!taken.includes(selSlot)){taken.push(selSlot);localStorage.setItem('ts_taken_'+selDate,JSON.stringify(taken));}
+  }catch(_){}
+
+  /* Envoi backend (best effort — ne bloque pas le succès) */
+  try{
+    await fetch(BACKEND+'/api/demos/book',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(booking),
+    });
+  }catch(_){}
+
+  showSuccess();
+}
+
+function showSuccess(){
+  const card=document.getElementById('success-card');
+  card.innerHTML=`
+    <div class="success-item"><i class="ti ti-calendar-event"></i>${fmtDay(booking.date)}</div>
+    <div class="success-item"><i class="ti ti-clock"></i>${booking.time} — ${SERVICE.duration} min</div>
+    <div class="success-item"><i class="ti ti-video"></i>${SERVICE.name}</div>
+    <div class="success-item"><i class="ti ti-mail"></i>${booking.email}</div>
+  `;
+  goStep(3);
+}
+
+/* ── GOOGLE CALENDAR */
+function addToCalendar(){
+  if(!booking)return;
+  const[yr,mo,dy]=booking.date.split('-').map(Number);
+  const[hh,mm]=booking.time.split(':').map(Number);
+  const start=new Date(yr,mo-1,dy,hh,mm,0);
+  const end=new Date(start.getTime()+SERVICE.duration*60000);
+  const fmt=dt=>dt.toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
+  const url='https://calendar.google.com/calendar/render?action=TEMPLATE'
+    +'&text='+encodeURIComponent('TrimSync Demo — '+SERVICE.name)
+    +'&dates='+fmt(start)+'/'+fmt(end)
+    +'&details='+encodeURIComponent('Free TrimSync demo. TrimSync automates Instagram DM bookings with AI.\nhttps://trimsync.tech')
+    +'&location='+encodeURIComponent('Google Meet (link sent by email)');
+  window.open(url,'_blank','noopener');
+}
+
+/* ── RESET */
+function resetBooking(){
+  selDate=null;selSlot=null;booking=null;
+  document.getElementById('btn-step1').disabled=true;
+  document.getElementById('slots-wrap').style.display='none';
+  renderCal();
+  goStep(1);
+}
+
+/* ── INIT */
+renderCal();
+
+/* Splash */
+setTimeout(()=>{
+  const s=document.getElementById('splash');
+  if(s){s.classList.add('out');setTimeout(()=>s&&s.remove(),600);}
+},1200);
+</script>
+</body>
+</html>

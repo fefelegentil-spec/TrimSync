@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Deletion — TrimSync</title>
+  <meta name="description" content="Instructions to request deletion of your data from TrimSync." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#0d0b09; --bg-raised:#141210;
+      --border:#2a2520; --border-hi:#3d3630;
+      --text:#f0ece5; --text-2:#b8b0a4; --text-3:#6b6560;
+      --accent:#c8692a; --accent-lo:rgba(200,105,42,0.1);
+      --font-serif:'Cormorant',Georgia,serif;
+      --font-sans:'DM Sans',system-ui,sans-serif;
+      --max:1160px; --radius:6px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(13,11,9,0.85);border-bottom:1px solid var(--border)}
+    .nav-inner{max-width:var(--max);margin:0 auto;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:64px}
+    .nav-logo{font-family:var(--font-serif);font-size:1.5rem;font-weight:700;letter-spacing:-0.03em;color:var(--text);text-decoration:none}
+    .nav-logo span{color:var(--accent)}
+    .nav-right{display:flex;align-items:center;gap:1rem}
+    .lang-toggle{display:flex;align-items:center;gap:0.3rem;padding:0.35rem 0.65rem;border:1px solid var(--border);border-radius:var(--radius);font-size:0.8rem;color:var(--text-3);background:transparent;cursor:pointer;font-family:inherit;transition:border-color 0.2s,color 0.2s}
+    .lang-toggle:hover{border-color:var(--border-hi);color:var(--text)}
+    .nav-back{font-size:0.875rem;color:var(--text-3);display:flex;align-items:center;gap:0.4rem;transition:color 0.2s}
+    .nav-back:hover{color:var(--text);text-decoration:none}
+    .content{max-width:720px;margin:0 auto;padding:8rem 2rem 6rem}
+    .content-header{margin-bottom:3.5rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+    .t-label{font-family:var(--font-sans);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:0.8rem;display:block}
+    h1{font-family:var(--font-serif);font-size:clamp(2.2rem,5vw,3.6rem);font-weight:600;letter-spacing:-0.02em;line-height:1.1;margin-bottom:1rem}
+    .content-meta{font-size:0.85rem;color:var(--text-3)}
+    h2{font-family:var(--font-serif);font-size:1.7rem;font-weight:600;line-height:1.2;letter-spacing:-0.01em;margin:2.8rem 0 1rem}
+    p{color:var(--text-2);margin-bottom:1.2rem;max-width:68ch;line-height:1.75}
+    ul,ol{color:var(--text-2);padding-left:1.4rem;margin-bottom:1.2rem}
+    ul li,ol li{margin-bottom:0.6rem;line-height:1.7}
+    .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:2.4rem 0}
+
+    /* Prominent contact box — accessible without login */
+    .delete-box {
+      border:1px solid var(--accent);
+      background:var(--accent-lo);
+      border-radius:var(--radius);
+      padding:2.4rem;
+      margin:2.4rem 0;
+    }
+    .delete-box h3{
+      font-family:var(--font-serif);font-size:1.4rem;font-weight:600;
+      margin-bottom:0.8rem; color:var(--text);
+    }
+    .delete-box p{margin-bottom:0.8rem}
+    .delete-email{
+      display:inline-flex;align-items:center;gap:0.5rem;
+      font-size:1.1rem;font-weight:500;color:var(--accent);
+    }
+    .delete-email:hover{text-decoration:underline}
+    .steps-list{
+      counter-reset:steps;list-style:none;padding:0;
+    }
+    .steps-list li{
+      counter-increment:steps;
+      display:flex;align-items:flex-start;gap:1rem;
+      padding:1.2rem 0;
+      border-bottom:1px solid var(--border);
+    }
+    .steps-list li:last-child{border-bottom:none}
+    .step-n{
+      display:flex;align-items:center;justify-content:center;
+      width:32px;height:32px;border-radius:50%;flex-shrink:0;
+      background:var(--accent);color:#fff;
+      font-family:var(--font-serif);font-size:1rem;font-weight:700;
+    }
+    .step-text p{margin-bottom:0;color:var(--text-2)}
+    .step-text strong{display:block;color:var(--text);margin-bottom:0.3rem;font-weight:500}
+    .info-box{
+      border:1px solid var(--border);background:var(--bg-raised);
+      border-radius:var(--radius);padding:1.6rem 2rem;margin-top:2rem;
+    }
+    .info-box p{margin:0;font-size:0.9rem}
+    .footer-mini{border-top:1px solid var(--border);padding:2rem;text-align:center}
+    .footer-mini a{color:var(--text-3);font-size:0.85rem;margin:0 0.8rem;transition:color 0.2s}
+    .footer-mini a:hover{color:var(--text);text-decoration:none}
+    .footer-mini p{font-size:0.8rem;color:var(--text-3);margin-top:1rem}
+    @media(max-width:600px){.content{padding:6rem 1.2rem 4rem}}
+  </style>
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">Trim<span>Sync</span></a>
+    <div class="nav-right">
+      <button class="lang-toggle" id="langToggle" aria-label="Toggle language">
+        <span id="langFlag">🇫🇷</span><span id="langCode">FR</span>
+      </button>
+      <a href="index.html" class="nav-back">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span data-en="Back" data-fr="Retour"></span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="content">
+  <div class="content-header">
+    <span class="t-label" data-en="Meta / Instagram requirement" data-fr="Exigence Meta / Instagram"></span>
+    <h1 data-en="Data Deletion Instructions" data-fr="Instructions de suppression des données"></h1>
+    <p class="content-meta" data-en="This page is accessible without login, as required by Meta." data-fr="Cette page est accessible sans connexion, comme l'exige Meta."></p>
+  </div>
+
+  <p data-en="TrimSync connects to Instagram via Meta's official API to help barbershops automate appointment booking. If you have interacted with a barbershop using TrimSync, we may hold data about you (your Instagram name and message content)." data-fr="TrimSync se connecte à Instagram via l'API officielle de Meta pour aider les barbershops à automatiser la prise de rendez-vous. Si vous avez interagi avec un barbershop utilisant TrimSync, nous pouvons détenir des données vous concernant (votre nom Instagram et le contenu de vos messages)."></p>
+  <p data-en="You can request deletion of your data at any time. No account or login is required." data-fr="Vous pouvez demander la suppression de vos données à tout moment. Aucun compte ni connexion n'est requis."></p>
+
+  <div class="delete-box">
+    <h3 data-en="Request data deletion" data-fr="Demander la suppression des données"></h3>
+    <p data-en="Send an email to our data team:" data-fr="Envoyez un e-mail à notre équipe data :"></p>
+    <a href="mailto:felix@trimsync.tech?subject=Data%20Deletion%20Request" class="delete-email">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="4" width="14" height="10" rx="2" stroke="#c8692a" stroke-width="1.5"/><path d="M2 6l7 5 7-5" stroke="#c8692a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      felix@trimsync.tech
+    </a>
+    <p style="margin-top:1rem;font-size:0.9rem" data-en="Subject line: 'Data Deletion Request'" data-fr="Objet : 'Demande de suppression des données'"></p>
+  </div>
+
+  <h2 data-en="What to include in your request" data-fr="Ce qu'il faut inclure dans votre demande"></h2>
+  <ol class="steps-list">
+    <li>
+      <span class="step-n">1</span>
+      <div class="step-text">
+        <strong data-en="Your Instagram username" data-fr="Votre nom d'utilisateur Instagram"></strong>
+        <p data-en="This allows us to locate your data in our system." data-fr="Cela nous permet de localiser vos données dans notre système."></p>
+      </div>
+    </li>
+    <li>
+      <span class="step-n">2</span>
+      <div class="step-text">
+        <strong data-en="The barbershop name (if known)" data-fr="Le nom du barbershop (si connu)"></strong>
+        <p data-en="The name of the barbershop whose Instagram account you messaged." data-fr="Le nom du barbershop dont vous avez contacté le compte Instagram."></p>
+      </div>
+    </li>
+    <li>
+      <span class="step-n">3</span>
+      <div class="step-text">
+        <strong data-en="Approximate date of interaction" data-fr="Date approximative de l'interaction"></strong>
+        <p data-en="Helps us narrow down the data record." data-fr="Nous aide à localiser l'enregistrement des données."></p>
+      </div>
+    </li>
+  </ol>
+
+  <div class="divider"></div>
+
+  <h2 data-en="What happens after your request" data-fr="Ce qui se passe après votre demande"></h2>
+  <ol>
+    <li data-en="We confirm receipt of your request within 5 business days." data-fr="Nous accusons réception de votre demande dans les 5 jours ouvrables."></li>
+    <li data-en="We verify your identity by matching the Instagram username you provide." data-fr="Nous vérifions votre identité en faisant correspondre le nom d'utilisateur Instagram que vous fournissez."></li>
+    <li data-en="All data associated with your account (name, message content, appointment records) is permanently deleted within 30 days." data-fr="Toutes les données associées à votre compte (nom, contenu des messages, dossiers de rendez-vous) sont définitivement supprimées dans les 30 jours."></li>
+    <li data-en="We send a confirmation email once the deletion is complete." data-fr="Nous vous envoyons un e-mail de confirmation une fois la suppression effectuée."></li>
+  </ol>
+
+  <div class="divider"></div>
+
+  <h2 data-en="Data we may hold about you" data-fr="Données que nous pouvons détenir sur vous"></h2>
+  <ul>
+    <li data-en="Instagram display name (as provided by Meta's API)" data-fr="Nom d'affichage Instagram (fourni par l'API Meta)"></li>
+    <li data-en="Direct message content exchanged with a TrimSync-powered barbershop" data-fr="Contenu des messages directs échangés avec un barbershop utilisant TrimSync"></li>
+    <li data-en="Appointment records: date, time, service type" data-fr="Dossiers de rendez-vous : date, heure, type de prestation"></li>
+  </ul>
+  <p data-en="We do not hold passwords, payment information, or any data beyond what is listed above." data-fr="Nous ne détenons pas de mots de passe, d'informations de paiement ou de données au-delà de ce qui est listé ci-dessus."></p>
+
+  <div class="divider"></div>
+
+  <h2 data-en="Barbershop owners: how to disconnect TrimSync" data-fr="Propriétaires de barbershop : comment déconnecter TrimSync"></h2>
+  <p data-en="If you are a barbershop owner and want to revoke TrimSync's access to your Instagram account:" data-fr="Si vous êtes propriétaire d'un barbershop et souhaitez révoquer l'accès de TrimSync à votre compte Instagram :"></p>
+  <ol>
+    <li data-en="Go to your Facebook Business account settings." data-fr="Accédez aux paramètres de votre compte Facebook Business."></li>
+    <li data-en='Navigate to "Apps and Websites" or "Connected Apps".' data-fr='Naviguez vers "Applications et sites web" ou "Applications connectées".'></li>
+    <li data-en='Find "TrimSync" and click "Remove".' data-fr='Trouvez "TrimSync" et cliquez sur "Supprimer".'></li>
+    <li data-en="You can also cancel your TrimSync subscription directly from your account dashboard." data-fr="Vous pouvez également résilier votre abonnement TrimSync directement depuis votre tableau de bord."></li>
+  </ol>
+  <p data-en="After disconnection, all your data will be deleted within 30 days." data-fr="Après la déconnexion, toutes vos données seront supprimées dans les 30 jours."></p>
+
+  <div class="info-box">
+    <p>
+      <span data-en="For any questions about your data, contact us at " data-fr="Pour toute question sur vos données, contactez-nous à "></span>
+      <a href="mailto:felix@trimsync.tech">felix@trimsync.tech</a>
+      <span data-en=". We respond within 5 business days." data-fr=". Nous répondons dans les 5 jours ouvrables."></span>
+    </p>
+  </div>
+</main>
+
+<footer class="footer-mini">
+  <a href="index.html"   data-en="Home"             data-fr="Accueil"></a>
+  <a href="privacy.html" data-en="Privacy Policy"   data-fr="Politique de confidentialité"></a>
+  <a href="terms.html"   data-en="Terms of Service" data-fr="Conditions d'utilisation"></a>
+  <a href="mailto:felix@trimsync.tech">felix@trimsync.tech</a>
+  <p>© 2025 TrimSync</p>
+</footer>
+
+<script>
+  const LANGS={en:{flag:'🇫🇷',code:'FR',next:'fr'},fr:{flag:'🇬🇧',code:'EN',next:'en'}};
+  let cur=localStorage.getItem('ts-lang')||'en';
+  function applyLang(l){
+    cur=l;localStorage.setItem('ts-lang',l);
+    document.documentElement.lang=l;
+    document.querySelectorAll('[data-en]').forEach(el=>{
+      const v=el.getAttribute('data-'+l);if(!v)return;
+      el.textContent=v;
+    });
+    document.getElementById('langFlag').textContent=LANGS[l].flag;
+    document.getElementById('langCode').textContent=LANGS[l].code;
+  }
+  document.getElementById('langToggle').addEventListener('click',()=>applyLang(LANGS[cur].next));
+  applyLang(cur);
+</script>
+</body>
+</html>

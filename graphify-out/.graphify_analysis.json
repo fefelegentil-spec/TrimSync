@@ -1,0 +1,169 @@
+{
+  "communities": {
+    "0": [
+      "trimsync_fonts_landing",
+      "trimsync_index",
+      "trimsync_magnetic_buttons",
+      "trimsync_motion11",
+      "trimsync_orb_bg",
+      "trimsync_pricing_model",
+      "trimsync_scroll_reveals",
+      "trimsync_section_nav",
+      "trimsync_shadow_overlay",
+      "trimsync_text_scramble"
+    ],
+    "1": [
+      "trimsync_contact_email",
+      "trimsync_datadeletion",
+      "trimsync_fonts_legal",
+      "trimsync_gdpr",
+      "trimsync_lang_system",
+      "trimsync_privacy",
+      "trimsync_terms"
+    ],
+    "2": [
+      "trimsync_brand",
+      "trimsync_chat_demo",
+      "trimsync_google_calendar",
+      "trimsync_instagram_api",
+      "trimsync_openai",
+      "trimsync_stripe"
+    ]
+  },
+  "cohesion": {
+    "0": 0.27,
+    "1": 0.71,
+    "2": 0.33
+  },
+  "gods": [
+    {
+      "id": "trimsync_index",
+      "label": "TrimSync Landing Page",
+      "degree": 16
+    },
+    {
+      "id": "trimsync_terms",
+      "label": "TrimSync Terms of Service",
+      "degree": 8
+    },
+    {
+      "id": "trimsync_datadeletion",
+      "label": "TrimSync Data Deletion Instructions",
+      "degree": 8
+    },
+    {
+      "id": "trimsync_privacy",
+      "label": "TrimSync Privacy Policy",
+      "degree": 7
+    },
+    {
+      "id": "trimsync_brand",
+      "label": "TrimSync SaaS Product",
+      "degree": 5
+    },
+    {
+      "id": "trimsync_motion11",
+      "label": "Motion@11 Animation Library",
+      "degree": 4
+    },
+    {
+      "id": "trimsync_lang_system",
+      "label": "Bilingual EN/FR Language Toggle",
+      "degree": 4
+    },
+    {
+      "id": "trimsync_fonts_legal",
+      "label": "Cormorant + DM Sans Fonts",
+      "degree": 4
+    },
+    {
+      "id": "trimsync_contact_email",
+      "label": "felix@trimsync.tech Contact",
+      "degree": 4
+    },
+    {
+      "id": "trimsync_instagram_api",
+      "label": "Meta Instagram API Integration",
+      "degree": 3
+    }
+  ],
+  "surprises": [
+    {
+      "source": "Bricolage Grotesque + Figtree Fonts",
+      "target": "Cormorant + DM Sans Fonts",
+      "source_files": [
+        "trimsync/index.html",
+        "trimsync/privacy.html"
+      ],
+      "confidence": "INFERRED",
+      "relation": "semantically_similar_to",
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities; semantically similar concepts with no structural link"
+    },
+    {
+      "source": "TrimSync Terms of Service",
+      "target": "Flat 99/Month Pricing Model",
+      "source_files": [
+        "trimsync/terms.html",
+        "trimsync/index.html"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "bridges separate communities; peripheral node `Flat 99/Month Pricing Model` unexpectedly reaches hub `TrimSync Terms of Service`"
+    },
+    {
+      "source": "TrimSync Landing Page",
+      "target": "TrimSync Privacy Policy",
+      "source_files": [
+        "trimsync/index.html",
+        "trimsync/privacy.html"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "TrimSync Landing Page",
+      "target": "TrimSync Terms of Service",
+      "source_files": [
+        "trimsync/index.html",
+        "trimsync/terms.html"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "TrimSync Landing Page",
+      "target": "TrimSync Data Deletion Instructions",
+      "source_files": [
+        "trimsync/index.html",
+        "trimsync/data-deletion.html"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "bridges separate communities"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `TrimSync Landing Page` connect `Community 0` to `Community 1`, `Community 2`?",
+      "why": "High betweenness centrality (0.747) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `TrimSync SaaS Product` connect `Community 2` to `Community 0`?",
+      "why": "High betweenness centrality (0.273) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `TrimSync Data Deletion Instructions` connect `Community 1` to `Community 0`, `Community 2`?",
+      "why": "High betweenness centrality (0.091) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `Google Calendar API Integration`, `Stripe Payment Processing`, `OpenAI AI Model` to the rest of the system?",
+      "why": "6 weakly-connected nodes found - possible documentation gaps or missing edges."
+    }
+  ]
+}

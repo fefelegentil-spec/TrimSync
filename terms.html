@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service — TrimSync</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#0d0b09; --bg-raised:#141210;
+      --border:#2a2520; --border-hi:#3d3630;
+      --text:#f0ece5; --text-2:#b8b0a4; --text-3:#6b6560;
+      --accent:#c8692a;
+      --font-serif:'Cormorant',Georgia,serif;
+      --font-sans:'DM Sans',system-ui,sans-serif;
+      --max:1160px; --radius:6px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(13,11,9,0.85);border-bottom:1px solid var(--border)}
+    .nav-inner{max-width:var(--max);margin:0 auto;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:64px}
+    .nav-logo{font-family:var(--font-serif);font-size:1.5rem;font-weight:700;letter-spacing:-0.03em;color:var(--text);text-decoration:none}
+    .nav-logo span{color:var(--accent)}
+    .nav-right{display:flex;align-items:center;gap:1rem}
+    .lang-toggle{display:flex;align-items:center;gap:0.3rem;padding:0.35rem 0.65rem;border:1px solid var(--border);border-radius:var(--radius);font-size:0.8rem;color:var(--text-3);background:transparent;cursor:pointer;font-family:inherit;transition:border-color 0.2s,color 0.2s}
+    .lang-toggle:hover{border-color:var(--border-hi);color:var(--text)}
+    .nav-back{font-size:0.875rem;color:var(--text-3);display:flex;align-items:center;gap:0.4rem;transition:color 0.2s}
+    .nav-back:hover{color:var(--text);text-decoration:none}
+    .content{max-width:720px;margin:0 auto;padding:8rem 2rem 6rem}
+    .content-header{margin-bottom:3.5rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+    .t-label{font-family:var(--font-sans);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:0.8rem;display:block}
+    h1{font-family:var(--font-serif);font-size:clamp(2.2rem,5vw,3.6rem);font-weight:600;letter-spacing:-0.02em;line-height:1.1;margin-bottom:1rem}
+    .content-meta{font-size:0.85rem;color:var(--text-3)}
+    h2{font-family:var(--font-serif);font-size:1.7rem;font-weight:600;line-height:1.2;letter-spacing:-0.01em;margin:2.8rem 0 1rem}
+    h3{font-family:var(--font-serif);font-size:1.2rem;font-weight:600;margin:1.8rem 0 0.6rem}
+    p{color:var(--text-2);margin-bottom:1.2rem;max-width:68ch;line-height:1.75}
+    ul,ol{color:var(--text-2);padding-left:1.4rem;margin-bottom:1.2rem}
+    ul li,ol li{margin-bottom:0.5rem;line-height:1.7}
+    .contact-box{margin-top:2.4rem;padding:1.6rem 2rem;border:1px solid var(--border);background:var(--bg-raised);border-radius:var(--radius)}
+    .contact-box p{margin:0}
+    .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:2.4rem 0}
+    .footer-mini{border-top:1px solid var(--border);padding:2rem;text-align:center}
+    .footer-mini a{color:var(--text-3);font-size:0.85rem;margin:0 0.8rem;transition:color 0.2s}
+    .footer-mini a:hover{color:var(--text);text-decoration:none}
+    .footer-mini p{font-size:0.8rem;color:var(--text-3);margin-top:1rem}
+    @media(max-width:600px){.content{padding:6rem 1.2rem 4rem}}
+  </style>
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">Trim<span>Sync</span></a>
+    <div class="nav-right">
+      <button class="lang-toggle" id="langToggle" aria-label="Toggle language">
+        <span id="langFlag">🇫🇷</span><span id="langCode">FR</span>
+      </button>
+      <a href="index.html" class="nav-back">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span data-en="Back" data-fr="Retour"></span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="content">
+  <div class="content-header">
+    <span class="t-label" data-en="Legal" data-fr="Légal"></span>
+    <h1 data-en="Terms of Service" data-fr="Conditions d'utilisation"></h1>
+    <p class="content-meta" data-en="Last updated: January 1, 2025" data-fr="Dernière mise à jour : 1er janvier 2025"></p>
+  </div>
+
+  <h2 data-en="1. Acceptance of terms" data-fr="1. Acceptation des conditions"></h2>
+  <p data-en="By creating a TrimSync account or using the Service, you agree to be bound by these Terms of Service. If you do not agree, do not use the Service." data-fr="En créant un compte TrimSync ou en utilisant le Service, vous acceptez d'être lié par ces Conditions d'utilisation. Si vous n'acceptez pas, n'utilisez pas le Service."></p>
+
+  <div class="divider"></div>
+
+  <h2 data-en="2. Description of the service" data-fr="2. Description du service"></h2>
+  <p data-en="TrimSync provides an AI-powered platform that connects to your Instagram Business account via Meta's official API and automates appointment booking through Direct Messages. The Service includes:" data-fr="TrimSync fournit une plateforme propulsée par IA qui se connecte à votre compte Instagram Business via l'API officielle de Meta et automatise la prise de rendez-vous via les messages directs. Le Service comprend :"></p>
+  <ul>
+    <li data-en="AI-driven DM response and booking automation" data-fr="Réponse automatisée aux DMs et prise de RDV par IA"></li>
+    <li data-en="Appointment confirmation and reminder messaging" data-fr="Messagerie de confirmation et de rappel de rendez-vous"></li>
+    <li data-en="Google Calendar synchronization" data-fr="Synchronisation Google Calendar"></li>
+    <li data-en="Customer-facing analytics dashboard" data-fr="Tableau de bord analytique orienté client"></li>
+  </ul>
+
+  <div class="divider"></div>
+
+  <h2 data-en="3. Eligibility and account" data-fr="3. Éligibilité et compte"></h2>
+  <p data-en="You must be 18 or older and operate a legitimate barbershop or hair salon business. You are responsible for maintaining the security of your account credentials and for all activity that occurs under your account." data-fr="Vous devez avoir 18 ans ou plus et exploiter un barbershop ou salon de coiffure légitime. Vous êtes responsable de la sécurité de vos identifiants de compte et de toutes les activités qui se déroulent sous votre compte."></p>
+
+  <div class="divider"></div>
+
+  <h2 data-en="4. Subscription and billing" data-fr="4. Abonnement et facturation"></h2>
+  <h3 data-en="4.1 Pricing" data-fr="4.1 Tarification"></h3>
+  <p data-en="TrimSync is offered at €99 per barbershop location per month. The first 30 days are provided free of charge. After the trial, billing is monthly on the same calendar date." data-fr="TrimSync est proposé à 99€ par établissement et par mois. Les 30 premiers jours sont offerts gratuitement. Après la période d'essai, la facturation est mensuelle à la même date du calendrier."></p>
+  <h3 data-en="4.2 Cancellation" data-fr="4.2 Résiliation"></h3>
+  <p data-en="You may cancel your subscription at any time from your account settings. Cancellation takes effect at the end of the current billing period. No refunds are issued for partial months." data-fr="Vous pouvez résilier votre abonnement à tout moment depuis les paramètres de votre compte. La résiliation prend effet à la fin de la période de facturation en cours. Aucun remboursement n'est accordé pour les mois partiels."></p>
+  <h3 data-en="4.3 Payment" data-fr="4.3 Paiement"></h3>
+  <p data-en="All payments are processed by Stripe. By subscribing, you authorize TrimSync to charge your payment method on a recurring basis. Failed payments may result in service suspension." data-fr="Tous les paiements sont traités par Stripe. En vous abonnant, vous autorisez TrimSync à débiter votre moyen de paiement de manière récurrente. Les paiements échoués peuvent entraîner la suspension du service."></p>
+
+  <div class="divider"></div>
+
+  <h2 data-en="5. Your responsibilities" data-fr="5. Vos responsabilités"></h2>
+  <p data-en="As a TrimSync customer, you agree to:" data-fr="En tant que client de TrimSync, vous vous engagez à :"></p>
+  <ul>
+    <li data-en="Comply with Meta's Terms of Service and Instagram Platform Policy" data-fr="Respecter les Conditions d'utilisation de Meta et la Politique de la plateforme Instagram"></li>
+    <li data-en="Ensure your use of TrimSync complies with applicable laws, including GDPR" data-fr="Vous assurer que votre utilisation de TrimSync est conforme aux lois applicables, y compris le RGPD"></li>
+    <li data-en="Not use the Service for spam, harassment, or any unlawful purpose" data-fr="Ne pas utiliser le Service à des fins de spam, de harcèlement ou à toute fin illicite"></li>
+    <li data-en="Inform your clients that an AI assistant may respond to their messages" data-fr="Informer vos clients qu'un assistant IA peut répondre à leurs messages"></li>
+    <li data-en="Maintain accurate availability and service information in your TrimSync settings" data-fr="Maintenir des informations de disponibilité et de prestation exactes dans vos paramètres TrimSync"></li>
+  </ul>
+
+  <div class="divider"></div>
+
+  <h2 data-en="6. Acceptable use" data-fr="6. Utilisation acceptable"></h2>
+  <p data-en="You may not use TrimSync to: (a) send unsolicited promotional messages; (b) impersonate any person or entity; (c) violate any third-party rights; (d) circumvent Meta's messaging policies; or (e) engage in any activity that could harm TrimSync's infrastructure, reputation, or other users." data-fr="Vous ne pouvez pas utiliser TrimSync pour : (a) envoyer des messages promotionnels non sollicités ; (b) usurper l'identité d'une personne ou entité ; (c) violer les droits de tiers ; (d) contourner les politiques de messagerie de Meta ; ou (e) vous livrer à toute activité susceptible de nuire à l'infrastructure, à la réputation de TrimSync ou à d'autres utilisateurs."></p>
+
+  <div class="divider"></div>
+
+  <h2 data-en="7. Intellectual property" data-fr="7. Propriété intellectuelle"></h2>
+  <p data-en="TrimSync and its underlying technology remain the exclusive property of TrimSync. You retain ownership of your barbershop's data, client information, and content. You grant TrimSync a limited license to process your data solely to provide the Service." data-fr="TrimSync et sa technologie sous-jacente restent la propriété exclusive de TrimSync. Vous conservez la propriété des données de votre barbershop, des informations clients et du contenu. Vous accordez à TrimSync une licence limitée pour traiter vos données uniquement afin de fournir le Service."></p>
+
+  <div class="divider"></div>
+
+  <h2 data-en="8. Service availability and limitations" data-fr="8. Disponibilité et limitations du service"></h2>
+  <p data-en="TrimSync targets 99.5% monthly uptime but does not guarantee uninterrupted service. The Service depends on third-party APIs (Meta, Google) whose availability is outside our control. We are not liable for booking losses resulting from API downtime." data-fr="TrimSync vise une disponibilité mensuelle de 99,5% mais ne garantit pas un service ininterrompu. Le Service dépend d'API tierces (Meta, Google) dont la disponibilité est hors de notre contrôle. Nous ne sommes pas responsables des pertes de réservations résultant d'une indisponibilité de ces API."></p>
+
+  <div class="divider"></div>
+
+  <h2 data-en="9. Limitation of liability" data-fr="9. Limitation de responsabilité"></h2>
+  <p data-en="To the maximum extent permitted by law, TrimSync's total liability for any claim arising from or related to the Service is limited to the amount you paid in the 3 months preceding the claim. We are not liable for indirect, incidental, or consequential damages." data-fr="Dans la mesure maximale permise par la loi, la responsabilité totale de TrimSync pour toute réclamation découlant du Service ou en relation avec celui-ci est limitée aux sommes payées dans les 3 mois précédant la réclamation. Nous ne sommes pas responsables des dommages indirects, accessoires ou consécutifs."></p>
+
+  <div class="divider"></div>
+
+  <h2 data-en="10. Termination" data-fr="10. Résiliation"></h2>
+  <p data-en="Either party may terminate the agreement at any time. TrimSync may suspend or terminate your account immediately if you violate these Terms or Meta's policies. Upon termination, your data will be deleted within 30 days per our Privacy Policy." data-fr="L'une ou l'autre des parties peut résilier le contrat à tout moment. TrimSync peut suspendre ou résilier votre compte immédiatement si vous enfreignez ces Conditions ou les politiques de Meta. À la résiliation, vos données seront supprimées dans les 30 jours conformément à notre Politique de confidentialité."></p>
+
+  <div class="divider"></div>
+
+  <h2 data-en="11. Governing law" data-fr="11. Droit applicable"></h2>
+  <p data-en="These Terms are governed by French law. Any dispute shall be subject to the exclusive jurisdiction of the French courts." data-fr="Ces Conditions sont régies par le droit français. Tout litige sera soumis à la juridiction exclusive des tribunaux français."></p>
+
+  <div class="divider"></div>
+
+  <h2 data-en="12. Contact" data-fr="12. Contact"></h2>
+  <div class="contact-box">
+    <p>
+      <span data-en="Questions about these Terms?" data-fr="Des questions sur ces Conditions ?"></span>
+      <br />
+      <a href="mailto:felix@trimsync.tech">felix@trimsync.tech</a>
+    </p>
+  </div>
+</main>
+
+<footer class="footer-mini">
+  <a href="index.html"         data-en="Home"             data-fr="Accueil"></a>
+  <a href="privacy.html"       data-en="Privacy Policy"   data-fr="Politique de confidentialité"></a>
+  <a href="data-deletion.html" data-en="Data Deletion"    data-fr="Suppression des données"></a>
+  <a href="mailto:felix@trimsync.tech">felix@trimsync.tech</a>
+  <p>© 2025 TrimSync</p>
+</footer>
+
+<script>
+  const LANGS={en:{flag:'🇫🇷',code:'FR',next:'fr'},fr:{flag:'🇬🇧',code:'EN',next:'en'}};
+  let cur=localStorage.getItem('ts-lang')||'en';
+  function applyLang(l){
+    cur=l;localStorage.setItem('ts-lang',l);
+    document.documentElement.lang=l;
+    document.querySelectorAll('[data-en]').forEach(el=>{
+      const v=el.getAttribute('data-'+l);if(!v)return;
+      el.textContent=v;
+    });
+    document.getElementById('langFlag').textContent=LANGS[l].flag;
+    document.getElementById('langCode').textContent=LANGS[l].code;
+  }
+  document.getElementById('langToggle').addEventListener('click',()=>applyLang(LANGS[cur].next));
+  applyLang(cur);
+</script>
+</body>
+</html>

@@ -300,6 +300,75 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   .price-big{font-size:clamp(4.5rem,20vw,9rem)}
   .hero-inner{gap:2rem}
 }
+
+/* ─── GLOW CARD — GlowingShadow (vanilla port) ─── */
+@property --gc-hue {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --gc-bx {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --gc-by {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+/* Bord gradient tournant — plans pricing + chat widget */
+.glow-card {
+  position: relative;
+  isolation: isolate;
+}
+.glow-card::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  z-index: -1;
+  background: oklch(0.08 0.006 222) radial-gradient(
+    35% 35% at calc(var(--gc-bx) * 1%) calc(var(--gc-by) * 1%),
+    hsl(calc(var(--gc-hue) * 1deg) 100% 62%) 0%,
+    hsl(calc(var(--gc-hue) * 1deg) 90% 45%) 35%,
+    hsl(calc(var(--gc-hue) * 1deg) 70% 28%) 65%,
+    transparent 100%
+  );
+  animation: gc-hue 8s linear infinite, gc-bg 8s linear infinite;
+  opacity: 0.7;
+  transition: opacity .4s var(--ex);
+}
+.glow-card:hover::before { opacity: 1; }
+
+/* Box-shadow coloré pulsant — pain cards + feat cards */
+.glow-subtle {
+  animation: gs-pulse 8s linear infinite;
+  transition: box-shadow .3s;
+}
+.glow-subtle:hover {
+  animation-play-state: paused;
+  box-shadow: 0 0 0 1px var(--amid), 0 8px 32px var(--alo) !important;
+}
+
+@keyframes gc-hue {
+  from { --gc-hue: 0; }
+  to   { --gc-hue: 360; }
+}
+@keyframes gc-bg {
+  0%   { --gc-bx: 0;   --gc-by: 0; }
+  25%  { --gc-bx: 100; --gc-by: 0; }
+  50%  { --gc-bx: 100; --gc-by: 100; }
+  75%  { --gc-bx: 0;   --gc-by: 100; }
+  100% { --gc-bx: 0;   --gc-by: 0; }
+}
+@keyframes gs-pulse {
+  0%,100% { box-shadow:0 0 0 1px oklch(0.76 0.13 193/.28),0 4px 20px oklch(0.76 0.13 193/.06); }
+  25%     { box-shadow:0 0 0 1px oklch(0.80 0.18 130/.28),0 4px 20px oklch(0.80 0.18 130/.06); }
+  50%     { box-shadow:0 0 0 1px oklch(0.78 0.18 280/.28),0 4px 20px oklch(0.78 0.18 280/.06); }
+  75%     { box-shadow:0 0 0 1px oklch(0.80 0.18 50/.28), 0 4px 20px oklch(0.80 0.18 50/.06); }
+}
 </style>
 </head>
 <body>
@@ -376,6 +445,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
     <!-- LIVE DM DEMO -->
     <div class="chat-wrap" data-hero="1" aria-label="Live demo: AI automatically books appointments">
+      <div class="glow-card" style="border-radius:24px;display:block">
       <div class="chat-phone">
         <div class="chat-bar">
           <div class="chat-av" aria-hidden="true" style="font-family:var(--fd);font-weight:800;font-size:12px;letter-spacing:-.02em">BP</div>
@@ -395,6 +465,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
           </div>
         </div>
       </div>
+      </div><!-- /glow-card chat wrapper -->
     </div>
   </div>
 </section>
@@ -418,17 +489,17 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       >Running a barbershop is a full-time job. Your phone shouldn't be too.</h2>
     </div>
     <div class="prob-grid">
-      <div class="pain rv d1">
+      <div class="pain rv d1 glow-subtle">
         <span class="pain-n" aria-hidden="true">01</span>
         <h3 data-en="Hours lost answering the same DMs" data-fr="Des heures perdues à répondre aux mêmes DMs">Hours lost answering the same DMs</h3>
         <p class="body-t" data-en='"Available Friday? What time?" The same question, a dozen times a day, pulling you away from your chair.' data-fr='"Disponible vendredi ? À quelle heure ?" La même question, des dizaines de fois par jour, à chaque coup de ciseau.'>"Available Friday? What time?" The same question, a dozen times a day, pulling you away from your chair.</p>
       </div>
-      <div class="pain rv d2">
+      <div class="pain rv d2 glow-subtle">
         <span class="pain-n" aria-hidden="true">02</span>
         <h3 data-en="Bookings lost to slow replies" data-fr="Des RDV perdus à cause des réponses lentes">Bookings lost to slow replies</h3>
         <p class="body-t" data-en="A client messages at 11pm and books the first barber who responds. If that's not you, it's your competition." data-fr="Un client écrit à 23h et réserve chez le premier barbier qui répond. Si ce n'est pas vous, c'est votre concurrent.">A client messages at 11pm and books the first barber who responds. If that's not you, it's your competition.</p>
       </div>
-      <div class="pain rv d3">
+      <div class="pain rv d3 glow-subtle">
         <span class="pain-n" aria-hidden="true">03</span>
         <h3 data-en="No-shows killing your revenue" data-fr="Les no-shows plombent votre CA">No-shows killing your revenue</h3>
         <p class="body-t" data-en="An empty chair is lost money. Without proper confirmations and reminders, no-shows will keep haunting your schedule." data-fr="Une chaise vide, c'est de l'argent perdu. Sans confirmations automatiques, les no-shows vont continuer à hanter votre agenda.">An empty chair is lost money. Without proper confirmations and reminders, no-shows will keep haunting your schedule.</p>
@@ -482,22 +553,22 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       >Everything you need. Nothing you don't.</h2>
     </div>
     <div class="feat-grid">
-      <div class="feat rv">
+      <div class="feat rv glow-subtle">
         <span class="feat-tag" data-en="Core" data-fr="Essentiel">Core</span>
         <h3 data-en="AI booking bot, 24/7" data-fr="Bot IA de réservation, 24h/24">AI booking bot, 24/7</h3>
         <p class="body-t" data-en="Your AI never sleeps. It answers questions, checks availability, and books appointments at any hour, in any language." data-fr="Votre IA ne dort jamais. Elle répond aux questions, vérifie les disponibilités et prend les rendez-vous à toute heure, dans n'importe quelle langue.">Your AI never sleeps. It answers questions, checks availability, and books appointments at any hour, in any language.</p>
       </div>
-      <div class="feat rv d1">
+      <div class="feat rv d1 glow-subtle">
         <span class="feat-tag" data-en="Automation" data-fr="Automatisation">Automation</span>
         <h3 data-en="Auto booking &amp; confirmation" data-fr="Réservation et confirmation auto">Auto booking &amp; confirmation</h3>
         <p class="body-t" data-en="Clients choose their slot and receive a booking notification, without you lifting a finger." data-fr="Les clients choisissent leur créneau et reçoivent une notification, sans que vous ayez à intervenir.">Clients choose their slot and receive a booking notification, without you lifting a finger.</p>
       </div>
-      <div class="feat rv d1">
+      <div class="feat rv d1 glow-subtle">
         <span class="feat-tag" data-en="Smart" data-fr="Intelligent">Smart</span>
         <h3 data-en="Smart cancellations and reschedules" data-fr="Annulations et déplacements intelligents">Smart cancellations and reschedules</h3>
         <p class="body-t" data-en="When a client needs to cancel, the AI handles it gracefully, offers alternatives, and fills the slot with the next person." data-fr="Quand un client annule, l'IA gère ça avec élégance, propose des alternatives et comble le créneau avec la personne suivante.">When a client needs to cancel, the AI handles it gracefully, offers alternatives, and fills the slot with the next person.</p>
       </div>
-      <div class="feat rv d2">
+      <div class="feat rv d2 glow-subtle">
         <span class="feat-tag" data-en="Integration" data-fr="Intégration">Integration</span>
         <h3 data-en="Google Calendar sync" data-fr="Sync Google Calendar">Google Calendar sync</h3>
         <p class="body-t" data-en="Every booking lands directly in your Google Calendar. No double entries, no manual updates." data-fr="Chaque réservation arrive directement dans votre Google Calendar. Pas de doublons, pas de mises à jour manuelles.">Every booking lands directly in your Google Calendar. No double entries, no manual updates.</p>
@@ -543,7 +614,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       <div class="plans-grid">
 
         <!-- Starter -->
-        <div class="plan rv d1">
+        <div class="plan rv d1 glow-card">
           <div>
             <div class="plan-name" data-en="Starter" data-fr="Starter">Starter</div>
             <div class="plan-price">€59<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
@@ -557,7 +628,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         </div>
 
         <!-- Pro — le plus populaire -->
-        <div class="plan plan-pop rv d2">
+        <div class="plan plan-pop rv d2 glow-card">
           <div class="plan-hot" data-en="Most popular" data-fr="Le plus populaire">Most popular</div>
           <div>
             <div class="plan-name" data-en="Pro" data-fr="Pro">Pro</div>
@@ -573,7 +644,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         </div>
 
         <!-- Max -->
-        <div class="plan rv d3">
+        <div class="plan rv d3 glow-card">
           <div>
             <div class="plan-name" data-en="Max" data-fr="Max">Max</div>
             <div class="plan-price">€99<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>

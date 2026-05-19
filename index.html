@@ -349,9 +349,18 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   .cta-acts .btn,.cta-acts button{justify-content:center;text-align:center}
 }
 
-/* ─── SECTIONS — toutes transparentes, vagues visibles partout ─── */
-#home,#problem,#solution,#features,#faq,#cta{background:transparent}
+/* ─── SECTIONS — alternance transparente / opaque avec micro-fondu ─── */
+#home,#solution,#cta{background:transparent}
 .div{display:none}
+
+/* Sections opaques : fondu de 60px en tête seulement — adoucit la coupure
+   sans fusionner les sections entre elles */
+#problem,#features,#faq{
+  background:linear-gradient(to bottom,
+    transparent 0,
+    oklch(0.10 0.007 222/.93) 60px
+  );
+}
 
 /* ─── SPOTLIGHT CARD — pointer-reactive glow (SpotlightCard vanilla port) ─── */
 [data-glow] {

@@ -89,6 +89,51 @@ app.post('/api/devis', async (req, res) => {
   }
 });
 
+/* ── POST /api/chat ──
+   Proxy sécurisé vers l'API Claude — la clé reste côté serveur.
+   Corps attendu : { system: string, messages: [{role, content}] }
+*/
+app.post('/api/chat', async (req, res) => {
+  const { system, messages } = req.body;
+  if (!system || !Array.isArray(messages)) {
+    return res.status(400).json({ ok: false, error: 'Champs system et messages requis.' });
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ ok: false, error: 'API non configurée.' });
+  }
+
+  try {
+    const upstream = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
+        'x-api-key': apiKey,
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 300,
+        system,
+        messages: messages.slice(-10),
+      }),
+    });
+
+    const data = await upstream.json();
+    if (!upstream.ok) {
+      console.error('[/api/chat] Erreur Claude :', data);
+      return res.status(upstream.status).json({ ok: false, error: data.error?.message || 'Erreur API.' });
+    }
+
+    const text = data.content?.find(b => b.type === 'text')?.text;
+    res.json({ ok: true, text });
+  } catch (err) {
+    console.error('[/api/chat] Erreur réseau :', err);
+    res.status(500).json({ ok: false, error: 'Erreur serveur.' });
+  }
+});
+
 /* ── Échappement HTML (anti-XSS dans les emails) ── */
 function escHtml(str) {
   return String(str)

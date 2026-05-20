@@ -455,6 +455,159 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .devis-msg.error{display:block;background:oklch(0.6 0.18 25/.12);border:1px solid oklch(0.6 0.18 25/.3);color:oklch(0.7 0.15 25)}
 @media(max-width:560px){.devis-modal{padding:2rem 1.4rem;border-radius:16px}}
 
+/* ── BOT DEMO SECTION ── */
+.bot-demo-inner{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2rem}
+.bot-demo-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;width:100%;max-width:680px;pointer-events:none;user-select:none}
+.bot-prev-card{background:oklch(0.10 0.008 222/.92);border:1px solid var(--bd);border-radius:14px;padding:1.1rem 1.2rem;text-align:left}
+.bot-prev-card .bpc-lbl{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--a);margin-bottom:.5rem}
+.bot-prev-card .bpc-msg{font-size:.78rem;color:var(--t2);line-height:1.4}
+.bot-prev-card .bpc-tag{margin-top:.55rem;font-size:.65rem;color:var(--t3);display:flex;align-items:center;gap:.3rem}
+.bot-prev-card .bpc-tag::before{content:'⚡';font-size:.6rem}
+.bot-demo-cta{display:flex;flex-direction:column;align-items:center;gap:.9rem}
+@media(max-width:640px){.bot-demo-preview{grid-template-columns:1fr;max-width:320px}}
+@media(max-width:460px){.bot-demo-preview{display:none}}
+
+/* ── BOT MODAL ── */
+.bot-overlay{position:fixed;inset:0;z-index:500;background:oklch(0.08 0.006 222/.97);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .35s var(--ex);overflow-y:auto;overscroll-behavior:contain}
+.bot-overlay.open{opacity:1;pointer-events:auto}
+.bot-overlay.open .bot-sheet{transform:translateY(0)}
+.bot-sheet{max-width:900px;margin:5vh auto 4rem;padding:0 1.25rem;transform:translateY(32px);transition:transform .4s var(--ex)}
+.bot-sheet-head{display:flex;align-items:center;justify-content:space-between;padding:1.4rem 0 1rem}
+.bot-sheet-logo{font-family:var(--fd);font-size:1.15rem;font-weight:800;letter-spacing:-.04em}
+.bot-sheet-logo em{color:var(--a);font-style:normal}
+.bot-close{width:38px;height:38px;border-radius:50%;background:oklch(0.18 0.009 220);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:1rem;transition:background .2s,color .2s;cursor:pointer}
+.bot-close:hover{background:oklch(0.22 0.010 218);color:var(--t)}
+
+/* hero du modal */
+.bot-hero{text-align:center;padding:1rem 0 2rem}
+.bot-hero h2{font-family:var(--fd);font-size:clamp(1.7rem,4vw,2.6rem);font-weight:800;letter-spacing:-.03em;line-height:1.05;margin-bottom:.7rem}
+.bot-hero h2 em{color:var(--a);font-style:italic}
+.bot-hero p{font-size:.95rem;color:var(--t2);max-width:48ch;margin:0 auto;line-height:1.7}
+
+/* progress */
+.bot-prog{display:flex;align-items:center;justify-content:center;margin-bottom:2.2rem;gap:0}
+.bp-step{display:flex;flex-direction:column;align-items:center;gap:5px}
+.bp-dot{width:32px;height:32px;border-radius:50%;border:1px solid var(--bd);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:11px;font-weight:800;color:var(--t3);transition:all .3s var(--ex)}
+.bp-dot.act{background:var(--a);border-color:var(--a);color:var(--on-a);box-shadow:0 0 18px oklch(0.76 0.13 193/.4)}
+.bp-dot.done{background:oklch(0.70 0.17 155/.15);border-color:oklch(0.70 0.17 155/.5);color:oklch(0.70 0.17 155)}
+.bp-lbl{font-size:.62rem;color:var(--t3);font-weight:600;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.bp-lbl.act{color:var(--a)}
+.bp-line{width:48px;height:1px;background:var(--bd);margin-bottom:17px;transition:background .3s}
+.bp-line.done{background:oklch(0.70 0.17 155/.5)}
+@media(max-width:480px){.bp-lbl{display:none}.bp-line{width:28px}}
+
+/* cards bot */
+.bcard{background:oklch(0.10 0.008 222/.95);border:1px solid var(--bd);border-radius:18px;padding:1.75rem 2rem;margin-bottom:1rem;backdrop-filter:blur(6px)}
+.bcard-title{font-family:var(--fd);font-size:1.05rem;font-weight:800;letter-spacing:-.02em;margin-bottom:.25rem}
+.bcard-sub{font-size:.85rem;color:var(--t2);margin-bottom:1.5rem;line-height:1.6}
+
+/* form bot */
+.bf{margin-bottom:.9rem}
+.bf label{display:block;font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t2);margin-bottom:5px}
+.bf input,.bf select,.bf textarea{width:100%;background:oklch(0.09 0.006 222);border:1px solid oklch(1 0 0/.16);border-radius:8px;padding:.6rem .85rem;color:var(--t);font-family:var(--fb);font-size:.875rem;outline:none;transition:border-color .2s}
+.bf input:focus,.bf select:focus,.bf textarea:focus{border-color:oklch(0.76 0.13 193/.55)}
+.bf textarea{resize:vertical;min-height:72px}
+.bf select option{background:#111}
+.b2col{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+@media(max-width:500px){.b2col{grid-template-columns:1fr}}
+
+/* chips bot */
+.bchip-group{display:flex;flex-wrap:wrap;gap:5px}
+.bchip{padding:5px 13px;border-radius:100px;border:1px solid var(--bd);background:oklch(0.09 0.006 222);color:var(--t2);font-size:.78rem;cursor:pointer;transition:all .15s;user-select:none}
+.bchip:hover{border-color:oklch(0.76 0.13 193/.4);color:var(--a)}
+.bchip.on{background:oklch(0.76 0.13 193/.12);border-color:oklch(0.76 0.13 193/.4);color:var(--a);font-weight:500}
+
+/* horaires bot */
+.bhours-grid{display:flex;flex-direction:column;gap:4px}
+.bhours-row{display:grid;grid-template-columns:76px 1fr 1fr 34px;gap:7px;align-items:center}
+.bhours-day{font-size:.78rem;color:var(--t2)}
+.bhours-row input[type=time]{background:oklch(0.09 0.006 222);border:1px solid oklch(1 0 0/.16);border-radius:6px;padding:5px 7px;color:var(--t);font-size:.78rem;outline:none}
+.bhours-row input[type=time]:focus{border-color:oklch(0.76 0.13 193/.55)}
+.btoggle{position:relative;width:30px;height:17px}
+.btoggle input{opacity:0;width:0;height:0}
+.btoggle-sl{position:absolute;inset:0;background:var(--bg3);border-radius:100px;cursor:pointer;transition:.2s;border:1px solid var(--bd)}
+.btoggle-sl::before{content:'';position:absolute;width:11px;height:11px;left:2px;top:2px;background:var(--t3);border-radius:50%;transition:.2s}
+.btoggle input:checked+.btoggle-sl{background:var(--a);border-color:var(--a)}
+.btoggle input:checked+.btoggle-sl::before{transform:translateX(13px);background:#fff}
+
+/* chat layout bot */
+.bchat-layout{display:grid;grid-template-columns:240px 1fr;gap:1.1rem}
+@media(max-width:620px){.bchat-layout{grid-template-columns:1fr}}
+.bchat-sidebar{background:oklch(0.10 0.008 222/.95);border:1px solid var(--bd);border-radius:16px;padding:1.1rem;backdrop-filter:blur(5px);display:flex;flex-direction:column;gap:.4rem}
+.bchat-sidebar-lbl{font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:.4rem}
+.bcpill{background:oklch(0.09 0.006 222);border-radius:8px;padding:.55rem .75rem}
+.bcpill .lbl{font-size:.62rem;color:var(--t3);margin-bottom:2px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.bcpill .val{font-size:.78rem;color:var(--t);line-height:1.35}
+.bsugg{margin-top:.6rem}
+.bsugg-btn{width:100%;text-align:left;padding:.5rem .7rem;background:oklch(0.09 0.006 222);border:1px solid var(--bd);border-radius:8px;font-size:.73rem;color:var(--t2);cursor:pointer;margin-bottom:4px;transition:all .15s}
+.bsugg-btn:hover{border-color:oklch(0.76 0.13 193/.4);color:var(--a)}
+.bchat-main{background:oklch(0.10 0.008 222/.95);border:1px solid var(--bd);border-radius:16px;display:flex;flex-direction:column;height:460px;backdrop-filter:blur(5px)}
+.bchat-hd{padding:.9rem 1.1rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:.65rem}
+.bchat-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--a),oklch(0.52 0.12 196));display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:10px;font-weight:800;color:var(--on-a);flex-shrink:0}
+.bchat-hd-name{font-family:var(--fd);font-weight:700;font-size:.85rem;letter-spacing:-.01em}
+.bchat-hd-sub{font-size:.7rem;color:oklch(0.70 0.17 155)}
+.bchat-msgs{flex:1;overflow-y:auto;padding:.9rem 1.1rem;display:flex;flex-direction:column;gap:7px;scroll-behavior:smooth}
+.bchat-msgs::-webkit-scrollbar{width:3px}
+.bchat-msgs::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:4px}
+.bmsg-row{display:flex;gap:6px;align-items:flex-end}
+.bmsg-row.user{flex-direction:row-reverse}
+.bbubble{max-width:76%;padding:.55rem .85rem;border-radius:13px;font-size:.82rem;line-height:1.5}
+.bbubble.bot{background:oklch(0.16 0.009 220);border:1px solid var(--bd);color:var(--t);border-bottom-left-radius:3px}
+.bbubble.user{background:var(--a);color:var(--on-a);border-bottom-right-radius:3px}
+.bbubble.typing{background:oklch(0.16 0.009 220);border:1px solid var(--bd)}
+.btyping-dots{display:inline-flex;gap:3px;align-items:center;padding:2px 0}
+.btyping-dots span{width:5px;height:5px;border-radius:50%;background:var(--t3);animation:btdot 1.2s ease-in-out infinite}
+.btyping-dots span:nth-child(2){animation-delay:.15s}
+.btyping-dots span:nth-child(3){animation-delay:.3s}
+@keyframes btdot{0%,60%,100%{transform:translateY(0);background:var(--t3)}30%{transform:translateY(-4px);background:oklch(0.76 0.13 193/.7)}}
+.bbot-tag{font-size:.62rem;color:var(--t3);margin-top:2px;padding-left:2px}
+.bmsg-av{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--a),oklch(0.52 0.12 196));display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:800;color:var(--on-a);flex-shrink:0;font-family:var(--fd)}
+.bchat-inp-row{padding:.75rem 1.1rem;border-top:1px solid var(--bd);display:flex;gap:6px}
+.bchat-inp-row input{flex:1;background:oklch(0.09 0.006 222);border:1px solid oklch(1 0 0/.16);border-radius:100px;padding:.5rem .9rem;color:var(--t);font-family:var(--fb);font-size:.82rem;outline:none;transition:border-color .2s}
+.bchat-inp-row input:focus{border-color:oklch(0.76 0.13 193/.55)}
+.bsend-btn{width:34px;height:34px;border-radius:50%;background:var(--a);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,transform .2s var(--ex);flex-shrink:0}
+.bsend-btn:hover{background:oklch(0.82 0.11 190);transform:scale(1.08)}
+.bsend-btn svg{width:14px;height:14px;fill:none;stroke:var(--on-a);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* plans bot */
+.bplan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-bottom:1.4rem}
+@media(max-width:520px){.bplan-grid{grid-template-columns:1fr}}
+.bplan-card{background:oklch(0.09 0.006 222);border:1px solid var(--bd);border-radius:13px;padding:1.1rem;cursor:pointer;transition:all .2s var(--ex);position:relative}
+.bplan-card:hover{border-color:oklch(0.76 0.13 193/.4);transform:translateY(-2px)}
+.bplan-card.sel{border-color:var(--a);background:var(--alo);box-shadow:0 0 0 1px var(--a)}
+.bplan-hot{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--a);color:var(--on-a);font-size:.6rem;font-family:var(--fd);font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:.2rem .65rem;border-radius:100px;white-space:nowrap}
+.bplan-name{font-family:var(--fd);font-size:.65rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--a);margin-bottom:.35rem}
+.bplan-price{font-family:var(--fd);font-size:1.65rem;font-weight:800;letter-spacing:-.04em;line-height:1}
+.bplan-price span{font-size:.7rem;font-weight:500;color:var(--t2)}
+.bplan-feats{margin-top:.65rem;display:flex;flex-direction:column;gap:.28rem}
+.bplan-feat{font-size:.73rem;color:var(--t2);display:flex;align-items:flex-start;gap:.45rem;line-height:1.35}
+.bplan-feat::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--a);flex-shrink:0;margin-top:.35rem}
+
+/* boutons bot */
+.bbtn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:100px;font-family:var(--fd);font-size:.88rem;font-weight:800;letter-spacing:-.01em;cursor:pointer;transition:all .2s var(--ex);border:none;white-space:nowrap}
+.bbtn-primary{background:var(--a);color:var(--on-a)}
+.bbtn-primary:hover{background:oklch(0.82 0.11 190);box-shadow:0 8px 24px oklch(0.76 0.13 193/.3);transform:translateY(-1px)}
+.bbtn-ghost{background:transparent;color:var(--t2);border:1px solid var(--bd2)}
+.bbtn-ghost:hover{color:var(--t);background:oklch(1 0 0/.04)}
+.bbtn-full{width:100%}
+.bbtn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+
+/* succès bot */
+.bsuccess{text-align:center;padding:2.5rem 1rem}
+.bsuccess-icon{width:62px;height:62px;border-radius:50%;background:oklch(0.70 0.17 155/.12);border:1px solid oklch(0.70 0.17 155/.4);display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem}
+.bsuccess-icon svg{width:28px;height:28px;stroke:oklch(0.70 0.17 155);stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.bsuccess-title{font-family:var(--fd);font-size:1.4rem;font-weight:800;letter-spacing:-.02em;margin-bottom:.4rem}
+.bsuccess-sub{color:var(--t2);margin-bottom:1.6rem;line-height:1.65;max-width:36ch;margin-left:auto;margin-right:auto}
+.bstep-list{text-align:left;max-width:360px;margin:0 auto 1.6rem;display:flex;flex-direction:column;gap:8px}
+.bstep-item{display:flex;align-items:flex-start;gap:.8rem;background:oklch(0.09 0.006 222);border:1px solid var(--bd);border-radius:10px;padding:.85rem .95rem}
+.bstep-num{width:24px;height:24px;border-radius:50%;background:var(--alo);border:1px solid var(--amid);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.68rem;font-weight:800;color:var(--a);flex-shrink:0}
+.bstep-info strong{display:block;font-size:.8rem;margin-bottom:2px}
+.bstep-info span{font-size:.73rem;color:var(--t2)}
+
+/* animations bot */
+.bfade{animation:bfadeIn .32s var(--ex)}
+@keyframes bfadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
 /* ── UTILITY ── */
 .sec-hd--center{text-align:center}
 .sec-h2{margin-top:.6rem}
@@ -671,6 +824,45 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
           <h3 data-en="Google Calendar sync" data-fr="Sync Google Calendar">Google Calendar sync</h3>
           <p class="body-t" data-en="Every booking lands directly in your Google Calendar. No double entries, no manual updates." data-fr="Chaque réservation arrive directement dans votre Google Calendar. Pas de doublons, pas de mises à jour manuelles.">Every booking lands directly in your Google Calendar. No double entries, no manual updates.</p>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOT DEMO -->
+<section class="section" id="bot-demo">
+  <div class="wrap">
+    <div class="sec-hd rv sec-hd--center">
+      <span class="label" data-en="Live demo" data-fr="Démo en direct">Live demo</span>
+      <h2 class="fd fd-lg sec-h2" style="max-width:560px;margin-left:auto;margin-right:auto">
+        <span data-en="Your bot. Your tone.<br><em>Try it right now.</em>" data-fr="Ton bot. Ton ton.<br><em>Teste-le maintenant.</em>">Your bot. Your tone.<br><em>Try it right now.</em></span>
+      </h2>
+    </div>
+    <div class="bot-demo-inner rv d1">
+      <p class="body-lg" style="max-width:48ch;text-align:center" data-en="Set up your barbershop in 2 minutes. Then chat with your AI — exactly as your clients will." data-fr="Configure ton salon en 2 minutes. Puis discute avec ton IA — exactement comme le vivront tes clients.">Set up your barbershop in 2 minutes. Then chat with your AI — exactly as your clients will.</p>
+      <div class="bot-demo-preview" aria-hidden="true">
+        <div class="bot-prev-card">
+          <div class="bpc-lbl" data-en="Client" data-fr="Client">Client</div>
+          <div class="bpc-msg" data-en="Hey, any spots tomorrow at 2pm?" data-fr="Bonjour, dispo demain à 14h ?">Hey, any spots tomorrow at 2pm?</div>
+          <div class="bpc-tag" data-en="Answered instantly" data-fr="Répondu instantanément">Answered instantly</div>
+        </div>
+        <div class="bot-prev-card">
+          <div class="bpc-lbl" data-en="Your AI" data-fr="Ton IA">Your AI</div>
+          <div class="bpc-msg" data-en="14:00 is available! What service?" data-fr="14h c'est libre ! Quelle prestation ?">14:00 is available! What service?</div>
+          <div class="bpc-tag" data-en="Automatic" data-fr="Automatique">Automatic</div>
+        </div>
+        <div class="bot-prev-card">
+          <div class="bpc-lbl" data-en="Result" data-fr="Résultat">Result</div>
+          <div class="bpc-msg" data-en="✓ Booked — Haircut + Beard, 14:00" data-fr="✓ Réservé — Coupe + Barbe, 14h">✓ Booked — Haircut + Beard, 14:00</div>
+          <div class="bpc-tag" data-en="Zero manual work" data-fr="Zéro effort manuel">Zero manual work</div>
+        </div>
+      </div>
+      <div class="bot-demo-cta">
+        <button class="btn btn-a btn-lg mag rv d2" onclick="openBotModal()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h5M10 5l3 3-3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><rect x="1.5" y="1.5" width="13" height="13" rx="3.5" stroke="currentColor" stroke-width="1.4"/></svg>
+          <span data-en="Try the bot now" data-fr="Tester le bot maintenant">Try the bot now</span>
+        </button>
+        <p style="font-size:.8rem;color:var(--t3)" data-en="Free · No account needed · 2 min setup" data-fr="Gratuit · Sans compte · 2 min de config">Free · No account needed · 2 min setup</p>
       </div>
     </div>
   </div>
@@ -919,7 +1111,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     </div>
     <div class="modal-cta-row">
       <a href="trimsync-booking.html" class="modal-book-btn" id="modal-book-btn">
-        <span data-en="Book your free demo" data-fr="Réserver votre démo gratuite">Book your free demo</span>
+        <span data-en="Get started" data-fr="Commencer">Get started</span>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
       <button class="btn-ghost-a" id="modal-devis-btn" data-en="Get a quote" data-fr="Demander un devis">Get a quote</button>
@@ -975,6 +1167,197 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       </button>
       <div class="devis-msg" id="dv-msg-status"></div>
     </form>
+  </div>
+</div>
+
+<!-- BOT MODAL -->
+<div id="bot-overlay" class="bot-overlay" role="dialog" aria-modal="true" aria-label="Bot demo">
+  <div class="bot-sheet">
+
+    <!-- Header -->
+    <div class="bot-sheet-head">
+      <span class="bot-sheet-logo">Trim<em>Sync</em></span>
+      <button class="bot-close" onclick="closeBotModal()" aria-label="Fermer">✕</button>
+    </div>
+
+    <!-- Hero modal -->
+    <div class="bot-hero">
+      <div class="badge" style="margin-bottom:1rem">
+        <span class="badge-pulse" aria-hidden="true"></span>
+        <span data-en="Configure &amp; test live" data-fr="Configure et teste en direct">Configure &amp; test live</span>
+      </div>
+      <h2><span data-en="Your bot,<br><em>live in 2 minutes.</em>" data-fr="Ton bot,<br><em>en ligne en 2 minutes.</em>">Your bot,<br><em>live in 2 minutes.</em></span></h2>
+      <p data-en="Personalize your AI, chat with it as a client would, then subscribe." data-fr="Personnalise ton IA, discute avec elle comme un client, puis abonne-toi.">Personalize your AI, chat with it as a client would, then subscribe.</p>
+    </div>
+
+    <!-- Progress -->
+    <div class="bot-prog" id="bot-prog">
+      <div class="bp-step"><div class="bp-dot act" id="bdot-1">1</div><div class="bp-lbl act" id="blbl-1" data-en="Your salon" data-fr="Ton salon">Your salon</div></div>
+      <div class="bp-line" id="bline-1"></div>
+      <div class="bp-step"><div class="bp-dot" id="bdot-2">2</div><div class="bp-lbl" id="blbl-2" data-en="Test bot" data-fr="Teste le bot">Test bot</div></div>
+      <div class="bp-line" id="bline-2"></div>
+      <div class="bp-step"><div class="bp-dot" id="bdot-3">3</div><div class="bp-lbl" id="blbl-3" data-en="Subscribe" data-fr="Abonnement">Subscribe</div></div>
+      <div class="bp-line" id="bline-3"></div>
+      <div class="bp-step"><div class="bp-dot" id="bdot-4">4</div><div class="bp-lbl" id="blbl-4" data-en="Instagram" data-fr="Instagram">Instagram</div></div>
+    </div>
+
+    <!-- STEP 1 : Config salon -->
+    <div id="bstep-1" class="bfade">
+      <div class="bcard">
+        <div class="bcard-title" data-en="Tell us about your salon" data-fr="Parle-nous de ton salon">Tell us about your salon</div>
+        <div class="bcard-sub" data-en="This personalizes your bot's replies. Your clients will notice." data-fr="Ces infos personnalisent les réponses de ton bot. Tes clients verront la différence.">This personalizes your bot's replies. Your clients will notice.</div>
+        <div class="b2col">
+          <div class="bf"><label data-en="Your first name" data-fr="Ton prénom">Your first name</label><input type="text" id="bf-name" placeholder="Karim"/></div>
+          <div class="bf"><label data-en="Salon name" data-fr="Nom du salon">Salon name</label><input type="text" id="bf-salon" placeholder="Barber Kingdom"/></div>
+        </div>
+        <div class="b2col">
+          <div class="bf"><label data-en="City" data-fr="Ville">City</label><input type="text" id="bf-ville" placeholder="Paris"/></div>
+          <div class="bf"><label data-en="Your @Instagram" data-fr="Ton @Instagram">Your @Instagram</label><input type="text" id="bf-ig" placeholder="@barberkingdom"/></div>
+        </div>
+        <div class="bf">
+          <label data-en="Services offered" data-fr="Services proposés">Services offered</label>
+          <div class="bchip-group" id="bchips">
+            <div class="bchip on" data-en="Classic cut" data-fr="Coupe classique">Classic cut</div>
+            <div class="bchip on" data-en="Fade" data-fr="Dégradé">Fade</div>
+            <div class="bchip" data-en="Beard" data-fr="Barbe">Beard</div>
+            <div class="bchip" data-en="Traditional shave" data-fr="Rasage traditionnel">Traditional shave</div>
+            <div class="bchip" data-en="Kids cut" data-fr="Coupe enfant">Kids cut</div>
+            <div class="bchip" data-en="Coloring" data-fr="Coloration">Coloring</div>
+            <div class="bchip" data-en="Hair care" data-fr="Soins capillaires">Hair care</div>
+            <div class="bchip" data-en="Straightening" data-fr="Lissage">Straightening</div>
+          </div>
+        </div>
+        <div class="b2col">
+          <div class="bf"><label data-en="Average price (€)" data-fr="Prix moyen (€)">Average price (€)</label><input type="text" id="bf-prix" placeholder="25" value="25"/></div>
+          <div class="bf"><label data-en="Average duration (min)" data-fr="Durée moyenne (min)">Average duration (min)</label><input type="text" id="bf-duree" placeholder="30" value="30"/></div>
+        </div>
+        <div class="bf">
+          <label data-en="Opening hours" data-fr="Horaires d'ouverture">Opening hours</label>
+          <div class="bhours-grid" id="bhours-grid"></div>
+        </div>
+        <div class="bf">
+          <label data-en="Custom welcome message (optional)" data-fr="Message d'accueil personnalisé (optionnel)">Custom welcome message (optional)</label>
+          <textarea id="bf-accueil" placeholder="Hey! I'm the bot for Barber Kingdom. I can help you book an appointment 💈"></textarea>
+        </div>
+        <div style="margin-top:1.4rem">
+          <button class="bbtn bbtn-primary bbtn-full" onclick="bGoStep2()">
+            <span data-en="Test my bot now →" data-fr="Tester mon bot maintenant →">Test my bot now →</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 : Chat -->
+    <div id="bstep-2" style="display:none" class="bfade">
+      <div class="bchat-layout">
+        <div class="bchat-sidebar">
+          <div class="bchat-sidebar-lbl" data-en="Bot configured" data-fr="Bot configuré">Bot configured</div>
+          <div class="bcpill"><div class="lbl" data-en="Salon" data-fr="Salon">Salon</div><div class="val" id="bs-salon">—</div></div>
+          <div class="bcpill"><div class="lbl" data-en="Barber" data-fr="Barbier">Barber</div><div class="val" id="bs-name">—</div></div>
+          <div class="bcpill"><div class="lbl" data-en="Services" data-fr="Services">Services</div><div class="val" id="bs-services">—</div></div>
+          <div class="bcpill"><div class="lbl" data-en="Avg. price" data-fr="Prix moyen">Avg. price</div><div class="val" id="bs-prix">—</div></div>
+          <div class="bcpill"><div class="lbl" data-en="Hours" data-fr="Horaires">Hours</div><div class="val" id="bs-horaires" style="font-size:.7rem;line-height:1.45">—</div></div>
+          <div class="bsugg" style="margin-top:.8rem">
+            <div class="bchat-sidebar-lbl" data-en="Try these messages" data-fr="Essaie ces messages">Try these messages</div>
+            <button class="bsugg-btn" onclick="bSendSuggestion(this)" data-en="Available tomorrow morning?" data-fr="Dispo demain matin ?">Available tomorrow morning?</button>
+            <button class="bsugg-btn" onclick="bSendSuggestion(this)" data-en="How much for a cut + beard?" data-fr="C'est combien une coupe + barbe ?">How much for a cut + beard?</button>
+            <button class="bsugg-btn" onclick="bSendSuggestion(this)" data-en="Do you do kids?" data-fr="Vous faites les enfants ?">Do you do kids?</button>
+            <button class="bsugg-btn" onclick="bSendSuggestion(this)" data-en="I need to cancel my appointment" data-fr="Je veux annuler mon RDV">I need to cancel my appointment</button>
+            <button class="bsugg-btn" onclick="bSendSuggestion(this)" data-en="Where are you exactly?" data-fr="Vous êtes où exactement ?">Where are you exactly?</button>
+          </div>
+          <div style="margin-top:auto;padding-top:.8rem">
+            <button class="bbtn bbtn-ghost bbtn-full" style="font-size:.72rem;padding:.5rem .9rem" onclick="bGoStep1()">← <span data-en="Edit config" data-fr="Modifier la config">Edit config</span></button>
+          </div>
+        </div>
+        <div class="bchat-main">
+          <div class="bchat-hd">
+            <div class="bchat-av" id="bchat-av">BK</div>
+            <div>
+              <div class="bchat-hd-name" id="bchat-salon-name">Barber Kingdom</div>
+              <div class="bchat-hd-sub">● <span data-en="Online" data-fr="En ligne">Online</span></div>
+            </div>
+          </div>
+          <div class="bchat-msgs" id="bchat-msgs" aria-live="polite"></div>
+          <div class="bchat-inp-row">
+            <input type="text" id="bchat-input" data-en-placeholder="Write your message…" data-fr-placeholder="Écris ton message…" placeholder="Write your message…" onkeydown="if(event.key==='Enter')bSendMsg()"/>
+            <button class="bsend-btn" onclick="bSendMsg()" aria-label="Send">
+              <svg viewBox="0 0 16 16"><line x1="14" y1="2" x2="7" y2="9"/><polyline points="14 2 10 14 7 9 2 6 14 2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:1.1rem;display:flex;justify-content:flex-end">
+        <button class="bbtn bbtn-primary" onclick="bGoStep3()">
+          <span data-en="Choose my plan →" data-fr="Choisir mon abonnement →">Choose my plan →</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 3 : Plans -->
+    <div id="bstep-3" style="display:none" class="bfade">
+      <div class="bcard">
+        <div class="bcard-title" data-en="Choose your plan" data-fr="Choisis ton abonnement">Choose your plan</div>
+        <div class="bcard-sub" data-en="No commitment. Switch plans anytime." data-fr="Sans engagement. Tu peux changer de formule à tout moment.">No commitment. Switch plans anytime.</div>
+        <div class="bplan-grid">
+          <div class="bplan-card" id="bplan-starter" onclick="bSelectPlan('starter')">
+            <div class="bplan-name">Starter</div>
+            <div class="bplan-price">59<span data-en="€/mo" data-fr="€/mois">€/mo</span></div>
+            <div class="bplan-feats">
+              <div class="bplan-feat" data-en="AI Instagram bot 24/7" data-fr="Bot IA Instagram 24h/24">AI Instagram bot 24/7</div>
+              <div class="bplan-feat" data-en="Unlimited DMs" data-fr="DMs illimités">Unlimited DMs</div>
+              <div class="bplan-feat" data-en="Auto confirmations" data-fr="Confirmations automatiques">Auto confirmations</div>
+            </div>
+          </div>
+          <div class="bplan-card sel" id="bplan-pro" onclick="bSelectPlan('pro')">
+            <div class="bplan-hot" data-en="Popular" data-fr="Populaire">Popular</div>
+            <div class="bplan-name">Pro</div>
+            <div class="bplan-price">79<span data-en="€/mo" data-fr="€/mois">€/mo</span></div>
+            <div class="bplan-feats">
+              <div class="bplan-feat" data-en="Everything in Starter" data-fr="Tout Starter">Everything in Starter</div>
+              <div class="bplan-feat" data-en="TrimSync dashboard" data-fr="Dashboard TrimSync">TrimSync dashboard</div>
+              <div class="bplan-feat" data-en="Agenda management" data-fr="Gestion agenda">Agenda management</div>
+              <div class="bplan-feat" data-en="Client CRM" data-fr="CRM clients">Client CRM</div>
+            </div>
+          </div>
+          <div class="bplan-card" id="bplan-max" onclick="bSelectPlan('max')">
+            <div class="bplan-name">Max</div>
+            <div class="bplan-price">99<span data-en="€/mo" data-fr="€/mois">€/mo</span></div>
+            <div class="bplan-feats">
+              <div class="bplan-feat" data-en="Everything in Pro" data-fr="Tout Pro">Everything in Pro</div>
+              <div class="bplan-feat" data-en="Native booking page" data-fr="Page réservation native">Native booking page</div>
+              <div class="bplan-feat" data-en="Analytics &amp; loyalty" data-fr="Analytics et fidélité">Analytics &amp; loyalty</div>
+              <div class="bplan-feat" data-en="Dedicated account manager" data-fr="Account manager dédié">Dedicated account manager</div>
+            </div>
+          </div>
+        </div>
+        <button id="bcheckout-btn" class="bbtn bbtn-primary bbtn-full" onclick="bGoStripe()">
+          <span data-en="Start with" data-fr="Commencer avec le plan">Start with</span> <span id="bplan-label">Pro</span> →
+        </button>
+        <p style="text-align:center;font-size:.73rem;color:var(--t3);margin-top:.7rem" data-en="Secure payment via Stripe · Cancel anytime" data-fr="Paiement sécurisé via Stripe · Annulable à tout moment">Secure payment via Stripe · Cancel anytime</p>
+      </div>
+    </div>
+
+    <!-- STEP 4 : Succès + Instagram -->
+    <div id="bstep-4" style="display:none" class="bfade">
+      <div class="bcard">
+        <div class="bsuccess">
+          <div class="bsuccess-icon"><svg viewBox="0 0 32 32"><polyline points="6 16 13 23 26 10"/></svg></div>
+          <div class="bsuccess-title" data-en="Payment confirmed 🎉" data-fr="Paiement confirmé 🎉">Payment confirmed 🎉</div>
+          <div class="bsuccess-sub" data-en="One last step: connect your Instagram so your bot starts replying to clients." data-fr="Plus qu'une étape : connecte ton Instagram pour que ton bot commence à répondre.">One last step: connect your Instagram so your bot starts replying to clients.</div>
+          <div class="bstep-list">
+            <div class="bstep-item"><div class="bstep-num">1</div><div class="bstep-info"><strong data-en="Config saved" data-fr="Configuration sauvegardée">Config saved</strong><span data-en="Your bot is ready with your info" data-fr="Ton bot est prêt avec tes infos">Your bot is ready with your info</span></div></div>
+            <div class="bstep-item"><div class="bstep-num">2</div><div class="bstep-info"><strong data-en="Payment validated" data-fr="Paiement validé">Payment validated</strong><span data-en="Subscription active" data-fr="Abonnement actif">Subscription active</span></div></div>
+            <div class="bstep-item" style="border-color:var(--amid)"><div class="bstep-num" style="background:var(--a);color:var(--on-a);border-color:var(--a)">3</div><div class="bstep-info"><strong data-en="Connect Instagram" data-fr="Connecter Instagram">Connect Instagram</strong><span data-en="Authorize TrimSync to reply to your DMs" data-fr="Autorise TrimSync à répondre à tes DMs">Authorize TrimSync to reply to your DMs</span></div></div>
+          </div>
+          <button class="bbtn bbtn-primary" style="padding:.85rem 1.8rem;font-size:.92rem" onclick="bConnectInstagram()">
+            <svg style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+            <span data-en="Connect my Instagram" data-fr="Connecter mon Instagram">Connect my Instagram</span>
+          </button>
+          <p style="font-size:.7rem;color:var(--t3);margin-top:.7rem" data-en="Redirected to Meta to authorize. Secure and revocable." data-fr="Redirigé vers Meta pour autoriser. Sécurisé et révocable.">Redirected to Meta to authorize. Secure and revocable.</p>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1043,7 +1426,7 @@ if(sprog)scroll(info=>{const p=typeof info==='number'?info:(info?.y?.progress??0
 (()=>{
   const secNav=document.getElementById('secnav');
   if(!secNav)return;
-  const SEC=[['home','Home','Accueil'],['problem','Problem','Problème'],['solution','How it works','Comment ça marche'],['features','Features','Fonctionnalités'],['pricing','Pricing','Tarifs'],['faq','FAQ','FAQ'],['cta','Get started','Commencer']];
+  const SEC=[['home','Home','Accueil'],['problem','Problem','Problème'],['solution','How it works','Comment ça marche'],['features','Features','Fonctionnalités'],['bot-demo','Try the bot','Tester'],['pricing','Pricing','Tarifs'],['faq','FAQ','FAQ'],['cta','Get started','Commencer']];
   SEC.forEach(([id,en,fr])=>{
     const dot=document.createElement('button');
     dot.className='sec-dot';
@@ -1220,7 +1603,8 @@ document.querySelectorAll('.faq-item').forEach(item=>{
       d.feats.map(f=>`<li${f.h?' class="mh"':''}>${f.t}</li>`).join('');
     modal.querySelector('#modal-steps-list').innerHTML=
       d.steps.map(s=>`<div class="modal-step-row"><div class="modal-step-num">${s.n}</div><div class="modal-step-body"><strong>${s.title}</strong>${s.desc}</div></div>`).join('');
-    modal.querySelector('#modal-book-btn').href=`trimsync-booking.html?plan=${key}`;
+    const STRIPE_LINKS={starter:'https://buy.stripe.com/5kQ9AT7Jd4ug3vs5HPgEg03',pro:'https://buy.stripe.com/28EdR9gfJbWI3vs8U1gEg04',max:'https://buy.stripe.com/cNi00jfbFf8U5DA2vDgEg05'};
+    modal.querySelector('#modal-book-btn').href=STRIPE_LINKS[key]||`trimsync-booking.html?plan=${key}`;
     /* traduire les strings statiques du modal */
     modal.querySelectorAll('[data-en]').forEach(el=>{
       const v=el.getAttribute('data-'+l);if(!v)return;
@@ -1343,6 +1727,333 @@ document.addEventListener('keydown', e => {
       openDevis(currentPlanKey);
     });
   }
+})();
+
+/* ═══════════════════════════════════════════════
+   BOT MODAL — config globale + logique complète
+   ═══════════════════════════════════════════════ */
+
+const BBACKEND = 'https://trimsync-backend-production.up.railway.app';
+const BSTRIPE  = {
+  starter:'https://buy.stripe.com/5kQ9AT7Jd4ug3vs5HPgEg03',
+  pro:    'https://buy.stripe.com/28EdR9gfJbWI3vs8U1gEg04',
+  max:    'https://buy.stripe.com/cNi00jfbFf8U5DA2vDgEg05'
+};
+
+const bcfg = {
+  name:'', salon:'', ville:'', ig:'',
+  services:[], prix:'25', duree:'30',
+  hours:{}, accueil:'', plan:'pro',
+  history:[]
+};
+
+const BDAYS = [
+  {key:'mon',en:'Monday',   fr:'Lundi',   open:true, from:'09:00',to:'19:00'},
+  {key:'tue',en:'Tuesday',  fr:'Mardi',   open:true, from:'09:00',to:'19:00'},
+  {key:'wed',en:'Wednesday',fr:'Mercredi',open:true, from:'09:00',to:'19:00'},
+  {key:'thu',en:'Thursday', fr:'Jeudi',   open:true, from:'09:00',to:'19:00'},
+  {key:'fri',en:'Friday',   fr:'Vendredi',open:true, from:'09:00',to:'20:00'},
+  {key:'sat',en:'Saturday', fr:'Samedi',  open:true, from:'09:00',to:'18:00'},
+  {key:'sun',en:'Sunday',   fr:'Dimanche',open:false,from:'10:00',to:'16:00'},
+];
+
+/* ── Horaires ── */
+function bBuildHours() {
+  const grid = document.getElementById('bhours-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  BDAYS.forEach(d => {
+    bcfg.hours[d.key] = {open:d.open, from:d.from, to:d.to};
+    const lbl = lang === 'fr' ? d.fr : d.en;
+    const row = document.createElement('div');
+    row.className = 'bhours-row';
+    row.innerHTML = `
+      <span class="bhours-day">${lbl}</span>
+      <input type="time" value="${d.from}" id="bh-from-${d.key}" onchange="bcfg.hours['${d.key}'].from=this.value"/>
+      <input type="time" value="${d.to}"   id="bh-to-${d.key}"   onchange="bcfg.hours['${d.key}'].to=this.value"/>
+      <label class="btoggle">
+        <input type="checkbox" ${d.open?'checked':''} onchange="bToggleDay('${d.key}',this.checked)"/>
+        <span class="btoggle-sl"></span>
+      </label>`;
+    grid.appendChild(row);
+    if (!d.open) {
+      row.querySelector(`#bh-from-${d.key}`).disabled = true;
+      row.querySelector(`#bh-to-${d.key}`).disabled = true;
+    }
+  });
+}
+window.bToggleDay = function(key, open) {
+  bcfg.hours[key].open = open;
+  document.getElementById(`bh-from-${key}`).disabled = !open;
+  document.getElementById(`bh-to-${key}`).disabled = !open;
+};
+
+/* chips */
+function bInitChips() {
+  document.querySelectorAll('#bchips .bchip').forEach(c => {
+    /* libellé bilingue */
+    const lbl = c.getAttribute('data-' + lang) || c.textContent;
+    c.textContent = lbl;
+    c.addEventListener('click', () => c.classList.toggle('on'));
+  });
+}
+
+/* ── Ouvrir / fermer ── */
+window.openBotModal = function() {
+  const ov = document.getElementById('bot-overlay');
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  bBuildHours();
+  bInitChips();
+  bSetStep(1);
+  /* réinitialiser chat si on rouvre */
+  bcfg.history = [];
+  const msgs = document.getElementById('bchat-msgs');
+  if (msgs) msgs.innerHTML = '';
+};
+window.closeBotModal = function() {
+  document.getElementById('bot-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+};
+document.getElementById('bot-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('bot-overlay')) window.closeBotModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('bot-overlay').classList.contains('open'))
+    window.closeBotModal();
+});
+
+/* ── Progress steps ── */
+function bSetStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.getElementById(`bdot-${i}`);
+    const lbl = document.getElementById(`blbl-${i}`);
+    if (!dot) continue;
+    dot.classList.remove('act','done');
+    lbl && lbl.classList.remove('act');
+    if (i < n)      { dot.classList.add('done'); dot.textContent = '✓'; }
+    else if (i===n) { dot.classList.add('act');  dot.textContent = i; lbl && lbl.classList.add('act'); }
+    else            { dot.textContent = i; }
+    if (i < 4) {
+      const line = document.getElementById(`bline-${i}`);
+      if (line) line.classList.toggle('done', i < n);
+    }
+  }
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`bstep-${i}`);
+    if (!el) continue;
+    el.style.display = i === n ? 'block' : 'none';
+    if (i === n) { el.classList.remove('bfade'); void el.offsetWidth; el.classList.add('bfade'); }
+  }
+  /* scroll haut du sheet */
+  const ov = document.getElementById('bot-overlay');
+  if (ov) ov.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ── Step 1 → 2 ── */
+window.bGoStep1 = function() { bSetStep(1); };
+window.bGoStep2 = function() {
+  bcfg.name    = document.getElementById('bf-name').value.trim()  || 'Alex';
+  bcfg.salon   = document.getElementById('bf-salon').value.trim() || 'Barber Kingdom';
+  bcfg.ville   = document.getElementById('bf-ville').value.trim() || 'Paris';
+  bcfg.ig      = document.getElementById('bf-ig').value.trim();
+  bcfg.services= Array.from(document.querySelectorAll('#bchips .bchip.on')).map(c => c.textContent.trim());
+  bcfg.prix    = document.getElementById('bf-prix').value  || '25';
+  bcfg.duree   = document.getElementById('bf-duree').value || '30';
+  bcfg.accueil = document.getElementById('bf-accueil').value.trim();
+  if (!bcfg.services.length) bcfg.services = lang==='fr' ? ['Coupe classique','Dégradé'] : ['Classic cut','Fade'];
+
+  const hoursStr = BDAYS.filter(d => bcfg.hours[d.key]?.open)
+    .map(d => `${lang==='fr'?d.fr:d.en} ${bcfg.hours[d.key].from}–${bcfg.hours[d.key].to}`)
+    .join(', ');
+
+  document.getElementById('bs-salon').textContent    = bcfg.salon;
+  document.getElementById('bs-name').textContent     = bcfg.name;
+  document.getElementById('bs-services').textContent = bcfg.services.join(', ');
+  document.getElementById('bs-prix').textContent     = `${bcfg.prix}€ — ${bcfg.duree} min`;
+  document.getElementById('bs-horaires').textContent = hoursStr || '—';
+
+  const initials = bcfg.salon.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) || 'BK';
+  document.getElementById('bchat-av').textContent          = initials;
+  document.getElementById('bchat-salon-name').textContent  = bcfg.salon;
+
+  bcfg.history = [];
+  const msgs = document.getElementById('bchat-msgs');
+  msgs.innerHTML = '';
+
+  const welcome = bcfg.accueil || (lang==='fr'
+    ? `Salut ! 👋 Je suis le bot de ${bcfg.salon} à ${bcfg.ville}. Comment puis-je t'aider ?`
+    : `Hey! 👋 I'm the bot for ${bcfg.salon} in ${bcfg.ville}. How can I help you?`);
+  bAddBotBubble(welcome);
+  bSetStep(2);
+};
+
+/* ── Chat ── */
+let bBusy = false;
+
+function bGetInitials() {
+  return bcfg.salon.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) || 'BK';
+}
+
+function bAddBotBubble(text, typing=false) {
+  const msgs = document.getElementById('bchat-msgs');
+  const row  = document.createElement('div');
+  row.className = 'bmsg-row';
+  const av  = document.createElement('div');
+  av.className = 'bmsg-av';
+  av.textContent = bGetInitials();
+  const bub = document.createElement('div');
+  bub.className = `bbubble bot${typing?' typing':''}`;
+  bub.id = typing ? 'btyping-bub' : '';
+  if (typing) {
+    bub.innerHTML = '<div class="btyping-dots"><span></span><span></span><span></span></div>';
+  } else {
+    bub.textContent = text;
+  }
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;flex-direction:column';
+  wrap.appendChild(bub);
+  if (!typing) {
+    const tag = document.createElement('div');
+    tag.className = 'bbot-tag';
+    tag.textContent = lang==='fr' ? '⚡ Répondu automatiquement' : '⚡ Answered automatically';
+    wrap.appendChild(tag);
+  }
+  row.appendChild(av);
+  row.appendChild(wrap);
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function bAddUserBubble(text) {
+  const msgs = document.getElementById('bchat-msgs');
+  const row  = document.createElement('div');
+  row.className = 'bmsg-row user';
+  const bub  = document.createElement('div');
+  bub.className = 'bbubble user';
+  bub.textContent = text;
+  row.appendChild(bub);
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+window.bSendSuggestion = function(btn) {
+  const txt = btn.getAttribute('data-' + lang) || btn.textContent;
+  document.getElementById('bchat-input').value = txt;
+  window.bSendMsg();
+};
+
+window.bSendMsg = async function() {
+  if (bBusy) return;
+  const input = document.getElementById('bchat-input');
+  const text  = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  bBusy = true;
+  bAddUserBubble(text);
+  bcfg.history.push({role:'user', content:text});
+  bAddBotBubble('', true);
+
+  const hoursDesc = BDAYS.filter(d => bcfg.hours[d.key]?.open)
+    .map(d => `${lang==='fr'?d.fr:d.en}: ${bcfg.hours[d.key].from}–${bcfg.hours[d.key].to}`)
+    .join(', ');
+
+  const system = lang==='fr'
+    ? `Tu es le bot Instagram de "${bcfg.salon}", salon de coiffure/barbershop tenu par ${bcfg.name} à ${bcfg.ville}. Services : ${bcfg.services.join(', ')}. Prix moyen : ${bcfg.prix}€. Durée : ${bcfg.duree} min. Horaires : ${hoursDesc||'Lun–Sam 9h–19h'}. Réponds de façon chaleureuse et concise (2-3 phrases max). Propose de réserver si pertinent. Ne mentionne jamais être un bot IA.`
+    : `You are the Instagram bot for "${bcfg.salon}", a barbershop run by ${bcfg.name} in ${bcfg.ville}. Services: ${bcfg.services.join(', ')}. Average price: €${bcfg.prix}. Duration: ${bcfg.duree} min. Hours: ${hoursDesc||'Mon–Sat 9am–7pm'}. Reply warmly and concisely (2-3 sentences max). Offer to book when relevant. Never mention being an AI bot.`;
+
+  try {
+    const res = await fetch(`${BBACKEND}/api/chat`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({system, messages: bcfg.history.slice(-10)})
+    });
+    const data = await res.json();
+    if (!data.ok || !data.text) throw new Error('no reply');
+    bcfg.history.push({role:'assistant', content:data.text});
+    document.getElementById('btyping-bub')?.closest('.bmsg-row')?.remove();
+    bAddBotBubble(data.text);
+  } catch(_) {
+    document.getElementById('btyping-bub')?.closest('.bmsg-row')?.remove();
+    const fallback = bFallback(text);
+    bcfg.history.push({role:'assistant', content:fallback});
+    bAddBotBubble(fallback);
+  }
+  bBusy = false;
+};
+
+function bFallback(text) {
+  const t = text.toLowerCase();
+  const s = bcfg.salon, n = bcfg.name, p = bcfg.prix, d = bcfg.duree, v = bcfg.ville;
+  const hasBeard   = bcfg.services.some(sv => /beard|barbe/i.test(sv));
+  const hasKids    = bcfg.services.some(sv => /kid|enfant/i.test(sv));
+  const openHours  = BDAYS.filter(dy => bcfg.hours[dy.key]?.open)
+    .map(dy => `${lang==='fr'?dy.fr:dy.en} ${bcfg.hours[dy.key].from}–${bcfg.hours[dy.key].to}`).join(', ');
+
+  if (lang === 'fr') {
+    if (t.match(/prix|combien|tarif/))    return `Nos prestations débutent à ${p}€ (environ ${d} min). Tu veux qu'on te propose un créneau ? 💈`;
+    if (t.match(/dispo|rdv|réserver|rendez/)) return `Avec plaisir ! Dis-moi ta dispo et ${n} te confirmera le créneau à ${v} 📅`;
+    if (t.match(/enfant|gamin/))          return hasKids ? `Oui, on coupe les enfants 😊 Même tarif de base ${p}€. Tu veux un RDV ?` : `On ne fait pas les coupes enfant pour l'instant.`;
+    if (t.match(/barbe|beard/))           return hasBeard ? `La barbe, c'est inclus dans nos services 💪 Dis-moi quand passer !` : `On ne propose pas le soin barbe actuellement.`;
+    if (t.match(/horaire|heure|ouvert/))  return `Nos horaires : ${openHours||'Lun–Sam 9h–19h'}. On t'attend ! 😊`;
+    if (t.match(/annuler|cancel/))        return `Pas de souci ! Envoie ton nom et l'heure du RDV, on s'en occupe 👍`;
+    if (t.match(/où|adresse|localisation/)) return `On est à ${v}. Envoie-moi un message pour l'adresse exacte 📍`;
+    return `Bien reçu ! ${n} revient vers toi rapidement. Tu veux prendre un RDV en même temps ? 💈`;
+  } else {
+    if (t.match(/price|how much|cost/))   return `Services start at €${p} (~${d} min). Want me to book a slot? 💈`;
+    if (t.match(/available|book|appointment|slot/)) return `Sure! Tell me your availability and ${n} will confirm your slot in ${v} 📅`;
+    if (t.match(/kid|child/))             return hasKids ? `Yes, we do kids' cuts 😊 Same base price €${p}. Want to book?` : `We don't do kids' cuts at the moment.`;
+    if (t.match(/beard/))                 return hasBeard ? `Beard service is available 💪 Let me know when you'd like to come in!` : `We don't offer beard services currently.`;
+    if (t.match(/hour|open|schedule/))    return `Our hours: ${openHours||'Mon–Sat 9am–7pm'}. See you soon! 😊`;
+    if (t.match(/cancel/))               return `No problem! Send your name and appointment time and we'll sort it 👍`;
+    if (t.match(/where|address|location/)) return `We're in ${v}. Message me for the exact address 📍`;
+    return `Got it! ${n} will get back to you shortly. Want to book an appointment too? 💈`;
+  }
+}
+
+/* ── Step 3 : Plans ── */
+window.bGoStep3 = function() { bSetStep(3); };
+window.bSelectPlan = function(plan) {
+  bcfg.plan = plan;
+  document.querySelectorAll('.bplan-card').forEach(c => c.classList.remove('sel'));
+  document.getElementById(`bplan-${plan}`)?.classList.add('sel');
+  const labels = {starter:'Starter', pro:'Pro', max:'Max'};
+  document.getElementById('bplan-label').textContent = labels[plan];
+};
+
+/* ── Checkout Stripe ── */
+window.bGoStripe = async function() {
+  const btn = document.getElementById('bcheckout-btn');
+  btn.disabled = true;
+  btn.querySelector('span').textContent = lang==='fr' ? 'Redirection…' : 'Redirecting…';
+  try {
+    await fetch(`${BBACKEND}/api/save-config`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name:bcfg.name, salon:bcfg.salon, ville:bcfg.ville, ig:bcfg.ig,
+        services:bcfg.services, prix:bcfg.prix, duree:bcfg.duree,
+        hours:bcfg.hours, plan:bcfg.plan
+      })
+    });
+  } catch(_) {}
+  const params = new URLSearchParams({client_reference_id: encodeURIComponent(`${bcfg.salon}|${bcfg.ig}`)});
+  window.location.href = `${BSTRIPE[bcfg.plan]}?${params}`;
+};
+
+/* ── Step 4 : Instagram OAuth ── */
+window.bConnectInstagram = function() {
+  const META_APP_ID   = 'TON_META_APP_ID';
+  const REDIRECT_URI  = encodeURIComponent(`${BBACKEND}/auth/instagram/callback`);
+  const SCOPE         = encodeURIComponent('instagram_basic,instagram_manage_messages,pages_manage_metadata');
+  const STATE         = encodeURIComponent(bcfg.salon || 'trimsync');
+  window.location.href = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${META_APP_ID}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE}&response_type=code&state=${STATE}`;
+};
+
+/* Ouvrir step 4 si retour Stripe avec ?payment=success */
+(()=>{
+  const p = new URLSearchParams(window.location.search);
+  if (p.get('payment') === 'success') { window.openBotModal(); bSetStep(4); }
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>

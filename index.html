@@ -1272,7 +1272,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       </div>
       <button class="preview-close" onclick="closePreview('booking')" aria-label="Close">✕</button>
     </div>
-    <iframe id="booking-preview-iframe" class="preview-iframe" src="booking-preview.html?salon=Mon+Salon&color=%233bbfcc" loading="lazy" title="Booking preview"></iframe>
+    <iframe id="booking-preview-iframe" class="preview-iframe" title="Booking preview"></iframe>
   </div>
 </div>
 
@@ -1296,7 +1296,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       </div>
       <button class="preview-close" onclick="closePreview('dashboard')" aria-label="Close">✕</button>
     </div>
-    <iframe id="dashboard-preview-iframe" class="preview-iframe" src="dashboard-preview.html?salon=Mon+Salon" loading="lazy" title="Dashboard preview"></iframe>
+    <iframe id="dashboard-preview-iframe" class="preview-iframe" title="Dashboard preview"></iframe>
   </div>
 </div>
 
@@ -2014,14 +2014,26 @@ function bInitChips() {
 
 /* ── Preview modals ── */
 window.openPreview = function(type) {
-  const id = type === 'booking' ? 'booking-preview-overlay' : 'dashboard-preview-overlay';
-  document.getElementById(id).classList.add('open');
+  const ovId    = type === 'booking' ? 'booking-preview-overlay'  : 'dashboard-preview-overlay';
+  const ifrId   = type === 'booking' ? 'booking-preview-iframe'   : 'dashboard-preview-iframe';
+  const src     = type === 'booking'
+    ? 'booking-preview.html?salon=Mon+Salon&color=%233bbfcc'
+    : 'dashboard-preview.html?salon=Mon+Salon';
+  /* Charger le src ici (pas au load) pour éviter le gel dans display:none */
+  const iframe  = document.getElementById(ifrId);
+  if (!iframe.src || iframe.src === 'about:blank' || iframe.src === window.location.href) {
+    iframe.src = src;
+  }
+  document.getElementById(ovId).classList.add('open');
   document.body.style.overflow = 'hidden';
 };
 window.closePreview = function(type) {
-  const id = type === 'booking' ? 'booking-preview-overlay' : 'dashboard-preview-overlay';
-  document.getElementById(id).classList.remove('open');
+  const ovId  = type === 'booking' ? 'booking-preview-overlay' : 'dashboard-preview-overlay';
+  const ifrId = type === 'booking' ? 'booking-preview-iframe'  : 'dashboard-preview-iframe';
+  document.getElementById(ovId).classList.remove('open');
   document.body.style.overflow = '';
+  /* Vider le src → prochain open repart from scratch (splash propre) */
+  document.getElementById(ifrId).src = 'about:blank';
 };
 window.previewSetColor = function(type, el) {
   const color = el.dataset.color;

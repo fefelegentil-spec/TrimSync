@@ -383,7 +383,8 @@ function renderCal(){
     const isSel = state.date && dt.toDateString()===new Date(state.date).toDateString();
     const cls = [past||isSun?'disabled':'',isToday?'today':'',isSel?'sel':''].filter(Boolean).join(' ');
     const dateStr = dt.toISOString().slice(0,10);
-    html+=`<div class="cal-day ${cls}" onclick="${past||isSun?'':``selectDate('${dateStr}')``}">${day}</div>`;
+    const handler = past||isSun ? '' : "selectDate('"+dateStr+"')";
+    html+=`<div class="cal-day ${cls}" onclick="${handler}">${day}</div>`;
   }
   g.innerHTML = html;
 }
@@ -413,7 +414,8 @@ function renderSlots(dayOfWeek){
   document.getElementById('slots-grid').innerHTML = allSlots.map(t=>{
     const taken = takenSlots.includes(t);
     const sel = state.time===t;
-    return `<div class="slot${taken?' taken':''}${sel?' sel':''}" onclick="${taken?'':``selectTime('${t}')``}">${t}</div>`;
+    const slotHandler = taken ? '' : "selectTime('"+t+"')";
+    return `<div class="slot${taken?' taken':''}${sel?' sel':''}" onclick="${slotHandler}">${t}</div>`;
   }).join('');
 }
 function selectTime(t){

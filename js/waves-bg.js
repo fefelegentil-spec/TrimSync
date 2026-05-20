@@ -72,7 +72,7 @@
       console.warn('waves-bg.js: WebGL non disponible', e);
       return;
     }
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
     const canvas = renderer.domElement;
     // fixed + inset:0 → s'étend sur toute la surface physique (safe-area incluse)

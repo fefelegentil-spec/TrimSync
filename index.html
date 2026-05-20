@@ -86,8 +86,9 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .btn-nav:hover{background:oklch(0.82 0.11 190)}
 
 /* nav */
-.nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:oklch(0.12 0.008 222/.92);border-bottom:1px solid var(--bd);transition:border-color .3s;padding-top:env(safe-area-inset-top)}
-.nav.scrolled{border-bottom-color:var(--bd2)}
+.nav{position:fixed;top:0;left:0;right:0;z-index:9950;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:oklch(0.12 0.008 222/.92);border-bottom:1px solid var(--bd);transition:background .3s,border-color .3s;padding-top:env(safe-area-inset-top);transform:translate3d(0,0,0)}
+.nav.scrolled{background:oklch(0.12 0.008 222);border-bottom-color:var(--bd2)}
+@media(max-width:960px){.nav{background:oklch(0.12 0.008 222)}}
 .nav-inner{max-width:var(--max);margin:0 auto;padding:0 2.5rem;display:flex;align-items:center;justify-content:space-between;height:68px}
 .logo{font-family:var(--fd);font-size:1.35rem;font-weight:800;letter-spacing:-.04em}
 .logo em{color:var(--a);font-style:normal}

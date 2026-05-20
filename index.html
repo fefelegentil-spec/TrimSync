@@ -580,16 +580,19 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 /* plans bot */
 .bplan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-bottom:1.4rem}
 @media(max-width:520px){.bplan-grid{grid-template-columns:1fr}}
-.bplan-card{background:oklch(0.09 0.006 222);border:1px solid var(--bd);border-radius:13px;padding:1.1rem;cursor:pointer;transition:all .2s var(--ex);position:relative}
-.bplan-card:hover{border-color:oklch(0.76 0.13 193/.4);transform:translateY(-2px)}
-.bplan-card.sel{border-color:var(--a);background:var(--alo);box-shadow:0 0 0 1px var(--a)}
-.bplan-hot{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--a);color:var(--on-a);font-size:.6rem;font-family:var(--fd);font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:.2rem .65rem;border-radius:100px;white-space:nowrap}
-.bplan-name{font-family:var(--fd);font-size:.65rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--a);margin-bottom:.35rem}
-.bplan-price{font-family:var(--fd);font-size:1.65rem;font-weight:800;letter-spacing:-.04em;line-height:1}
-.bplan-price span{font-size:.7rem;font-weight:500;color:var(--t2)}
-.bplan-feats{margin-top:.65rem;display:flex;flex-direction:column;gap:.28rem}
-.bplan-feat{font-size:.73rem;color:var(--t2);display:flex;align-items:flex-start;gap:.45rem;line-height:1.35}
-.bplan-feat::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--a);flex-shrink:0;margin-top:.35rem}
+.bplan-card{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:1.25rem 1.1rem;cursor:pointer;transition:all .25s var(--ex);position:relative;display:flex;flex-direction:column;gap:.9rem}
+.bplan-card:hover{border-color:oklch(0.76 0.13 193/.4);transform:translateY(-3px);box-shadow:0 12px 32px oklch(0 0 0/.2)}
+.bplan-card.sel{border-color:var(--a);background:oklch(0.15 0.010 220);box-shadow:0 0 0 1px var(--a),0 12px 40px oklch(0.76 0.13 193/.12)}
+.bplan-hot{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--a);color:var(--on-a);font-size:.6rem;font-family:var(--fd);font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .7rem;border-radius:100px;white-space:nowrap}
+.bplan-name{font-family:var(--fd);font-size:.65rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--a)}
+.bplan-card.sel .bplan-name{color:var(--a)}
+.bplan-price{font-family:var(--fd);font-size:2rem;font-weight:800;letter-spacing:-.04em;line-height:1;color:var(--t)}
+.bplan-price span{font-size:.7rem;font-weight:500;color:var(--t2);vertical-align:super}
+.bplan-feats{display:flex;flex-direction:column;gap:.4rem;flex:1}
+.bplan-feat{font-size:.75rem;color:var(--t2);display:flex;align-items:flex-start;gap:.55rem;line-height:1.4;padding-left:.1rem}
+.bplan-feat::before{content:'';width:6px;height:6px;border-radius:50%;background:oklch(0.76 0.13 193/.5);flex-shrink:0;margin-top:.38rem}
+.bplan-card.sel .bplan-feat{color:var(--t)}
+.bplan-card.sel .bplan-feat::before{background:var(--a)}
 
 /* boutons bot */
 .bbtn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:100px;font-family:var(--fd);font-size:.88rem;font-weight:800;letter-spacing:-.01em;cursor:pointer;transition:all .2s var(--ex);border:none;white-space:nowrap}
@@ -1226,13 +1229,13 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
           <label data-en="Services offered" data-fr="Services proposés">Services offered</label>
           <div class="bchip-group" id="bchips">
             <div class="bchip on" data-en="Classic cut" data-fr="Coupe classique">Classic cut</div>
-            <div class="bchip on" data-en="Fade" data-fr="Dégradé">Fade</div>
-            <div class="bchip" data-en="Beard" data-fr="Barbe">Beard</div>
+            <div class="bchip on" data-en="Beard" data-fr="Barbe">Beard</div>
+            <div class="bchip" data-en="Premium cut" data-fr="Coupe premium">Premium cut</div>
+            <div class="bchip" data-en="Beard + cut combo" data-fr="Coupe + barbe">Beard + cut combo</div>
             <div class="bchip" data-en="Traditional shave" data-fr="Rasage traditionnel">Traditional shave</div>
             <div class="bchip" data-en="Kids cut" data-fr="Coupe enfant">Kids cut</div>
-            <div class="bchip" data-en="Coloring" data-fr="Coloration">Coloring</div>
-            <div class="bchip" data-en="Hair care" data-fr="Soins capillaires">Hair care</div>
-            <div class="bchip" data-en="Straightening" data-fr="Lissage">Straightening</div>
+            <div class="bchip" data-en="Hair coloring" data-fr="Coloration">Hair coloring</div>
+            <div class="bchip" data-en="Locs & twists" data-fr="Locks & twists">Locs & twists</div>
           </div>
         </div>
         <div class="b2col">
@@ -1334,18 +1337,18 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
             <div class="bplan-feats">
               <div class="bplan-feat" data-en="AI Instagram bot 24/7" data-fr="Bot IA Instagram 24h/24">AI Instagram bot 24/7</div>
               <div class="bplan-feat" data-en="Unlimited DMs" data-fr="DMs illimités">Unlimited DMs</div>
-              <div class="bplan-feat" data-en="Auto confirmations" data-fr="Confirmations automatiques">Auto confirmations</div>
+              <div class="bplan-feat" data-en="Auto booking confirmations" data-fr="Confirmations auto de RDV">Auto booking confirmations</div>
             </div>
           </div>
           <div class="bplan-card sel" id="bplan-pro" onclick="bSelectPlan('pro')">
-            <div class="bplan-hot" data-en="Popular" data-fr="Populaire">Popular</div>
+            <div class="bplan-hot" data-en="Most popular" data-fr="Le plus populaire">Most popular</div>
             <div class="bplan-name">Pro</div>
             <div class="bplan-price">79<span data-en="€/mo" data-fr="€/mois">€/mo</span></div>
             <div class="bplan-feats">
               <div class="bplan-feat" data-en="Everything in Starter" data-fr="Tout Starter">Everything in Starter</div>
               <div class="bplan-feat" data-en="TrimSync dashboard" data-fr="Dashboard TrimSync">TrimSync dashboard</div>
-              <div class="bplan-feat" data-en="Agenda management" data-fr="Gestion agenda">Agenda management</div>
-              <div class="bplan-feat" data-en="Client CRM" data-fr="CRM clients">Client CRM</div>
+              <div class="bplan-feat" data-en="Agenda management" data-fr="Gestion de l'agenda">Agenda management</div>
+              <div class="bplan-feat" data-en="Client management" data-fr="Gestion clients">Client management</div>
             </div>
           </div>
           <div class="bplan-card" id="bplan-max" onclick="bSelectPlan('max')">
@@ -1354,8 +1357,10 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
             <div class="bplan-feats">
               <div class="bplan-feat" data-en="Everything in Pro" data-fr="Tout Pro">Everything in Pro</div>
               <div class="bplan-feat" data-en="Native booking page" data-fr="Page réservation native">Native booking page</div>
-              <div class="bplan-feat" data-en="Analytics &amp; loyalty" data-fr="Analytics et fidélité">Analytics &amp; loyalty</div>
-              <div class="bplan-feat" data-en="Dedicated account manager" data-fr="Account manager dédié">Dedicated account manager</div>
+              <div class="bplan-feat" data-en="Stats &amp; analytics" data-fr="Stats &amp; analytics">Stats &amp; analytics</div>
+              <div class="bplan-feat" data-en="Loyalty program" data-fr="Programme fidélité">Loyalty program</div>
+              <div class="bplan-feat" data-en="Marketing tools" data-fr="Outils marketing">Marketing tools</div>
+              <div class="bplan-feat" data-en="SumUp integration" data-fr="Intégration SumUp">SumUp integration</div>
             </div>
           </div>
         </div>

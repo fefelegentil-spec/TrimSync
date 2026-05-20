@@ -629,6 +629,29 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .btn-ghost-a{display:flex;justify-content:center;align-items:center;gap:.5rem;padding:1rem 2rem;background:oklch(0.76 0.13 193/.12);color:oklch(0.76 0.13 193);border:1px solid oklch(0.76 0.13 193/.3);font-family:var(--fd);font-weight:800;font-size:.95rem;letter-spacing:-.02em;border-radius:100px;transition:background .2s,border-color .2s}
 .btn-ghost-a:hover{background:oklch(0.76 0.13 193/.18);border-color:oklch(0.76 0.13 193/.5)}
 .btn-lg{font-size:1rem;padding:1rem 2.2rem}
+
+/* ── PREVIEW MODALS ── */
+.preview-overlay{position:fixed;inset:0;z-index:3001;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:.75rem}
+.preview-overlay.open{display:flex}
+.preview-modal{width:100%;max-width:1160px;height:92vh;background:oklch(0.11 0.008 222);border:1px solid var(--bd2);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 40px 120px rgba(0,0,0,.7);animation:previewIn .38s var(--ex)}
+@keyframes previewIn{from{opacity:0;transform:scale(.94) translateY(24px)}}
+.preview-tb{display:flex;align-items:center;gap:10px;padding:10px 14px;background:oklch(0.14 0.009 220);border-bottom:1px solid oklch(0.20 0.010 220);flex-shrink:0;flex-wrap:wrap}
+.preview-tb-title{font-family:var(--fd);font-weight:700;font-size:.8rem;color:var(--t);white-space:nowrap;margin-right:4px}
+.preview-tb-sep{width:1px;height:20px;background:oklch(0.28 0.011 218);flex-shrink:0}
+.preview-swatches{display:flex;gap:5px;align-items:center}
+.preview-swatch{width:19px;height:19px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s;flex-shrink:0}
+.preview-swatch:hover{transform:scale(1.18)}
+.preview-swatch.act{border-color:white;box-shadow:0 0 0 1px rgba(255,255,255,.25)}
+.preview-cpick{position:relative;width:19px;height:19px;flex-shrink:0}
+.preview-cpick-btn{width:19px;height:19px;border-radius:50%;border:2px dashed rgba(255,255,255,.35);background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);cursor:pointer;display:block}
+.preview-cpick input[type=color]{position:absolute;inset:0;opacity:0;cursor:pointer;border-radius:50%}
+.preview-close{margin-left:auto;width:30px;height:30px;border-radius:50%;background:oklch(1 0 0/.07);color:var(--t2);font-size:.8rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0}
+.preview-close:hover{background:oklch(1 0 0/.14);color:var(--t)}
+.preview-iframe{flex:1;border:none;width:100%;min-height:0}
+/* preview buttons in plan cards */
+.bpreview-row{display:flex;gap:6px;margin-top:.35rem}
+.bpreview-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:.42rem .6rem;border-radius:8px;background:oklch(0.76 0.13 193/.07);border:1px solid oklch(0.76 0.13 193/.22);color:var(--a);font-size:.68rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;font-family:var(--fb)}
+.bpreview-btn:hover{background:oklch(0.76 0.13 193/.16);border-color:oklch(0.76 0.13 193/.5);transform:translateY(-1px)}
 </style>
 </head>
 <body>
@@ -1183,6 +1206,54 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   </div>
 </div>
 
+<!-- BOOKING PREVIEW MODAL -->
+<div id="booking-preview-overlay" class="preview-overlay" role="dialog" aria-modal="true" aria-label="Booking preview">
+  <div class="preview-modal">
+    <div class="preview-tb">
+      <span class="preview-tb-title">Booking preview</span>
+      <div class="preview-tb-sep"></div>
+      <span style="font-size:.72rem;color:var(--t2)">Color:</span>
+      <div class="preview-swatches" id="bp-swatches">
+        <div class="preview-swatch act" style="background:#3bbfcc" data-color="#3bbfcc" onclick="previewSetColor('booking',this)"></div>
+        <div class="preview-swatch" style="background:#C8A85A" data-color="#C8A85A" onclick="previewSetColor('booking',this)"></div>
+        <div class="preview-swatch" style="background:#A78BFA" data-color="#A78BFA" onclick="previewSetColor('booking',this)"></div>
+        <div class="preview-swatch" style="background:#E05050" data-color="#E05050" onclick="previewSetColor('booking',this)"></div>
+        <div class="preview-swatch" style="background:#4ABA6A" data-color="#4ABA6A" onclick="previewSetColor('booking',this)"></div>
+        <div class="preview-cpick">
+          <div class="preview-cpick-btn"></div>
+          <input type="color" value="#3bbfcc" oninput="previewSetCustomColor('booking',this.value)">
+        </div>
+      </div>
+      <button class="preview-close" onclick="closePreview('booking')" aria-label="Close">✕</button>
+    </div>
+    <iframe id="booking-preview-iframe" class="preview-iframe" src="booking-preview.html?salon=Mon+Salon&color=%233bbfcc" loading="lazy" title="Booking preview"></iframe>
+  </div>
+</div>
+
+<!-- DASHBOARD PREVIEW MODAL -->
+<div id="dashboard-preview-overlay" class="preview-overlay" role="dialog" aria-modal="true" aria-label="Dashboard preview">
+  <div class="preview-modal">
+    <div class="preview-tb">
+      <span class="preview-tb-title">Dashboard preview</span>
+      <div class="preview-tb-sep"></div>
+      <span style="font-size:.72rem;color:var(--t2)">Color:</span>
+      <div class="preview-swatches" id="dp-swatches">
+        <div class="preview-swatch act" style="background:#A78BFA" data-color="#A78BFA" onclick="previewSetColor('dashboard',this)"></div>
+        <div class="preview-swatch" style="background:#3bbfcc" data-color="#3bbfcc" onclick="previewSetColor('dashboard',this)"></div>
+        <div class="preview-swatch" style="background:#C8A85A" data-color="#C8A85A" onclick="previewSetColor('dashboard',this)"></div>
+        <div class="preview-swatch" style="background:#E05050" data-color="#E05050" onclick="previewSetColor('dashboard',this)"></div>
+        <div class="preview-swatch" style="background:#4ABA6A" data-color="#4ABA6A" onclick="previewSetColor('dashboard',this)"></div>
+        <div class="preview-cpick">
+          <div class="preview-cpick-btn"></div>
+          <input type="color" value="#A78BFA" oninput="previewSetCustomColor('dashboard',this.value)">
+        </div>
+      </div>
+      <button class="preview-close" onclick="closePreview('dashboard')" aria-label="Close">✕</button>
+    </div>
+    <iframe id="dashboard-preview-iframe" class="preview-iframe" src="dashboard-preview.html?salon=Mon+Salon" loading="lazy" title="Dashboard preview"></iframe>
+  </div>
+</div>
+
 <!-- BOT MODAL -->
 <div id="bot-overlay" class="bot-overlay" role="dialog" aria-modal="true" aria-label="Bot demo">
   <div class="bot-sheet">
@@ -1352,6 +1423,12 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
               <div class="bplan-feat" data-en="Agenda management" data-fr="Gestion de l'agenda">Agenda management</div>
               <div class="bplan-feat" data-en="Client management" data-fr="Gestion clients">Client management</div>
             </div>
+            <div class="bpreview-row">
+              <button class="bpreview-btn" onclick="openPreview('dashboard');event.stopPropagation()">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/></svg>
+                Preview dashboard
+              </button>
+            </div>
           </div>
           <div class="bplan-card" id="bplan-max" onclick="bSelectPlan('max')">
             <div class="bplan-name">Max</div>
@@ -1363,6 +1440,16 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
               <div class="bplan-feat" data-en="Loyalty program" data-fr="Programme fidélité">Loyalty program</div>
               <div class="bplan-feat" data-en="Marketing tools" data-fr="Outils marketing">Marketing tools</div>
               <div class="bplan-feat" data-en="SumUp integration" data-fr="Intégration SumUp">SumUp integration</div>
+            </div>
+            <div class="bpreview-row">
+              <button class="bpreview-btn" onclick="openPreview('booking');event.stopPropagation()">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                Booking
+              </button>
+              <button class="bpreview-btn" onclick="openPreview('dashboard');event.stopPropagation()">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/></svg>
+                Dashboard
+              </button>
             </div>
           </div>
         </div>
@@ -1862,6 +1949,41 @@ function bInitChips() {
     c.addEventListener('click', () => c.classList.toggle('on'));
   });
 }
+
+/* ── Preview modals ── */
+window.openPreview = function(type) {
+  const id = type === 'booking' ? 'booking-preview-overlay' : 'dashboard-preview-overlay';
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+window.closePreview = function(type) {
+  const id = type === 'booking' ? 'booking-preview-overlay' : 'dashboard-preview-overlay';
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+};
+window.previewSetColor = function(type, el) {
+  const color = el.dataset.color;
+  const containerId = type === 'booking' ? 'bp-swatches' : 'dp-swatches';
+  document.getElementById(containerId).querySelectorAll('.preview-swatch').forEach(s => s.classList.remove('act'));
+  el.classList.add('act');
+  const iframeId = type === 'booking' ? 'booking-preview-iframe' : 'dashboard-preview-iframe';
+  const iframe = document.getElementById(iframeId);
+  if (iframe && iframe.contentWindow) iframe.contentWindow.postMessage({ type:'SET_COLOR', color }, '*');
+};
+window.previewSetCustomColor = function(type, color) {
+  const containerId = type === 'booking' ? 'bp-swatches' : 'dp-swatches';
+  document.getElementById(containerId).querySelectorAll('.preview-swatch').forEach(s => s.classList.remove('act'));
+  const iframeId = type === 'booking' ? 'booking-preview-iframe' : 'dashboard-preview-iframe';
+  const iframe = document.getElementById(iframeId);
+  if (iframe && iframe.contentWindow) iframe.contentWindow.postMessage({ type:'SET_COLOR', color }, '*');
+};
+/* close preview on overlay click */
+document.querySelectorAll('.preview-overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target === ov) { ov.classList.remove('open'); document.body.style.overflow = ''; } });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.preview-overlay.open').forEach(o => { o.classList.remove('open'); document.body.style.overflow = ''; });
+});
 
 /* ── Ouvrir / fermer ── */
 window.openBotModal = function() {

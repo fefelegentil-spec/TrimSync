@@ -2,7 +2,7 @@
 <html lang="en" data-lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <title>TrimSync — AI Booking for Barbershops</title>
 <meta name="description" content="TrimSync automates Instagram DM bookings for barbershops with AI. Never miss a booking again."/>
 <meta property="og:title" content="TrimSync — AI Booking for Barbershops"/>
@@ -37,7 +37,7 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased}
-body{background-color:var(--bg);color:var(--t);font-family:var(--fb);font-size:16px;line-height:1.65;overflow-x:hidden}
+body{background-color:var(--bg);color:var(--t);font-family:var(--fb);font-size:16px;line-height:1.65;overflow-x:clip}
 a{color:inherit;text-decoration:none}
 img,svg,canvas{display:block}
 button{cursor:pointer;border:none;background:none;font:inherit;color:inherit}
@@ -86,7 +86,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .btn-nav:hover{background:oklch(0.82 0.11 190)}
 
 /* nav */
-.nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:oklch(0.12 0.008 222/.85);border-bottom:1px solid var(--bd);transition:border-color .3s}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:oklch(0.12 0.008 222/.92);border-bottom:1px solid var(--bd);transition:border-color .3s;padding-top:env(safe-area-inset-top)}
 .nav.scrolled{border-bottom-color:var(--bd2)}
 .nav-inner{max-width:var(--max);margin:0 auto;padding:0 2.5rem;display:flex;align-items:center;justify-content:space-between;height:68px}
 .logo{font-family:var(--fd);font-size:1.35rem;font-weight:800;letter-spacing:-.04em}
@@ -102,14 +102,14 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .hbg[aria-expanded=true] span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
 .hbg[aria-expanded=true] span:nth-child(2){opacity:0}
 .hbg[aria-expanded=true] span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
-.nav-mob{display:none;position:fixed;inset:68px 0 0;background:oklch(0.12 0.008 222/.97);backdrop-filter:blur(24px);padding:2rem 2.5rem;flex-direction:column;gap:.3rem;z-index:99}
+.nav-mob{display:none;position:fixed;top:calc(68px + env(safe-area-inset-top));left:0;right:0;bottom:0;background:oklch(0.12 0.008 222/.97);backdrop-filter:blur(24px);padding:2rem 2.5rem;flex-direction:column;gap:.3rem;z-index:99;overflow-y:auto;overscroll-behavior:contain}
 .nav-mob.open{display:flex}
 .nav-mob a{font-family:var(--fd);font-size:1.2rem;font-weight:700;letter-spacing:-.03em;padding:.85rem 0;border-bottom:1px solid var(--bd);color:var(--t);transition:color .2s}
 .nav-mob a:hover{color:var(--t)}
 .nav-mob .btn-a{text-align:center;justify-content:center;margin-top:.5rem;border-bottom:none}
 
 /* hero */
-.hero{position:relative;z-index:1;min-height:100svh;min-height:100vh;display:flex;align-items:center;padding:7rem 0 4rem;overflow:hidden}
+.hero{position:relative;z-index:1;min-height:100svh;min-height:100vh;display:flex;align-items:center;padding:calc(7rem + env(safe-area-inset-top)) 0 4rem;overflow:hidden}
 #hbg2{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .hero-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr 460px;gap:4rem;align-items:center}
 .badge{display:inline-flex;align-items:center;gap:.6rem;padding:.4rem .9rem;border:1px solid var(--bd2);border-radius:100px;font-size:.78rem;font-weight:500;color:var(--t2);margin-bottom:1.8rem}
@@ -281,7 +281,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .cta-acts{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
 
 /* footer */
-.footer{border-top:1px solid var(--bd);padding:2.8rem 0}
+.footer{border-top:1px solid var(--bd);padding:2.8rem 0 calc(2.8rem + env(safe-area-inset-bottom))}
 .foot-in{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem}
 .foot-logo{font-family:var(--fd);font-size:1.15rem;font-weight:800;letter-spacing:-.04em}
 .foot-logo em{color:var(--a);font-style:normal}
@@ -320,7 +320,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 /* Tablette portrait : 768px */
 @media(max-width:768px){
   .section{padding:5.5rem 0}
-  .hero{padding:6.5rem 0 3.5rem}
+  .hero{padding:calc(6.5rem + env(safe-area-inset-top)) 0 3.5rem}
   .sec-hd{margin-bottom:3rem}
   .hero-sub{font-size:1rem;max-width:44ch}
   .chat-wrap{max-width:380px}
@@ -334,9 +334,9 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 @media(max-width:560px){
   .wrap{padding:0 1.25rem}
   .nav-inner{padding:0 1.25rem}
-  .nav-mob{padding:1.8rem 1.25rem}
+  .nav-mob{padding:2rem 1.25rem}
   .section{padding:4.5rem 0}
-  .hero{padding:6rem 0 3rem}
+  .hero{padding:calc(6rem + env(safe-area-inset-top)) 0 3rem}
   .hero-inner{gap:2rem}
   .sec-hd{margin-bottom:2.4rem}
   .hero-proof{gap:.6rem 1.2rem}
@@ -1079,23 +1079,14 @@ applyLang(lang);
 
 /* ── MOBILE MENU ── */
 const hbg=document.getElementById('hbg'),nm=document.getElementById('nm');
+function closeMenu(){nm.classList.remove('open');hbg.setAttribute('aria-expanded','false');hbg.setAttribute('aria-label','Open menu');}
 hbg.addEventListener('click',()=>{
   const open=nm.classList.toggle('open');
   hbg.setAttribute('aria-expanded',String(open));
   hbg.setAttribute('aria-label',open?'Close menu':'Open menu');
-  document.body.style.overflow=open?'hidden':'';
 });
-nm.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
-  nm.classList.remove('open');hbg.setAttribute('aria-expanded','false');
-  hbg.setAttribute('aria-label','Open menu');document.body.style.overflow='';
-}));
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'&&nm.classList.contains('open')){
-    nm.classList.remove('open');hbg.setAttribute('aria-expanded','false');
-    hbg.setAttribute('aria-label','Open menu');document.body.style.overflow='';
-    hbg.focus();
-  }
-});
+nm.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&nm.classList.contains('open')){closeMenu();hbg.focus();}});
 
 /* ── NAV SCROLL ── */
 const navEl=document.getElementById('nav');
@@ -1215,15 +1206,18 @@ if(!pref){
   const orbB=document.querySelector('.orb-b');
   const orbC=document.querySelector('.orb-c');
   const pricingEl=document.getElementById('pricing');
+  /* pricingTop calculé une fois, mis à jour au resize — évite getBoundingClientRect() à chaque scroll */
+  let pricingTop=0;
+  function cachePricingTop(){pricingTop=pricingEl?(pricingEl.getBoundingClientRect().top+scrollY):0;}
+  cachePricingTop();
+  window.addEventListener('resize',cachePricingTop,{passive:true});
   function updateOrbOpacity(){
     const sy=scrollY;
     const wh=window.innerHeight;
-    /* hero : pleine intensité ; sections intermédiaires : 60% ; au dessus pricing : quasi invisible */
     let intensity=1;
     if(pricingEl){
-      const pt=pricingEl.getBoundingClientRect().top+sy;
-      if(sy>pt-wh*.5) intensity=0.18;           /* proche/dans pricing */
-      else if(sy>wh*.8) intensity=0.60;          /* sections intermédiaires */
+      if(sy>pricingTop-wh*.5) intensity=0.18;
+      else if(sy>wh*.8) intensity=0.60;
     }
     const s=String(intensity);
     if(orbA) orbA.style.opacity=s;
@@ -1420,5 +1414,6 @@ document.addEventListener('keydown', e => {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script src="js/waves-bg.js"></script>
+<script src="js/spotlight-cards.js"></script>
 </body>
 </html>

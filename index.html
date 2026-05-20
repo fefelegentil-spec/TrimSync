@@ -296,6 +296,9 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .plan-demo-btn::after{content:'→';font-size:.7rem;opacity:.4}
 @media(max-width:960px){.plans-wrap{grid-template-columns:1fr;gap:2.5rem}}
 @media(max-width:760px){.plans-grid{grid-template-columns:1fr;gap:.75rem}.plan-pop{margin-top:14px}.plan-pop{order:-1}}
+/* plan sélectionné dans le bot step 3 */
+#bot-plans-grid .plan{cursor:pointer}
+#bot-plans-grid .plan.plan-sel{border-color:oklch(1 0 0/.6)!important;transform:translateY(-4px)!important;box-shadow:0 20px 48px oklch(0 0 0/.28)!important}
 @media(max-width:560px){.setup-fee{flex-direction:column;gap:1.2rem;padding:1.5rem}.setup-checks{margin-left:0}}
 
 /* faq */
@@ -1443,64 +1446,80 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
     <!-- STEP 3 : Plans -->
     <div id="bstep-3" style="display:none" class="bfade">
-      <div class="bcard">
-        <div class="bcard-title" data-en="Choose your plan" data-fr="Choisis ton abonnement">Choose your plan</div>
-        <div class="bcard-sub" data-en="No commitment. Switch plans anytime." data-fr="Sans engagement. Tu peux changer de formule à tout moment.">No commitment. Switch plans anytime.</div>
-        <div class="bplan-grid">
-          <div class="bplan-card" id="bplan-starter" onclick="bSelectPlan('starter')">
-            <div class="bplan-name">Starter</div>
-            <div class="bplan-price">59<span data-en="€/mo" data-fr="€/mois">€/mo</span></div>
-            <div class="bplan-feats">
-              <div class="bplan-feat" data-en="AI Instagram bot 24/7" data-fr="Bot IA Instagram 24h/24">AI Instagram bot 24/7</div>
-              <div class="bplan-feat" data-en="Unlimited DMs" data-fr="DMs illimités">Unlimited DMs</div>
-              <div class="bplan-feat" data-en="Auto booking confirmations" data-fr="Confirmations auto de RDV">Auto booking confirmations</div>
+      <div style="background:var(--adrench);border-radius:18px;padding:1.5rem 1.25rem;color:var(--on-a)">
+        <div style="font-family:var(--fd);font-size:1.05rem;font-weight:800;letter-spacing:-.02em;margin-bottom:.25rem" data-en="Choose your plan" data-fr="Choisis ton abonnement">Choose your plan</div>
+        <div style="font-size:.82rem;color:oklch(0.88 0.07 193);margin-bottom:1.25rem" data-en="No commitment. Switch plans anytime." data-fr="Sans engagement. Tu peux changer de formule à tout moment.">No commitment. Switch plans anytime.</div>
+        <div class="plans-grid" id="bot-plans-grid">
+
+          <!-- Starter -->
+          <div class="plan" id="bplan-starter" onclick="bSelectPlan('starter')">
+            <div>
+              <div class="plan-name" data-en="Starter" data-fr="Starter">Starter</div>
+              <div class="plan-price">€59<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
             </div>
+            <ul class="plan-feats">
+              <li data-en="AI Instagram bot 24/7" data-fr="Bot IA Instagram 24h/24">AI Instagram bot 24/7</li>
+              <li data-en="Unlimited DMs" data-fr="DMs illimités">Unlimited DMs</li>
+              <li data-en="Auto confirmations" data-fr="Confirmations automatiques">Auto confirmations</li>
+            </ul>
+            <button class="plan-cta" onclick="event.stopPropagation();bBuyPlan('starter')" data-en="Get started" data-fr="Commencer">Get started</button>
           </div>
-          <div class="bplan-card sel" id="bplan-pro" onclick="bSelectPlan('pro')">
-            <div class="bplan-hot" data-en="Most popular" data-fr="Le plus populaire">Most popular</div>
-            <div class="bplan-name">Pro</div>
-            <div class="bplan-price">79<span data-en="€/mo" data-fr="€/mois">€/mo</span></div>
-            <div class="bplan-feats">
-              <div class="bplan-feat" data-en="Everything in Starter" data-fr="Tout Starter">Everything in Starter</div>
-              <div class="bplan-feat" data-en="TrimSync dashboard" data-fr="Dashboard TrimSync">TrimSync dashboard</div>
-              <div class="bplan-feat" data-en="Agenda management" data-fr="Gestion de l'agenda">Agenda management</div>
-              <div class="bplan-feat" data-en="Client management" data-fr="Gestion clients">Client management</div>
+
+          <!-- Pro -->
+          <div class="plan plan-pop" id="bplan-pro" onclick="bSelectPlan('pro')">
+            <div class="plan-hot" data-en="Most popular" data-fr="Le plus populaire">Most popular</div>
+            <div>
+              <div class="plan-name" data-en="Pro" data-fr="Pro">Pro</div>
+              <div class="plan-price">€79<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
             </div>
-            <div class="bpreview-row">
-              <button class="bpreview-btn" onclick="openPreview('dashboard');event.stopPropagation()">
-                <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/></svg>
-                Preview dashboard
+            <ul class="plan-feats">
+              <li data-en="Everything in Starter" data-fr="Tout Starter">Everything in Starter</li>
+              <li data-en="TrimSync dashboard" data-fr="Dashboard TrimSync">TrimSync dashboard</li>
+              <li data-en="Agenda management" data-fr="Gestion agenda">Agenda management</li>
+              <li data-en="Client management" data-fr="Gestion clients">Client management</li>
+            </ul>
+            <div class="plan-demo-sep"><span data-en="Try" data-fr="Démos">Try</span></div>
+            <div class="plan-demo-row">
+              <button class="plan-demo-btn" onclick="event.stopPropagation();openPreview('dashboard')">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/></svg>
+                <span data-en="The dashboard" data-fr="Le dashboard">The dashboard</span>
               </button>
             </div>
+            <button class="plan-cta" onclick="event.stopPropagation();bBuyPlan('pro')" data-en="Get started" data-fr="Commencer">Get started</button>
           </div>
-          <div class="bplan-card" id="bplan-max" onclick="bSelectPlan('max')">
-            <div class="bplan-name">Max</div>
-            <div class="bplan-price">99<span data-en="€/mo" data-fr="€/mois">€/mo</span></div>
-            <div class="bplan-feats">
-              <div class="bplan-feat" data-en="Everything in Pro" data-fr="Tout Pro">Everything in Pro</div>
-              <div class="bplan-feat" data-en="Native booking page" data-fr="Page réservation native">Native booking page</div>
-              <div class="bplan-feat" data-en="Stats &amp; analytics" data-fr="Stats &amp; analytics">Stats &amp; analytics</div>
-              <div class="bplan-feat" data-en="Loyalty program" data-fr="Programme fidélité">Loyalty program</div>
-              <div class="bplan-feat" data-en="Marketing tools" data-fr="Outils marketing">Marketing tools</div>
-              <div class="bplan-feat" data-en="SumUp integration" data-fr="Intégration SumUp">SumUp integration</div>
+
+          <!-- Max -->
+          <div class="plan" id="bplan-max" onclick="bSelectPlan('max')">
+            <div>
+              <div class="plan-name" data-en="Max" data-fr="Max">Max</div>
+              <div class="plan-price">€99<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
             </div>
-            <div class="bpreview-row">
-              <button class="bpreview-btn" onclick="openPreview('booking');event.stopPropagation()">
-                <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-                Booking
+            <ul class="plan-feats">
+              <li data-en="Everything in Pro" data-fr="Tout Pro">Everything in Pro</li>
+              <li data-en="Native booking page" data-fr="Page réservation native">Native booking page</li>
+              <li data-en="Stats &amp; analytics" data-fr="Stats &amp; analytics">Stats &amp; analytics</li>
+              <li data-en="Loyalty program" data-fr="Programme fidélité">Loyalty program</li>
+              <li data-en="Marketing tools" data-fr="Outils marketing">Marketing tools</li>
+              <li data-en="SumUp integration" data-fr="Intégration SumUp">SumUp integration</li>
+            </ul>
+            <div class="plan-demo-sep"><span data-en="Try" data-fr="Démos">Try</span></div>
+            <div class="plan-demo-row">
+              <button class="plan-demo-btn" onclick="event.stopPropagation();openPreview('dashboard')">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/></svg>
+                <span data-en="The dashboard" data-fr="Le dashboard">The dashboard</span>
               </button>
-              <button class="bpreview-btn" onclick="openPreview('dashboard');event.stopPropagation()">
-                <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/></svg>
-                Dashboard
+              <button class="plan-demo-btn" onclick="event.stopPropagation();openPreview('booking')">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                <span data-en="The booking page" data-fr="La page booking">The booking page</span>
               </button>
             </div>
+            <button class="plan-cta" onclick="event.stopPropagation();bBuyPlan('max')" data-en="Get started" data-fr="Commencer">Get started</button>
           </div>
+
         </div>
-        <button id="bcheckout-btn" class="bbtn bbtn-primary bbtn-full" onclick="bGoStripe()">
-          <span data-en="Start with" data-fr="Commencer avec le plan">Start with</span> <span id="bplan-label">Pro</span> →
-        </button>
-        <p style="text-align:center;font-size:.73rem;color:var(--t3);margin-top:.7rem" data-en="Secure payment via Stripe · Cancel anytime" data-fr="Paiement sécurisé via Stripe · Annulable à tout moment">Secure payment via Stripe · Cancel anytime</p>
       </div>
+      <p style="text-align:center;font-size:.73rem;color:var(--t3);margin-top:.7rem" data-en="Secure payment via Stripe · Cancel anytime" data-fr="Paiement sécurisé via Stripe · Annulable à tout moment">Secure payment via Stripe · Cancel anytime</p>
+      <span id="bplan-label" style="display:none">pro</span>
     </div>
 
     <!-- STEP 4 : Succès + Instagram -->
@@ -2363,10 +2382,12 @@ function bFallback(text) {
 window.bGoStep3 = function() { bSetStep(3); };
 window.bSelectPlan = function(plan) {
   bcfg.plan = plan;
-  document.querySelectorAll('.bplan-card').forEach(c => c.classList.remove('sel'));
-  document.getElementById(`bplan-${plan}`)?.classList.add('sel');
-  const labels = {starter:'Starter', pro:'Pro', max:'Max'};
-  document.getElementById('bplan-label').textContent = labels[plan];
+  document.querySelectorAll('#bot-plans-grid .plan').forEach(c => c.classList.remove('plan-sel'));
+  document.getElementById(`bplan-${plan}`)?.classList.add('plan-sel');
+};
+window.bBuyPlan = function(plan) {
+  bcfg.plan = plan;
+  bGoStripe();
 };
 
 /* ── Checkout Stripe ── */

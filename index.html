@@ -1211,7 +1211,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
           <div class="bf"><label data-en="Salon name" data-fr="Nom du salon">Salon name</label><input type="text" id="bf-salon" placeholder="Barber Kingdom"/></div>
         </div>
         <div class="b2col">
-          <div class="bf"><label data-en="City" data-fr="Ville">City</label><input type="text" id="bf-ville" placeholder="Paris"/></div>
+          <div class="bf"><label data-en="City" data-fr="Ville">City</label><input type="text" id="bf-ville" placeholder="Paris" autocomplete="off"/></div>
           <div class="bf"><label data-en="Your @Instagram" data-fr="Ton @Instagram">Your @Instagram</label><input type="text" id="bf-ig" placeholder="@barberkingdom"/></div>
         </div>
         <div class="bf">
@@ -1855,7 +1855,7 @@ window.bGoStep1 = function() { bSetStep(1); };
 window.bGoStep2 = function() {
   bcfg.name    = document.getElementById('bf-name').value.trim()  || 'Alex';
   bcfg.salon   = document.getElementById('bf-salon').value.trim() || 'Barber Kingdom';
-  bcfg.ville   = document.getElementById('bf-ville').value.trim() || 'Paris';
+  bcfg.ville   = (document.getElementById('bf-ville').value.trim() || 'Paris').replace(/\s*\(.*?\)\s*/g, '').trim();
   bcfg.ig      = document.getElementById('bf-ig').value.trim();
   bcfg.services= Array.from(document.querySelectorAll('#bchips .bchip.on')).map(c => c.textContent.trim());
   bcfg.prix    = document.getElementById('bf-prix').value  || '25';

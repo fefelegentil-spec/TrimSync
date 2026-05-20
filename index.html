@@ -530,6 +530,14 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .btoggle input:checked+.btoggle-sl{background:var(--a);border-color:var(--a)}
 .btoggle input:checked+.btoggle-sl::before{transform:translateX(13px);background:#fff}
 
+/* ton selector */
+.bton-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.4rem}
+.bton-btn{display:flex;flex-direction:column;align-items:center;gap:.3rem;padding:.65rem .4rem;border:1px solid var(--bd);border-radius:var(--r);background:var(--bg3);color:var(--t2);font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s}
+.bton-btn:hover{border-color:var(--a);color:var(--t)}
+.bton-btn.act{border-color:var(--a);background:var(--alo);color:var(--a)}
+.bton-icon{font-size:1.2rem}
+@media(max-width:480px){.bton-grid{grid-template-columns:repeat(2,1fr)}}
+
 /* chat layout bot */
 .bchat-layout{display:grid;grid-template-columns:240px 1fr;gap:1.1rem}
 @media(max-width:620px){.bchat-layout{grid-template-columns:1fr}}
@@ -1236,6 +1244,27 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
           <div class="bhours-grid" id="bhours-grid"></div>
         </div>
         <div class="bf">
+          <label data-en="Bot personality" data-fr="Personnalité du bot">Bot personality</label>
+          <div class="bton-grid" id="bton-grid">
+            <button type="button" class="bton-btn act" data-ton="chill" onclick="bSelectTon(this)">
+              <span class="bton-icon">😎</span>
+              <span data-en="Chill" data-fr="Détendu">Chill</span>
+            </button>
+            <button type="button" class="bton-btn" data-ton="street" onclick="bSelectTon(this)">
+              <span class="bton-icon">🔥</span>
+              <span data-en="Street" data-fr="Street">Street</span>
+            </button>
+            <button type="button" class="bton-btn" data-ton="pro" onclick="bSelectTon(this)">
+              <span class="bton-icon">💼</span>
+              <span data-en="Pro" data-fr="Sérieux">Pro</span>
+            </button>
+            <button type="button" class="bton-btn" data-ton="girly" onclick="bSelectTon(this)">
+              <span class="bton-icon">✨</span>
+              <span data-en="Girly" data-fr="Girly">Girly</span>
+            </button>
+          </div>
+        </div>
+        <div class="bf">
           <label data-en="Custom welcome message (optional)" data-fr="Message d'accueil personnalisé (optionnel)">Custom welcome message (optional)</label>
           <textarea id="bf-accueil" placeholder="Hey! I'm the bot for Barber Kingdom. I can help you book an appointment 💈"></textarea>
         </div>
@@ -1743,11 +1772,30 @@ const BSTRIPE  = {
 const bcfg = {
   name:'', salon:'', ville:'', ig:'',
   services:[], prix:'25', duree:'30',
-  hours:{}, accueil:'', plan:'pro',
+  hours:{}, accueil:'', plan:'pro', ton:'chill',
   history:[],
   /* ── Flux de réservation ── */
   bookingStep:'initial',
   bookingData:{name:'', service:'', date:'', time:''}
+};
+
+const BTON_PROMPTS = {
+  chill: {
+    fr: `Ton : décontracté, sympa, naturel. Tu parles comme un pote — direct, sans chichi. Phrases courtes. Pas d'emojis excessifs.`,
+    en: `Tone: chill, friendly, natural. Talk like a mate — direct, no fuss. Short sentences. No excessive emojis.`
+  },
+  street: {
+    fr: `Ton : street, urban, authentique. Tu parles avec un peu d'argot, tu es relax mais efficace. Genre "wesh", "nickel", "c'est chaud", "t'inquiètes". Reste compréhensible.`,
+    en: `Tone: street, urban, authentic. Use casual slang, relaxed but efficient. Words like "bet", "no cap", "lowkey", "fr". Stay understandable.`
+  },
+  pro: {
+    fr: `Ton : professionnel, sérieux, poli. Tu vouvoies le client. Phrases claires et formelles. Aucun argot, aucun emoji.`,
+    en: `Tone: professional, serious, polite. Use formal language. Clear and structured sentences. No slang, no emojis.`
+  },
+  girly: {
+    fr: `Ton : chaleureux, enthousiaste, bienveillant. Tu es expressif·ve, positif·ve. Quelques emojis kawaii sont bienvenus (✨🌸💕). Reste professionnel mais adorable.`,
+    en: `Tone: warm, enthusiastic, kind. You're expressive and positive. A few cute emojis are welcome (✨🌸💕). Stay professional but adorable.`
+  }
 };
 
 const BDAYS = [
@@ -1789,6 +1837,13 @@ window.bToggleDay = function(key, open) {
   bcfg.hours[key].open = open;
   document.getElementById(`bh-from-${key}`).disabled = !open;
   document.getElementById(`bh-to-${key}`).disabled = !open;
+};
+
+/* ton */
+window.bSelectTon = function(btn) {
+  document.querySelectorAll('.bton-btn').forEach(b => b.classList.remove('act'));
+  btn.classList.add('act');
+  bcfg.ton = btn.getAttribute('data-ton');
 };
 
 /* chips */
@@ -2080,8 +2135,8 @@ window.bSendMsg = async function() {
   }
 
   const system = lang==='fr'
-    ? `Tu es le bot Instagram de "${bcfg.salon}", barbershop tenu par ${bcfg.name} à ${bcfg.ville}. Tu gères les réservations en posant les questions une à une. Services : ${bcfg.services.join(', ')}. Tarif moyen : ${bcfg.prix}€ (${bcfg.duree} min). Horaires : ${hoursDesc||'Lun–Sam 9h–19h'}. ${bookingContext} Parle de façon naturelle et directe, comme un vrai humain par SMS — jamais de liste à puces, jamais d'astérisques, jamais de markdown. Maximum 1 ou 2 emojis si vraiment pertinent, sinon aucun. Phrases courtes, ton décontracté mais pro. Ne mentionne jamais être un bot IA.`
-    : `You are the Instagram bot for "${bcfg.salon}", a barbershop run by ${bcfg.name} in ${bcfg.ville}. You handle bookings by asking questions one at a time. Services: ${bcfg.services.join(', ')}. Price: €${bcfg.prix} (~${bcfg.duree} min). Hours: ${hoursDesc||'Mon–Sat 9am–7pm'}. ${bookingContext} Write naturally like a real human texting — no bullet points, no asterisks, no markdown. Max 1 emoji if truly relevant, otherwise none. Short sentences, casual but professional tone. Never mention being an AI bot.`;
+    ? `Tu es le bot Instagram de "${bcfg.salon}", barbershop tenu par ${bcfg.name} à ${bcfg.ville}. Tu gères les réservations en posant les questions une à une. Services : ${bcfg.services.join(', ')}. Tarif moyen : ${bcfg.prix}€ (${bcfg.duree} min). Horaires : ${hoursDesc||'Lun–Sam 9h–19h'}. ${bookingContext} ${BTON_PROMPTS[bcfg.ton]?.fr || BTON_PROMPTS.chill.fr} Jamais de liste à puces, jamais d'astérisques, jamais de markdown. Ne mentionne jamais être un bot IA.`
+    : `You are the Instagram bot for "${bcfg.salon}", a barbershop run by ${bcfg.name} in ${bcfg.ville}. You handle bookings by asking questions one at a time. Services: ${bcfg.services.join(', ')}. Price: €${bcfg.prix} (~${bcfg.duree} min). Hours: ${hoursDesc||'Mon–Sat 9am–7pm'}. ${bookingContext} ${BTON_PROMPTS[bcfg.ton]?.en || BTON_PROMPTS.chill.en} No bullet points, no asterisks, no markdown. Never mention being an AI bot.`;
 
   try {
     const res = await fetch(`${BBACKEND}/api/chat`, {

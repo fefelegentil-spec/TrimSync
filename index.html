@@ -1744,7 +1744,10 @@ const bcfg = {
   name:'', salon:'', ville:'', ig:'',
   services:[], prix:'25', duree:'30',
   hours:{}, accueil:'', plan:'pro',
-  history:[]
+  history:[],
+  /* ── Flux de réservation ── */
+  bookingStep:'initial',
+  bookingData:{name:'', service:'', date:'', time:''}
 };
 
 const BDAYS = [
@@ -1895,6 +1898,75 @@ function bGetInitials() {
   return bcfg.salon.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) || 'BK';
 }
 
+/* ── Générer créneaux fictifs disponibles ── */
+function bGenerateSlots(dateStr, serviceName) {
+  const date = new Date(dateStr + 'T00:00:00');
+  const dayIndex = date.getDay();
+  const dayMap = ['sun','mon','tue','wed','thu','fri','sat'];
+  const dayKey = dayMap[dayIndex];
+  const dayConfig = bcfg.hours[dayKey];
+
+  if (!dayConfig || !dayConfig.open) return [];
+
+  /* Parser les heures */
+  const [openH, openM] = dayConfig.from.split(':').map(Number);
+  const [closeH, closeM] = dayConfig.to.split(':').map(Number);
+  const openMin = openH * 60 + openM;
+  const closeMin = closeH * 60 + closeM;
+  const duration = parseInt(bcfg.duree) || 30;
+
+  /* Générer créneaux par 15 min */
+  const slots = [];
+  for (let t = openMin; t + duration <= closeMin; t += 15) {
+    const h = Math.floor(t / 60).toString().padStart(2,'0');
+    const m = (t % 60).toString().padStart(2,'0');
+    slots.push(`${h}:${m}`);
+  }
+  return slots;
+}
+
+/* ── Extraire données de réservation depuis le message ── */
+function bExtractBookingData(userMsg) {
+  const result = {name:'', service:'', date:'', time:''};
+  const lower = userMsg.toLowerCase();
+
+  /* Chercher un nom (1-2 mots) */
+  const nameMatch = userMsg.match(/^(?:je m'appelle |my name is |je suis |i'm |c'est )?([a-zàâäéèêëïîôöùûüœæç]+(?:\s+[a-zàâäéèêëïîôöùûüœæç]+)?)/i);
+  if (nameMatch) result.name = nameMatch[1].trim();
+
+  /* Chercher un service */
+  for (const svc of bcfg.services) {
+    if (lower.includes(svc.toLowerCase())) {
+      result.service = svc;
+      break;
+    }
+  }
+
+  /* Chercher une date (YYYY-MM-DD ou formats courants) */
+  const dateMatch = userMsg.match(/(\d{4}-\d{2}-\d{2}|\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4})/);
+  if (dateMatch) {
+    let d = dateMatch[1];
+    if (d.includes('/') || d.includes('.') || d.includes('-')) {
+      const [part1, part2, part3] = d.split(/[\/.-]/);
+      if (part3?.length === 4) {
+        result.date = `${part3}-${part1.padStart(2,'0')}-${part2.padStart(2,'0')}`;
+      } else {
+        result.date = d;
+      }
+    }
+  }
+
+  /* Chercher une heure (HH:MM) */
+  const timeMatch = userMsg.match(/(\d{1,2}):(\d{2})/);
+  if (timeMatch) {
+    const h = timeMatch[1].padStart(2,'0');
+    const m = timeMatch[2].padStart(2,'0');
+    result.time = `${h}:${m}`;
+  }
+
+  return result;
+}
+
 function bAddBotBubble(text, typing=false) {
   const msgs = document.getElementById('bchat-msgs');
   const row  = document.createElement('div');
@@ -1954,13 +2026,62 @@ window.bSendMsg = async function() {
   bcfg.history.push({role:'user', content:text});
   bAddBotBubble('', true);
 
+  /* Extraire données de réservation du message utilisateur */
+  const extracted = bExtractBookingData(text);
+  if (extracted.name) bcfg.bookingData.name = extracted.name;
+  if (extracted.service) bcfg.bookingData.service = extracted.service;
+  if (extracted.date) bcfg.bookingData.date = extracted.date;
+  if (extracted.time) bcfg.bookingData.time = extracted.time;
+
   const hoursDesc = BDAYS.filter(d => bcfg.hours[d.key]?.open)
     .map(d => `${lang==='fr'?d.fr:d.en}: ${bcfg.hours[d.key].from}–${bcfg.hours[d.key].to}`)
     .join(', ');
 
+  /* SystemPrompt intelligent selon l'étape du flux */
+  let bookingContext = '';
+  if (lang === 'fr') {
+    if (!bcfg.bookingData.name) {
+      bookingContext = 'L\'étape actuelle : Tu dois d\'abord demander le prénom du client. Pose-le simplement et chaleureusement.';
+      bcfg.bookingStep = 'get_name';
+    } else if (!bcfg.bookingData.service) {
+      bookingContext = `Client : ${bcfg.bookingData.name}. Tu dois maintenant proposer les services disponibles (${bcfg.services.join(', ')}) et demander lequel il souhaite.`;
+      bcfg.bookingStep = 'get_service';
+    } else if (!bcfg.bookingData.date) {
+      bookingContext = `Client : ${bcfg.bookingData.name}, Service : ${bcfg.bookingData.service}. Maintenant, demande-lui la date souhaitée (format JJ/MM ou DD-MM-YYYY).`;
+      bcfg.bookingStep = 'get_date';
+    } else if (!bcfg.bookingData.time) {
+      const slots = bGenerateSlots(bcfg.bookingData.date, bcfg.bookingData.service);
+      const slotStr = slots.length > 0 ? slots.slice(0, 5).join(', ') + (slots.length > 5 ? '...' : '') : 'Pas de créneau disponible';
+      bookingContext = `Client : ${bcfg.bookingData.name}, Service : ${bcfg.bookingData.service}, Date : ${bcfg.bookingData.date}. Créneaux disponibles : ${slotStr}. Demande-lui l'heure préférée (HH:MM).`;
+      bcfg.bookingStep = 'get_time';
+    } else {
+      bookingContext = `Réservation confirmée : ${bcfg.bookingData.name} le ${bcfg.bookingData.date} à ${bcfg.bookingData.time} pour une ${bcfg.bookingData.service}. Remercie-le chaleureusement et offre les prochaines étapes.`;
+      bcfg.bookingStep = 'done';
+    }
+  } else {
+    if (!bcfg.bookingData.name) {
+      bookingContext = 'Current step: Ask for the customer\'s first name. Do it in a friendly and warm way.';
+      bcfg.bookingStep = 'get_name';
+    } else if (!bcfg.bookingData.service) {
+      bookingContext = `Customer: ${bcfg.bookingData.name}. Now suggest the available services (${bcfg.services.join(', ')}) and ask which one they want.`;
+      bcfg.bookingStep = 'get_service';
+    } else if (!bcfg.bookingData.date) {
+      bookingContext = `Customer: ${bcfg.bookingData.name}, Service: ${bcfg.bookingData.service}. Now ask for their preferred date (DD/MM or MM-DD-YYYY format).`;
+      bcfg.bookingStep = 'get_date';
+    } else if (!bcfg.bookingData.time) {
+      const slots = bGenerateSlots(bcfg.bookingData.date, bcfg.bookingData.service);
+      const slotStr = slots.length > 0 ? slots.slice(0, 5).join(', ') + (slots.length > 5 ? '...' : '') : 'No slots available';
+      bookingContext = `Customer: ${bcfg.bookingData.name}, Service: ${bcfg.bookingData.service}, Date: ${bcfg.bookingData.date}. Available slots: ${slotStr}. Ask for their preferred time (HH:MM).`;
+      bcfg.bookingStep = 'get_time';
+    } else {
+      bookingContext = `Booking confirmed: ${bcfg.bookingData.name} on ${bcfg.bookingData.date} at ${bcfg.bookingData.time} for ${bcfg.bookingData.service}. Thank them warmly and offer next steps.`;
+      bcfg.bookingStep = 'done';
+    }
+  }
+
   const system = lang==='fr'
-    ? `Tu es le bot Instagram de "${bcfg.salon}", salon de coiffure/barbershop tenu par ${bcfg.name} à ${bcfg.ville}. Services : ${bcfg.services.join(', ')}. Prix moyen : ${bcfg.prix}€. Durée : ${bcfg.duree} min. Horaires : ${hoursDesc||'Lun–Sam 9h–19h'}. Réponds de façon chaleureuse et concise (2-3 phrases max). Propose de réserver si pertinent. Ne mentionne jamais être un bot IA.`
-    : `You are the Instagram bot for "${bcfg.salon}", a barbershop run by ${bcfg.name} in ${bcfg.ville}. Services: ${bcfg.services.join(', ')}. Average price: €${bcfg.prix}. Duration: ${bcfg.duree} min. Hours: ${hoursDesc||'Mon–Sat 9am–7pm'}. Reply warmly and concisely (2-3 sentences max). Offer to book when relevant. Never mention being an AI bot.`;
+    ? `Tu es le bot Instagram de "${bcfg.salon}", salon de coiffure tenu par ${bcfg.name} à ${bcfg.ville}. Tu gères les réservations en posant les questions une à une. Services : ${bcfg.services.join(', ')}. Tarif moyen : ${bcfg.prix}€ (${bcfg.duree} min). Horaires : ${hoursDesc||'Lun–Sam 9h–19h'}. ${bookingContext} Sois chaleureux, professionnel, concis (2-4 phrases max). Ne mentionne jamais être un bot IA. Extrais les infos (prénom, service, date, heure) des messages et recap brièvement.`
+    : `You are the Instagram bot for "${bcfg.salon}", a barbershop run by ${bcfg.name} in ${bcfg.ville}. You handle bookings by asking questions one at a time. Services: ${bcfg.services.join(', ')}. Price: €${bcfg.prix} (~${bcfg.duree} min). Hours: ${hoursDesc||'Mon–Sat 9am–7pm'}. ${bookingContext} Be warm, professional, concise (2-4 sentences max). Never mention being an AI bot. Extract info (name, service, date, time) and recap briefly.`;
 
   try {
     const res = await fetch(`${BBACKEND}/api/chat`, {

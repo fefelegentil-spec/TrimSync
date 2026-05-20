@@ -36,7 +36,7 @@ img{display:block;max-width:100%}
 
 /* SPLASH */
 #splash{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .5s var(--ease)}
-#splash.out{opacity:0;pointer-events:none}
+#splash.out{opacity:0;pointer-events:none;visibility:hidden}
 .splash-mark{width:72px;height:72px;border-radius:18px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:30px;font-weight:800;color:#000;animation:markIn .6s var(--bounce) both,pulse 2s ease-in-out 1s infinite alternate}
 @keyframes markIn{0%{transform:scale(.5);opacity:0}100%{transform:scale(1);opacity:1}}
 @keyframes pulse{from{box-shadow:0 0 0 0 rgba(59,191,204,.3)}to{box-shadow:0 0 0 18px rgba(59,191,204,0)}}
@@ -327,7 +327,11 @@ function init(){
   document.getElementById('splashName').textContent = salonName.toUpperCase();
   renderServices();
   renderCal();
-  setTimeout(()=>{ document.getElementById('splash').classList.add('out'); },1400);
+  setTimeout(()=>{
+    const splash = document.getElementById('splash');
+    splash.classList.add('out');
+    setTimeout(()=>{ splash.style.display='none'; }, 550);
+  }, 1400);
 }
 
 /* ── Color ── */
@@ -339,7 +343,7 @@ function applyColor(c){
 }
 document.getElementById('colorPicker').addEventListener('input',e=>applyColor(e.target.value));
 document.querySelectorAll('.swatch').forEach(s=>s.addEventListener('click',()=>applyColor(s.dataset.color)));
-window.addEventListener('message',e=>{if(e.data?.type==='setColor') applyColor(e.data.color);});
+window.addEventListener('message',e=>{if(e.data?.type==='SET_COLOR') applyColor(e.data.color);});
 
 /* ── Services ── */
 function renderServices(){
@@ -489,7 +493,21 @@ function reset(){
   renderCal();
 }
 
-init();
+try {
+  init();
+} catch(err) {
+  console.error('[booking-preview] init error:', err);
+  const splash = document.getElementById('splash');
+  if(splash){ splash.classList.add('out'); setTimeout(()=>{ splash.style.display='none'; },550); }
+}
+/* Fallback ultime : si le splash est encore visible après 4s, on le force à disparaître */
+setTimeout(()=>{
+  const splash = document.getElementById('splash');
+  if(splash && splash.style.display!=='none'){
+    splash.classList.add('out');
+    setTimeout(()=>{ splash.style.display='none'; },550);
+  }
+},4000);
 </script>
 </body>
 </html>

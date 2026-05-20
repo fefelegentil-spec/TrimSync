@@ -10,6 +10,7 @@
 <meta property="og:type" content="website"/>
 <meta property="og:locale" content="en_US"/>
 <meta name="twitter:card" content="summary_large_image"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet"/>
@@ -131,7 +132,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .chat-wrap::before{content:'';position:absolute;inset:-40px -40px;background:radial-gradient(ellipse 80% 80% at 50% 50%,oklch(0.76 0.13 193/.07) 0%,transparent 70%);pointer-events:none}
 .chat-phone{background:oklch(0.16 0.009 220);border:1px solid var(--bd2);border-radius:24px;overflow:hidden;box-shadow:0 0 0 1px oklch(0.76 0.13 193/.12),0 40px 80px oklch(0.04 0.005 218/.6)}
 .chat-bar{display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;border-bottom:1px solid var(--bd);background:oklch(0.17 0.009 220)}
-.chat-av{width:36px;height:36px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,oklch(0.76 0.13 193),oklch(0.52 0.12 196));display:flex;align-items:center;justify-content:center;font-size:15px}
+.chat-av{width:36px;height:36px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,oklch(0.76 0.13 193),oklch(0.52 0.12 196));display:flex;align-items:center;justify-content:center;font-size:12px;font-family:var(--fd);font-weight:800;letter-spacing:-.02em}
 .chat-info{flex:1;min-width:0}
 .chat-name{font-family:var(--fd);font-size:.88rem;font-weight:700;display:block}
 .chat-ai{display:inline-flex;align-items:center;gap:.25rem;font-size:9px;font-weight:700;color:var(--a);background:oklch(0.76 0.13 193/.12);border-radius:4px;padding:.1rem .35rem}
@@ -237,7 +238,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .price-feats{list-style:none;display:flex;flex-direction:column;gap:.65rem;margin-bottom:2.2rem}
 .price-feats li{display:flex;align-items:center;gap:.7rem;font-size:.92rem;font-weight:500;color:oklch(0.90 0.04 200)}
 .price-feats li::before{content:'';display:block;width:15px;height:15px;flex-shrink:0;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'%3E%3Ccircle cx='7.5' cy='7.5' r='6.5' stroke='%2390e0d0' stroke-width='1.5' fill='none'/%3E%3Cpath d='M5 7.5l2 2 3.5-3.5' stroke='%2390e0d0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")}
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15'%3E%3Ccircle cx='7.5' cy='7.5' r='6.5' stroke='%2360c4c8' stroke-width='1.5' fill='none'/%3E%3Cpath d='M5 7.5l2 2 3.5-3.5' stroke='%2360c4c8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")}
 .btn-on-a{display:inline-flex;align-items:center;gap:.5rem;padding:1rem 2rem;background:var(--on-a);color:var(--adrench);font-family:var(--fd);font-weight:800;font-size:1rem;letter-spacing:-.02em;border-radius:100px;transition:opacity .2s}
 .btn-on-a:hover{opacity:.88}
 .price-free{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .95rem;border:1.5px solid oklch(0.78 0.09 193/.6);border-radius:100px;font-size:.83rem;font-weight:600;color:oklch(0.88 0.07 193);margin-top:1rem}
@@ -313,11 +314,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
 /* reveal — animations désactivées, éléments toujours visibles */
 .rv{opacity:1;transform:none}
-.rv.on{opacity:1;transform:none}
 .d1{}.d2{}.d3{}.d4{}
-
-/* divider */
-.div{height:1px;background:linear-gradient(90deg,transparent,var(--bd),transparent)}
 
 /* ── RESPONSIVE ── */
 
@@ -385,7 +382,6 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
 /* ─── SECTIONS — fonds statiques + bordures de délimitation ─── */
 #home,#solution,#cta{background:transparent}
-.div{display:none}
 
 /* Sections opaques : fond sombre + fine bordure teal haut/bas */
 #problem,#features,#faq{
@@ -452,6 +448,15 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .devis-msg.success{display:block;background:oklch(0.76 0.13 193/.12);border:1px solid oklch(0.76 0.13 193/.3);color:oklch(0.76 0.13 193)}
 .devis-msg.error{display:block;background:oklch(0.6 0.18 25/.12);border:1px solid oklch(0.6 0.18 25/.3);color:oklch(0.7 0.15 25)}
 @media(max-width:560px){.devis-modal{padding:2rem 1.4rem;border-radius:16px}}
+
+/* ── UTILITY ── */
+.sec-hd--center{text-align:center}
+.sec-h2{margin-top:.6rem}
+.sec-hd--tight{margin-bottom:3rem}
+.price-roi-foot{margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid oklch(0.28 0.10 200/.28)}
+.btn-ghost-a{display:flex;justify-content:center;align-items:center;gap:.5rem;padding:1rem 2rem;background:oklch(0.76 0.13 193/.12);color:oklch(0.76 0.13 193);border:1px solid oklch(0.76 0.13 193/.3);font-family:var(--fd);font-weight:800;font-size:.95rem;letter-spacing:-.02em;border-radius:100px;transition:background .2s,border-color .2s}
+.btn-ghost-a:hover{background:oklch(0.76 0.13 193/.18);border-color:oklch(0.76 0.13 193/.5)}
+.btn-lg{font-size:1rem;padding:1rem 2.2rem}
 </style>
 </head>
 <body>
@@ -528,10 +533,9 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
     <!-- LIVE DM DEMO -->
     <div class="chat-wrap" data-hero="1" aria-label="Live demo: AI automatically books appointments">
-      <div class="glow-card" style="border-radius:24px;display:block">
       <div class="chat-phone">
         <div class="chat-bar">
-          <div class="chat-av" aria-hidden="true" style="font-family:var(--fd);font-weight:800;font-size:12px;letter-spacing:-.02em">BP</div>
+          <div class="chat-av" aria-hidden="true">BP</div>
           <div class="chat-info">
             <span class="chat-name">BarberShop Pro</span>
             <span class="chat-ai"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true"><circle cx="4" cy="4" r="3.5" fill="#c87c30" opacity=".4"/><circle cx="4" cy="4" r="1.5" fill="#c87c30"/></svg> AI Active</span>
@@ -548,7 +552,6 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
           </div>
         </div>
       </div>
-      </div><!-- /glow-card chat wrapper -->
     </div>
   </div>
 </section>
@@ -566,7 +569,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   <div class="wrap">
     <div class="sec-hd rv">
       <span class="label" data-en="The reality" data-fr="La réalité">The reality</span>
-      <h2 class="fd fd-lg" style="margin-top:.6rem;max-width:580px"
+      <h2 class="fd fd-lg sec-h2" style="max-width:580px"
         data-en="Running a barbershop is a full-time job. Your phone shouldn't be too."
         data-fr="Gérer un barbershop, c'est déjà un plein temps. Votre téléphone ne devrait pas l'être aussi."
       >Running a barbershop is a full-time job. Your phone shouldn't be too.</h2>
@@ -591,14 +594,13 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   </div>
 </section>
 
-<div class="div"></div>
 
 <!-- SOLUTION -->
 <section class="section" id="solution">
   <div class="wrap">
-    <div class="sec-hd rv" style="text-align:center">
+    <div class="sec-hd rv sec-hd--center">
       <span class="label" data-en="How it works" data-fr="Comment ça marche">How it works</span>
-      <h2 class="fd fd-lg" style="margin-top:.6rem"
+      <h2 class="fd fd-lg sec-h2"
         data-en="Three steps. Zero friction."
         data-fr="Trois étapes. Zéro friction."
       >Three steps. Zero friction.</h2>
@@ -626,14 +628,13 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   </div>
 </section>
 
-<div class="div"></div>
 
 <!-- FEATURES -->
 <section class="section" id="features">
   <div class="wrap">
-    <div class="sec-hd rv" style="margin-bottom:3rem">
+    <div class="sec-hd rv sec-hd--tight">
       <span class="label" data-en="Built for barbers" data-fr="Conçu pour les barbiers">Built for barbers</span>
-      <h2 class="fd fd-lg" style="margin-top:.6rem;max-width:480px"
+      <h2 class="fd fd-lg sec-h2" style="max-width:480px"
         data-en="Everything you need. Nothing you don't."
         data-fr="Tout ce dont vous avez besoin. Rien de plus."
       >Everything you need. Nothing you don't.</h2>
@@ -674,9 +675,9 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   <div class="wrap">
 
     <!-- En-tête section -->
-    <div class="rv" style="text-align:center;margin-bottom:2.5rem">
+    <div class="rv sec-hd--center" style="margin-bottom:2.5rem">
       <span class="label" data-en="Transparent pricing" data-fr="Tarifs transparents">Transparent pricing</span>
-      <h2 class="fd fd-lg" style="margin-top:.6rem;max-width:540px;margin-left:auto;margin-right:auto"
+      <h2 class="fd fd-lg sec-h2" style="max-width:540px;margin-left:auto;margin-right:auto"
         data-en="Simple. Honest. No surprises."
         data-fr="Simple. Honnête. Sans surprise."
       >Simple. Honest. No surprises.</h2>
@@ -773,8 +774,8 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
           <span><strong data-en="TrimSync Starter" data-fr="TrimSync Starter">TrimSync Starter</strong></span>
           <span class="vs-new">€59<span data-en="/mo" data-fr="/mois">/mo</span></span>
         </div>
-        <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid oklch(0.28 0.10 200/.28)">
-          <a href="trimsync-booking.html" class="btn-on-a mag" style="display:inline-flex;gap:.5rem;align-items:center">
+        <div class="price-roi-foot">
+          <a href="trimsync-booking.html" class="btn-on-a mag">
             <span data-en="Book a free demo" data-fr="Réserver une démo gratuite">Book a free demo</span>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
@@ -789,14 +790,13 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   </div>
 </section>
 
-<div class="div"></div>
 
 <!-- FAQ -->
 <section class="section" id="faq">
   <div class="wrap">
-    <div class="sec-hd rv" style="text-align:center;margin-bottom:3.5rem">
+    <div class="sec-hd rv sec-hd--center">
       <span class="label">FAQ</span>
-      <h2 class="fd fd-lg" style="margin-top:.6rem"
+      <h2 class="fd fd-lg sec-h2"
         data-en="Questions barbers ask"
         data-fr="Les questions des barbiers"
       >Questions barbers ask</h2>
@@ -856,7 +856,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   <div class="cta-glow" aria-hidden="true"></div>
   <div class="wrap">
     <span class="label rv" data-en="Get started" data-fr="Commencer">Get started</span>
-    <h2 class="fd fd-lg rv d1" style="margin-top:.8rem"
+    <h2 class="fd fd-lg rv d1 sec-h2"
       data-en="Ready to stop answering<br><em>DMs at midnight?</em>"
       data-fr="Prêt à arrêter de répondre<br><em>aux DMs à minuit ?</em>"
     >Ready to stop answering<br><em>DMs at midnight?</em></h2>
@@ -865,7 +865,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       data-fr="Réservez une démo gratuite. Nous vous montrons exactement comment TrimSync fonctionne pour votre barbershop."
     >Book a free demo. We'll show you exactly how TrimSync works for your barbershop.</p>
     <div class="cta-acts rv d3">
-      <a href="trimsync-booking.html" class="btn btn-a mag" style="font-size:1rem;padding:1rem 2.2rem">
+      <a href="trimsync-booking.html" class="btn btn-a btn-lg mag">
         <span data-en="Book a free demo" data-fr="Réserver une démo gratuite">Book a free demo</span>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
@@ -916,7 +916,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <span data-en="Book your free demo" data-fr="Réserver votre démo gratuite">Book your free demo</span>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
-      <button class="modal-book-btn" id="modal-devis-btn" style="background:oklch(0.76 0.13 193/.12);color:oklch(0.76 0.13 193);border:1px solid oklch(0.76 0.13 193/.3)" data-en="Get a quote" data-fr="Demander un devis">Get a quote</button>
+      <button class="btn-ghost-a" id="modal-devis-btn" data-en="Get a quote" data-fr="Demander un devis">Get a quote</button>
       <p class="modal-no-commit" data-en="No commitment — cancel anytime." data-fr="Sans engagement — résiliez quand vous voulez.">No commitment — cancel anytime.</p>
     </div>
   </div>
@@ -953,8 +953,8 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <div class="devis-field full">
           <label class="devis-label" for="dv-plan" data-en="Plan you're interested in" data-fr="Plan qui vous intéresse">Plan you're interested in</label>
           <select class="devis-select" id="dv-plan">
-            <option value="starter" data-en="Starter — €29/mo" data-fr="Starter — 29 €/mois">Starter — €29/mo</option>
-            <option value="pro" data-en="Pro — €59/mo" data-fr="Pro — 59 €/mois">Pro — €59/mo</option>
+            <option value="starter" data-en="Starter — €59/mo" data-fr="Starter — 59 €/mois">Starter — €59/mo</option>
+            <option value="pro" data-en="Pro — €79/mo" data-fr="Pro — 79 €/mois">Pro — €79/mo</option>
             <option value="max" data-en="Max — €99/mo" data-fr="Max — 99 €/mois">Max — €99/mo</option>
           </select>
         </div>
@@ -992,6 +992,7 @@ function applyLang(l){
   document.getElementById('lc').textContent=t.code;
   document.getElementById('lt').setAttribute('aria-label',t.label);
   document.getElementById('la').textContent=t.ann;
+  if(window._updateSecNav)window._updateSecNav(l);
 }
 document.getElementById('lt').addEventListener('click',()=>{applyLang(LANGS[lang].next);restartChat();});
 applyLang(lang);
@@ -1040,6 +1041,7 @@ if(sprog)scroll(info=>{const p=typeof info==='number'?info:(info?.y?.progress??0
   SEC.forEach(([id,en,fr])=>{
     const dot=document.createElement('button');
     dot.className='sec-dot';
+    dot.dataset.en=en;dot.dataset.fr=fr;
     const lbl=lang==='fr'?fr:en;
     dot.setAttribute('data-lbl',lbl);
     dot.setAttribute('aria-label',lbl);
@@ -1050,6 +1052,13 @@ if(sprog)scroll(info=>{const p=typeof info==='number'?info:(info?.y?.progress??0
       dot.classList.add('act');
     },{margin:'-40% 0px -40% 0px'});
   });
+  /* expose pour applyLang */
+  window._updateSecNav=l=>{
+    document.querySelectorAll('.sec-dot').forEach(d=>{
+      const lbl=l==='fr'?d.dataset.fr:d.dataset.en;
+      d.setAttribute('data-lbl',lbl);d.setAttribute('aria-label',lbl);
+    });
+  };
 })();
 
 

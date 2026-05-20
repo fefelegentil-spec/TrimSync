@@ -171,13 +171,15 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
 /* problem */
 /* ── PROBLEM — liste éditoriale horizontale (icône | titre / texte) ── */
-.prob-grid{display:flex;flex-direction:column}
-.pain{display:grid;grid-template-columns:56px 1fr;grid-template-rows:auto auto;column-gap:2rem;padding:2.4rem 0;border-top:1px solid oklch(1 0 0/.08);background:transparent;border-radius:0;position:static;overflow:visible}
-.pain:last-child{border-bottom:1px solid oklch(1 0 0/.08)}
+.prob-grid{display:flex;flex-direction:column;counter-reset:pain}
+.pain{counter-increment:pain;display:grid;grid-template-columns:56px 1fr;grid-template-rows:auto auto;column-gap:2rem;padding:3rem 0;border-top:1px solid oklch(1 0 0/.14);background:transparent;border-radius:0;position:static;overflow:visible}
+.pain:last-child{border-bottom:1px solid oklch(1 0 0/.14)}
 .pain::before{display:none}
 .pain-n{display:none}
-.pain-ico{grid-column:1;grid-row:1/3;align-self:start;padding-top:.2rem;margin:0;color:var(--a);display:flex;line-height:0}
-.pain h3{grid-column:2;grid-row:1;font-family:var(--fd);font-size:1.15rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.55rem;line-height:1.2}
+.pain-ico{grid-column:1;grid-row:1/3;align-self:start;padding-top:.15rem;margin:0;color:var(--a);display:flex;line-height:0}
+.pain-ico svg{filter:drop-shadow(0 0 12px oklch(0.76 0.13 193/.45))}
+.pain h3{grid-column:2;grid-row:1;font-family:var(--fd);font-size:clamp(1.15rem,1.8vw,1.35rem);font-weight:800;letter-spacing:-.025em;margin-bottom:.55rem;line-height:1.15}
+.pain h3::before{content:"0" counter(pain) " —";display:block;font-family:var(--fd);font-size:.62rem;font-weight:800;letter-spacing:.22em;color:var(--a);margin-bottom:.4rem;line-height:1}
 .pain p{grid-column:2;grid-row:2;margin:0}
 
 /* solution */
@@ -185,11 +187,12 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .sol-steps::after{display:none}
 .step{padding:2.4rem 2.2rem;border-radius:18px;background:oklch(0.10 0.008 222/.92);border:1px solid var(--bd2);position:relative;overflow:hidden}
 .step::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,oklch(0.76 0.13 193/.35),transparent);pointer-events:none}
-.step-ico{margin-bottom:1.2rem;color:oklch(0.76 0.13 193/.75);display:block;line-height:0}
-.step-n{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;font-family:var(--fd);font-size:.88rem;font-weight:800;margin-bottom:1.3rem;position:relative;z-index:1}
-.step-n-a{background:var(--a);color:var(--on-a)}
+.step-ico{margin-bottom:1.4rem;color:var(--a);display:block;line-height:0}
+.step-ico svg{filter:drop-shadow(0 0 10px oklch(0.76 0.13 193/.4))}
+.step-n{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;font-family:var(--fd);font-size:.95rem;font-weight:800;margin-bottom:1.4rem;position:relative;z-index:1}
+.step-n-a{background:var(--a);color:var(--on-a);box-shadow:0 0 20px oklch(0.76 0.13 193/.5)}
 .step-n-b{background:oklch(0.76 0.13 193/.10);color:var(--a);border:1px solid oklch(0.76 0.13 193/.4)}
-.step h3{font-family:var(--fd);font-size:1.1rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.7rem}
+.step h3{font-family:var(--fd);font-size:clamp(1.05rem,1.5vw,1.2rem);font-weight:700;letter-spacing:-.02em;margin-bottom:.7rem}
 
 /* features — 3 boxes portrait + 1 box horizontale (la D) */
 .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto;gap:1.25rem}
@@ -200,7 +203,10 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
   box-shadow:0 1rem 2rem -1rem black;
   min-height:280px;
+  border:1px solid var(--bd);
+  transition:border-color .3s var(--ex),box-shadow .3s var(--ex);
 }
+.feat:hover{border-color:oklch(0.76 0.13 193/.3);box-shadow:0 1rem 2rem -1rem black,0 0 0 1px oklch(0.76 0.13 193/.12)}
 /* 3 premières : une par colonne */
 .feat:nth-child(1){grid-column:1;grid-row:1}
 .feat:nth-child(2){grid-column:2;grid-row:1}
@@ -210,10 +216,10 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .feat:nth-child(4) .feat-body{flex:1;display:flex;flex-direction:column;gap:.5rem}
 .feat:nth-child(4) .feat-ico{margin-bottom:0;flex-shrink:0}
 .feat:nth-child(4) h3{margin-bottom:0}
-.feat-ico{color:var(--a);display:block;line-height:0;margin-bottom:.4rem}
-.feat-ico svg{width:44px;height:44px}
-.feat-tag{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--a);display:block}
-.feat h3{font-family:var(--fd);font-size:1.2rem;font-weight:700;letter-spacing:-.02em}
+.feat-ico{color:var(--a);display:block;line-height:0;margin-bottom:.6rem}
+.feat-ico svg{width:44px;height:44px;filter:drop-shadow(0 0 14px oklch(0.76 0.13 193/.4))}
+.feat-tag{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--a);display:block;margin-bottom:.1rem}
+.feat h3{font-family:var(--fd);font-size:clamp(1.1rem,1.6vw,1.25rem);font-weight:700;letter-spacing:-.02em}
 .feat .body-t{font-size:.88rem;flex:1}
 @media(max-width:860px){
   .feat-grid{grid-template-columns:1fr 1fr}
@@ -614,13 +620,13 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       </div>
       <div class="step">
         <span class="step-ico" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="9" y="14" width="22" height="18" rx="4" stroke="currentColor" stroke-width="1.7"/><path d="M15 10h10M20 10v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="16" cy="24" r="2" stroke="currentColor" stroke-width="1.5"/><circle cx="24" cy="24" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 23h4M31 23h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
-        <div class="step-n step-n-b">2</div>
+        <div class="step-n step-n-a">2</div>
         <h3 data-en="AI handles your DMs" data-fr="L'IA gère vos DMs">AI handles your DMs</h3>
         <p class="body-t" data-en="Our AI reads every message, understands booking intent, and responds naturally on your behalf, 24/7." data-fr="Notre IA lit chaque message, comprend l'intention de réservation, et répond naturellement en votre nom, 24h/24.">Our AI reads every message, understands booking intent, and responds naturally on your behalf, 24/7.</p>
       </div>
       <div class="step">
         <span class="step-ico" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 5l4 4h5a2 2 0 0 1 2 2v5l4 4-4 4v5a2 2 0 0 1-2 2h-5l-4 4-4-4h-5a2 2 0 0 1-2-2v-5l-4-4 4-4v-5a2 2 0 0 1 2-2h5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 20l4 4 8-8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <div class="step-n step-n-b">3</div>
+        <div class="step-n step-n-a">3</div>
         <h3 data-en="Appointments booked, instantly" data-fr="RDV confirmés, instantanément">Appointments booked, instantly</h3>
         <p class="body-t" data-en="Clients get confirmed bookings, automatic reminders, and calendar updates. You see everything in your dashboard." data-fr="Les clients reçoivent des confirmations, des rappels et des mises à jour calendrier. Vous voyez tout dans votre tableau de bord.">Clients get confirmed bookings, automatic reminders, and calendar updates. You see everything in your dashboard.</p>
       </div>

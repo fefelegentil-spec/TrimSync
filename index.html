@@ -394,110 +394,6 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   border-bottom:1px solid oklch(0.76 0.13 193/.35);
 }
 
-/* ─── SPOTLIGHT CARD — port vanilla du composant GlowCard React ─── */
-[data-glow] {
-  /* Tokens : surchargeables via data-glow-color="purple" etc. */
-  --base: 193; --spread: 60; --border: 2; --size: 300;
-  --border-size: calc(var(--border) * 1px);
-  --spotlight-size: calc(var(--size) * 1px);
-  --hue: calc(var(--base) + (var(--xp, 0.5) * var(--spread)));
-
-  border: var(--border-size) solid transparent;
-
-  /* Layer 1 (padding-box) : fond de carte réactif au curseur
-     Layer 2 (border-box)  : bordure lumineuse qui suit le curseur */
-  background-image:
-    radial-gradient(
-      var(--spotlight-size) var(--spotlight-size) at
-      calc(var(--x, -9999) * 1px) calc(var(--y, -9999) * 1px),
-      hsl(var(--hue) 100% 65% / 0.13),
-      transparent
-    ),
-    radial-gradient(
-      calc(var(--spotlight-size) * 0.60) calc(var(--spotlight-size) * 0.60) at
-      calc(var(--x, -9999) * 1px) calc(var(--y, -9999) * 1px),
-      hsl(var(--hue) 100% 72% / 1),
-      oklch(0.76 0.13 193 / 0.28)
-    );
-  background-clip: padding-box, border-box;
-  background-origin: padding-box, border-box;
-  background-size: 100% 100%, 100% 100%;
-  background-position: 0 0, 0 0;
-  position: relative;
-  touch-action: none;
-}
-
-/* Halo de bordure brillant (::before) — technique mask-composite */
-[data-glow]::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: var(--border-size);
-  background: radial-gradient(
-    calc(var(--spotlight-size) * 0.75) calc(var(--spotlight-size) * 0.75) at
-    calc(var(--x, -9999) * 1px) calc(var(--y, -9999) * 1px),
-    hsl(var(--hue) 100% 55% / 0.9),
-    transparent 100%
-  );
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
-  filter: brightness(1.8);
-}
-
-/* Highlight blanc fin sur la bordure (::after) */
-[data-glow]::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: var(--border-size);
-  background: radial-gradient(
-    calc(var(--spotlight-size) * 0.45) calc(var(--spotlight-size) * 0.45) at
-    calc(var(--x, -9999) * 1px) calc(var(--y, -9999) * 1px),
-    hsl(0 0% 100% / 0.65),
-    transparent 100%
-  );
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-/* Nœud enfant injecté par spotlight-cards.js : halo flou externe */
-[data-glow] > [data-glow-inner] {
-  position: absolute;
-  inset: -8px;
-  border-radius: inherit;
-  background: radial-gradient(
-    calc(var(--spotlight-size) * 0.5) calc(var(--spotlight-size) * 0.5) at
-    calc(calc(var(--x, -9999) + 8) * 1px) calc(calc(var(--y, -9999) + 8) * 1px),
-    hsl(var(--hue) 80% 65% / 0.10),
-    transparent
-  );
-  filter: blur(14px);
-  pointer-events: none;
-  z-index: -1;
-}
-
-/* ── Variantes de couleur ── */
-[data-glow-color="purple"] { --base: 280; --spread: 60; }
-[data-glow-color="green"]  { --base: 140; --spread: 50; }
-[data-glow-color="red"]    { --base: 0;   --spread: 30; }
-[data-glow-color="orange"] { --base: 30;  --spread: 40; }
-[data-glow-color="teal"]   { --base: 193; --spread: 40; }
 
 /* ── PLAN DETAIL MODAL ── */
 .plan-modal-overlay{position:fixed;inset:0;z-index:9000;background:oklch(0.06 0.01 222/.84);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity .3s ease;display:flex;align-items:center;justify-content:center;padding:1.5rem}
@@ -1328,7 +1224,6 @@ document.querySelectorAll('.faq-item').forEach(item=>{
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('open'))closePlan();});
 })();
 
-/* ── SPOTLIGHT CARDS — voir js/spotlight-cards.js ── */
 
 /* ── DEVIS MODAL ── */
 const DEVIS_BACKEND = 'https://trimsync-backend-production.up.railway.app';
@@ -1437,6 +1332,5 @@ document.addEventListener('keydown', e => {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script src="js/waves-bg.js"></script>
-<script src="js/spotlight-cards.js"></script>
 </body>
 </html>

@@ -477,7 +477,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .bot-prev-card .bpc-lbl{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--a);margin-bottom:.5rem}
 .bot-prev-card .bpc-msg{font-size:.78rem;color:var(--t2);line-height:1.4}
 .bot-prev-card .bpc-tag{margin-top:.55rem;font-size:.65rem;color:var(--t3);display:flex;align-items:center;gap:.3rem}
-.bot-prev-card .bpc-tag::before{content:'⚡';font-size:.6rem}
+.bot-prev-card .bpc-tag::before{content:'';font-size:.6rem}
 .bot-demo-cta{display:flex;flex-direction:column;align-items:center;gap:.9rem}
 @media(max-width:640px){.bot-demo-preview{grid-template-columns:1fr;max-width:320px}}
 @media(max-width:460px){.bot-demo-preview{display:none}}
@@ -1369,26 +1369,22 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
           <label data-en="Bot personality" data-fr="Personnalité du bot">Bot personality</label>
           <div class="bton-grid" id="bton-grid">
             <button type="button" class="bton-btn act" data-ton="chill" onclick="bSelectTon(this)">
-              <span class="bton-icon">😎</span>
               <span data-en="Chill" data-fr="Détendu">Chill</span>
             </button>
             <button type="button" class="bton-btn" data-ton="street" onclick="bSelectTon(this)">
-              <span class="bton-icon">🔥</span>
               <span data-en="Street" data-fr="Street">Street</span>
             </button>
             <button type="button" class="bton-btn" data-ton="pro" onclick="bSelectTon(this)">
-              <span class="bton-icon">💼</span>
               <span data-en="Pro" data-fr="Sérieux">Pro</span>
             </button>
             <button type="button" class="bton-btn" data-ton="girly" onclick="bSelectTon(this)">
-              <span class="bton-icon">✨</span>
               <span data-en="Girly" data-fr="Girly">Girly</span>
             </button>
           </div>
         </div>
         <div class="bf">
           <label data-en="Custom welcome message (optional)" data-fr="Message d'accueil personnalisé (optionnel)">Custom welcome message (optional)</label>
-          <textarea id="bf-accueil" placeholder="Hey! I'm the bot for Barber Kingdom. I can help you book an appointment 💈"></textarea>
+          <textarea id="bf-accueil" placeholder="Hey! I'm the bot for Barber Kingdom. I can help you book an appointment."></textarea>
         </div>
         <div style="margin-top:1.4rem">
           <button class="bbtn bbtn-primary bbtn-full" onclick="bGoStep2()">
@@ -1527,7 +1523,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       <div class="bcard">
         <div class="bsuccess">
           <div class="bsuccess-icon"><svg viewBox="0 0 32 32"><polyline points="6 16 13 23 26 10"/></svg></div>
-          <div class="bsuccess-title" data-en="Payment confirmed 🎉" data-fr="Paiement confirmé 🎉">Payment confirmed 🎉</div>
+          <div class="bsuccess-title" data-en="Payment confirmed" data-fr="Paiement confirmé">Payment confirmed</div>
           <div class="bsuccess-sub" data-en="One last step: connect your Instagram so your bot starts replying to clients." data-fr="Plus qu'une étape : connecte ton Instagram pour que ton bot commence à répondre.">One last step: connect your Instagram so your bot starts replying to clients.</div>
           <div class="bstep-list">
             <div class="bstep-item"><div class="bstep-num">1</div><div class="bstep-info"><strong data-en="Config saved" data-fr="Configuration sauvegardée">Config saved</strong><span data-en="Your bot is ready with your info" data-fr="Ton bot est prêt avec tes infos">Your bot is ready with your info</span></div></div>
@@ -1949,8 +1945,8 @@ const BTON_PROMPTS = {
     en: `Tone: professional, serious, polite. Use formal language. Clear and structured sentences. No slang, no emojis.`
   },
   girly: {
-    fr: `Ton : chaleureux, enthousiaste, bienveillant. Tu es expressif·ve, positif·ve. Quelques emojis kawaii sont bienvenus (✨🌸💕). Reste professionnel mais adorable.`,
-    en: `Tone: warm, enthusiastic, kind. You're expressive and positive. A few cute emojis are welcome (✨🌸💕). Stay professional but adorable.`
+    fr: `Ton : chaleureux, enthousiaste, bienveillant. Tu es expressif·ve, positif·ve. Reste professionnel mais adorable.`,
+    en: `Tone: warm, enthusiastic, kind. You're expressive and positive. Stay professional but adorable.`
   }
 };
 
@@ -2143,8 +2139,8 @@ window.bGoStep2 = function() {
   msgs.innerHTML = '';
 
   const welcome = bcfg.accueil || (lang==='fr'
-    ? `Salut ! 👋 Je suis le bot de ${bcfg.salon} à ${bcfg.ville}. Comment puis-je t'aider ?`
-    : `Hey! 👋 I'm the bot for ${bcfg.salon} in ${bcfg.ville}. How can I help you?`);
+    ? `Salut ! Je suis le bot de ${bcfg.salon} à ${bcfg.ville}. Comment puis-je t'aider ?`
+    : `Hey! I'm the bot for ${bcfg.salon} in ${bcfg.ville}. How can I help you?`);
   bAddBotBubble(welcome);
   bSetStep(2);
 };
@@ -2246,7 +2242,7 @@ function bAddBotBubble(text, typing=false) {
   if (!typing) {
     const tag = document.createElement('div');
     tag.className = 'bbot-tag';
-    tag.textContent = lang==='fr' ? '⚡ Répondu automatiquement' : '⚡ Answered automatically';
+    tag.textContent = lang==='fr' ? 'Répondu automatiquement' : 'Answered automatically';
     wrap.appendChild(tag);
   }
   row.appendChild(av);
@@ -2370,23 +2366,23 @@ function bFallback(text) {
     .map(dy => `${lang==='fr'?dy.fr:dy.en} ${bcfg.hours[dy.key].from}–${bcfg.hours[dy.key].to}`).join(', ');
 
   if (lang === 'fr') {
-    if (t.match(/prix|combien|tarif/))    return `Nos prestations débutent à ${p}€ (environ ${d} min). Tu veux qu'on te propose un créneau ? 💈`;
-    if (t.match(/dispo|rdv|réserver|rendez/)) return `Avec plaisir ! Dis-moi ta dispo et ${n} te confirmera le créneau à ${v} 📅`;
-    if (t.match(/enfant|gamin/))          return hasKids ? `Oui, on coupe les enfants 😊 Même tarif de base ${p}€. Tu veux un RDV ?` : `On ne fait pas les coupes enfant pour l'instant.`;
-    if (t.match(/barbe|beard/))           return hasBeard ? `La barbe, c'est inclus dans nos services 💪 Dis-moi quand passer !` : `On ne propose pas le soin barbe actuellement.`;
-    if (t.match(/horaire|heure|ouvert/))  return `Nos horaires : ${openHours||'Lun–Sam 9h–19h'}. On t'attend ! 😊`;
-    if (t.match(/annuler|cancel/))        return `Pas de souci ! Envoie ton nom et l'heure du RDV, on s'en occupe 👍`;
-    if (t.match(/où|adresse|localisation/)) return `On est à ${v}. Envoie-moi un message pour l'adresse exacte 📍`;
-    return `Bien reçu ! ${n} revient vers toi rapidement. Tu veux prendre un RDV en même temps ? 💈`;
+    if (t.match(/prix|combien|tarif/))    return `Nos prestations débutent à ${p}€ (environ ${d} min). Tu veux qu'on te propose un créneau ?`;
+    if (t.match(/dispo|rdv|réserver|rendez/)) return `Avec plaisir ! Dis-moi ta dispo et ${n} te confirmera le créneau à ${v}.`;
+    if (t.match(/enfant|gamin/))          return hasKids ? `Oui, on coupe les enfants. Même tarif de base ${p}€. Tu veux un RDV ?` : `On ne fait pas les coupes enfant pour l'instant.`;
+    if (t.match(/barbe|beard/))           return hasBeard ? `La barbe, c'est inclus dans nos services. Dis-moi quand passer !` : `On ne propose pas le soin barbe actuellement.`;
+    if (t.match(/horaire|heure|ouvert/))  return `Nos horaires : ${openHours||'Lun–Sam 9h–19h'}. On t'attend !`;
+    if (t.match(/annuler|cancel/))        return `Pas de souci ! Envoie ton nom et l'heure du RDV, on s'en occupe.`;
+    if (t.match(/où|adresse|localisation/)) return `On est à ${v}. Envoie-moi un message pour l'adresse exacte.`;
+    return `Bien reçu ! ${n} revient vers toi rapidement. Tu veux prendre un RDV en même temps ?`;
   } else {
-    if (t.match(/price|how much|cost/))   return `Services start at €${p} (~${d} min). Want me to book a slot? 💈`;
-    if (t.match(/available|book|appointment|slot/)) return `Sure! Tell me your availability and ${n} will confirm your slot in ${v} 📅`;
-    if (t.match(/kid|child/))             return hasKids ? `Yes, we do kids' cuts 😊 Same base price €${p}. Want to book?` : `We don't do kids' cuts at the moment.`;
-    if (t.match(/beard/))                 return hasBeard ? `Beard service is available 💪 Let me know when you'd like to come in!` : `We don't offer beard services currently.`;
-    if (t.match(/hour|open|schedule/))    return `Our hours: ${openHours||'Mon–Sat 9am–7pm'}. See you soon! 😊`;
-    if (t.match(/cancel/))               return `No problem! Send your name and appointment time and we'll sort it 👍`;
-    if (t.match(/where|address|location/)) return `We're in ${v}. Message me for the exact address 📍`;
-    return `Got it! ${n} will get back to you shortly. Want to book an appointment too? 💈`;
+    if (t.match(/price|how much|cost/))   return `Services start at €${p} (~${d} min). Want me to book a slot?`;
+    if (t.match(/available|book|appointment|slot/)) return `Sure! Tell me your availability and ${n} will confirm your slot in ${v}.`;
+    if (t.match(/kid|child/))             return hasKids ? `Yes, we do kids' cuts. Same base price €${p}. Want to book?` : `We don't do kids' cuts at the moment.`;
+    if (t.match(/beard/))                 return hasBeard ? `Beard service is available. Let me know when you'd like to come in!` : `We don't offer beard services currently.`;
+    if (t.match(/hour|open|schedule/))    return `Our hours: ${openHours||'Mon–Sat 9am–7pm'}. See you soon!`;
+    if (t.match(/cancel/))               return `No problem! Send your name and appointment time and we'll sort it.`;
+    if (t.match(/where|address|location/)) return `We're in ${v}. Message me for the exact address.`;
+    return `Got it! ${n} will get back to you shortly. Want to book an appointment too?`;
   }
 }
 

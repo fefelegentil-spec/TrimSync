@@ -684,7 +684,7 @@ function setStep(n){
   }
   document.getElementById('back-btn').style.display = n>1&&n<5 ? 'block':'none';
   document.getElementById('bot-cta').style.display = n===5 ? 'none':'block';
-  const labels = ['Continuer','Continuer','Valider mes infos','Confirmer mon RDV ✓',''];
+  const labels = ['Continuer','Continuer','Valider mes infos','Confirmer mon RDV',''];
   document.getElementById('cta-label').textContent = labels[n-1]||'Continuer';
   state.step = n;
   window.scrollTo({top:0,behavior:'smooth'});

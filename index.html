@@ -299,9 +299,21 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 /* plan sélectionné dans le bot step 3 */
 #bot-plans-grid .plan{cursor:pointer}
 #bot-plans-grid .plan.plan-sel{border-color:oklch(1 0 0/.6)!important;transform:translateY(-4px)!important;box-shadow:0 20px 48px oklch(0 0 0/.28)!important}
-/* step 3 bot — layout adapté modal : plans pleine largeur, ROI en dessous */
+/* step 3 bot — layout + compaction pour le modal */
+#bstep-3 .pricing{padding:2.25rem 0}
+#bstep-3 .wrap{padding:0 1.75rem}
+#bstep-3 .sec-hd--center{margin-bottom:1.4rem}
+#bstep-3 .sec-h2{font-size:clamp(1.45rem,4vw,2.1rem);margin-top:.35rem}
+#bstep-3 .setup-fee{padding:1.25rem 1.5rem;margin-bottom:1.4rem;gap:1.4rem}
+#bstep-3 .setup-amount{font-size:clamp(2rem,5vw,2.9rem)}
+#bstep-3 .setup-desc{font-size:.81rem;max-width:34ch}
+#bstep-3 .setup-checks span{font-size:.77rem}
 #bstep-3 .plans-wrap{display:block}
-#bstep-3 .plans-grid{grid-template-columns:1fr 1fr;margin-bottom:2rem}
+#bstep-3 .plans-grid{grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1.4rem}
+#bstep-3 .plan{padding:1.3rem 1.3rem;gap:.85rem}
+#bstep-3 .plan-price{font-size:clamp(1.7rem,4vw,2.2rem)}
+#bstep-3 .plan-feats{gap:.4rem}
+#bstep-3 .plan-feats li{font-size:.8rem}
 #bstep-3 .price-right{max-width:100%}
 @media(max-width:600px){#bstep-3 .plans-grid{grid-template-columns:1fr;gap:1rem}#bstep-3 .plan-pop{margin-top:14px}}
 @media(max-width:560px){.setup-fee{flex-direction:column;gap:1.2rem;padding:1.5rem}.setup-checks{margin-left:0}}

@@ -2025,7 +2025,7 @@ document.querySelectorAll('.faq-item').forEach(item=>{
       d.feats.map(f=>`<li${f.h?' class="mh"':''}>${f.t}</li>`).join('');
     modal.querySelector('#modal-steps-list').innerHTML=
       d.steps.map(s=>`<div class="modal-step-row"><div class="modal-step-num">${s.n}</div><div class="modal-step-body"><strong>${s.title}</strong>${s.desc}</div></div>`).join('');
-    const STRIPE_LINKS={starter:'https://buy.stripe.com/5kQ9AT7Jd4ug3vs5HPgEg03',max:'https://buy.stripe.com/cNi00jfbFf8U5DA2vDgEg05'};
+    const STRIPE_LINKS={starter:'https://buy.stripe.com/9B6fZhe7Bd0MgiegmtgEg06',max:'https://buy.stripe.com/9B614n9Rl9OA5DA9Y5gEg07'};
     modal.querySelector('#modal-book-btn').href=STRIPE_LINKS[key]||`trimsync-booking.html?plan=${key}`;
     /* traduire les strings statiques du modal */
     modal.querySelectorAll('[data-en]').forEach(el=>{
@@ -2157,8 +2157,8 @@ document.addEventListener('keydown', e => {
 
 const BBACKEND = 'https://fcutz-automation-multitenant-production.up.railway.app';
 const BSTRIPE  = {
-  starter:'https://buy.stripe.com/5kQ9AT7Jd4ug3vs5HPgEg03',
-  max:    'https://buy.stripe.com/cNi00jfbFf8U5DA2vDgEg05'
+  starter:'https://buy.stripe.com/9B6fZhe7Bd0MgiegmtgEg06',
+  max:    'https://buy.stripe.com/9B614n9Rl9OA5DA9Y5gEg07'
 };
 
 const bcfg = {
@@ -2704,7 +2704,9 @@ window.bConnectInstagram = function() {
       oklch(0.76 0.13 193 / var(--bg-spot-opacity)),
       transparent
     )`;
+    /* Exclure #bot-plans-grid : fond teal → spotlight teal = invisible */
     document.querySelectorAll('.feat,.plan').forEach(el=>{
+      if(el.closest('#bot-plans-grid')) return;
       el.setAttribute('data-glow','');
       el.style.backgroundImage=SPOTLIGHT;
       el.style.backgroundAttachment='fixed';

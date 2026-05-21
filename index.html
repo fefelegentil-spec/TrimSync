@@ -315,6 +315,12 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 #bstep-3 .plan-feats{gap:.4rem}
 #bstep-3 .plan-feats li{font-size:.8rem}
 #bstep-3 .price-right{max-width:100%}
+/* ROI table : contraste renforcé (anti ton-sur-ton sur le fond teal) */
+#bstep-3 .vs-lbl{color:oklch(0.95 0.02 200)}
+#bstep-3 .vs-row{border-bottom-color:oklch(0.97 0.02 200/.30)}
+#bstep-3 .vs-row span:first-child{color:oklch(0.98 0.01 200)}
+#bstep-3 .vs-old{color:oklch(0.86 0.05 200)}
+#bstep-3 .vs-new{color:#fff}
 @media(max-width:600px){#bstep-3 .plans-grid{grid-template-columns:1fr;gap:1rem}#bstep-3 .plan-pop{margin-top:14px}}
 @media(max-width:560px){.setup-fee{flex-direction:column;gap:1.2rem;padding:1.5rem}.setup-checks{margin-left:0}}
 

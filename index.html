@@ -333,9 +333,220 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .foot-links a:hover{color:var(--t)}
 .foot-copy{font-size:.78rem;color:var(--t2)}
 
-/* reveal — animations désactivées, éléments toujours visibles */
+/* reveal — fallback visible ; JS initialise à opacity:0 et anime */
 .rv{opacity:1;transform:none}
 .d1{}.d2{}.d3{}.d4{}
+
+/* ═══════════════════════════════════════════════════════════════
+   REFONTE UI/UX — Scroll Animations + Spotlight + Sections
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── CURSOR SPOTLIGHT GLOBAL (cyan) ── */
+:root{--cx:-9999;--cy:-9999}
+.glow-fx{
+  position:absolute;inset:0;border-radius:inherit;
+  background:radial-gradient(
+    320px circle at calc(var(--cx)*1px) calc(var(--cy)*1px),
+    oklch(0.76 0.13 193/.13),transparent 70%
+  );
+  background-attachment:fixed;pointer-events:none;z-index:0;
+}
+
+/* ── PROBLEM — 50/50 SPLITS PLEINE LARGEUR ── */
+.prob-grid{display:flex;flex-direction:column;gap:0;counter-reset:pain}
+.pain{
+  counter-increment:pain;
+  display:grid;grid-template-columns:1fr 1fr;gap:0;
+  padding:0;border:none;border-radius:0;
+  border-top:1px solid oklch(0.76 0.13 193/.15);
+  min-height:42vh;overflow:hidden;position:relative;
+}
+.pain:last-child{border-bottom:1px solid oklch(0.76 0.13 193/.15)}
+.pain::before{display:none}
+.pain-n{display:none}
+.pain-ico{display:none} /* remplacé par .pain-left .pain-ico */
+.pain-left{
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  gap:1.5rem;padding:4rem 3rem;
+  background:oklch(0.09 0.007 222);
+  border-right:1px solid oklch(0.76 0.13 193/.15);
+  position:relative;overflow:hidden;
+}
+.pain-left::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 80% 80% at 50% 50%,oklch(0.76 0.13 193/.07),transparent);
+}
+.pain-left .pain-ico{
+  display:flex;position:relative;z-index:1;color:var(--a);
+}
+.pain-left .pain-ico svg{
+  width:56px;height:56px;
+  filter:drop-shadow(0 0 20px oklch(0.76 0.13 193/.55));
+}
+.pain-num{
+  font-family:var(--fd);font-size:clamp(5rem,10vw,8rem);font-weight:800;
+  letter-spacing:-.05em;line-height:1;
+  color:oklch(0.76 0.13 193/.12);
+  position:absolute;bottom:.5rem;right:1.5rem;
+  pointer-events:none;
+}
+.pain-right{
+  display:flex;flex-direction:column;justify-content:center;
+  padding:4rem;position:relative;overflow:hidden;
+}
+.pain-right h3{
+  font-family:var(--fd);font-size:clamp(1.3rem,2vw,1.65rem);
+  font-weight:800;letter-spacing:-.025em;margin-bottom:1rem;line-height:1.15;
+}
+.pain-right h3::before{display:none}
+.pain-right .body-t{font-size:1rem;max-width:42ch}
+@media(max-width:760px){
+  .pain{grid-template-columns:1fr;min-height:auto}
+  .pain-left{
+    border-right:none;border-bottom:1px solid oklch(0.76 0.13 193/.15);
+    padding:2.5rem;min-height:140px;
+  }
+  .pain-right{padding:2.5rem}
+  .pain-num{font-size:5rem}
+}
+
+/* ── SOLUTION — TIMELINE VERTICALE ── */
+.sol-steps{display:none} /* remplacé par .sol-timeline */
+.sol-timeline{
+  position:relative;padding:1rem 0;
+  display:flex;flex-direction:column;gap:0;margin-top:3rem;
+}
+.sol-tline-track{
+  position:absolute;left:50%;top:0;bottom:0;width:2px;
+  background:oklch(0.22 0.010 218);transform:translateX(-50%);
+}
+.sol-tline-progress{
+  width:100%;
+  background:linear-gradient(180deg,var(--a),oklch(0.52 0.12 196));
+  height:0%;box-shadow:0 0 10px oklch(0.76 0.13 193/.5);
+}
+.sol-step{
+  display:grid;grid-template-columns:1fr 80px 1fr;
+  align-items:center;gap:0;padding:3.5rem 0;position:relative;
+}
+.sol-step-node{
+  display:flex;align-items:center;justify-content:center;z-index:2;
+}
+.sol-step-num{
+  width:54px;height:54px;border-radius:50%;
+  background:var(--a);color:var(--on-a);
+  font-family:var(--fd);font-size:1.15rem;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 28px oklch(0.76 0.13 193/.5),0 0 0 7px oklch(0.76 0.13 193/.12);
+  position:relative;z-index:2;flex-shrink:0;
+}
+.sol-step-empty{opacity:0;pointer-events:none}
+.step-content{display:flex;flex-direction:column;gap:.8rem}
+.sol-step--right .sol-step-empty{grid-column:1;grid-row:1}
+.sol-step--right .sol-step-node{grid-column:2;grid-row:1}
+.sol-step--right .step-content{grid-column:3;grid-row:1;padding-left:3rem}
+.sol-step--left .step-content{grid-column:1;grid-row:1;padding-right:3rem;text-align:right}
+.sol-step--left .sol-step-node{grid-column:2;grid-row:1}
+.sol-step--left .sol-step-empty{grid-column:3;grid-row:1}
+.step-content .step-ico{display:block;line-height:0;color:var(--a)}
+.step-content .step-ico svg{
+  width:40px;height:40px;
+  filter:drop-shadow(0 0 10px oklch(0.76 0.13 193/.4));
+}
+.step-content h3{
+  font-family:var(--fd);font-size:clamp(1.1rem,1.8vw,1.3rem);
+  font-weight:700;letter-spacing:-.02em;
+}
+.sol-step--left .step-content .step-ico{align-self:flex-end}
+@media(max-width:760px){
+  .sol-tline-track{left:27px}
+  .sol-step{
+    grid-template-columns:54px 1fr;gap:0 1.5rem;
+    padding:2rem 0;
+  }
+  .sol-step--right .sol-step-empty,.sol-step--left .sol-step-empty{display:none}
+  .sol-step--right .sol-step-node,.sol-step--left .sol-step-node{grid-column:1;grid-row:1}
+  .sol-step--right .step-content,.sol-step--left .step-content{
+    grid-column:2;grid-row:1;
+    padding:0;text-align:left;
+  }
+  .sol-step--left .step-content .step-ico{align-self:flex-start}
+}
+
+/* ── FEATURES — BENTO ASYMÉTRIQUE RADICAL ── */
+.feat-grid{
+  display:grid;
+  grid-template-columns:1.7fr 1fr 1fr;
+  grid-template-rows:340px 200px;
+  gap:1.25rem;
+}
+.feat:nth-child(1){
+  grid-column:1;grid-row:1/3;min-height:0;
+  background:oklch(0.10 0.008 222);
+  box-shadow:0 2rem 5rem -1rem oklch(0 0 0/.55),0 0 0 1px oklch(0.76 0.13 193/.08);
+}
+.feat:nth-child(2){
+  grid-column:2;grid-row:1;min-height:0;
+  background:oklch(0.08 0.006 222);
+  border-color:oklch(0.76 0.13 193/.18);
+}
+.feat:nth-child(3){
+  grid-column:3;grid-row:1;min-height:0;
+  background:oklch(0.13 0.009 220);
+}
+.feat:nth-child(4){
+  grid-column:2/-1;grid-row:2;min-height:0;
+  flex-direction:row;align-items:center;gap:2rem;padding:1.6rem 2rem;
+  background:oklch(0.11 0.008 222);
+  border-color:oklch(0.76 0.13 193/.2);
+  box-shadow:0 0 0 1px oklch(0.76 0.13 193/.08),0 1rem 2rem -1rem black;
+}
+.feat:nth-child(4) .feat-body{flex:1;display:flex;flex-direction:column;gap:.5rem}
+.feat:nth-child(4) .feat-ico{margin-bottom:0;flex-shrink:0}
+.feat:nth-child(4) h3{margin-bottom:0}
+/* Watermark décoratif sur card A */
+.feat:nth-child(1)::after{
+  content:'AI';
+  position:absolute;bottom:1rem;right:1.5rem;
+  font-family:var(--fd);font-size:7rem;font-weight:800;letter-spacing:-.05em;
+  color:oklch(0.76 0.13 193/.06);pointer-events:none;line-height:1;z-index:0;
+}
+@media(max-width:960px){
+  .feat-grid{
+    display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto;
+  }
+  .feat:nth-child(1){grid-column:1;grid-row:auto;min-height:280px}
+  .feat:nth-child(2){grid-column:2;grid-row:auto}
+  .feat:nth-child(3){grid-column:1;grid-row:auto}
+  .feat:nth-child(4){grid-column:1/-1;grid-row:auto;flex-direction:column;align-items:flex-start}
+}
+@media(max-width:560px){
+  .feat-grid{grid-template-columns:1fr}
+  .feat:nth-child(1),.feat:nth-child(2),.feat:nth-child(3),.feat:nth-child(4){
+    grid-column:1;grid-row:auto;
+  }
+}
+
+/* ── CTA FINAL — PLEIN ÉCRAN ── */
+.cta-final{
+  min-height:92vh;display:flex;align-items:center;justify-content:center;
+}
+.cta-final .wrap{text-align:center;position:relative}
+.cta-glow{
+  background:radial-gradient(
+    ellipse 90% 110% at 50% 55%,
+    oklch(0.76 0.13 193/.15) 0%,
+    oklch(0.76 0.13 193/.06) 40%,
+    transparent 70%
+  );
+}
+
+/* ── HERO CONTENT will-change ── */
+.hero-content{will-change:transform}
+.chat-wrap{will-change:transform}
+
+/* ── PRICING — transform-origin pour scale ── */
+.plan{transform-origin:bottom center}
 
 /* ── RESPONSIVE ── */
 
@@ -783,21 +994,40 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       >Running a barbershop is a full-time job. Your phone shouldn't be too.</h2>
     </div>
     <div class="prob-grid">
+
       <div class="pain">
-        <span class="pain-ico" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><path d="M8 9h22a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4H16l-6 6v-6h-2a4 4 0 0 1-4-4V13a4 4 0 0 1 4-4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M13 18h16M13 23h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
-        <h3 data-en="Hours lost answering the same DMs" data-fr="Des heures perdues à répondre aux mêmes DMs">Hours lost answering the same DMs</h3>
-        <p class="body-t" data-en='"Available Friday? What time?" The same question, a dozen times a day, pulling you away from your chair.' data-fr='"Disponible vendredi ? À quelle heure ?" La même question, des dizaines de fois par jour, à chaque coup de ciseau.'>"Available Friday? What time?" The same question, a dozen times a day, pulling you away from your chair.</p>
+        <div class="pain-left">
+          <span class="pain-ico" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><path d="M8 9h22a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4H16l-6 6v-6h-2a4 4 0 0 1-4-4V13a4 4 0 0 1 4-4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M13 18h16M13 23h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+          <span class="pain-num" aria-hidden="true">01</span>
+        </div>
+        <div class="pain-right">
+          <h3 data-en="Hours lost answering the same DMs" data-fr="Des heures perdues à répondre aux mêmes DMs">Hours lost answering the same DMs</h3>
+          <p class="body-t" data-en='"Available Friday? What time?" The same question, a dozen times a day, pulling you away from your chair.' data-fr='"Disponible vendredi ? À quelle heure ?" La même question, des dizaines de fois par jour, à chaque coup de ciseau.'>"Available Friday? What time?" The same question, a dozen times a day, pulling you away from your chair.</p>
+        </div>
       </div>
+
       <div class="pain">
-        <span class="pain-ico" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><rect x="7" y="11" width="30" height="25" rx="4" stroke="currentColor" stroke-width="1.8"/><path d="M7 19h30M16 7v8M28 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M18 28l8 0M26 25l-8 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
-        <h3 data-en="Bookings lost to slow replies" data-fr="Des RDV perdus à cause des réponses lentes">Bookings lost to slow replies</h3>
-        <p class="body-t" data-en="A client messages at 11pm and books the first barber who responds. If that's not you, it's your competition." data-fr="Un client écrit à 23h et réserve chez le premier barbier qui répond. Si ce n'est pas vous, c'est votre concurrent.">A client messages at 11pm and books the first barber who responds. If that's not you, it's your competition.</p>
+        <div class="pain-left">
+          <span class="pain-ico" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><rect x="7" y="11" width="30" height="25" rx="4" stroke="currentColor" stroke-width="1.8"/><path d="M7 19h30M16 7v8M28 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M18 28l8 0M26 25l-8 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+          <span class="pain-num" aria-hidden="true">02</span>
+        </div>
+        <div class="pain-right">
+          <h3 data-en="Bookings lost to slow replies" data-fr="Des RDV perdus à cause des réponses lentes">Bookings lost to slow replies</h3>
+          <p class="body-t" data-en="A client messages at 11pm and books the first barber who responds. If that's not you, it's your competition." data-fr="Un client écrit à 23h et réserve chez le premier barbier qui répond. Si ce n'est pas vous, c'est votre concurrent.">A client messages at 11pm and books the first barber who responds. If that's not you, it's your competition.</p>
+        </div>
       </div>
+
       <div class="pain">
-        <span class="pain-ico" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="14" r="6" stroke="currentColor" stroke-width="1.8"/><path d="M10 36c0-6.6 5.4-12 12-12s12 5.4 12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M30 6l6 6M36 6l-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
-        <h3 data-en="No-shows killing your revenue" data-fr="Les no-shows plombent votre CA">No-shows killing your revenue</h3>
-        <p class="body-t" data-en="An empty chair is lost money. Without proper confirmations and reminders, no-shows will keep haunting your schedule." data-fr="Une chaise vide, c'est de l'argent perdu. Sans confirmations automatiques, les no-shows vont continuer à hanter votre agenda.">An empty chair is lost money. Without proper confirmations and reminders, no-shows will keep haunting your schedule.</p>
+        <div class="pain-left">
+          <span class="pain-ico" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="14" r="6" stroke="currentColor" stroke-width="1.8"/><path d="M10 36c0-6.6 5.4-12 12-12s12 5.4 12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M30 6l6 6M36 6l-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+          <span class="pain-num" aria-hidden="true">03</span>
+        </div>
+        <div class="pain-right">
+          <h3 data-en="No-shows killing your revenue" data-fr="Les no-shows plombent votre CA">No-shows killing your revenue</h3>
+          <p class="body-t" data-en="An empty chair is lost money. Without proper confirmations and reminders, no-shows will keep haunting your schedule." data-fr="Une chaise vide, c'est de l'argent perdu. Sans confirmations automatiques, les no-shows vont continuer à hanter votre agenda.">An empty chair is lost money. Without proper confirmations and reminders, no-shows will keep haunting your schedule.</p>
+        </div>
       </div>
+
     </div>
   </div>
 </section>
@@ -813,25 +1043,50 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         data-fr="Trois étapes. Zéro friction."
       >Three steps. Zero friction.</h2>
     </div>
-    <div class="sol-steps">
-      <div class="step">
-        <span class="step-ico" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="9" y="9" width="22" height="22" rx="6" stroke="currentColor" stroke-width="1.7"/><circle cx="20" cy="20" r="6" stroke="currentColor" stroke-width="1.7"/><circle cx="29" cy="11" r="1.8" fill="currentColor"/></svg></span>
-        <div class="step-n step-n-a">1</div>
-        <h3 data-en="Connect your Instagram" data-fr="Connectez Instagram">Connect your Instagram</h3>
-        <p class="body-t" data-en="Link your Instagram business account in one click. No technical knowledge required." data-fr="Connectez votre compte Instagram professionnel en un clic. Aucune compétence technique requise.">Link your Instagram business account in one click. No technical knowledge required.</p>
+    <div class="sol-timeline">
+      <div class="sol-tline-track" aria-hidden="true">
+        <div class="sol-tline-progress"></div>
       </div>
-      <div class="step">
-        <span class="step-ico" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="9" y="14" width="22" height="18" rx="4" stroke="currentColor" stroke-width="1.7"/><path d="M15 10h10M20 10v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="16" cy="24" r="2" stroke="currentColor" stroke-width="1.5"/><circle cx="24" cy="24" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 23h4M31 23h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
-        <div class="step-n step-n-a">2</div>
-        <h3 data-en="AI handles your DMs" data-fr="L'IA gère vos DMs">AI handles your DMs</h3>
-        <p class="body-t" data-en="Our AI reads every message, understands booking intent, and responds naturally on your behalf, 24/7." data-fr="Notre IA lit chaque message, comprend l'intention de réservation, et répond naturellement en votre nom, 24h/24.">Our AI reads every message, understands booking intent, and responds naturally on your behalf, 24/7.</p>
+
+      <!-- Étape 1 — droite -->
+      <div class="sol-step sol-step--right">
+        <div class="sol-step-empty" aria-hidden="true"></div>
+        <div class="sol-step-node">
+          <div class="sol-step-num">1</div>
+        </div>
+        <div class="step-content">
+          <span class="step-ico" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="9" y="9" width="22" height="22" rx="6" stroke="currentColor" stroke-width="1.7"/><circle cx="20" cy="20" r="6" stroke="currentColor" stroke-width="1.7"/><circle cx="29" cy="11" r="1.8" fill="currentColor"/></svg></span>
+          <h3 data-en="Connect your Instagram" data-fr="Connectez Instagram">Connect your Instagram</h3>
+          <p class="body-t" data-en="Link your Instagram business account in one click. No technical knowledge required." data-fr="Connectez votre compte Instagram professionnel en un clic. Aucune compétence technique requise.">Link your Instagram business account in one click. No technical knowledge required.</p>
+        </div>
       </div>
-      <div class="step">
-        <span class="step-ico" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 5l4 4h5a2 2 0 0 1 2 2v5l4 4-4 4v5a2 2 0 0 1-2 2h-5l-4 4-4-4h-5a2 2 0 0 1-2-2v-5l-4-4 4-4v-5a2 2 0 0 1 2-2h5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 20l4 4 8-8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <div class="step-n step-n-a">3</div>
-        <h3 data-en="Appointments booked, instantly" data-fr="RDV confirmés, instantanément">Appointments booked, instantly</h3>
-        <p class="body-t" data-en="Clients get confirmed bookings, automatic reminders, and calendar updates. You see everything in your dashboard." data-fr="Les clients reçoivent des confirmations, des rappels et des mises à jour calendrier. Vous voyez tout dans votre tableau de bord.">Clients get confirmed bookings, automatic reminders, and calendar updates. You see everything in your dashboard.</p>
+
+      <!-- Étape 2 — gauche -->
+      <div class="sol-step sol-step--left">
+        <div class="step-content">
+          <span class="step-ico" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="9" y="14" width="22" height="18" rx="4" stroke="currentColor" stroke-width="1.7"/><path d="M15 10h10M20 10v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="16" cy="24" r="2" stroke="currentColor" stroke-width="1.5"/><circle cx="24" cy="24" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 23h4M31 23h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+          <h3 data-en="AI handles your DMs" data-fr="L'IA gère vos DMs">AI handles your DMs</h3>
+          <p class="body-t" data-en="Our AI reads every message, understands booking intent, and responds naturally on your behalf, 24/7." data-fr="Notre IA lit chaque message, comprend l'intention de réservation, et répond naturellement en votre nom, 24h/24.">Our AI reads every message, understands booking intent, and responds naturally on your behalf, 24/7.</p>
+        </div>
+        <div class="sol-step-node">
+          <div class="sol-step-num">2</div>
+        </div>
+        <div class="sol-step-empty" aria-hidden="true"></div>
       </div>
+
+      <!-- Étape 3 — droite -->
+      <div class="sol-step sol-step--right">
+        <div class="sol-step-empty" aria-hidden="true"></div>
+        <div class="sol-step-node">
+          <div class="sol-step-num">3</div>
+        </div>
+        <div class="step-content">
+          <span class="step-ico" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 5l4 4h5a2 2 0 0 1 2 2v5l4 4-4 4v5a2 2 0 0 1-2 2h-5l-4 4-4-4h-5a2 2 0 0 1-2-2v-5l-4-4 4-4v-5a2 2 0 0 1 2-2h5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 20l4 4 8-8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <h3 data-en="Appointments booked, instantly" data-fr="RDV confirmés, instantanément">Appointments booked, instantly</h3>
+          <p class="body-t" data-en="Clients get confirmed bookings, automatic reminders, and calendar updates. You see everything in your dashboard." data-fr="Les clients reçoivent des confirmations, des rappels et des mises à jour calendrier. Vous voyez tout dans votre tableau de bord.">Clients get confirmed bookings, automatic reminders, and calendar updates. You see everything in your dashboard.</p>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -2431,6 +2686,206 @@ window.bConnectInstagram = function() {
 (()=>{
   const p = new URLSearchParams(window.location.search);
   if (p.get('payment') === 'success') { window.openBotModal(); bSetStep(4); }
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   REFONTE UI/UX — Scroll Animations + Cursor Spotlight
+   ══════════════════════════════════════════════════════════════ */
+(()=>{
+  const EX=[0.16,1,0.3,1];
+  const EXB=[0.22,1,0.36,1];
+
+  /* ── CURSOR SPOTLIGHT GLOBAL (cyan) ── */
+  if(!pref){
+    document.addEventListener('pointermove',e=>{
+      document.documentElement.style.setProperty('--cx',e.clientX);
+      document.documentElement.style.setProperty('--cy',e.clientY);
+    },{passive:true});
+
+    /* Injecte .glow-fx dans toutes les cards */
+    document.querySelectorAll(
+      '.feat,.step-content,.plan,.setup-fee,.bot-prev-card,.pain-left,.pain-right,.bcard'
+    ).forEach(el=>{
+      if(el.querySelector('.glow-fx')) return;
+      const fx=document.createElement('div');
+      fx.className='glow-fx';fx.setAttribute('aria-hidden','true');
+      el.appendChild(fx);
+    });
+  }
+
+  /* ── HELPER : observer one-shot ── */
+  function once(targets,cb,opts){
+    const els=typeof targets==='string'
+      ?[...document.querySelectorAll(targets)]
+      :(targets instanceof Element?[targets]:targets);
+    if(!els.length) return;
+    const obs=new IntersectionObserver(entries=>{
+      entries.forEach(e=>{if(!e.isIntersecting)return;cb(e.target,obs);obs.unobserve(e.target);});
+    },opts||{rootMargin:'-8% 0px',threshold:0.1});
+    els.forEach(el=>obs.observe(el));
+  }
+
+  /* ── REVEALS GÉNÉRIQUES (.rv) ── */
+  if(!pref){
+    document.querySelectorAll('.rv').forEach(el=>{
+      el.style.opacity='0';el.style.transform='translateY(28px)';
+    });
+    once('.rv',(t)=>{
+      let delay=0;
+      if(t.classList.contains('d2')) delay=0.12;
+      else if(t.classList.contains('d3')) delay=0.22;
+      else if(t.classList.contains('d4')) delay=0.32;
+      animate(t,{opacity:[0,1],y:[28,0]},{duration:0.65,delay,easing:EX});
+    },{rootMargin:'-8% 0px',threshold:0.1});
+  }
+
+  /* ── PROBLEM — stagger 50/50 ── */
+  if(!pref){
+    document.querySelectorAll('.pain-left').forEach(el=>{el.style.opacity='0';el.style.transform='translateX(-64px)';});
+    document.querySelectorAll('.pain-right').forEach(el=>{el.style.opacity='0';el.style.transform='translateX(64px)';});
+    once('.pain',(t)=>{
+      const L=t.querySelector('.pain-left');
+      const R=t.querySelector('.pain-right');
+      if(L) animate(L,{opacity:[0,1],x:[-64,0]},{duration:0.75,easing:EX});
+      if(R) animate(R,{opacity:[0,1],x:[64,0]},{duration:0.75,delay:0.13,easing:EX});
+    },{rootMargin:'-12% 0px',threshold:0.15});
+  }
+
+  /* ── SOLUTION TIMELINE — slide alterné + ligne progress ── */
+  if(!pref){
+    document.querySelectorAll('.sol-step').forEach(el=>{
+      const c=el.querySelector('.step-content');
+      const n=el.querySelector('.sol-step-num');
+      const isL=el.classList.contains('sol-step--left');
+      if(c){c.style.opacity='0';c.style.transform=`translateX(${isL?-56:56}px)`;}
+      if(n){n.style.opacity='0';n.style.transform='scale(0.55)';}
+    });
+    once('.sol-step',(t)=>{
+      const c=t.querySelector('.step-content');
+      const n=t.querySelector('.sol-step-num');
+      const isL=t.classList.contains('sol-step--left');
+      if(n) animate(n,{opacity:[0,1],scale:[0.55,1]},{duration:0.5,easing:EXB});
+      if(c) animate(c,{opacity:[0,1],x:[isL?-56:56,0]},{duration:0.7,delay:0.1,easing:EX});
+    },{rootMargin:'-18% 0px',threshold:0.2});
+
+    /* Ligne progress scrubée au scroll */
+    const tl=document.querySelector('.sol-timeline');
+    const prog=document.querySelector('.sol-tline-progress');
+    if(tl&&prog){
+      const update=()=>{
+        const r=tl.getBoundingClientRect();
+        const vis=Math.max(0,Math.min(tl.offsetHeight,-r.top+window.innerHeight*0.55));
+        prog.style.height=(vis/tl.offsetHeight*100)+'%';
+      };
+      window.addEventListener('scroll',update,{passive:true});
+      update();
+    }
+  }
+
+  /* ── FEATURES BENTO — stagger en cascade ── */
+  if(!pref){
+    document.querySelectorAll('.feat').forEach(el=>{
+      el.style.opacity='0';el.style.transform='translateY(44px)';
+    });
+    const fg=document.querySelector('.feat-grid');
+    if(fg){
+      const obs=new IntersectionObserver(entries=>{
+        if(!entries[0].isIntersecting) return;
+        [...fg.querySelectorAll('.feat')].forEach((el,i)=>{
+          animate(el,{opacity:[0,1],y:[44,0]},{duration:0.65,delay:i*0.1,easing:EX});
+        });
+        obs.disconnect();
+      },{rootMargin:'-5% 0px',threshold:0.08});
+      obs.observe(fg);
+    }
+  }
+
+  /* ── PRICING — scale in stagger ── */
+  if(!pref){
+    document.querySelectorAll('.plan').forEach(el=>{
+      el.style.opacity='0';el.style.transform='scale(0.9) translateY(24px)';
+    });
+    const pg=document.querySelector('.plans-grid');
+    if(pg){
+      const obs=new IntersectionObserver(entries=>{
+        if(!entries[0].isIntersecting) return;
+        [...pg.querySelectorAll('.plan')].forEach((el,i)=>{
+          animate(el,{opacity:[0,1],scale:[0.9,1],y:[24,0]},{duration:0.6,delay:i*0.09,easing:EXB});
+        });
+        obs.disconnect();
+      },{rootMargin:'0px',threshold:0.1});
+      obs.observe(pg);
+    }
+    /* Setup fee */
+    const sf=document.querySelector('.setup-fee');
+    if(sf){
+      sf.style.opacity='0';sf.style.transform='translateY(32px)';
+      once(sf,t=>animate(t,{opacity:[0,1],y:[32,0]},{duration:0.7,easing:EX}),{rootMargin:'-5% 0px'});
+    }
+  }
+
+  /* ── FAQ — stagger items ── */
+  if(!pref){
+    document.querySelectorAll('.faq-item').forEach(el=>{
+      el.style.opacity='0';el.style.transform='translateY(20px)';
+    });
+    const fl=document.querySelector('.faq-list');
+    if(fl){
+      const obs=new IntersectionObserver(entries=>{
+        if(!entries[0].isIntersecting) return;
+        [...fl.querySelectorAll('.faq-item')].forEach((el,i)=>{
+          animate(el,{opacity:[0,1],y:[20,0]},{duration:0.5,delay:i*0.07,easing:EX});
+        });
+        obs.disconnect();
+      },{rootMargin:'-5% 0px',threshold:0.08});
+      obs.observe(fl);
+    }
+  }
+
+  /* ── BOT DEMO PREVIEW CARDS — stagger ── */
+  if(!pref){
+    document.querySelectorAll('.bot-prev-card').forEach(el=>{
+      el.style.opacity='0';el.style.transform='translateY(28px)';
+    });
+    const bw=document.querySelector('.bot-demo-preview');
+    if(bw){
+      const obs=new IntersectionObserver(entries=>{
+        if(!entries[0].isIntersecting) return;
+        [...bw.querySelectorAll('.bot-prev-card')].forEach((el,i)=>{
+          animate(el,{opacity:[0,1],y:[28,0]},{duration:0.55,delay:i*0.12,easing:EX});
+        });
+        obs.disconnect();
+      },{threshold:0.2});
+      obs.observe(bw);
+    }
+  }
+
+  /* ── HERO PARALLAX LÉGER ── */
+  if(!pref){
+    const hc=document.querySelector('.hero-content');
+    const cw=document.querySelector('.chat-wrap');
+    window.addEventListener('scroll',()=>{
+      const y=window.scrollY;
+      if(y>900) return;
+      if(hc) hc.style.transform=`translateY(${y*0.1}px)`;
+      if(cw) cw.style.transform=`translateY(${y*0.055}px)`;
+    },{passive:true});
+  }
+
+  /* ── ORB PARALLAX (profondeur fond) ── */
+  /* Utilise la propriété CSS `translate` (indépendante de `transform`)
+     pour se composer avec les keyframes existants sans conflit */
+  if(!pref){
+    const oa=document.querySelector('.orb-a');
+    const ob=document.querySelector('.orb-b');
+    const oc=document.querySelector('.orb-c');
+    window.addEventListener('scroll',()=>{
+      const y=window.scrollY;
+      if(oa) oa.style.translate=`0 ${(y*0.07).toFixed(1)}px`;
+      if(ob) ob.style.translate=`0 ${(-y*0.05).toFixed(1)}px`;
+      if(oc) oc.style.translate=`0 ${(y*0.035).toFixed(1)}px`;
+    },{passive:true});
+  }
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>

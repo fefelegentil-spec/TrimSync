@@ -200,7 +200,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto;gap:1.25rem}
 .feat{
   background:oklch(0.10 0.008 222/.92);border-radius:18px;padding:2.2rem;
-  position:relative;overflow:hidden;
+  position:relative;overflow:visible;
   display:flex;flex-direction:column;gap:.8rem;
   backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
   box-shadow:0 1rem 2rem -1rem black;
@@ -341,15 +341,60 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
    REFONTE UI/UX — Scroll Animations + Spotlight + Sections
    ═══════════════════════════════════════════════════════════════ */
 
-/* ── CURSOR SPOTLIGHT GLOBAL (cyan) ── */
-:root{--cx:-9999;--cy:-9999}
-.glow-fx{
-  position:absolute;inset:0;border-radius:inherit;
-  background:radial-gradient(
-    320px circle at calc(var(--cx)*1px) calc(var(--cy)*1px),
-    oklch(0.76 0.13 193/.13),transparent 70%
+/* ── GLOWCARD EFFECT — port fidèle de spotlight-card.tsx ── */
+/* Variables initialisées hors écran pour que le glow ne s'affiche pas au chargement */
+:root{--x:-9999;--y:-9999;--xp:0;--yp:0}
+
+[data-glow]{
+  --base:185;--spread:60;--size:240;
+  --bg-spot-opacity:.075;
+  --border-spot-opacity:1;
+  --border-light-opacity:.55;
+  --saturation:100;--lightness:70;
+  --border:2;
+  --border-size:calc(var(--border)*1px);
+  --spotlight-size:calc(var(--size)*1px);
+  --hue:calc(var(--base) + (var(--xp)*var(--spread)));
+  position:relative;
+}
+
+[data-glow]::before,
+[data-glow]::after{
+  pointer-events:none;
+  content:"";
+  position:absolute;
+  inset:calc(var(--border-size)*-1);
+  border:var(--border-size) solid transparent;
+  border-radius:inherit;
+  background-attachment:fixed;
+  background-size:calc(100% + (2*var(--border-size))) calc(100% + (2*var(--border-size)));
+  background-repeat:no-repeat;
+  background-position:50% 50%;
+  mask:linear-gradient(transparent,transparent),linear-gradient(white,white);
+  mask-clip:padding-box,border-box;
+  mask-composite:intersect;
+  -webkit-mask:linear-gradient(transparent,transparent),linear-gradient(white,white);
+  -webkit-mask-clip:padding-box,border-box;
+  -webkit-mask-composite:xor;
+}
+
+[data-glow]::before{
+  background-image:radial-gradient(
+    calc(var(--spotlight-size)*.75) calc(var(--spotlight-size)*.75) at
+    calc(var(--x)*1px) calc(var(--y)*1px),
+    hsl(var(--hue) calc(var(--saturation)*1%) calc(var(--lightness)*1%) / var(--border-spot-opacity)),
+    transparent 100%
   );
-  background-attachment:fixed;pointer-events:none;z-index:0;
+  filter:brightness(2);
+}
+
+[data-glow]::after{
+  background-image:radial-gradient(
+    calc(var(--spotlight-size)*.5) calc(var(--spotlight-size)*.5) at
+    calc(var(--x)*1px) calc(var(--y)*1px),
+    hsl(0 100% 100% / var(--border-light-opacity)),
+    transparent 100%
+  );
 }
 
 /* ── PROBLEM — 50/50 SPLITS PLEINE LARGEUR ── */
@@ -372,10 +417,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   border-right:1px solid oklch(0.76 0.13 193/.15);
   position:relative;overflow:hidden;
 }
-.pain-left::after{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse 80% 80% at 50% 50%,oklch(0.76 0.13 193/.07),transparent);
-}
+/* pain-left::after supprimé — conflit avec [data-glow]::after */
 .pain-left .pain-ico{
   display:flex;position:relative;z-index:1;color:var(--a);
 }
@@ -504,12 +546,12 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .feat:nth-child(4) .feat-body{flex:1;display:flex;flex-direction:column;gap:.5rem}
 .feat:nth-child(4) .feat-ico{margin-bottom:0;flex-shrink:0}
 .feat:nth-child(4) h3{margin-bottom:0}
-/* Watermark décoratif sur card A */
-.feat:nth-child(1)::after{
-  content:'AI';
+/* Watermark décoratif card A — span .feat-wm (::after réservé au glow) */
+.feat-wm{
   position:absolute;bottom:1rem;right:1.5rem;
   font-family:var(--fd);font-size:7rem;font-weight:800;letter-spacing:-.05em;
-  color:oklch(0.76 0.13 193/.06);pointer-events:none;line-height:1;z-index:0;
+  color:oklch(0.76 0.13 193/.07);pointer-events:none;line-height:1;z-index:0;
+  user-select:none;
 }
 @media(max-width:960px){
   .feat-grid{
@@ -1104,6 +1146,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     </div>
     <div class="feat-grid">
       <div class="feat">
+        <span class="feat-wm" aria-hidden="true">AI</span>
         <span class="feat-ico" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="10" y="16" width="20" height="16" rx="4" stroke="currentColor" stroke-width="1.7"/><path d="M20 10v6M16 10h8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="16" cy="25" r="2" stroke="currentColor" stroke-width="1.5"/><circle cx="24" cy="25" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M6 23h4M30 23h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
         <span class="feat-tag" data-en="Core" data-fr="Essentiel">Core</span>
         <h3 data-en="AI booking bot, 24/7" data-fr="Bot IA de réservation, 24h/24">AI booking bot, 24/7</h3>
@@ -2695,21 +2738,34 @@ window.bConnectInstagram = function() {
   const EX=[0.16,1,0.3,1];
   const EXB=[0.22,1,0.36,1];
 
-  /* ── CURSOR SPOTLIGHT GLOBAL (cyan) ── */
+  /* ── GLOWCARD EFFECT — port fidèle de spotlight-card.tsx ── */
+  /* Même logique que le composant React :
+     --x/--y = coordonnées viewport absolues (clientX/Y)
+     --xp/--yp = fraction 0→1 de l'écran
+     background-attachment:fixed = le gradient se positionne dans l'espace viewport
+     => le glow suit le curseur sur toutes les cards simultanément */
   if(!pref){
+    /* 1. Tracker pointeur → variables CSS root */
     document.addEventListener('pointermove',e=>{
-      document.documentElement.style.setProperty('--cx',e.clientX);
-      document.documentElement.style.setProperty('--cy',e.clientY);
+      const r=document.documentElement;
+      r.style.setProperty('--x',e.clientX.toFixed(1));
+      r.style.setProperty('--xp',(e.clientX/window.innerWidth).toFixed(3));
+      r.style.setProperty('--y',e.clientY.toFixed(1));
+      r.style.setProperty('--yp',(e.clientY/window.innerHeight).toFixed(3));
     },{passive:true});
 
-    /* Injecte .glow-fx dans toutes les cards */
-    document.querySelectorAll(
-      '.feat,.step-content,.plan,.setup-fee,.bot-prev-card,.pain-left,.pain-right,.bcard'
-    ).forEach(el=>{
-      if(el.querySelector('.glow-fx')) return;
-      const fx=document.createElement('div');
-      fx.className='glow-fx';fx.setAttribute('aria-hidden','true');
-      el.appendChild(fx);
+    /* 2. Appliquer data-glow + background spotlight inline sur .feat et .plan
+       (inline style > toute règle CSS → pas de conflit de spécificité) */
+    const SPOTLIGHT=`radial-gradient(
+      var(--spotlight-size) var(--spotlight-size) at
+      calc(var(--x)*1px) calc(var(--y)*1px),
+      hsl(var(--hue) calc(var(--saturation)*1%) calc(var(--lightness)*1%) / var(--bg-spot-opacity)),
+      transparent
+    )`;
+    document.querySelectorAll('.feat,.plan').forEach(el=>{
+      el.setAttribute('data-glow','');
+      el.style.backgroundImage=SPOTLIGHT;
+      el.style.backgroundAttachment='fixed';
     });
   }
 

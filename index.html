@@ -266,7 +266,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .setup-checks{display:flex;flex-direction:column;gap:.3rem;margin-left:auto}
 .setup-checks span{font-size:.82rem;color:oklch(0.88 0.07 193);font-weight:500}
 .plans-wrap{display:grid;grid-template-columns:3fr 2fr;gap:4rem;align-items:start}
-.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem}
+.plans-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.85rem}
 .plan{background:oklch(1 0 0/.06);border:1px solid oklch(1 0 0/.14);border-radius:18px;padding:1.75rem 1.5rem;display:flex;flex-direction:column;gap:1.3rem;position:relative;transition:transform .35s var(--ex),box-shadow .35s var(--ex),border-color .3s}
 .plan:hover{transform:translateY(-5px);box-shadow:0 24px 64px oklch(0 0 0/.25);border-color:oklch(1 0 0/.28)}
 .plan-pop{background:oklch(1 0 0/.10);border-color:oklch(1 0 0/.30);box-shadow:0 8px 32px oklch(0 0 0/.2)}
@@ -1233,11 +1233,11 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     <div class="setup-fee rv d1">
       <div class="setup-badge" data-en="One-time fee" data-fr="Frais unique">One-time fee</div>
       <div class="setup-body">
-        <div class="setup-amount">€300</div>
+        <div class="setup-amount">€100</div>
         <div class="setup-desc"
-          data-en="Setup fee — Platform access + full onboarding included. Paid once, never again."
-          data-fr="Frais de mise en place — Accès plateforme + onboarding complet inclus. Payé une seule fois."
-        >Setup fee — Platform access + full onboarding included. Paid once, never again.</div>
+          data-en="Setup fee — Instagram API connection + onboarding call included. Paid once, never again."
+          data-fr="Frais de mise en place — Connexion API Instagram + appel d'onboarding inclus. Payé une seule fois."
+        >Setup fee — Instagram API connection + onboarding call included. Paid once, never again.</div>
       </div>
       <div class="setup-checks">
         <span data-en="✓ Instagram API connection" data-fr="✓ Connexion API Instagram">✓ Instagram API connection</span>
@@ -1259,11 +1259,13 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
             <div class="plan-price">€59<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
           </div>
           <ul class="plan-feats">
-            <li data-en="AI Instagram bot 24/7" data-fr="Bot IA Instagram 24h/24">AI Instagram bot 24/7</li>
-            <li data-en="Unlimited DMs" data-fr="DMs illimités">Unlimited DMs</li>
-            <li data-en="Auto confirmations" data-fr="Confirmations automatiques">Auto confirmations</li>
+            <li data-en="AI Instagram bot, 24/7" data-fr="Bot IA Instagram, 24h/24">AI Instagram bot, 24/7</li>
+            <li data-en="Sends booking links to your platform (Planity, Bon Rencard…)" data-fr="Envoie des liens de réservation vers ta plateforme (Planity, Bon Rencard…)">Sends booking links to your platform (Planity, Bon Rencard…)</li>
+            <li data-en="Unlimited DMs handled" data-fr="DMs illimités traités">Unlimited DMs handled</li>
+            <li data-en="Auto confirmations &amp; reminders" data-fr="Confirmations et rappels automatiques">Auto confirmations &amp; reminders</li>
+            <li data-en="Works with your existing booking tool" data-fr="Compatible avec ton outil de réservation existant">Works with your existing booking tool</li>
           </ul>
-          <div class="plan-demo-sep"><span data-en="Try" data-fr="Démos">Try</span></div>
+          <div class="plan-demo-sep"><span data-en="Try" data-fr="Essayer">Try</span></div>
           <div class="plan-demo-row">
             <button class="plan-demo-btn" onclick="openBotModal()">
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="13" height="13" rx="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h4M11 6l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1273,48 +1275,22 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
           <button class="plan-cta" data-plan="starter" data-en="Get started" data-fr="Commencer">Get started</button>
         </div>
 
-        <!-- Pro — le plus populaire -->
+        <!-- Max — le plus populaire -->
         <div class="plan plan-pop rv d2">
           <div class="plan-hot" data-en="Most popular" data-fr="Le plus populaire">Most popular</div>
-          <div>
-            <div class="plan-name" data-en="Pro" data-fr="Pro">Pro</div>
-            <div class="plan-price">€79<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
-          </div>
-          <ul class="plan-feats">
-            <li data-en="Everything in Starter" data-fr="Tout Starter">Everything in Starter</li>
-            <li data-en="TrimSync dashboard" data-fr="Dashboard TrimSync">TrimSync dashboard</li>
-            <li data-en="Agenda management" data-fr="Gestion agenda">Agenda management</li>
-            <li data-en="Client management" data-fr="Gestion clients">Client management</li>
-          </ul>
-          <div class="plan-demo-sep"><span data-en="Try" data-fr="Démos">Try</span></div>
-          <div class="plan-demo-row">
-            <button class="plan-demo-btn" onclick="openBotModal()">
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="13" height="13" rx="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h4M11 6l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <span data-en="The bot" data-fr="Le bot">The bot</span>
-            </button>
-            <button class="plan-demo-btn" onclick="openPreview('dashboard')">
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/></svg>
-              <span data-en="The dashboard" data-fr="Le dashboard">The dashboard</span>
-            </button>
-          </div>
-          <button class="plan-cta" data-plan="pro" data-en="Get started" data-fr="Commencer">Get started</button>
-        </div>
-
-        <!-- Max -->
-        <div class="plan rv d3">
           <div>
             <div class="plan-name" data-en="Max" data-fr="Max">Max</div>
             <div class="plan-price">€99<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
           </div>
           <ul class="plan-feats">
-            <li data-en="Everything in Pro" data-fr="Tout Pro">Everything in Pro</li>
-            <li data-en="Native booking page" data-fr="Page réservation native">Native booking page</li>
+            <li data-en="AI Instagram bot, 24/7" data-fr="Bot IA Instagram, 24h/24">AI Instagram bot, 24/7</li>
+            <li data-en="Integrated booking calendar — no third-party app needed" data-fr="Agenda de réservation intégré — sans appli tierce">Integrated booking calendar — no third-party app needed</li>
+            <li data-en="Bot + agenda fully connected" data-fr="Bot + agenda entièrement connectés">Bot + agenda fully connected</li>
+            <li data-en="Client management (CRM)" data-fr="Gestion clients (CRM)">Client management (CRM)</li>
             <li data-en="Stats &amp; analytics" data-fr="Stats &amp; analytics">Stats &amp; analytics</li>
-            <li data-en="Loyalty program" data-fr="Programme fidélité">Loyalty program</li>
-            <li data-en="Marketing tools" data-fr="Outils marketing">Marketing tools</li>
-            <li data-en="SumUp integration" data-fr="Intégration SumUp">SumUp integration</li>
+            <li data-en="SumUp payment integration" data-fr="Intégration paiement SumUp">SumUp payment integration</li>
           </ul>
-          <div class="plan-demo-sep"><span data-en="Try" data-fr="Démos">Try</span></div>
+          <div class="plan-demo-sep"><span data-en="Try" data-fr="Essayer">Try</span></div>
           <div class="plan-demo-row">
             <button class="plan-demo-btn" onclick="openBotModal()">
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="13" height="13" rx="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h4M11 6l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1487,8 +1463,8 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     <div class="modal-section-lbl" data-en="Your onboarding" data-fr="Votre onboarding">Your onboarding</div>
     <div class="modal-steps-list" id="modal-steps-list"></div>
     <div class="modal-setup-note">
-      <strong data-en="One-time €300 setup fee" data-fr="Frais de mise en place unique 300 €">One-time €300 setup fee</strong>
-      — <span data-en="Platform access + full onboarding call included. Paid once, never again." data-fr="Accès plateforme + appel d'onboarding inclus. Payé une seule fois, jamais plus.">Platform access + full onboarding call included. Paid once, never again.</span>
+      <strong data-en="One-time €100 setup fee" data-fr="Frais de mise en place unique 100 €">One-time €100 setup fee</strong>
+      — <span data-en="Instagram API connection + onboarding call included. Paid once, never again." data-fr="Connexion API Instagram + appel d'onboarding inclus. Payé une seule fois, jamais plus.">Instagram API connection + onboarding call included. Paid once, never again.</span>
     </div>
     <div class="modal-cta-row">
       <a href="trimsync-booking.html" class="modal-book-btn" id="modal-book-btn">
@@ -1533,7 +1509,6 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
           <label class="devis-label" for="dv-plan" data-en="Plan you're interested in" data-fr="Plan qui vous intéresse">Plan you're interested in</label>
           <select class="devis-select" id="dv-plan">
             <option value="starter" data-en="Starter — €59/mo" data-fr="Starter — 59 €/mois">Starter — €59/mo</option>
-            <option value="pro" data-en="Pro — €79/mo" data-fr="Pro — 79 €/mois">Pro — €79/mo</option>
             <option value="max" data-en="Max — €99/mo" data-fr="Max — 99 €/mois">Max — €99/mo</option>
           </select>
         </div>
@@ -1753,51 +1728,27 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
               <div class="plan-price">€59<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
             </div>
             <ul class="plan-feats">
-              <li data-en="AI Instagram bot 24/7" data-fr="Bot IA Instagram 24h/24">AI Instagram bot 24/7</li>
-              <li data-en="Unlimited DMs" data-fr="DMs illimités">Unlimited DMs</li>
-              <li data-en="Auto confirmations" data-fr="Confirmations automatiques">Auto confirmations</li>
+              <li data-en="AI Instagram bot, 24/7" data-fr="Bot IA Instagram, 24h/24">AI Instagram bot, 24/7</li>
+              <li data-en="Booking links → your platform" data-fr="Liens de réservation → ta plateforme">Booking links → your platform</li>
+              <li data-en="Unlimited DMs + auto confirmations" data-fr="DMs illimités + confirmations auto">Unlimited DMs + auto confirmations</li>
             </ul>
             <button class="plan-cta" onclick="event.stopPropagation();bBuyPlan('starter')" data-en="Get started" data-fr="Commencer">Get started</button>
           </div>
 
-          <!-- Pro -->
-          <div class="plan plan-pop" id="bplan-pro" onclick="bSelectPlan('pro')">
-            <div class="plan-hot" data-en="Most popular" data-fr="Le plus populaire">Most popular</div>
-            <div>
-              <div class="plan-name" data-en="Pro" data-fr="Pro">Pro</div>
-              <div class="plan-price">€79<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
-            </div>
-            <ul class="plan-feats">
-              <li data-en="Everything in Starter" data-fr="Tout Starter">Everything in Starter</li>
-              <li data-en="TrimSync dashboard" data-fr="Dashboard TrimSync">TrimSync dashboard</li>
-              <li data-en="Agenda management" data-fr="Gestion agenda">Agenda management</li>
-              <li data-en="Client management" data-fr="Gestion clients">Client management</li>
-            </ul>
-            <div class="plan-demo-sep"><span data-en="Try" data-fr="Démos">Try</span></div>
-            <div class="plan-demo-row">
-              <button class="plan-demo-btn" onclick="event.stopPropagation();openPreview('dashboard')">
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/></svg>
-                <span data-en="The dashboard" data-fr="Le dashboard">The dashboard</span>
-              </button>
-            </div>
-            <button class="plan-cta" onclick="event.stopPropagation();bBuyPlan('pro')" data-en="Get started" data-fr="Commencer">Get started</button>
-          </div>
-
           <!-- Max -->
-          <div class="plan" id="bplan-max" onclick="bSelectPlan('max')">
+          <div class="plan plan-pop" id="bplan-max" onclick="bSelectPlan('max')">
+            <div class="plan-hot" data-en="Most popular" data-fr="Le plus populaire">Most popular</div>
             <div>
               <div class="plan-name" data-en="Max" data-fr="Max">Max</div>
               <div class="plan-price">€99<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
             </div>
             <ul class="plan-feats">
-              <li data-en="Everything in Pro" data-fr="Tout Pro">Everything in Pro</li>
-              <li data-en="Native booking page" data-fr="Page réservation native">Native booking page</li>
-              <li data-en="Stats &amp; analytics" data-fr="Stats &amp; analytics">Stats &amp; analytics</li>
-              <li data-en="Loyalty program" data-fr="Programme fidélité">Loyalty program</li>
-              <li data-en="Marketing tools" data-fr="Outils marketing">Marketing tools</li>
-              <li data-en="SumUp integration" data-fr="Intégration SumUp">SumUp integration</li>
+              <li data-en="AI Instagram bot, 24/7" data-fr="Bot IA Instagram, 24h/24">AI Instagram bot, 24/7</li>
+              <li data-en="Integrated booking calendar" data-fr="Agenda intégré">Integrated booking calendar</li>
+              <li data-en="Bot + agenda fully connected" data-fr="Bot + agenda connectés">Bot + agenda fully connected</li>
+              <li data-en="CRM + stats + SumUp" data-fr="CRM + stats + SumUp">CRM + stats + SumUp</li>
             </ul>
-            <div class="plan-demo-sep"><span data-en="Try" data-fr="Démos">Try</span></div>
+            <div class="plan-demo-sep"><span data-en="Try" data-fr="Essayer">Try</span></div>
             <div class="plan-demo-row">
               <button class="plan-demo-btn" onclick="event.stopPropagation();openPreview('dashboard')">
                 <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/></svg>
@@ -2040,30 +1991,21 @@ document.querySelectorAll('.faq-item').forEach(item=>{
   const PLANS={
     starter:{
       price:'€59',
-      en:{name:'Starter',hot:null,tagline:'Perfect to get started — automated bookings from day one.',
-        feats:[{t:'AI Instagram bot, 24/7',h:1},{t:'Unlimited DMs handled'},{t:'Auto booking + confirmations',h:1},{t:'Automatic reminders (24h + 2h before)'},{t:'Cancellation & reschedule handling'},{t:'Google Calendar sync',h:1},{t:'1 location — up to 200 bookings/month'},{t:'Email support (48h response)'}],
-        steps:[{n:'1',title:'Instagram connection',desc:'5-min setup via your Facebook Business account'},{n:'2',title:'AI training',desc:'We configure your services, hours, and bot tone'},{n:'3',title:'Go live',desc:'Your AI handles DMs from the very first day'}]},
-      fr:{name:'Starter',hot:null,tagline:'Idéal pour commencer — réservations automatisées dès le premier jour.',
-        feats:[{t:'Bot IA Instagram, 24h/24',h:1},{t:'DMs illimités traités'},{t:'Réservation + confirmations automatiques',h:1},{t:'Rappels automatiques (24h + 2h avant)'},{t:'Gestion des annulations et reports'},{t:'Sync Google Calendar',h:1},{t:"1 établissement — jusqu'à 200 RDV/mois"},{t:'Support email (réponse 48h)'}],
-        steps:[{n:'1',title:'Connexion Instagram',desc:'5 min via votre compte Facebook Business'},{n:'2',title:'Entraînement IA',desc:'On configure vos prestations, horaires et ton du bot'},{n:'3',title:'Mise en ligne',desc:'Votre IA prend les DMs dès le premier jour'}]}
-    },
-    pro:{
-      price:'€79',
-      en:{name:'Pro',hot:'Most popular',tagline:'The full toolkit for an ambitious barbershop.',
-        feats:[{t:'Everything in Starter',h:1},{t:'TrimSync dashboard',h:1},{t:'Full agenda management'},{t:'Client CRM — history, notes, profiles',h:1},{t:'WhatsApp + Instagram DM'},{t:'Smart slot-filling on cancellations'},{t:'Up to 3 locations — 1,000 bookings/month'},{t:'Priority support (same-day response)'}],
-        steps:[{n:'1',title:'Instagram + WhatsApp',desc:'Connect both channels in one onboarding session'},{n:'2',title:'Dashboard setup',desc:'CRM, agenda view, and notifications configured'},{n:'3',title:'Team briefing',desc:'Walkthrough for you and your barbers'}]},
-      fr:{name:'Pro',hot:'Le plus populaire',tagline:'La boîte à outils complète pour un barbershop ambitieux.',
-        feats:[{t:'Tout Starter',h:1},{t:'Dashboard TrimSync',h:1},{t:'Gestion agenda complète'},{t:'CRM clients — historique, notes, profils',h:1},{t:'WhatsApp + Instagram DM'},{t:'Remplissage auto des créneaux libérés'},{t:"Jusqu'à 3 établissements — 1 000 RDV/mois"},{t:'Support prioritaire (réponse le jour même)'}],
-        steps:[{n:'1',title:'Instagram + WhatsApp',desc:'Connexion des deux canaux en une session'},{n:'2',title:'Config dashboard',desc:'CRM, vue agenda et notifications configurés'},{n:'3',title:'Brief équipe',desc:'Prise en main pour vous et vos barbiers'}]}
+      en:{name:'Starter',hot:null,tagline:'Your AI bot handles Instagram DMs and sends booking links to your existing platform.',
+        feats:[{t:'AI Instagram bot, 24/7',h:1},{t:'Sends booking links (Planity, Bon Rencard, etc.)',h:1},{t:'Unlimited DMs handled'},{t:'Auto confirmations & reminders (24h + 2h)',h:1},{t:'Cancellation & reschedule handling'},{t:'Works with your existing booking tool'},{t:'Email support (48h response)'}],
+        steps:[{n:'1',title:'Instagram connection',desc:'5-min setup via your Facebook Business account'},{n:'2',title:'Link your booking platform',desc:'We configure your Planity / Bon Rencard link in the bot'},{n:'3',title:'Go live',desc:'Your AI responds to DMs and sends your booking link from day one'}]},
+      fr:{name:'Starter',hot:null,tagline:'Ton bot IA répond aux DMs Instagram et envoie des liens de réservation vers ta plateforme existante.',
+        feats:[{t:'Bot IA Instagram, 24h/24',h:1},{t:'Envoie des liens de réservation (Planity, Bon Rencard…)',h:1},{t:'DMs illimités traités'},{t:'Confirmations et rappels automatiques (24h + 2h)',h:1},{t:'Gestion des annulations et reports'},{t:'Compatible avec ton outil de réservation existant'},{t:'Support email (réponse 48h)'}],
+        steps:[{n:'1',title:'Connexion Instagram',desc:'5 min via ton compte Facebook Business'},{n:'2',title:'Lien ta plateforme de réservation',desc:'On configure ton lien Planity / Bon Rencard dans le bot'},{n:'3',title:'Mise en ligne',desc:'Ton IA répond aux DMs et envoie ton lien de réservation dès J1'}]}
     },
     max:{
       price:'€99',
-      en:{name:'Max',hot:null,tagline:'Full power. For barbershops that want to scale.',
-        feats:[{t:'Everything in Pro',h:1},{t:'Native booking page (your own URL)',h:1},{t:'Advanced stats & analytics'},{t:'Loyalty program — points + rewards',h:1},{t:'Marketing tools & campaigns'},{t:'SumUp payment integration',h:1},{t:'Dedicated account manager'},{t:'Unlimited locations + bookings'}],
-        steps:[{n:'1',title:'Full platform onboarding',desc:'Dedicated 2-hour setup call with your account manager'},{n:'2',title:'Integrations & branding',desc:'Booking page, SumUp, loyalty — all wired up'},{n:'3',title:'Launch & monitor',desc:'Real-time analytics from day one, weekly check-ins'}]},
-      fr:{name:'Max',hot:null,tagline:'Pleine puissance. Pour les barbershops qui veulent scaler.',
-        feats:[{t:'Tout Pro',h:1},{t:'Page réservation native (votre URL)',h:1},{t:'Stats et analytics avancés'},{t:'Programme fidélité — points + récompenses',h:1},{t:'Outils marketing et campagnes'},{t:'Intégration paiement SumUp',h:1},{t:'Account manager dédié'},{t:'Établissements et RDV illimités'}],
-        steps:[{n:'1',title:'Onboarding plateforme complète',desc:'Appel de 2h dédié avec votre account manager'},{n:'2',title:'Intégrations et branding',desc:'Page réservation, SumUp, fidélité — tout configuré'},{n:'3',title:'Lancement et suivi',desc:'Analytics temps réel dès J1, points hebdo'}]}
+      en:{name:'Max',hot:'Most popular',tagline:'Bot + integrated booking calendar — fully connected. No third-party platform needed.',
+        feats:[{t:'AI Instagram bot, 24/7',h:1},{t:'Integrated booking calendar (your own)',h:1},{t:'Bot + agenda fully connected — AI books directly',h:1},{t:'Auto confirmations, reminders & cancellations'},{t:'Client CRM — history, notes, profiles',h:1},{t:'Stats & analytics'},{t:'SumUp payment integration',h:1},{t:'Priority support (same-day response)'}],
+        steps:[{n:'1',title:'Instagram connection',desc:'5-min setup via your Facebook Business account'},{n:'2',title:'Agenda & bot config',desc:'We wire your calendar, services, and hours to the AI'},{n:'3',title:'Go live — fully connected',desc:'Bot takes bookings directly in your calendar from day one'}]},
+      fr:{name:'Max',hot:'Le plus populaire',tagline:'Bot + agenda de réservation intégré — tout connecté. Aucune plateforme tierce nécessaire.',
+        feats:[{t:'Bot IA Instagram, 24h/24',h:1},{t:'Agenda de réservation intégré (le tien)',h:1},{t:'Bot + agenda entièrement connectés — l\'IA prend les RDV directement',h:1},{t:'Confirmations, rappels et annulations automatiques'},{t:'CRM clients — historique, notes, profils',h:1},{t:'Stats et analytics'},{t:'Intégration paiement SumUp',h:1},{t:'Support prioritaire (réponse le jour même)'}],
+        steps:[{n:'1',title:'Connexion Instagram',desc:'5 min via ton compte Facebook Business'},{n:'2',title:'Config agenda & bot',desc:'On connecte ton agenda, tes prestations et tes horaires à l\'IA'},{n:'3',title:'Mise en ligne — tout connecté',desc:'Le bot prend les RDV directement dans ton agenda dès J1'}]}
     }
   };
 
@@ -2083,7 +2025,7 @@ document.querySelectorAll('.faq-item').forEach(item=>{
       d.feats.map(f=>`<li${f.h?' class="mh"':''}>${f.t}</li>`).join('');
     modal.querySelector('#modal-steps-list').innerHTML=
       d.steps.map(s=>`<div class="modal-step-row"><div class="modal-step-num">${s.n}</div><div class="modal-step-body"><strong>${s.title}</strong>${s.desc}</div></div>`).join('');
-    const STRIPE_LINKS={starter:'https://buy.stripe.com/5kQ9AT7Jd4ug3vs5HPgEg03',pro:'https://buy.stripe.com/28EdR9gfJbWI3vs8U1gEg04',max:'https://buy.stripe.com/cNi00jfbFf8U5DA2vDgEg05'};
+    const STRIPE_LINKS={starter:'https://buy.stripe.com/5kQ9AT7Jd4ug3vs5HPgEg03',max:'https://buy.stripe.com/cNi00jfbFf8U5DA2vDgEg05'};
     modal.querySelector('#modal-book-btn').href=STRIPE_LINKS[key]||`trimsync-booking.html?plan=${key}`;
     /* traduire les strings statiques du modal */
     modal.querySelectorAll('[data-en]').forEach(el=>{

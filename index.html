@@ -1716,22 +1716,34 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
     <!-- STEP 3 : Pricing — section exacte du site, fond teal, sans classes .rv -->
     <div id="bstep-3" style="display:none" class="bfade">
-      <div style="background:var(--adrench);color:var(--on-a);border-radius:18px;padding:2.5rem 2rem;margin-top:.5rem">
+
+      <!-- Intro CTA -->
+      <div style="text-align:center;padding:.5rem 0 2rem">
+        <div class="badge" style="margin-bottom:.85rem;display:inline-flex">
+          <span class="badge-pulse" aria-hidden="true"></span>
+          <span data-en="Bot tested ✓" data-fr="Bot testé ✓">Bot tested ✓</span>
+        </div>
+        <p class="fd" style="font-size:clamp(1.1rem,2.5vw,1.35rem);font-weight:700;letter-spacing:-.025em;color:var(--t);margin:0"
+           data-en="You've seen what it can do — now make it yours."
+           data-fr="Tu as vu ce qu'il sait faire — maintenant, rends-le tien.">You've seen what it can do — now make it yours.</p>
+      </div>
+
+      <!-- Bloc pricing complet -->
+      <div style="background:var(--adrench);color:var(--on-a);border-radius:20px;padding:2.8rem 2.5rem 2.5rem">
 
         <!-- En-tête -->
-        <div class="sec-hd--center" style="margin-bottom:2rem">
+        <div class="sec-hd--center" style="margin-bottom:2.2rem">
           <span class="label" style="color:oklch(0.88 0.07 193)" data-en="Transparent pricing" data-fr="Tarifs transparents">Transparent pricing</span>
-          <h2 class="fd sec-h2" style="max-width:540px;margin:.4rem auto 0;font-size:clamp(1.4rem,3vw,2rem)"
-            data-en="Simple. Honest. No surprises."
-            data-fr="Simple. Honnête. Sans surprise."
-          >Simple. Honest. No surprises.</h2>
+          <h2 class="fd sec-h2" style="max-width:480px;margin:.4rem auto 0;font-size:clamp(1.4rem,3vw,2rem)"
+              data-en="Simple. Honest. No surprises."
+              data-fr="Simple. Honnête. Sans surprise.">Simple. Honest. No surprises.</h2>
         </div>
 
         <!-- Frais de setup unique -->
-        <div class="setup-fee">
+        <div class="setup-fee" style="margin-bottom:2rem">
           <div class="setup-badge" data-en="One-time fee" data-fr="Frais unique">One-time fee</div>
           <div class="setup-body">
-            <div class="setup-amount">€100</div>
+            <div class="setup-amount" style="font-size:clamp(2.2rem,5vw,3.5rem)">€100</div>
             <div class="setup-desc"
               data-en="Setup fee — Instagram API connection + onboarding call included. Paid once, never again."
               data-fr="Frais de mise en place — Connexion API Instagram + appel d'onboarding inclus. Payé une seule fois."
@@ -1763,7 +1775,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
                 <li data-en="Auto confirmations &amp; reminders" data-fr="Confirmations et rappels automatiques">Auto confirmations &amp; reminders</li>
                 <li data-en="Works with your existing booking tool" data-fr="Compatible avec ton outil de réservation existant">Works with your existing booking tool</li>
               </ul>
-              <div class="plan-demo-sep"><span data-en="You're testing it" data-fr="Tu le testes">You're testing it</span></div>
+              <div class="plan-demo-sep"><span data-en="You tested it ✓" data-fr="Tu l'as testé ✓">You tested it ✓</span></div>
               <div class="plan-demo-row">
                 <button class="plan-demo-btn" disabled style="opacity:.5;cursor:default" onclick="event.stopPropagation()">
                   <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="13" height="13" rx="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h4M11 6l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1788,7 +1800,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
                 <li data-en="Stats &amp; analytics" data-fr="Stats &amp; analytics">Stats &amp; analytics</li>
                 <li data-en="SumUp payment integration" data-fr="Intégration paiement SumUp">SumUp payment integration</li>
               </ul>
-              <div class="plan-demo-sep"><span data-en="Try" data-fr="Essayer">Try</span></div>
+              <div class="plan-demo-sep"><span data-en="You tested it ✓" data-fr="Tu l'as testé ✓">You tested it ✓</span></div>
               <div class="plan-demo-row">
                 <button class="plan-demo-btn" disabled style="opacity:.5;cursor:default" onclick="event.stopPropagation()">
                   <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="13" height="13" rx="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h4M11 6l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1837,7 +1849,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
         </div><!-- /plans-wrap -->
 
-      </div><!-- /teal wrapper -->
+      </div><!-- /bloc pricing -->
       <span id="bplan-label" style="display:none">starter</span>
     </div>
 

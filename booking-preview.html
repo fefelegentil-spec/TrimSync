@@ -6,6 +6,7 @@
 <title>Booking Preview — TrimSync</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700;800;900&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script>
 <style>
 :root{
   --accent:#3bbfcc;
@@ -20,25 +21,17 @@
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
 html,body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:14px;line-height:1.5;min-height:100vh;overflow-x:hidden}
 button{background:none;border:none;cursor:pointer;font-family:inherit;color:inherit}
-img{display:block;max-width:100%}
 
-/* Ambient glow */
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:
-    radial-gradient(ellipse at 50% -8%, color-mix(in srgb,var(--accent) 10%,transparent), transparent 55%),
-    radial-gradient(ellipse at 85% 90%, color-mix(in srgb,var(--accent) 5%,transparent), transparent 50%);
-}
-/* Noise */
+/* Noise overlay (par-dessus le WebGL) */
 body::after{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.3;
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.28;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
 }
 
 /* ── Color toolbar ── */
 .ctb{
   position:fixed;top:0;left:0;right:0;z-index:200;
-  background:rgba(6,6,6,.92);backdrop-filter:blur(18px);
+  background:rgba(6,6,6,.88);backdrop-filter:blur(18px);
   border-bottom:1px solid var(--border);
   padding:7px 14px;display:flex;align-items:center;gap:9px;
   font-size:11px;color:var(--t3);font-weight:700;letter-spacing:.04em;font-family:var(--fd);
@@ -50,8 +43,7 @@ body::after{
 
 /* ── Splash ── */
 #splash{
-  position:fixed;inset:0;z-index:999;
-  background:radial-gradient(circle at 50% 42%, color-mix(in srgb,var(--accent) 7%,#060606), #060606 70%);
+  position:fixed;inset:0;z-index:999;background:transparent;
   display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;
   transition:opacity .55s var(--ease);
 }
@@ -80,7 +72,6 @@ body::after{
 .header{
   position:relative;z-index:2;text-align:center;
   padding:calc(36px + 28px) 20px 10px;
-  background:linear-gradient(180deg,rgba(14,10,4,.5),transparent);
 }
 .h-mark{
   width:54px;height:54px;border-radius:14px;
@@ -105,7 +96,7 @@ body::after{
 .st-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;max-width:72px}
 .st-n{
   width:30px;height:30px;border-radius:50%;
-  border:1.5px solid var(--t4);background:var(--bg2);
+  border:1.5px solid var(--t4);background:rgba(12,12,12,.8);
   display:flex;align-items:center;justify-content:center;
   font-family:var(--fd);font-size:11px;font-weight:800;color:var(--t3);
   transition:.3s var(--ease);
@@ -132,28 +123,37 @@ body::after{
 /* ── Service cards ── */
 .svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
 .svc-card{
-  position:relative;background:var(--bg2);border:1px solid var(--border);border-radius:16px;
+  position:relative;
+  background:rgba(12,12,12,.75);border:1px solid var(--border);border-radius:16px;
   overflow:hidden;cursor:pointer;display:flex;flex-direction:column;
+  backdrop-filter:blur(8px);
   transition:border-color .2s var(--ease),background .2s var(--ease),box-shadow .2s var(--ease),transform .1s var(--ease);
 }
 .svc-card:active{transform:scale(.97)}
 .svc-card:hover{
   border-color:color-mix(in srgb,var(--accent) 50%,transparent);
-  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 5%,transparent),var(--bg2));
+  background:rgba(16,16,16,.85);
 }
 .svc-card.sel{
   border-color:var(--accent);
-  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 8%,transparent),var(--bg2));
+  background:color-mix(in srgb,var(--accent) 6%,rgba(12,12,12,.85));
   box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 24%,transparent),0 8px 28px color-mix(in srgb,var(--accent) 14%,transparent);
 }
 .svc-ew{
   width:100%;aspect-ratio:1.4/1;
-  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 7%,#0a0a0a),#080808);
-  display:flex;align-items:center;justify-content:center;font-size:44px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 6%,rgba(8,8,8,.9)),rgba(6,6,6,.9));
+  display:flex;align-items:center;justify-content:center;
   border-bottom:1px solid var(--border);
   transition:background .2s var(--ease);
 }
-.svc-card.sel .svc-ew{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 12%,#0a0a0a),#080808)}
+.svc-ew i{
+  font-size:38px;
+  color:color-mix(in srgb,var(--accent) 50%,#666);
+  transition:color .2s var(--ease),transform .3s var(--bounce);
+}
+.svc-card:hover .svc-ew i{color:color-mix(in srgb,var(--accent) 75%,#fff);transform:scale(1.06)}
+.svc-card.sel .svc-ew{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 12%,rgba(8,8,8,.9)),rgba(6,6,6,.9))}
+.svc-card.sel .svc-ew i{color:var(--accent);transform:scale(1.06)}
 .svc-body{padding:12px 12px 14px;display:flex;flex-direction:column;gap:5px}
 .svc-name{font-family:var(--fd);font-size:13px;font-weight:700;color:var(--text);letter-spacing:-.02em;transition:color .2s var(--ease)}
 .svc-card.sel .svc-name{color:var(--accent)}
@@ -170,17 +170,19 @@ body::after{
 
 /* ── Calendar ── */
 .cal-card{
-  background:var(--bg2);border:1px solid var(--border);border-radius:16px;
-  padding:16px;margin-bottom:14px;box-shadow:0 4px 24px rgba(0,0,0,.35);
+  background:rgba(12,12,12,.75);border:1px solid var(--border);border-radius:16px;
+  padding:16px;margin-bottom:14px;backdrop-filter:blur(8px);
+  box-shadow:0 4px 24px rgba(0,0,0,.35);
 }
 .cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .cal-month{font-family:var(--fd);font-size:15px;font-weight:800;letter-spacing:-.02em;text-transform:capitalize}
 .cal-nav{
-  width:34px;height:34px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);
-  color:var(--t2);display:flex;align-items:center;justify-content:center;cursor:pointer;
-  transition:.15s var(--ease);font-size:16px;
+  width:34px;height:34px;border-radius:10px;
+  background:rgba(20,20,20,.8);border:1px solid var(--border);color:var(--t2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;
+  transition:.15s var(--ease);
 }
-.cal-nav:hover{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.cal-nav:hover{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent)}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .cal-dn{font-size:9px;color:var(--t3);text-align:center;padding:5px 0;letter-spacing:1.5px;text-transform:uppercase;font-weight:700}
 .cal-d{
@@ -190,7 +192,7 @@ body::after{
   transition:background .14s var(--ease),color .14s var(--ease),transform .08s var(--ease);
 }
 .cal-d:active:not(.disabled):not(.empty){transform:scale(.86)}
-.cal-d:hover:not(.disabled):not(.empty){background:var(--bg3);border-color:var(--border)}
+.cal-d:hover:not(.disabled):not(.empty){background:rgba(255,255,255,.06);border-color:var(--border)}
 .cal-d.today{color:var(--accent);font-weight:700}
 .cal-d.disabled{opacity:.22;pointer-events:none;text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--accent) 30%,transparent)}
 .cal-d.empty{pointer-events:none;opacity:0}
@@ -211,7 +213,8 @@ body::after{
 }
 @keyframes fsIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .slot{
-  background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  background:rgba(12,12,12,.75);border:1px solid var(--border);border-radius:12px;
+  backdrop-filter:blur(6px);
   padding:13px 6px;text-align:center;
   font-family:var(--fd);font-size:13px;font-weight:700;color:var(--text);
   cursor:pointer;min-height:46px;display:flex;align-items:center;justify-content:center;
@@ -219,7 +222,7 @@ body::after{
 }
 .slot:hover:not(.taken){
   border-color:var(--accent);color:var(--accent);
-  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 6%,transparent),var(--bg2));
+  background:color-mix(in srgb,var(--accent) 6%,rgba(12,12,12,.85));
 }
 .slot:active:not(.taken){transform:scale(.91)}
 .slot.sel{
@@ -235,21 +238,24 @@ body::after{
 .f-group{margin-bottom:13px}
 .f-label{display:block;font-size:9.5px;letter-spacing:1.8px;color:var(--t3);text-transform:uppercase;font-weight:700;margin-bottom:7px}
 .f-input{
-  width:100%;background:var(--bg2);border:1.5px solid var(--border);border-radius:12px;
+  width:100%;
+  background:rgba(12,12,12,.75);border:1.5px solid var(--border);border-radius:12px;
+  backdrop-filter:blur(8px);
   padding:13px 15px;color:var(--text);font-size:15px;font-family:var(--fb);font-weight:500;
   transition:.2s var(--ease);min-height:48px;
 }
 .f-input:focus{
-  border-color:var(--accent);border-width:2px;background:var(--bg3);outline:none;
+  border-color:var(--accent);border-width:2px;background:rgba(16,16,16,.9);outline:none;
   box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 10%,transparent);
 }
 .f-input::placeholder{color:var(--t4)}
 
 /* ── Recap ── */
 .recap-card{
-  background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 6%,transparent),transparent);
+  background:color-mix(in srgb,var(--accent) 5%,rgba(10,10,10,.8));
   border:1px solid color-mix(in srgb,var(--accent) 28%,transparent);
   border-radius:16px;padding:16px;margin-bottom:16px;
+  backdrop-filter:blur(8px);
   box-shadow:0 2px 18px rgba(0,0,0,.3);
 }
 .recap-row{
@@ -281,9 +287,10 @@ body::after{
 .suc-title{font-family:var(--fd);font-size:23px;font-weight:900;margin-bottom:8px;letter-spacing:-.03em}
 .suc-sub{font-size:13px;color:var(--t2);line-height:1.65;margin-bottom:22px;max-width:290px;margin-left:auto;margin-right:auto}
 .rdv-card{
-  background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 6%,transparent),transparent);
+  background:color-mix(in srgb,var(--accent) 5%,rgba(10,10,10,.8));
   border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);
   border-radius:14px;padding:14px;text-align:left;margin-bottom:22px;
+  backdrop-filter:blur(8px);
 }
 .rdv-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
 .rdv-row:last-child{border-bottom:none}
@@ -298,7 +305,7 @@ body::after{
 /* ── Bottom CTA ── */
 .bot-cta{
   position:fixed;bottom:0;left:0;right:0;
-  padding:14px 16px;background:linear-gradient(to top,var(--bg) 55%,transparent);
+  padding:14px 16px;background:linear-gradient(to top,rgba(6,6,6,.98) 55%,transparent);
   z-index:10;
 }
 .btn-primary{
@@ -371,14 +378,12 @@ body::after{
 <!-- MAIN -->
 <div class="main">
 
-  <!-- STEP 1 : Services -->
   <div class="section act" id="sec-1">
     <div class="sec-title">Quelle prestation ?</div>
     <div class="sec-sub">Sélectionne le service souhaité</div>
     <div class="svc-grid" id="svc-grid"></div>
   </div>
 
-  <!-- STEP 2 : Date & créneaux -->
   <div class="section" id="sec-2">
     <div class="sec-title">Choisir une date</div>
     <div class="sec-sub">Les créneaux s'affichent après sélection</div>
@@ -404,7 +409,6 @@ body::after{
     </div>
   </div>
 
-  <!-- STEP 3 : Infos client -->
   <div class="section" id="sec-3">
     <div class="sec-title">Tes informations</div>
     <div class="sec-sub">Pour confirmer ton rendez-vous</div>
@@ -415,7 +419,6 @@ body::after{
     <div class="f-group"><label class="f-label">Note <span style="color:var(--t3);font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">(optionnel)</span></label><input class="f-input" id="inp-note" type="text" placeholder="Ex : Fade court, ligne nette…"></div>
   </div>
 
-  <!-- STEP 4 : Confirmation -->
   <div class="section" id="sec-4">
     <div class="sec-title">Confirmer le RDV</div>
     <div class="sec-sub">Vérifie les informations avant de valider</div>
@@ -430,7 +433,6 @@ body::after{
     <p style="text-align:center;font-size:11px;color:var(--t3);margin-bottom:14px;letter-spacing:.02em">Paiement sur place · Sans engagement · Annulation gratuite</p>
   </div>
 
-  <!-- STEP 5 : Succès -->
   <div class="section" id="sec-5">
     <div class="suc-wrap">
       <div class="suc-icon"><i class="ti ti-check"></i></div>
@@ -448,7 +450,6 @@ body::after{
 
 </div>
 
-<!-- BOTTOM CTA -->
 <div class="bot-cta" id="bot-cta">
   <button class="btn-primary" id="cta-btn" onclick="nextStep()">
     <span id="cta-label">Continuer</span><span>→</span>
@@ -457,13 +458,106 @@ body::after{
 </div>
 
 <script>
+/* ══════════════════════════════════════════════════════
+   WebGL BACKGROUND — courbes topographiques animées
+   Même shader que js/background.js du site TrimSync
+   ══════════════════════════════════════════════════════ */
+(function(){
+  if(typeof THREE === 'undefined'){ console.warn('Three.js non chargé'); return; }
+
+  const vertexShader = `
+    varying vec2 vUv;
+    void main(){ vUv = uv; gl_Position = vec4(position,1.0); }
+  `;
+  const fragmentShader = `
+    precision mediump float;
+    uniform vec2  iResolution;
+    uniform float iTime;
+    uniform vec3  uAccent;
+    varying vec2  vUv;
+    void main(){
+      vec2 uv = (2.0*vUv*iResolution - iResolution) / min(iResolution.x,iResolution.y);
+      float t = iTime * 0.28;
+      for(float i=1.0;i<8.0;i++){
+        uv.x += 0.55/i * cos(i*2.30*uv.y + t);
+        uv.y += 0.55/i * cos(i*1.40*uv.x + t);
+      }
+      float s = abs(sin(t - uv.y - uv.x));
+      s = max(s, 0.022);
+      vec3 dark = vec3(0.024,0.027,0.039);
+      float intensity = clamp(0.060/s, 0.0, 0.22);
+      vec3 color = dark + uAccent * intensity;
+      float cx = vUv.x-0.50, cy = vUv.y-0.45;
+      float d = sqrt(cx*cx+cy*cy);
+      color *= 0.68 + 0.32*smoothstep(1.0,0.35,d*2.0);
+      gl_FragColor = vec4(color,1.0);
+    }
+  `;
+
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+  } catch(e){ console.warn('WebGL indisponible'); return; }
+
+  renderer.setPixelRatio(window.devicePixelRatio);
+  const canvas = renderer.domElement;
+  canvas.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;';
+  document.body.insertBefore(canvas, document.body.firstChild);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+  const clock  = new THREE.Clock();
+
+  /* Couleur initiale depuis l'URL — sera mise à jour dans applyColor() */
+  const params = new URLSearchParams(location.search);
+  const initColor = params.get('color') ? decodeURIComponent(params.get('color')) : '#3bbfcc';
+  function hexToVec3(hex){
+    const h = hex.replace('#','');
+    return new THREE.Vector3(
+      parseInt(h.slice(0,2),16)/255,
+      parseInt(h.slice(2,4),16)/255,
+      parseInt(h.slice(4,6),16)/255
+    );
+  }
+
+  const uniforms = {
+    iTime:       { value: 0 },
+    iResolution: { value: new THREE.Vector2() },
+    uAccent:     { value: hexToVec3(initColor) },
+  };
+
+  /* Exposer pour que applyColor() mette à jour la couleur en temps réel */
+  window._bgUniforms  = uniforms;
+  window._bgHexToVec3 = hexToVec3;
+
+  const mat = new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms });
+  scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2), mat));
+
+  function onResize(){
+    const w = window.innerWidth, h = window.innerHeight;
+    renderer.setSize(w, h, false);
+    uniforms.iResolution.value.set(w, h);
+  }
+  window.addEventListener('resize', onResize);
+  onResize();
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  renderer.setAnimationLoop(()=>{
+    if(!reduced) uniforms.iTime.value = clock.getElapsedTime();
+    renderer.render(scene, camera);
+  });
+})();
+
+/* ══════════════════════════════════════════════════════
+   APP
+   ══════════════════════════════════════════════════════ */
 const SERVICES = [
-  {id:'coupe-classique', name:'Coupe classique', price:25, duration:30, emoji:'✂️'},
-  {id:'coupe-premium',   name:'Coupe premium',   price:35, duration:45, emoji:'💎'},
-  {id:'barbe',           name:'Barbe',            price:20, duration:25, emoji:'🧔'},
-  {id:'coupe-barbe',     name:'Coupe + Barbe',    price:45, duration:60, emoji:'⚡'},
-  {id:'rasage',          name:'Rasage traditionnel', price:30, duration:35, emoji:'🪒'},
-  {id:'kids',            name:'Coupe enfant',     price:20, duration:25, emoji:'🌟'},
+  {id:'coupe-classique', name:'Coupe classique',    price:25, duration:30, icon:'ti-scissors'},
+  {id:'coupe-premium',   name:'Coupe premium',       price:35, duration:45, icon:'ti-diamond'},
+  {id:'barbe',           name:'Barbe',               price:20, duration:25, icon:'ti-razor-electric'},
+  {id:'coupe-barbe',     name:'Coupe + Barbe',       price:45, duration:60, icon:'ti-bolt'},
+  {id:'rasage',          name:'Rasage traditionnel', price:30, duration:35, icon:'ti-sparkles'},
+  {id:'kids',            name:'Coupe enfant',        price:20, duration:25, icon:'ti-heart'},
 ];
 
 let state = {step:1, svc:null, date:null, time:null, calDate:new Date()};
@@ -489,10 +583,17 @@ function init(){
   }, 1400);
 }
 
-/* ── Color ── */
+/* ── Color (CSS var + WebGL uniform) ── */
 function applyColor(c){
   document.documentElement.style.setProperty('--accent', c);
-  if(/^#[0-9a-f]{6}$/i.test(c)) document.getElementById('colorPicker').value = c;
+  if(/^#[0-9a-f]{6}$/i.test(c)){
+    document.getElementById('colorPicker').value = c;
+    /* Mettre à jour le shader WebGL en temps réel */
+    if(window._bgUniforms && window._bgHexToVec3){
+      const v = window._bgHexToVec3(c);
+      window._bgUniforms.uAccent.value.copy(v);
+    }
+  }
   document.querySelectorAll('.sw').forEach(s=>s.classList.toggle('act', s.dataset.color===c));
 }
 document.getElementById('colorPicker').addEventListener('input', e=>applyColor(e.target.value));
@@ -504,7 +605,7 @@ function renderServices(){
   document.getElementById('svc-grid').innerHTML = SERVICES.map(s=>`
     <div class="svc-card" data-id="${s.id}" onclick="selectSvc('${s.id}')">
       <div class="svc-chk"><i class="ti ti-check" style="font-size:10px;color:#000"></i></div>
-      <div class="svc-ew">${s.emoji}</div>
+      <div class="svc-ew"><i class="ti ${s.icon}"></i></div>
       <div class="svc-body">
         <div class="svc-name">${s.name}</div>
         <div class="svc-meta">

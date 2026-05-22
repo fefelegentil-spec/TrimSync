@@ -17,10 +17,10 @@
 <style>
 /* page ambient orbs */
 #page-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.orb{position:absolute;border-radius:50%;filter:blur(100px);will-change:transform}
-.orb-a{width:90vmax;height:90vmax;background:radial-gradient(circle,oklch(0.76 0.13 193/.24) 0%,transparent 62%);top:-20%;left:-22%;animation:orb-a 24s ease-in-out infinite alternate}
-.orb-b{width:70vmax;height:70vmax;background:radial-gradient(circle,oklch(0.52 0.18 193/.20) 0%,transparent 58%);bottom:-22%;right:-18%;animation:orb-b 30s ease-in-out infinite alternate}
-.orb-c{width:60vmax;height:60vmax;background:radial-gradient(circle,oklch(0.76 0.13 193/.16) 0%,transparent 60%);top:38%;left:28%;animation:orb-c 20s ease-in-out 6s infinite alternate}
+.orb{position:absolute;border-radius:50%;filter:blur(140px);will-change:transform}
+.orb-a{width:90vmax;height:90vmax;background:radial-gradient(circle,oklch(0.76 0.13 193/.16) 0%,transparent 70%);top:-30%;left:-28%;animation:orb-a 24s ease-in-out infinite alternate}
+.orb-b{width:70vmax;height:70vmax;background:radial-gradient(circle,oklch(0.52 0.18 193/.13) 0%,transparent 68%);bottom:-30%;right:-24%;animation:orb-b 30s ease-in-out infinite alternate}
+.orb-c{width:55vmax;height:55vmax;background:radial-gradient(circle,oklch(0.76 0.13 193/.08) 0%,transparent 70%);top:42%;left:30%;animation:orb-c 20s ease-in-out 6s infinite alternate}
 @keyframes orb-a{to{transform:translate(32%,48%) scale(1.35)}}
 @keyframes orb-b{to{transform:translate(-38%,-32%) scale(0.72)}}
 @keyframes orb-c{to{transform:translate(-25%,30%) scale(1.28)}}
@@ -113,9 +113,26 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .nav-mob .btn-a{text-align:center;justify-content:center;margin-top:.5rem;border-bottom:none}
 
 /* hero */
-.hero{position:relative;z-index:1;min-height:100svh;min-height:100vh;display:flex;align-items:center;padding:calc(7rem + env(safe-area-inset-top)) 0 4rem;overflow:hidden}
+.hero{position:relative;z-index:1;min-height:100svh;min-height:100vh;display:flex;align-items:flex-start;padding:calc(7rem + env(safe-area-inset-top)) 0 4rem;overflow:hidden}
 #hbg2{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.hero-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr 460px;gap:4rem;align-items:center}
+.hero-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;align-items:stretch}
+.hero-prop{position:relative;display:flex;flex-direction:column;border-radius:28px;padding:2.8rem 2.6rem;overflow:hidden}
+.hero-prop--bot{background:linear-gradient(158deg,oklch(0.83 0.115 193) 0%,oklch(0.69 0.135 198) 100%);color:oklch(0.21 0.03 220)}
+.hero-prop--dash{background:oklch(0.155 0.009 220);border:1px solid var(--bd2);color:var(--t)}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.55rem;font-family:var(--fd);font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:1.4rem}
+.hero-prop--bot .hero-eyebrow{color:oklch(0.27 0.045 220)}
+.hero-prop--dash .hero-eyebrow{color:var(--a)}
+.hero-eyebrow b{font-family:var(--fd);font-size:.92rem;font-weight:900;opacity:.9}
+.hero-prop .hero-h{font-size:clamp(1.65rem,2.3vw,2.4rem);line-height:1.1;letter-spacing:-.02em;margin-bottom:.95rem}
+.hero-prop--bot .hero-h{color:oklch(0.15 0.03 220)}
+.hero-prop .hero-sub{font-size:1rem;line-height:1.55;margin-bottom:1.9rem;max-width:40ch}
+.hero-prop--bot .hero-sub{color:oklch(0.30 0.035 220)}
+.hero-prop--dash .hero-sub{color:var(--t2)}
+.hero-cta-row{margin-bottom:2.2rem}
+.hero-visual{margin-top:auto;width:100%}
+.btn-dark{padding:.875rem 1.75rem;background:oklch(0.17 0.02 220);color:oklch(0.97 0.01 200);font-size:.95rem}
+.btn-dark:hover{background:oklch(0.12 0.018 220);box-shadow:0 8px 28px oklch(0.10 0.02 220/.4)}
+@media(max-width:1120px){.hero-inner{grid-template-columns:1fr;gap:1.2rem}.hero-prop{padding:2.4rem 2rem}}
 .badge{display:inline-flex;align-items:center;gap:.6rem;padding:.4rem .9rem;border:1px solid var(--bd2);border-radius:100px;font-size:.78rem;font-weight:500;color:var(--t2);margin-bottom:1.8rem}
 .badge-pulse{width:6px;height:6px;border-radius:50%;background:var(--a);animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 oklch(0.76 0.13 193/.5)}50%{box-shadow:0 0 0 6px oklch(0.76 0.13 193/0)}}
@@ -131,7 +148,30 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
 /* chat window */
 .chat-wrap{position:relative}
-.chat-wrap::before{content:'';position:absolute;inset:-40px -40px;background:radial-gradient(ellipse 80% 80% at 50% 50%,oklch(0.76 0.13 193/.07) 0%,transparent 70%);pointer-events:none}
+.chat-wrap::before{content:'';position:absolute;inset:-30px;background:radial-gradient(ellipse 70% 70% at 50% 50%,oklch(0.76 0.13 193/.05) 0%,transparent 72%);pointer-events:none}
+/* dashboard mockup (offre 2) — calqué sur le vrai dashboard, accent violet */
+.dash-mock{--dva:#A78BFA;position:relative;background:oklch(0.185 0.010 220);border:1px solid oklch(1 0 0/.08);border-radius:18px;overflow:hidden;box-shadow:0 24px 60px oklch(0.04 0.005 218/.5)}
+.dash-top{display:flex;align-items:center;gap:.45rem;padding:.8rem 1rem;border-bottom:1px solid oklch(1 0 0/.06)}
+.dash-dot{width:8px;height:8px;border-radius:50%;background:oklch(1 0 0/.18);flex-shrink:0}
+.dash-dot:first-child{background:oklch(0.66 0.16 25/.7)}
+.dash-ttl{margin-left:.4rem;font-family:var(--fd);font-size:.78rem;font-weight:800}
+.dash-ttl em{font-style:normal;color:var(--dva)}
+.dash-body{padding:.85rem 1rem 1rem;display:flex;flex-direction:column;gap:.7rem}
+.dash-kpis{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.dash-kpi{background:oklch(1 0 0/.03);border:1px solid oklch(1 0 0/.06);border-radius:12px;padding:.6rem .7rem}
+.dash-kpi .kl{font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);font-weight:700}
+.dash-kpi .kv{font-family:var(--fd);font-size:1.3rem;font-weight:900;color:var(--t);letter-spacing:-.02em;line-height:1.1;margin:.15rem 0}
+.dash-kpi .kv u{text-decoration:none;font-size:.8rem;font-weight:600;color:var(--t3)}
+.dash-kpi .kt{font-size:.6rem;font-weight:700;color:oklch(0.72 0.15 150)}
+.dash-sec-h{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);font-weight:700;margin-top:.1rem}
+.dash-list{display:flex;flex-direction:column}
+.dash-row{display:flex;align-items:center;gap:.65rem;padding:.5rem 0;border-bottom:1px solid oklch(1 0 0/.05)}
+.dash-row:last-child{border-bottom:none}
+.dash-time{font-family:var(--fd);font-size:.72rem;font-weight:800;color:var(--dva);min-width:36px}
+.dash-rb{flex:1;min-width:0}
+.dash-rb b{display:block;font-size:.74rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-rb span{font-size:.62rem;color:var(--t3)}
+.dash-price{font-family:var(--fd);font-size:.74rem;font-weight:800;color:oklch(0.80 0.10 290)}
 .chat-phone{background:oklch(0.16 0.009 220);border:1px solid var(--bd2);border-radius:24px;overflow:hidden;box-shadow:0 0 0 1px oklch(0.76 0.13 193/.12),0 40px 80px oklch(0.04 0.005 218/.6)}
 .chat-bar{display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;border-bottom:1px solid var(--bd);background:oklch(0.17 0.009 220)}
 .chat-av{width:36px;height:36px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,oklch(0.76 0.13 193),oklch(0.52 0.12 196));display:flex;align-items:center;justify-content:center;font-size:12px;font-family:var(--fd);font-weight:800;letter-spacing:-.02em}
@@ -1001,54 +1041,100 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 <section class="hero" id="home">
   <!-- shadow-bg : effet déplacé vers #page-bg (fixed full-site) -->
   <div class="hero-inner wrap">
-    <div class="hero-content">
-      <div class="badge" data-hero="1">
-        <span class="badge-pulse" aria-hidden="true"></span>
-        <span data-en="AI-powered booking automation" data-fr="Automatisation IA des réservations">AI-powered booking automation</span>
-      </div>
-      <h1 class="fd fd-xl hero-h" data-hero="1" id="hero-headline">
-        <span data-en="Your chair<br><em>fills itself.</em>" data-fr="Votre chaise<br><em>se remplit seule.</em>">Your chair<br><em>fills itself.</em></span>
-      </h1>
-      <p class="hero-sub" data-hero="1"
-        data-en="TrimSync connects to your Instagram and books appointments automatically. While you cut, the AI handles the DMs."
-        data-fr="TrimSync se connecte à votre Instagram et prend les rendez-vous automatiquement. Pendant que vous coiffez, l'IA gère les DMs."
-      >TrimSync connects to your Instagram and books appointments automatically. While you cut, the AI handles the DMs.</p>
-      <div class="hero-ctas" data-hero="1">
-        <a href="#cta" class="btn btn-a mag">
-          <span data-en="Get started free" data-fr="Commencer gratuitement">Get started free</span>
+
+    <!-- PANNEAU 1 : LE BOT (fond cyan) -->
+    <div class="hero-prop hero-prop--bot">
+      <span class="hero-eyebrow"><b>01</b> <span data-en="The bot" data-fr="Le bot">The bot</span></span>
+      <h2 class="fd hero-h" id="hero-prop-1"
+        data-en="Your AI bot answers every Instagram DM"
+        data-fr="Ton bot IA répond à chaque DM Instagram">Your AI bot answers every Instagram DM</h2>
+      <p class="hero-sub"
+        data-en="It replies, qualifies and books for you — 24/7, in your tone."
+        data-fr="Il répond, qualifie et réserve à ta place — 24h/24, dans ton ton.">It replies, qualifies and books for you — 24/7, in your tone.</p>
+      <div class="hero-cta-row">
+        <button type="button" class="btn btn-dark mag" onclick="openBotModal()">
+          <span data-en="Test the bot" data-fr="Tester le bot">Test the bot</span>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-        <a href="#solution" class="btn btn-b mag" data-en="See how it works" data-fr="Voir comment ça marche">See how it works</a>
+        </button>
       </div>
-      <div class="hero-proof" data-hero="1">
-        <span class="proof-item" data-en="No credit card required" data-fr="Sans carte bancaire">No credit card required</span>
-        <span class="proof-item" data-en="First month free" data-fr="Premier mois gratuit">First month free</span>
-        <span class="proof-item" data-en="Setup in 10 minutes" data-fr="Configuré en 10 minutes">Setup in 10 minutes</span>
+      <div class="hero-visual chat-wrap" aria-label="AI handles Instagram DMs">
+        <div class="chat-phone">
+          <div class="chat-bar">
+            <div class="chat-av" aria-hidden="true">BP</div>
+            <div class="chat-info">
+              <span class="chat-name">BarberShop Pro</span>
+              <span class="chat-ai"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true"><circle cx="4" cy="4" r="3.5" fill="#c87c30" opacity=".4"/><circle cx="4" cy="4" r="1.5" fill="#c87c30"/></svg> AI Active</span>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-label="Instagram" role="img"><rect x="3" y="3" width="12" height="12" rx="3.5" stroke="oklch(0.50 0.007 58)" stroke-width="1.3"/><circle cx="9" cy="9" r="2.8" stroke="oklch(0.50 0.007 58)" stroke-width="1.3"/><circle cx="13" cy="5" r=".7" fill="oklch(0.50 0.007 58)"/></svg>
+          </div>
+          <div class="chat-msgs" id="chat-msgs" aria-live="polite" aria-label="Conversation demo"></div>
+          <div class="chat-foot" aria-hidden="true">
+            <div class="chat-inp" id="chat-inp-fake">
+              <span id="chat-inp-txt" data-en="Message..." data-fr="Message...">Message...</span>
+            </div>
+            <div class="chat-send">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="oklch(0.10 0.008 218)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- LIVE DM DEMO -->
-    <div class="chat-wrap" data-hero="1" aria-label="Live demo: AI automatically books appointments">
-      <div class="chat-phone">
-        <div class="chat-bar">
-          <div class="chat-av" aria-hidden="true">BP</div>
-          <div class="chat-info">
-            <span class="chat-name">BarberShop Pro</span>
-            <span class="chat-ai"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true"><circle cx="4" cy="4" r="3.5" fill="#c87c30" opacity=".4"/><circle cx="4" cy="4" r="1.5" fill="#c87c30"/></svg> AI Active</span>
-          </div>
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-label="Instagram" role="img"><rect x="3" y="3" width="12" height="12" rx="3.5" stroke="oklch(0.50 0.007 58)" stroke-width="1.3"/><circle cx="9" cy="9" r="2.8" stroke="oklch(0.50 0.007 58)" stroke-width="1.3"/><circle cx="13" cy="5" r=".7" fill="oklch(0.50 0.007 58)"/></svg>
+    <!-- PANNEAU 2 : LA PLATEFORME (fond sombre) -->
+    <div class="hero-prop hero-prop--dash">
+      <span class="hero-eyebrow"><b>02</b> <span data-en="The platform" data-fr="La plateforme">The platform</span></span>
+      <h2 class="fd hero-h" id="hero-prop-2"
+        data-en="Run your whole shop from one dashboard"
+        data-fr="Gère tout ton salon depuis un seul dashboard">Run your whole shop from one dashboard</h2>
+      <p class="hero-sub"
+        data-en="Bookings, clients, revenue — your all-in-one. Replace Planity &amp; Booksy."
+        data-fr="RDV, clients, chiffre — ton tout-en-un. Remplace Planity &amp; Booksy.">Bookings, clients, revenue — your all-in-one. Replace Planity &amp; Booksy.</p>
+      <div class="hero-cta-row">
+        <button type="button" class="btn btn-a mag" onclick="openPreview('dashboard')">
+          <span data-en="Test the dashboard" data-fr="Tester le dashboard">Test the dashboard</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="hero-visual dash-mock" aria-label="Dashboard preview" role="img">
+        <div class="dash-top">
+          <span class="dash-dot"></span><span class="dash-dot"></span><span class="dash-dot"></span>
+          <span class="dash-ttl">Trim<em>Sync</em></span>
         </div>
-        <div class="chat-msgs" id="chat-msgs" aria-live="polite" aria-label="Conversation demo"></div>
-        <div class="chat-foot" aria-hidden="true">
-          <div class="chat-inp" id="chat-inp-fake">
-            <span id="chat-inp-txt" data-en="Message..." data-fr="Message...">Message...</span>
+        <div class="dash-body">
+          <div class="dash-kpis">
+            <div class="dash-kpi">
+              <span class="kl" data-en="Bookings today" data-fr="RDV aujourd'hui">Bookings today</span>
+              <span class="kv">6</span>
+              <span class="kt" data-en="↑ +2 vs yesterday" data-fr="↑ +2 vs hier">↑ +2 vs yesterday</span>
+            </div>
+            <div class="dash-kpi">
+              <span class="kl" data-en="Revenue today" data-fr="CA aujourd'hui">Revenue today</span>
+              <span class="kv">234<u>€</u></span>
+              <span class="kt">↑ +18%</span>
+            </div>
           </div>
-          <div class="chat-send">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="oklch(0.10 0.008 218)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="dash-sec-h" data-en="Today's schedule" data-fr="Agenda du jour">Today's schedule</span>
+          <div class="dash-list">
+            <div class="dash-row">
+              <span class="dash-time">09:30</span>
+              <span class="dash-rb"><b>Lucas Martin</b><span data-en="Classic cut" data-fr="Coupe classique">Classic cut</span></span>
+              <span class="dash-price">25€</span>
+            </div>
+            <div class="dash-row">
+              <span class="dash-time">11:00</span>
+              <span class="dash-rb"><b>Thomas Dubois</b><span data-en="Cut + Beard" data-fr="Coupe + Barbe">Cut + Beard</span></span>
+              <span class="dash-price">45€</span>
+            </div>
+            <div class="dash-row">
+              <span class="dash-time">14:00</span>
+              <span class="dash-rb"><b>Alex Bernard</b><span data-en="Premium cut" data-fr="Coupe premium">Premium cut</span></span>
+              <span class="dash-price">38€</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
+
   </div>
 </section>
 
@@ -1266,8 +1352,12 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     <!-- Frais de setup unique -->
     <div class="setup-fee rv d1">
       <div class="setup-badge" data-en="One-time fee" data-fr="Frais unique">One-time fee</div>
+      <div style="text-align:center;margin-bottom:0.5rem;">
+        <span style="background:#dcfce7;color:#15803d;padding:.25rem .75rem;border-radius:9999px;font-size:.8rem;font-weight:600;" data-en="Free for the first 10 clients" data-fr="Offert pour les 10 premiers clients">Free for the first 10 clients</span>
+      </div>
       <div class="setup-body">
-        <div class="setup-amount">€100</div>
+        <div class="setup-amount" style="text-decoration:line-through;color:#9ca3af;">€100</div>
+        <div style="color:#16a34a;font-weight:700;font-size:1.4rem;line-height:1;margin-top:.15rem;" data-en="Free" data-fr="Gratuit">Free</div>
         <div class="setup-desc"
           data-en="Setup fee — Instagram API connection + onboarding call included. Paid once, never again."
           data-fr="Frais de mise en place — Connexion API Instagram + appel d'onboarding inclus. Payé une seule fois."
@@ -1765,8 +1855,12 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
           <!-- Frais de setup unique -->
           <div class="setup-fee">
             <div class="setup-badge" data-en="One-time fee" data-fr="Frais unique">One-time fee</div>
+            <div style="text-align:center;margin-bottom:0.5rem;">
+              <span style="background:#dcfce7;color:#15803d;padding:.25rem .75rem;border-radius:9999px;font-size:.8rem;font-weight:600;" data-en="Free for the first 10 clients" data-fr="Offert pour les 10 premiers clients">Free for the first 10 clients</span>
+            </div>
             <div class="setup-body">
-              <div class="setup-amount">€100</div>
+              <div class="setup-amount" style="text-decoration:line-through;color:#9ca3af;">€100</div>
+              <div style="color:#16a34a;font-weight:700;font-size:1.4rem;line-height:1;margin-top:.15rem;" data-en="Free" data-fr="Gratuit">Free</div>
               <div class="setup-desc"
                 data-en="Setup fee — Instagram API connection + onboarding call included. Paid once, never again."
                 data-fr="Frais de mise en place — Connexion API Instagram + appel d'onboarding inclus. Payé une seule fois."
@@ -2024,15 +2118,16 @@ const CONV={
   ]
 };
 const DELAYS=[600,900,700,700,900,700];
-function restartChat(){
-  clearTimeout(chatTimer);
-  const box=document.getElementById('chat-msgs');
+const chatTimers={};
+function restartChat(chatId='chat-msgs'){
+  clearTimeout(chatTimers[chatId]);
+  const box=document.getElementById(chatId);
   if(!box)return;
   box.innerHTML='';
   const conv=CONV[lang]||CONV.en;
   let delay=400;
   conv.forEach((step,i)=>{
-    chatTimer=setTimeout(()=>{
+    chatTimers[chatId]=setTimeout(()=>{
       if(step.t==='type'){
         const el=document.createElement('div');el.className='typing';
         el.innerHTML='<span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>';
@@ -2049,13 +2144,13 @@ function restartChat(){
     },delay);
     delay+=DELAYS[i]||700;
   });
-  chatTimer=setTimeout(()=>{
+  chatTimers[chatId]=setTimeout(()=>{
     const els=[...box.querySelectorAll('.msg,.typing')];
     els.forEach((e,i)=>setTimeout(()=>{e.style.opacity='0';e.style.transform='translateY(-8px)';e.style.transition='all .3s ease-in';},i*60));
-    setTimeout(()=>restartChat(),els.length*60+400);
+    setTimeout(()=>restartChat(chatId),els.length*60+400);
   },delay+2200);
 }
-restartChat();
+restartChat('chat-msgs');
 
 /* ── SCROLL REVEALS — désactivés ── */
 

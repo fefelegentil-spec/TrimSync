@@ -233,7 +233,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   display:flex;flex-direction:column;gap:.8rem;
   backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
   box-shadow:0 1rem 2rem -1rem black;
-  min-height:280px;
+  min-height:360px;
   border:1px solid var(--bd);
   transition:border-color .3s var(--ex),box-shadow .3s var(--ex);
 }
@@ -666,101 +666,45 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 /* Contenu au-dessus du layer décoratif */
 .feat > :not(.feat-bg){position:relative;z-index:1}
 
-/* ── Card 1 — AI bot — halo teal + anneaux concentriques ── */
-.feat:nth-child(1){
-  background-color:oklch(0.113 0.009 222);
-  border-color:oklch(0.76 0.13 193/.32);
+/* ── Cards : base commune dark, halo subtil + top-edge teal ── */
+.feat:nth-child(1),.feat:nth-child(2),.feat:nth-child(3),.feat:nth-child(4){
+  background-color:oklch(0.105 0.008 222);
+  border-color:oklch(0.76 0.13 193/.16);
   box-shadow:
-    0 2rem 4rem -1rem oklch(0 0 0/.65),
-    0 0 0 1px oklch(0.76 0.13 193/.18),
-    inset 0 1px 0 oklch(0.76 0.13 193/.55);
+    0 1.5rem 3rem -1rem oklch(0 0 0/.55),
+    0 0 0 1px oklch(0.76 0.13 193/.08),
+    inset 0 1px 0 oklch(0.76 0.13 193/.32);
 }
-.feat:nth-child(1):hover{
+.feat:nth-child(1):hover,.feat:nth-child(2):hover,.feat:nth-child(3):hover,.feat:nth-child(4):hover{
   box-shadow:
-    0 3rem 6rem -1rem oklch(0 0 0/.70),
-    0 0 0 1px oklch(0.76 0.13 193/.32),
-    inset 0 1px 0 oklch(0.76 0.13 193/.70);
-}
-.feat:nth-child(1) .feat-bg{
-  background:radial-gradient(ellipse 150% 58% at 50% -5%,oklch(0.76 0.13 193/.44) 0%,transparent 60%);
-}
-.feat:nth-child(1) .feat-bg::after{
-  content:'';
-  position:absolute;top:-70px;left:50%;transform:translateX(-50%);
-  width:260px;height:260px;border-radius:50%;
-  border:1px solid oklch(0.76 0.13 193/.22);
-  box-shadow:0 0 0 50px oklch(0.76 0.13 193/.08),0 0 0 100px oklch(0.76 0.13 193/.04);
-}
-
-/* ── Card 2 — auto booking — dot grid + coin teal ── */
-.feat:nth-child(2){
-  background-color:oklch(0.088 0.007 225);
-  border-color:oklch(0.76 0.13 193/.24);
-  box-shadow:0 0 0 1px oklch(0.76 0.13 193/.15),inset 0 1px 0 oklch(0.76 0.13 193/.38);
-}
-.feat:nth-child(2):hover{
-  box-shadow:
-    0 2rem 4rem -1rem oklch(0 0 0/.45),
-    0 0 0 1px oklch(0.76 0.13 193/.32),
-    inset 0 1px 0 oklch(0.76 0.13 193/.55);
-}
-.feat:nth-child(2) .feat-bg{
-  background-image:
-    radial-gradient(circle at 18% 18%,oklch(0.76 0.13 193/.42) 0%,transparent 55%),
-    radial-gradient(circle,oklch(0.76 0.13 193/.22) 1px,transparent 1px);
-  background-size:100% 100%,22px 22px;
-}
-
-/* ── Card 3 — smart cancel — arcs bas-droit ── */
-.feat:nth-child(3){
-  background-color:oklch(0.138 0.010 218);
-  border-color:oklch(0.42 0.016 215);
-  box-shadow:0 0 0 1px oklch(0.42 0.016 215),inset 0 1px 0 oklch(0.76 0.13 193/.30);
-}
-.feat:nth-child(3):hover{
-  box-shadow:
-    0 2rem 4rem -1rem oklch(0 0 0/.45),
-    0 0 0 1px oklch(0.76 0.13 193/.32),
+    0 2.5rem 5rem -1rem oklch(0 0 0/.65),
+    0 0 0 1px oklch(0.76 0.13 193/.22),
     inset 0 1px 0 oklch(0.76 0.13 193/.48);
 }
-.feat:nth-child(3) .feat-bg{
-  background:
-    radial-gradient(circle at 88% 90%,oklch(0.58 0.11 210/.42) 0%,transparent 55%),
-    radial-gradient(circle at 20% 15%,oklch(0.76 0.13 193/.24) 0%,transparent 40%);
+
+/* ── Halo unique par carte — chaque carte a une "source lumineuse" différente ── */
+/* Card 1 — halo top centré (carte principale) */
+.feat:nth-child(1) .feat-bg{
+  background:radial-gradient(ellipse 110% 55% at 50% -10%,oklch(0.76 0.13 193/.26) 0%,transparent 58%);
 }
-.feat:nth-child(3) .feat-bg::after{
-  content:'';
-  position:absolute;bottom:-55px;right:-55px;
-  width:210px;height:210px;border-radius:50%;
-  border:1px solid oklch(0.76 0.13 193/.28);
-  box-shadow:0 0 0 42px oklch(0.76 0.13 193/.09);
+.feat:nth-child(1) .feat-bg::after{display:none}
+
+/* Card 2 — halo coin haut-gauche */
+.feat:nth-child(2) .feat-bg{
+  background:radial-gradient(ellipse 90% 65% at 10% 0%,oklch(0.76 0.13 193/.24) 0%,transparent 55%);
 }
 
-/* ── Card 4 — calendar sync (horizontal) — flux gauche ── */
-.feat:nth-child(4){
-  background-color:oklch(0.12 0.009 220);
-  border-color:oklch(0.76 0.13 193/.30);
-  box-shadow:
-    0 0 0 1px oklch(0.76 0.13 193/.14),
-    inset 0 1px 0 oklch(0.76 0.13 193/.44);
+/* Card 3 — halo coin bas-droit */
+.feat:nth-child(3) .feat-bg{
+  background:radial-gradient(ellipse 90% 65% at 95% 100%,oklch(0.58 0.11 210/.28) 0%,transparent 55%);
 }
-.feat:nth-child(4):hover{
-  box-shadow:
-    0 2rem 4rem -1rem oklch(0 0 0/.45),
-    0 0 0 1px oklch(0.76 0.13 193/.32),
-    inset 0 1px 0 oklch(0.76 0.13 193/.58);
-}
+.feat:nth-child(3) .feat-bg::after{display:none}
+
+/* Card 4 — flux gauche horizontal */
 .feat:nth-child(4) .feat-bg{
-  background:
-    linear-gradient(90deg,oklch(0.76 0.13 193/.28) 0%,transparent 42%),
-    radial-gradient(ellipse 40% 100% at 0% 50%,oklch(0.76 0.13 193/.20) 0%,transparent 65%);
+  background:linear-gradient(90deg,oklch(0.76 0.13 193/.22) 0%,transparent 45%);
 }
-.feat:nth-child(4) .feat-bg::after{
-  content:'';
-  position:absolute;top:50%;left:82px;transform:translateY(-50%);
-  width:1px;height:65%;
-  background:linear-gradient(180deg,transparent,oklch(0.76 0.13 193/.52),transparent);
-}
+.feat:nth-child(4) .feat-bg::after{display:none}
 
 /* ── Transitions — sans will-change (préserve data-glow background-attachment:fixed) ── */
 .feat{
@@ -798,20 +742,8 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   color:var(--a);margin-bottom:.2rem;
 }
 
-/* ── Watermarks ── */
-.feat-wm{animation:featwm-breathe 9s ease-in-out infinite alternate;pointer-events:none}
-.feat-wm-num{
-  position:absolute;bottom:.7rem;right:1.3rem;
-  font-family:var(--fd);font-size:6rem;font-weight:800;
-  letter-spacing:-.05em;line-height:1;
-  color:oklch(0.76 0.13 193/.18);
-  user-select:none;pointer-events:none;z-index:1;
-  animation:featwm-breathe 9s ease-in-out 2s infinite alternate;
-}
-@keyframes featwm-breathe{
-  to{color:oklch(0.76 0.13 193/.32);transform:translateY(-8px) scale(1.03)}
-}
-@media(prefers-reduced-motion:reduce){.feat-wm,.feat-wm-num{animation:none}}
+/* ── Watermarks DÉSACTIVÉS — bruit visuel disproportionné ── */
+.feat-wm,.feat-wm-num{display:none!important}
 
 /* ═══════════════════════════════════════════════════════════════
    PAIN SECTIONS — REDESIGN ÉDITORIAL

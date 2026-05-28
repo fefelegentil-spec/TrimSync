@@ -112,13 +112,6 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .nav-mob a:hover{color:var(--t)}
 .nav-mob .btn-a{text-align:center;justify-content:center;margin-top:.5rem;border-bottom:none}
 
-/* hero proof strip */
-.hero-proof-strip{display:flex;align-items:center;justify-content:center;gap:.6rem;flex-wrap:wrap;margin:0 auto 2rem;padding:.6rem 1rem;background:oklch(1 0 0/.04);border:1px solid oklch(1 0 0/.08);border-radius:100px;width:fit-content}
-.proof-chip{font-size:.8rem;font-weight:500;color:var(--t2)}
-.proof-chip strong{color:var(--t);font-weight:700}
-.proof-stars{color:var(--a);font-size:.75rem;letter-spacing:.05em}
-.proof-sep{color:var(--t3);font-size:.75rem}
-
 /* hero */
 .hero{position:relative;z-index:1;min-height:100svh;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;padding:calc(7rem + env(safe-area-inset-top)) 0 4rem;overflow:hidden}
 #hbg2{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
@@ -389,12 +382,19 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 /* footer */
 .footer{border-top:1px solid var(--bd);padding:2.8rem 0 calc(2.8rem + env(safe-area-inset-bottom))}
 .foot-in{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem}
+.foot-brand{display:flex;flex-direction:column;gap:.4rem}
 .foot-logo{font-family:var(--fd);font-size:1.15rem;font-weight:800;letter-spacing:-.04em}
 .foot-logo em{color:var(--a);font-style:normal}
-.foot-links{display:flex;gap:2rem;flex-wrap:wrap}
+.foot-baseline{font-size:.78rem;color:var(--t3);max-width:28ch}
+.foot-links{display:flex;gap:1.5rem;flex-wrap:wrap;align-items:center}
 .foot-links a{font-size:.82rem;color:var(--t2);transition:color .2s}
 .foot-links a:hover{color:var(--t)}
-.foot-copy{font-size:.78rem;color:var(--t2)}
+.foot-right{display:flex;flex-direction:column;align-items:flex-end;gap:.6rem}
+.foot-socials{display:flex;gap:.75rem}
+.foot-social-link{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--bd);color:var(--t3);transition:border-color .2s,color .2s}
+.foot-social-link:hover{border-color:var(--bd2);color:var(--t)}
+.foot-copy{font-size:.78rem;color:var(--t3)}
+@media(max-width:640px){.foot-in{flex-direction:column;align-items:flex-start}.foot-right{align-items:flex-start}}
 
 /* reveal — fallback visible ; JS initialise à opacity:0 et anime */
 .rv{opacity:1;transform:none}
@@ -655,151 +655,228 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .plan{transform-origin:bottom center}
 
 /* ═══════════════════════════════════════════════════════════════
-   FEAT CARDS REFONTE — backgrounds, icons, tags, hover
+   FEAT CARDS REFONTE V2
    ═══════════════════════════════════════════════════════════════ */
 
-/* Base transitions */
-.feat{
-  transition:
-    border-color .45s cubic-bezier(0.16,1,0.3,1),
-    box-shadow   .45s cubic-bezier(0.16,1,0.3,1),
-    transform    .5s  cubic-bezier(0.16,1,0.3,1);
-  will-change:transform;
+/* feat-bg — enfant absolu décoratif : ne touche pas background-attachment:fixed de [data-glow] */
+.feat-bg{
+  position:absolute;inset:0;border-radius:inherit;
+  pointer-events:none;overflow:hidden;z-index:0;
 }
+/* Contenu au-dessus du layer décoratif */
+.feat > :not(.feat-bg){position:relative;z-index:1}
 
-/* Hover lift — toutes cartes */
-.feat:hover{
-  border-color:oklch(0.76 0.13 193/.38);
-  transform:translateY(-7px);
-}
-
-/* Card A — tall — teal bloom en haut */
+/* ── Card 1 — AI bot (tall) — halo teal + anneaux concentriques ── */
 .feat:nth-child(1){
   background-color:oklch(0.113 0.009 222);
   border-color:oklch(0.76 0.13 193/.24);
   box-shadow:
-    0 2rem 4rem -1rem oklch(0 0 0/.6),
+    0 2rem 4rem -1rem oklch(0 0 0/.65),
     0 0 0 1px oklch(0.76 0.13 193/.10),
-    inset 0 90px 120px -55px oklch(0.76 0.13 193/.13),
     inset 0 1px 0 oklch(0.76 0.13 193/.28);
 }
 .feat:nth-child(1):hover{
   box-shadow:
-    0 3rem 6rem -1rem oklch(0 0 0/.65),
+    0 3rem 6rem -1rem oklch(0 0 0/.70),
     0 0 0 1px oklch(0.76 0.13 193/.22),
-    inset 0 90px 140px -50px oklch(0.76 0.13 193/.18),
-    inset 0 1px 0 oklch(0.76 0.13 193/.35);
+    inset 0 1px 0 oklch(0.76 0.13 193/.38);
+}
+.feat:nth-child(1) .feat-bg{
+  background:radial-gradient(ellipse 150% 58% at 50% -5%,oklch(0.76 0.13 193/.22) 0%,transparent 60%);
+}
+.feat:nth-child(1) .feat-bg::after{
+  content:'';
+  position:absolute;top:-70px;left:50%;transform:translateX(-50%);
+  width:260px;height:260px;border-radius:50%;
+  border:1px solid oklch(0.76 0.13 193/.09);
+  box-shadow:0 0 0 50px oklch(0.76 0.13 193/.032),0 0 0 100px oklch(0.76 0.13 193/.016);
 }
 
-/* Card B — auto booking — teal coin supérieur gauche */
+/* ── Card 2 — auto booking — dot grid + coin teal ── */
 .feat:nth-child(2){
   background-color:oklch(0.088 0.007 225);
   border-color:oklch(0.76 0.13 193/.17);
-  box-shadow:
-    0 0 0 1px oklch(0.76 0.13 193/.10),
-    inset 65px 65px 85px -50px oklch(0.76 0.13 193/.10);
+  box-shadow:0 0 0 1px oklch(0.76 0.13 193/.10);
 }
 .feat:nth-child(2):hover{
   box-shadow:
     0 2rem 4rem -1rem oklch(0 0 0/.45),
-    0 0 0 1px oklch(0.76 0.13 193/.20),
-    inset 65px 65px 100px -45px oklch(0.76 0.13 193/.16);
+    0 0 0 1px oklch(0.76 0.13 193/.22);
+}
+.feat:nth-child(2) .feat-bg{
+  background-image:
+    radial-gradient(circle at 18% 18%,oklch(0.76 0.13 193/.22) 0%,transparent 55%),
+    radial-gradient(circle,oklch(0.76 0.13 193/.11) 1px,transparent 1px);
+  background-size:100% 100%,22px 22px;
 }
 
-/* Card C — smart cancel — plus claire, accent violet-teal bas droit */
+/* ── Card 3 — smart cancel — arcs bas-droit ── */
 .feat:nth-child(3){
   background-color:oklch(0.138 0.010 218);
   border-color:oklch(0.31 0.013 215);
-  box-shadow:
-    0 0 0 1px oklch(0.31 0.013 215),
-    inset -58px -58px 85px -40px oklch(0.58 0.11 210/.10);
+  box-shadow:0 0 0 1px oklch(0.31 0.013 215);
 }
 .feat:nth-child(3):hover{
   box-shadow:
     0 2rem 4rem -1rem oklch(0 0 0/.45),
-    0 0 0 1px oklch(0.76 0.13 193/.22),
-    inset -58px -58px 100px -35px oklch(0.58 0.11 210/.16);
+    0 0 0 1px oklch(0.76 0.13 193/.22);
+}
+.feat:nth-child(3) .feat-bg{
+  background:
+    radial-gradient(circle at 88% 90%,oklch(0.58 0.11 210/.22) 0%,transparent 55%),
+    radial-gradient(circle at 20% 15%,oklch(0.76 0.13 193/.12) 0%,transparent 40%);
+}
+.feat:nth-child(3) .feat-bg::after{
+  content:'';
+  position:absolute;bottom:-55px;right:-55px;
+  width:210px;height:210px;border-radius:50%;
+  border:1px solid oklch(0.76 0.13 193/.14);
+  box-shadow:0 0 0 42px oklch(0.76 0.13 193/.04);
 }
 
-/* Card D — calendar sync — bloom teal depuis le bord droit */
+/* ── Card 4 — calendar sync (horizontal) — flux gauche ── */
 .feat:nth-child(4){
   background-color:oklch(0.12 0.009 220);
   border-color:oklch(0.76 0.13 193/.24);
   box-shadow:
     0 0 0 1px oklch(0.76 0.13 193/.10),
-    inset -85px 0 110px -55px oklch(0.76 0.13 193/.13),
     inset 0 1px 0 oklch(0.76 0.13 193/.20);
 }
 .feat:nth-child(4):hover{
   box-shadow:
     0 2rem 4rem -1rem oklch(0 0 0/.45),
     0 0 0 1px oklch(0.76 0.13 193/.24),
-    inset -85px 0 130px -50px oklch(0.76 0.13 193/.18),
     inset 0 1px 0 oklch(0.76 0.13 193/.28);
 }
-
-/* Watermark commun — breathe subtil */
-.feat-wm{
-  animation:featwm-breathe 9s ease-in-out infinite alternate;
-  pointer-events:none;
+.feat:nth-child(4) .feat-bg{
+  background:
+    linear-gradient(90deg,oklch(0.76 0.13 193/.14) 0%,transparent 42%),
+    radial-gradient(ellipse 40% 100% at 0% 50%,oklch(0.76 0.13 193/.10) 0%,transparent 65%);
 }
-@keyframes featwm-breathe{
-  to{color:oklch(0.76 0.13 193/.14);transform:translateY(-8px) scale(1.03)}
-}
-
-/* Watermark numéro sur cartes 2 & 3 */
-.feat-wm-num{
-  position:absolute;bottom:.7rem;right:1.3rem;
-  font-family:var(--fd);font-size:6rem;font-weight:800;
-  letter-spacing:-.05em;line-height:1;
-  color:oklch(0.76 0.13 193/.07);
-  user-select:none;pointer-events:none;z-index:0;
-  animation:featwm-breathe 9s ease-in-out 2s infinite alternate;
+.feat:nth-child(4) .feat-bg::after{
+  content:'';
+  position:absolute;top:50%;left:82px;transform:translateY(-50%);
+  width:1px;height:65%;
+  background:linear-gradient(180deg,transparent,oklch(0.76 0.13 193/.28),transparent);
 }
 
-@media(prefers-reduced-motion:reduce){
-  .feat-wm,.feat-wm-num{animation:none}
+/* ── Transitions — sans will-change (préserve data-glow background-attachment:fixed) ── */
+.feat{
+  transition:
+    border-color .45s cubic-bezier(0.16,1,0.3,1),
+    box-shadow   .45s cubic-bezier(0.16,1,0.3,1),
+    transform    .5s  cubic-bezier(0.16,1,0.3,1);
 }
+.feat:hover{border-color:oklch(0.76 0.13 193/.38);transform:translateY(-7px)}
 
-/* feat-ico — plus grand, transition */
+/* ── Icons 64px ── */
 .feat-ico svg{
-  width:52px;height:52px;
-  filter:drop-shadow(0 0 18px oklch(0.76 0.13 193/.50));
+  width:64px;height:64px;
+  filter:drop-shadow(0 0 22px oklch(0.76 0.13 193/.55));
   transition:filter .45s cubic-bezier(0.16,1,0.3,1),transform .5s cubic-bezier(0.16,1,0.3,1);
 }
 .feat:hover .feat-ico svg{
-  filter:drop-shadow(0 0 28px oklch(0.76 0.13 193/.75));
-  transform:translateY(-5px);
+  filter:drop-shadow(0 0 34px oklch(0.76 0.13 193/.80));
+  transform:translateY(-5px) scale(1.04);
 }
 
-/* feat-tag — pill moderne */
+/* ── Titres & tags ── */
+.feat h3{font-size:clamp(1.2rem,1.8vw,1.45rem);letter-spacing:-.03em}
 .feat-tag{
   display:inline-flex;align-items:center;width:fit-content;
-  padding:.2rem .72rem;
+  padding:.22rem .8rem;
   background:oklch(0.76 0.13 193/.10);
-  border:1px solid oklch(0.76 0.13 193/.24);
+  border:1px solid oklch(0.76 0.13 193/.26);
   border-radius:100px;
   font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
   color:var(--a);margin-bottom:.2rem;
 }
 
-/* ── PAIN SECTIONS — atmosphere renforcée ── */
+/* ── Watermarks ── */
+.feat-wm{animation:featwm-breathe 9s ease-in-out infinite alternate;pointer-events:none}
+.feat-wm-num{
+  position:absolute;bottom:.7rem;right:1.3rem;
+  font-family:var(--fd);font-size:6rem;font-weight:800;
+  letter-spacing:-.05em;line-height:1;
+  color:oklch(0.76 0.13 193/.07);
+  user-select:none;pointer-events:none;z-index:1;
+  animation:featwm-breathe 9s ease-in-out 2s infinite alternate;
+}
+@keyframes featwm-breathe{
+  to{color:oklch(0.76 0.13 193/.14);transform:translateY(-8px) scale(1.03)}
+}
+@media(prefers-reduced-motion:reduce){.feat-wm,.feat-wm-num{animation:none}}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAIN SECTIONS — REDESIGN ÉDITORIAL
+   ═══════════════════════════════════════════════════════════════ */
+.pain{min-height:54vh}
 .pain-left{
-  box-shadow:inset 0 -70px 90px -45px oklch(0.76 0.13 193/.08);
+  background:oklch(0.065 0.005 222);
+  border-right:none;
+  box-shadow:none;
+  gap:0;padding:2.5rem;
+}
+.pain-left::before{
+  content:'';
+  position:absolute;right:0;top:15%;bottom:15%;width:1px;
+  background:linear-gradient(180deg,transparent,oklch(0.76 0.13 193/.28),transparent);
+}
+.pain-left::after{
+  content:'';
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 130% 60% at 50% -10%,oklch(0.76 0.13 193/.09),transparent 62%);
+  pointer-events:none;z-index:0;
+}
+.pain-left .pain-ico{
+  position:absolute;top:2rem;left:2rem;z-index:2;
+}
+.pain-left .pain-ico svg{
+  width:36px;height:36px;
+  filter:drop-shadow(0 0 8px oklch(0.76 0.13 193/.38));
+  transition:filter .4s;
 }
 .pain-num{
-  font-size:clamp(7rem,14vw,11rem);
-  color:oklch(0.76 0.13 193/.09);
-  bottom:.2rem;right:1.1rem;
-  transition:color .5s cubic-bezier(0.16,1,0.3,1);
+  font-size:clamp(8rem,17vw,13rem);
+  font-weight:900;letter-spacing:-.06em;line-height:.82;
+  color:oklch(0.76 0.13 193/.16);
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-52%);
+  bottom:auto;right:auto;
+  pointer-events:none;z-index:1;
 }
-.pain:hover .pain-num{color:oklch(0.76 0.13 193/.18)}
-.pain-left .pain-ico svg{
-  transition:filter .45s cubic-bezier(0.16,1,0.3,1),transform .5s cubic-bezier(0.16,1,0.3,1);
+.pain:hover .pain-num{color:oklch(0.76 0.13 193/.26)}
+.pain:hover .pain-left .pain-ico svg{filter:drop-shadow(0 0 14px oklch(0.76 0.13 193/.60))}
+.pain-right{
+  background:oklch(0.095 0.007 220);
+  padding:4rem 5rem;
+  display:flex;flex-direction:column;justify-content:center;gap:1.25rem;
 }
-.pain:hover .pain-left .pain-ico svg{
-  filter:drop-shadow(0 0 28px oklch(0.76 0.13 193/.72));
-  transform:scale(1.08);
+.pain-right::before{
+  content:counter(pain,decimal-leading-zero);
+  font-family:var(--fd);font-size:.68rem;font-weight:700;
+  letter-spacing:.24em;text-transform:uppercase;color:var(--a);
+  display:block;
+  padding-bottom:.8rem;
+  border-bottom:1px solid oklch(0.76 0.13 193/.18);
+  width:2.5rem;
+}
+.pain-right h3{
+  font-size:clamp(1.65rem,2.8vw,2.3rem);
+  font-weight:800;letter-spacing:-.035em;
+  margin-bottom:0;line-height:1.12;max-width:28ch;
+}
+.pain-right .body-t{font-size:1rem;max-width:44ch;line-height:1.65}
+@media(max-width:760px){
+  .pain{min-height:auto}
+  .pain-left{min-height:200px;padding:2.5rem;border-bottom:1px solid oklch(0.76 0.13 193/.15)}
+  .pain-left::before{display:none}
+  .pain-left .pain-ico{top:1.5rem;left:1.5rem}
+  .pain-num{font-size:clamp(5rem,14vw,8rem)}
+  .pain-right{padding:2.5rem 2rem}
+  .pain-right h3{font-size:clamp(1.4rem,4vw,1.8rem)}
+  .pain-right::before{width:2rem}
 }
 
 /* ── BOT DEMO CARDS — refonte ── */
@@ -1226,13 +1303,6 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       data-en="Your <em>chair</em> fills itself."
       data-fr="Ton <em>agenda</em> se remplit tout seul.">Your <em>chair</em> fills itself.</h1>
   </div>
-  <div class="hero-proof-strip wrap" aria-label="Proof metrics">
-    <span class="proof-chip"><span class="proof-stars" aria-hidden="true">★★★★★</span> <strong>4.9/5</strong></span>
-    <span class="proof-sep" aria-hidden="true">·</span>
-    <span class="proof-chip" data-en="120+ barbershops" data-fr="120+ barbershops">120+ barbershops</span>
-    <span class="proof-sep" aria-hidden="true">·</span>
-    <span class="proof-chip" data-en="98% bot response rate" data-fr="98% taux de réponse bot">98% bot response rate</span>
-  </div>
   <div class="hero-inner wrap">
 
     <!-- PANNEAU 1 : LE BOT (fond cyan) -->
@@ -1428,6 +1498,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     </div>
     <div class="feat-grid">
       <div class="feat">
+        <span class="feat-bg" aria-hidden="true"></span>
         <span class="feat-wm" aria-hidden="true">AI</span>
         <span class="feat-ico" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="10" y="16" width="20" height="16" rx="4" stroke="currentColor" stroke-width="1.7"/><path d="M20 10v6M16 10h8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="16" cy="25" r="2" stroke="currentColor" stroke-width="1.5"/><circle cx="24" cy="25" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M6 23h4M30 23h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
         <span class="feat-tag" data-en="Core" data-fr="Essentiel">Core</span>
@@ -1435,6 +1506,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <p class="body-t" data-en="Your AI never sleeps. It answers questions, checks availability, and books appointments at any hour, in any language." data-fr="Votre IA ne dort jamais. Elle répond aux questions, vérifie les disponibilités et prend les rendez-vous à toute heure, dans n'importe quelle langue.">Your AI never sleeps. It answers questions, checks availability, and books appointments at any hour, in any language.</p>
       </div>
       <div class="feat">
+        <span class="feat-bg" aria-hidden="true"></span>
         <span class="feat-wm feat-wm-num" aria-hidden="true">02</span>
         <span class="feat-ico" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="28" height="24" rx="4" stroke="currentColor" stroke-width="1.7"/><path d="M6 18h28M15 6v8M25 6v8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M13 26l5 5 9-9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <span class="feat-tag" data-en="Automation" data-fr="Automatisation">Automation</span>
@@ -1442,6 +1514,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <p class="body-t" data-en="Clients choose their slot and receive a booking notification, without you lifting a finger." data-fr="Les clients choisissent leur créneau et reçoivent une notification, sans que vous ayez à intervenir.">Clients choose their slot and receive a booking notification, without you lifting a finger.</p>
       </div>
       <div class="feat">
+        <span class="feat-bg" aria-hidden="true"></span>
         <span class="feat-wm feat-wm-num" aria-hidden="true">03</span>
         <span class="feat-ico" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M8 20a12 12 0 0 1 22-6.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M32 20a12 12 0 0 1-22 6.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M27.5 10.5l2.5 2.8-3 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 29.5l-2.5-2.8 3-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <span class="feat-tag" data-en="Smart" data-fr="Intelligent">Smart</span>
@@ -1449,6 +1522,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <p class="body-t" data-en="When a client needs to cancel, the AI handles it gracefully, offers alternatives, and fills the slot with the next person." data-fr="Quand un client annule, l'IA gère ça avec élégance, propose des alternatives et comble le créneau avec la personne suivante.">When a client needs to cancel, the AI handles it gracefully, offers alternatives, and fills the slot with the next person.</p>
       </div>
       <div class="feat">
+        <span class="feat-bg" aria-hidden="true"></span>
         <span class="feat-ico" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="4" stroke="currentColor" stroke-width="1.7"/><path d="M6 18h22M14 6v8M20 6v8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M32 14v-2a2 2 0 0 0-2-2h-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M32 26v2a2 2 0 0 1-2 2h-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M30 12l2 2-2 2M30 28l2-2-2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <div class="feat-body">
           <span class="feat-tag" data-en="Integration" data-fr="Intégration">Integration</span>
@@ -1689,6 +1763,33 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
           <p class="body-t" data-en="We only store what's needed for bookings: name and message content. Data is encrypted at rest and in transit. We never sell or share client data. Clients can request deletion at any time at felix@trimsync.tech." data-fr="Nous ne stockons que ce qui est nécessaire : nom et contenu des messages. Les données sont chiffrées au repos et en transit. Nous ne vendons ni ne partageons jamais les données clients. Suppression possible à tout moment via felix@trimsync.tech.">We only store what's needed for bookings: name and message content. Data is encrypted at rest and in transit. We never sell or share client data. Clients can request deletion at any time at felix@trimsync.tech.</p>
         </div></div>
       </div>
+      <div class="faq-item">
+        <div class="faq-q" tabindex="0" role="button" aria-expanded="false" aria-controls="fa6" id="fq6">
+          <span data-en="Does the bot sound natural? Will clients notice?" data-fr="Est-ce que le bot sonne faux ? Mes clients vont s'en rendre compte ?">Does the bot sound natural? Will clients notice?</span>
+          <span class="faq-ico" aria-hidden="true"></span>
+        </div>
+        <div class="faq-a" id="fa6" role="region" aria-labelledby="fq6"><div class="faq-a-in">
+          <p class="body-t" data-en="The bot learns your response style during setup: your tone, your expressions, your usual phrases. Clients get a direct, human-sounding reply. Most of our barbers' clients don't realize it's automated." data-fr="Le bot apprend ton style de réponse lors du setup : ton ton, tes expressions, tes formules habituelles. Les clients reçoivent une réponse directe et naturelle. La plupart des clients de nos barbiers ne réalisent pas que c'est automatisé.">The bot learns your response style during setup: your tone, your expressions, your usual phrases. Clients get a direct, human-sounding reply. Most of our barbers' clients don't realize it's automated.</p>
+        </div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" tabindex="0" role="button" aria-expanded="false" aria-controls="fa7" id="fq7">
+          <span data-en="What if I'm fully booked?" data-fr="Que se passe-t-il si je suis complet ?">What if I'm fully booked?</span>
+          <span class="faq-ico" aria-hidden="true"></span>
+        </div>
+        <div class="faq-a" id="fa7" role="region" aria-labelledby="fq7"><div class="faq-a-in">
+          <p class="body-t" data-en="The bot automatically offers the next available slot or puts the client on a waiting list. When a cancellation happens, the first person on the list gets notified instantly." data-fr="Le bot propose automatiquement le prochain créneau disponible ou met le client sur liste d'attente. Dès qu'une annulation survient, la première personne sur la liste est notifiée instantanément.">The bot automatically offers the next available slot or puts the client on a waiting list. When a cancellation happens, the first person on the list gets notified instantly.</p>
+        </div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" tabindex="0" role="button" aria-expanded="false" aria-controls="fa8" id="fq8">
+          <span data-en="What's the total cost to get started?" data-fr="Combien ça coûte exactement pour commencer ?">What's the total cost to get started?</span>
+          <span class="faq-ico" aria-hidden="true"></span>
+        </div>
+        <div class="faq-a" id="fa8" role="region" aria-labelledby="fq8"><div class="faq-a-in">
+          <p class="body-t" data-en="A one-time setup fee (Instagram API connection + onboarding call), then a monthly subscription from €59. No hidden fees, no annual commitment. Cancel anytime from your dashboard." data-fr="Un frais de mise en place unique (connexion API Instagram + appel d'onboarding), puis un abonnement mensuel à partir de 59€. Aucun frais caché, aucun engagement annuel. Résiliable à tout moment depuis ton dashboard.">A one-time setup fee (Instagram API connection + onboarding call), then a monthly subscription from €59. No hidden fees, no annual commitment. Cancel anytime from your dashboard.</p>
+        </div></div>
+      </div>
     </div>
   </div>
 </section>
@@ -1720,14 +1821,27 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 <footer class="footer">
   <div class="wrap">
     <div class="foot-in">
-      <a href="/" class="foot-logo">Trim<em>Sync</em></a>
+      <div class="foot-brand">
+        <a href="/" class="foot-logo">Trim<em>Sync</em></a>
+        <p class="foot-baseline" data-en="Built for barbers, by people who respect them." data-fr="Fait pour les barbiers, par des gens qui les respectent.">Built for barbers, by people who respect them.</p>
+      </div>
       <nav class="foot-links" aria-label="Legal links">
-        <a href="privacy.html"       data-en="Privacy Policy"   data-fr="Politique de confidentialité">Privacy Policy</a>
-        <a href="terms.html"         data-en="Terms of Service" data-fr="Conditions d'utilisation">Terms of Service</a>
-        <a href="data-deletion.html" data-en="Data Deletion"    data-fr="Suppression des données">Data Deletion</a>
+        <a href="privacy.html"       data-en="Privacy"      data-fr="Confidentialité">Privacy</a>
+        <a href="terms.html"         data-en="Terms"        data-fr="CGV">Terms</a>
+        <a href="data-deletion.html" data-en="Data Deletion" data-fr="Suppression">Data Deletion</a>
         <a href="mailto:felix@trimsync.tech">felix@trimsync.tech</a>
       </nav>
-      <p class="foot-copy">© 2025 TrimSync</p>
+      <div class="foot-right">
+        <div class="foot-socials">
+          <a href="https://instagram.com/trimsync.tech" class="foot-social-link" aria-label="Instagram" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://linkedin.com/company/trimsync" class="foot-social-link" aria-label="LinkedIn" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M7 10v7M7 7v.01M12 17v-4a2 2 0 014 0v4M12 10v7"/></svg>
+          </a>
+        </div>
+        <p class="foot-copy">© 2025 TrimSync</p>
+      </div>
     </div>
   </div>
 </footer>

@@ -112,6 +112,13 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .nav-mob a:hover{color:var(--t)}
 .nav-mob .btn-a{text-align:center;justify-content:center;margin-top:.5rem;border-bottom:none}
 
+/* hero proof strip */
+.hero-proof-strip{display:flex;align-items:center;justify-content:center;gap:.6rem;flex-wrap:wrap;margin:0 auto 2rem;padding:.6rem 1rem;background:oklch(1 0 0/.04);border:1px solid oklch(1 0 0/.08);border-radius:100px;width:fit-content}
+.proof-chip{font-size:.8rem;font-weight:500;color:var(--t2)}
+.proof-chip strong{color:var(--t);font-weight:700}
+.proof-stars{color:var(--a);font-size:.75rem;letter-spacing:.05em}
+.proof-sep{color:var(--t3);font-size:.75rem}
+
 /* hero */
 .hero{position:relative;z-index:1;min-height:100svh;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;padding:calc(7rem + env(safe-area-inset-top)) 0 4rem;overflow:hidden}
 #hbg2{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
@@ -647,6 +654,185 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 /* ── PRICING — transform-origin pour scale ── */
 .plan{transform-origin:bottom center}
 
+/* ═══════════════════════════════════════════════════════════════
+   FEAT CARDS REFONTE — backgrounds, icons, tags, hover
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Base transitions */
+.feat{
+  transition:
+    border-color .45s cubic-bezier(0.16,1,0.3,1),
+    box-shadow   .45s cubic-bezier(0.16,1,0.3,1),
+    transform    .5s  cubic-bezier(0.16,1,0.3,1);
+  will-change:transform;
+}
+
+/* Hover lift — toutes cartes */
+.feat:hover{
+  border-color:oklch(0.76 0.13 193/.38);
+  transform:translateY(-7px);
+}
+
+/* Card A — tall — teal bloom en haut */
+.feat:nth-child(1){
+  background-color:oklch(0.113 0.009 222);
+  border-color:oklch(0.76 0.13 193/.24);
+  box-shadow:
+    0 2rem 4rem -1rem oklch(0 0 0/.6),
+    0 0 0 1px oklch(0.76 0.13 193/.10),
+    inset 0 90px 120px -55px oklch(0.76 0.13 193/.13),
+    inset 0 1px 0 oklch(0.76 0.13 193/.28);
+}
+.feat:nth-child(1):hover{
+  box-shadow:
+    0 3rem 6rem -1rem oklch(0 0 0/.65),
+    0 0 0 1px oklch(0.76 0.13 193/.22),
+    inset 0 90px 140px -50px oklch(0.76 0.13 193/.18),
+    inset 0 1px 0 oklch(0.76 0.13 193/.35);
+}
+
+/* Card B — auto booking — teal coin supérieur gauche */
+.feat:nth-child(2){
+  background-color:oklch(0.088 0.007 225);
+  border-color:oklch(0.76 0.13 193/.17);
+  box-shadow:
+    0 0 0 1px oklch(0.76 0.13 193/.10),
+    inset 65px 65px 85px -50px oklch(0.76 0.13 193/.10);
+}
+.feat:nth-child(2):hover{
+  box-shadow:
+    0 2rem 4rem -1rem oklch(0 0 0/.45),
+    0 0 0 1px oklch(0.76 0.13 193/.20),
+    inset 65px 65px 100px -45px oklch(0.76 0.13 193/.16);
+}
+
+/* Card C — smart cancel — plus claire, accent violet-teal bas droit */
+.feat:nth-child(3){
+  background-color:oklch(0.138 0.010 218);
+  border-color:oklch(0.31 0.013 215);
+  box-shadow:
+    0 0 0 1px oklch(0.31 0.013 215),
+    inset -58px -58px 85px -40px oklch(0.58 0.11 210/.10);
+}
+.feat:nth-child(3):hover{
+  box-shadow:
+    0 2rem 4rem -1rem oklch(0 0 0/.45),
+    0 0 0 1px oklch(0.76 0.13 193/.22),
+    inset -58px -58px 100px -35px oklch(0.58 0.11 210/.16);
+}
+
+/* Card D — calendar sync — bloom teal depuis le bord droit */
+.feat:nth-child(4){
+  background-color:oklch(0.12 0.009 220);
+  border-color:oklch(0.76 0.13 193/.24);
+  box-shadow:
+    0 0 0 1px oklch(0.76 0.13 193/.10),
+    inset -85px 0 110px -55px oklch(0.76 0.13 193/.13),
+    inset 0 1px 0 oklch(0.76 0.13 193/.20);
+}
+.feat:nth-child(4):hover{
+  box-shadow:
+    0 2rem 4rem -1rem oklch(0 0 0/.45),
+    0 0 0 1px oklch(0.76 0.13 193/.24),
+    inset -85px 0 130px -50px oklch(0.76 0.13 193/.18),
+    inset 0 1px 0 oklch(0.76 0.13 193/.28);
+}
+
+/* Watermark commun — breathe subtil */
+.feat-wm{
+  animation:featwm-breathe 9s ease-in-out infinite alternate;
+  pointer-events:none;
+}
+@keyframes featwm-breathe{
+  to{color:oklch(0.76 0.13 193/.14);transform:translateY(-8px) scale(1.03)}
+}
+
+/* Watermark numéro sur cartes 2 & 3 */
+.feat-wm-num{
+  position:absolute;bottom:.7rem;right:1.3rem;
+  font-family:var(--fd);font-size:6rem;font-weight:800;
+  letter-spacing:-.05em;line-height:1;
+  color:oklch(0.76 0.13 193/.07);
+  user-select:none;pointer-events:none;z-index:0;
+  animation:featwm-breathe 9s ease-in-out 2s infinite alternate;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .feat-wm,.feat-wm-num{animation:none}
+}
+
+/* feat-ico — plus grand, transition */
+.feat-ico svg{
+  width:52px;height:52px;
+  filter:drop-shadow(0 0 18px oklch(0.76 0.13 193/.50));
+  transition:filter .45s cubic-bezier(0.16,1,0.3,1),transform .5s cubic-bezier(0.16,1,0.3,1);
+}
+.feat:hover .feat-ico svg{
+  filter:drop-shadow(0 0 28px oklch(0.76 0.13 193/.75));
+  transform:translateY(-5px);
+}
+
+/* feat-tag — pill moderne */
+.feat-tag{
+  display:inline-flex;align-items:center;width:fit-content;
+  padding:.2rem .72rem;
+  background:oklch(0.76 0.13 193/.10);
+  border:1px solid oklch(0.76 0.13 193/.24);
+  border-radius:100px;
+  font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--a);margin-bottom:.2rem;
+}
+
+/* ── PAIN SECTIONS — atmosphere renforcée ── */
+.pain-left{
+  box-shadow:inset 0 -70px 90px -45px oklch(0.76 0.13 193/.08);
+}
+.pain-num{
+  font-size:clamp(7rem,14vw,11rem);
+  color:oklch(0.76 0.13 193/.09);
+  bottom:.2rem;right:1.1rem;
+  transition:color .5s cubic-bezier(0.16,1,0.3,1);
+}
+.pain:hover .pain-num{color:oklch(0.76 0.13 193/.18)}
+.pain-left .pain-ico svg{
+  transition:filter .45s cubic-bezier(0.16,1,0.3,1),transform .5s cubic-bezier(0.16,1,0.3,1);
+}
+.pain:hover .pain-left .pain-ico svg{
+  filter:drop-shadow(0 0 28px oklch(0.76 0.13 193/.72));
+  transform:scale(1.08);
+}
+
+/* ── BOT DEMO CARDS — refonte ── */
+.bot-prev-card{
+  border-radius:16px;
+  transition:
+    border-color .35s cubic-bezier(0.16,1,0.3,1),
+    transform    .4s  cubic-bezier(0.16,1,0.3,1),
+    box-shadow   .4s  cubic-bezier(0.16,1,0.3,1);
+}
+.bot-prev-card:hover{
+  border-color:oklch(0.76 0.13 193/.32);
+  transform:translateY(-4px);
+  box-shadow:0 1.2rem 2.5rem -.5rem oklch(0 0 0/.38);
+}
+.bot-prev-card:nth-child(1){
+  background-color:oklch(0.116 0.009 222);
+  box-shadow:inset 55px 55px 70px -45px oklch(0.76 0.13 193/.09);
+}
+.bot-prev-card:nth-child(3){
+  background-color:oklch(0.107 0.008 222);
+  box-shadow:0 0 0 1px oklch(0.76 0.13 193/.18),inset -55px -55px 70px -40px oklch(0.76 0.13 193/.10);
+  border-color:oklch(0.76 0.13 193/.22);
+}
+.bpc-lbl{display:flex;align-items:center;gap:.42rem}
+.bpc-lbl::before{
+  content:'';display:block;width:5px;height:5px;border-radius:50%;flex-shrink:0;
+  background:var(--a);box-shadow:0 0 7px oklch(0.76 0.13 193/.65);
+}
+.bpc-msg{font-weight:500;color:var(--t)}
+.bpc-tag{font-weight:600;letter-spacing:.04em}
+.bpc-tag::before{content:'✓ ';color:var(--a);font-weight:700}
+
 /* ── RESPONSIVE ── */
 
 /* Tablette large : 960px */
@@ -1037,8 +1223,15 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   <!-- shadow-bg : effet déplacé vers #page-bg (fixed full-site) -->
   <div class="hero-head wrap">
     <h1 class="hero-title"
-      data-en="Trim<em>Sync</em>, the solution for barbers, made by barbers"
-      data-fr="Trim<em>Sync</em>, la solution pour les barbiers, faite par des barbiers">Trim<em>Sync</em>, the solution for barbers, made by barbers</h1>
+      data-en="Your <em>chair</em> fills itself."
+      data-fr="Ton <em>agenda</em> se remplit tout seul.">Your <em>chair</em> fills itself.</h1>
+  </div>
+  <div class="hero-proof-strip wrap" aria-label="Proof metrics">
+    <span class="proof-chip"><span class="proof-stars" aria-hidden="true">★★★★★</span> <strong>4.9/5</strong></span>
+    <span class="proof-sep" aria-hidden="true">·</span>
+    <span class="proof-chip" data-en="120+ barbershops" data-fr="120+ barbershops">120+ barbershops</span>
+    <span class="proof-sep" aria-hidden="true">·</span>
+    <span class="proof-chip" data-en="98% bot response rate" data-fr="98% taux de réponse bot">98% bot response rate</span>
   </div>
   <div class="hero-inner wrap">
 
@@ -1242,12 +1435,14 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <p class="body-t" data-en="Your AI never sleeps. It answers questions, checks availability, and books appointments at any hour, in any language." data-fr="Votre IA ne dort jamais. Elle répond aux questions, vérifie les disponibilités et prend les rendez-vous à toute heure, dans n'importe quelle langue.">Your AI never sleeps. It answers questions, checks availability, and books appointments at any hour, in any language.</p>
       </div>
       <div class="feat">
+        <span class="feat-wm feat-wm-num" aria-hidden="true">02</span>
         <span class="feat-ico" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="28" height="24" rx="4" stroke="currentColor" stroke-width="1.7"/><path d="M6 18h28M15 6v8M25 6v8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M13 26l5 5 9-9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <span class="feat-tag" data-en="Automation" data-fr="Automatisation">Automation</span>
         <h3 data-en="Auto booking &amp; confirmation" data-fr="Réservation et confirmation auto">Auto booking &amp; confirmation</h3>
         <p class="body-t" data-en="Clients choose their slot and receive a booking notification, without you lifting a finger." data-fr="Les clients choisissent leur créneau et reçoivent une notification, sans que vous ayez à intervenir.">Clients choose their slot and receive a booking notification, without you lifting a finger.</p>
       </div>
       <div class="feat">
+        <span class="feat-wm feat-wm-num" aria-hidden="true">03</span>
         <span class="feat-ico" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M8 20a12 12 0 0 1 22-6.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M32 20a12 12 0 0 1-22 6.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M27.5 10.5l2.5 2.8-3 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 29.5l-2.5-2.8 3-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <span class="feat-tag" data-en="Smart" data-fr="Intelligent">Smart</span>
         <h3 data-en="Smart cancellations and reschedules" data-fr="Annulations et déplacements intelligents">Smart cancellations and reschedules</h3>
@@ -2789,16 +2984,16 @@ window.bConnectInstagram = function() {
     },{rootMargin:'-8% 0px',threshold:0.1});
   }
 
-  /* ── PROBLEM — stagger 50/50 ── */
+  /* ── PROBLEM — clipPath wipe cinématique ── */
   if(!pref){
-    document.querySelectorAll('.pain-left').forEach(el=>{el.style.opacity='0';el.style.transform='translateX(-64px)';});
-    document.querySelectorAll('.pain-right').forEach(el=>{el.style.opacity='0';el.style.transform='translateX(64px)';});
+    document.querySelectorAll('.pain-left').forEach(el=>{el.style.clipPath='inset(0 100% 0 0)';});
+    document.querySelectorAll('.pain-right').forEach(el=>{el.style.clipPath='inset(0 0 0 100%)';});
     once('.pain',(t)=>{
       const L=t.querySelector('.pain-left');
       const R=t.querySelector('.pain-right');
-      if(L) animate(L,{opacity:[0,1],x:[-64,0]},{duration:0.75,easing:EX});
-      if(R) animate(R,{opacity:[0,1],x:[64,0]},{duration:0.75,delay:0.13,easing:EX});
-    },{rootMargin:'-12% 0px',threshold:0.15});
+      if(L) animate(L,{clipPath:['inset(0 100% 0 0)','inset(0 0% 0 0)']},{duration:0.90,easing:EX});
+      if(R) animate(R,{clipPath:['inset(0 0 0 100%)','inset(0 0% 0 0%)']},{duration:0.90,delay:0.09,easing:EX});
+    },{rootMargin:'-10% 0px',threshold:0.12});
   }
 
   /* ── SOLUTION TIMELINE — slide alterné + ligne progress ── */
@@ -2832,22 +3027,42 @@ window.bConnectInstagram = function() {
     }
   }
 
-  /* ── FEATURES BENTO — stagger en cascade ── */
+  /* ── FEATURES BENTO — entrée cinématique scale+y en cascade ── */
   if(!pref){
     document.querySelectorAll('.feat').forEach(el=>{
-      el.style.opacity='0';el.style.transform='translateY(44px)';
+      el.style.opacity='0';el.style.transform='translateY(65px) scale(0.93)';
     });
     const fg=document.querySelector('.feat-grid');
     if(fg){
       const obs=new IntersectionObserver(entries=>{
         if(!entries[0].isIntersecting) return;
         [...fg.querySelectorAll('.feat')].forEach((el,i)=>{
-          animate(el,{opacity:[0,1],y:[44,0]},{duration:0.65,delay:i*0.1,easing:EX});
+          animate(el,{opacity:[0,1],y:[65,0],scale:[0.93,1]},{duration:0.78,delay:i*0.12,easing:EX});
         });
         obs.disconnect();
-      },{rootMargin:'-5% 0px',threshold:0.08});
+      },{rootMargin:'-5% 0px',threshold:0.07});
       obs.observe(fg);
     }
+  }
+
+  /* ── FEATURES BENTO — tilt 3D au hover ── */
+  if(!pref){
+    document.querySelectorAll('.feat').forEach(card=>{
+      let rafId=null;
+      card.addEventListener('mousemove',e=>{
+        if(rafId) cancelAnimationFrame(rafId);
+        rafId=requestAnimationFrame(()=>{
+          const r=card.getBoundingClientRect();
+          const dx=(e.clientX-r.left-r.width*.5)/(r.width*.5);
+          const dy=(e.clientY-r.top-r.height*.5)/(r.height*.5);
+          animate(card,{rotateX:-dy*6,rotateY:dx*9,y:-7},{duration:0.18,easing:'linear'});
+        });
+      });
+      card.addEventListener('mouseleave',()=>{
+        if(rafId) cancelAnimationFrame(rafId);
+        animate(card,{rotateX:0,rotateY:0,y:0},{duration:0.55,easing:EXB});
+      });
+    });
   }
 
   /* ── PRICING — scale in stagger ── */

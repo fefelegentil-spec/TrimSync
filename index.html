@@ -583,7 +583,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .feat-grid{
   display:grid;
   grid-template-columns:1.7fr 1fr 1fr;
-  grid-template-rows:340px 200px;
+  grid-template-rows:minmax(340px,auto) minmax(180px,auto);
   gap:1.25rem;
 }
 .feat:nth-child(1){
@@ -1446,7 +1446,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       <div class="feat">
         <span class="feat-bg" aria-hidden="true"></span>
         <span class="feat-wm feat-wm-num" aria-hidden="true">02</span>
-        <span class="feat-ico" aria-hidden="true"><svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="13" width="32" height="28" rx="5" fill="currentColor" fill-opacity=".15" stroke-width="2"/><path d="M7 23h32" stroke-width="2"/><path d="M17 7v12M31 7v12" stroke-width="2.2"/><path d="M15 34l7 8 15-15" stroke-width="3"/></svg></span>
+        <span class="feat-ico" aria-hidden="true"><svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="13" width="32" height="28" rx="5" fill="currentColor" fill-opacity=".15" stroke-width="2"/><path d="M7 23h32" stroke-width="2"/><path d="M17 7v12M31 7v12" stroke-width="2.2"/><path d="M15 31l6 6 15-15" stroke-width="3"/></svg></span>
         <span class="feat-tag" data-en="Automation" data-fr="Automatisation">Automation</span>
         <h3 data-en="Auto booking &amp; confirmation" data-fr="Réservation et confirmation auto">Auto booking &amp; confirmation</h3>
         <p class="body-t" data-en="Clients choose their slot and receive a booking notification, without you lifting a finger." data-fr="Les clients choisissent leur créneau et reçoivent une notification, sans que vous ayez à intervenir.">Clients choose their slot and receive a booking notification, without you lifting a finger.</p>
@@ -1454,14 +1454,14 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       <div class="feat">
         <span class="feat-bg" aria-hidden="true"></span>
         <span class="feat-wm feat-wm-num" aria-hidden="true">03</span>
-        <span class="feat-ico" aria-hidden="true"><svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 22a14 14 0 0 1 24 0" stroke-width="2.2"/><path d="M38 22l2-6 6 2" stroke-width="2"/><path d="M38 30a14 14 0 0 1-24 0" stroke-width="2.2"/><path d="M14 30l-2 6-6-2" stroke-width="2"/><circle cx="26" cy="26" r="9" fill="currentColor" fill-opacity=".18" stroke-width="1.8"/><path d="M22 26l3 3.5 7-8" stroke-width="2.4"/></svg></span>
+        <span class="feat-ico" aria-hidden="true"><svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M44 16a18 18 0 1 0 0 20" stroke-width="2.4"/><path d="M44 6v10h-10" stroke-width="2.4"/><path d="M18 27l5 5 11-12" stroke-width="3"/></svg></span>
         <span class="feat-tag" data-en="Smart" data-fr="Intelligent">Smart</span>
         <h3 data-en="Smart cancellations and reschedules" data-fr="Annulations et déplacements intelligents">Smart cancellations and reschedules</h3>
         <p class="body-t" data-en="When a client needs to cancel, the AI handles it gracefully, offers alternatives, and fills the slot with the next person." data-fr="Quand un client annule, l'IA gère ça avec élégance, propose des alternatives et comble le créneau avec la personne suivante.">When a client needs to cancel, the AI handles it gracefully, offers alternatives, and fills the slot with the next person.</p>
       </div>
       <div class="feat">
         <span class="feat-bg" aria-hidden="true"></span>
-        <span class="feat-ico" aria-hidden="true"><svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="12" width="28" height="26" rx="5" fill="currentColor" fill-opacity=".15" stroke-width="2"/><path d="M6 22h28" stroke-width="2"/><path d="M15 6v12M25 6v12" stroke-width="2.2"/><circle cx="14" cy="32" r="2.2" fill="currentColor" stroke="none"/><circle cx="20" cy="32" r="2.2" fill="currentColor" stroke="none"/><circle cx="26" cy="32" r="2.2" fill="currentColor" stroke="none"/><path d="M40 18a10 10 0 0 1 5 10" stroke-width="2.2"/><path d="M45 16l1 5-5 1" stroke-width="2"/><path d="M40 38a10 10 0 0 1-5-10" stroke-width="2.2"/><path d="M35 40l-1-5 5-1" stroke-width="2"/></svg></span>
+        <span class="feat-ico" aria-hidden="true"><svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="11" width="30" height="28" rx="5" fill="currentColor" fill-opacity=".15" stroke-width="2"/><path d="M6 21h30" stroke-width="2"/><path d="M15 6v10M27 6v10" stroke-width="2.2"/><circle cx="14" cy="31" r="2" fill="currentColor" stroke="none"/><circle cx="21" cy="31" r="2" fill="currentColor" stroke="none"/><circle cx="28" cy="31" r="2" fill="currentColor" stroke="none"/><circle cx="40" cy="39" r="9" fill="oklch(0.105 0.008 222)" stroke-width="2"/><path d="M43 36a4 4 0 1 0 -1 4.5" stroke-width="1.8" fill="none"/><path d="M43 33v3h-3" stroke-width="1.8" fill="none"/></svg></span>
         <div class="feat-body">
           <span class="feat-tag" data-en="Integration" data-fr="Intégration">Integration</span>
           <h3 data-en="Google Calendar sync" data-fr="Sync Google Calendar">Google Calendar sync</h3>

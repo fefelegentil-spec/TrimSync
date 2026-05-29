@@ -1299,6 +1299,18 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .sol-step--right .sol-step-empty.step-mock{padding-right:2.5rem}
 .sol-step--left .sol-step-empty.step-mock{padding-left:2.5rem}
 @media(max-width:760px){.sol-step-empty.step-mock{display:none}}
+
+/* Task 5 — mini-aperçus produit + stats dans les features cards */
+.feat-mock{margin-top:1rem;padding:.7rem .8rem;background:oklch(0.13 0.009 222/.6);border:1px solid oklch(1 0 0/.05);border-radius:10px;display:flex;flex-direction:column;gap:.4rem;font-size:.72rem;color:var(--t2);line-height:1.4}
+.feat-mock .fm-row{display:flex;align-items:center;gap:.5rem}
+.feat-mock .fm-row .fm-dot{width:6px;height:6px;border-radius:50%;background:var(--a);box-shadow:0 0 6px var(--a);flex:none}
+.feat-mock .fm-row.muted .fm-dot{background:oklch(1 0 0/.20);box-shadow:none}
+.feat-mock .fm-row b{color:var(--t1);font-weight:600}
+.feat-stat-row{display:flex;gap:1.4rem;flex-wrap:wrap;margin-top:.8rem;padding-top:.75rem;border-top:1px solid oklch(1 0 0/.06)}
+.feat-stat-row .fs{display:flex;flex-direction:column;gap:.12rem}
+.feat-stat-row .fs .n{font-size:1.05rem;font-weight:700;color:var(--a);letter-spacing:-.02em;font-feature-settings:"tnum";line-height:1}
+.feat-stat-row .fs .l{font-size:.56rem;color:var(--t3);letter-spacing:.06em;text-transform:uppercase}
+.feat:nth-child(4) .feat-mock{max-width:420px}
 </style>
 </head>
 <body>
@@ -1613,6 +1625,14 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <span class="feat-tag" data-en="Core" data-fr="Essentiel">Core</span>
         <h3 data-en="AI booking bot, 24/7" data-fr="Bot IA de réservation, 24h/24">AI booking bot, 24/7</h3>
         <p class="body-t" data-en="Your AI never sleeps. It answers questions, checks availability, and books appointments at any hour, in any language." data-fr="Votre IA ne dort jamais. Elle répond aux questions, vérifie les disponibilités et prend les rendez-vous à toute heure, dans n'importe quelle langue.">Your AI never sleeps. It answers questions, checks availability, and books appointments at any hour, in any language.</p>
+        <div class="feat-mock" aria-hidden="true">
+          <div class="fm-row muted"><span class="fm-dot"></span><span data-en="<b>Client</b> · Open Saturday?" data-fr="<b>Client</b> · Ouvert samedi ?"><b>Client</b> · Open Saturday?</span></div>
+          <div class="fm-row"><span class="fm-dot"></span><span data-en="<b>AI</b> · Yes! 10am–7pm." data-fr="<b>IA</b> · Yes ! 10h–19h."><b>AI</b> · Yes! 10am–7pm.</span></div>
+        </div>
+        <div class="feat-stat-row">
+          <div class="fs"><span class="n">4s</span><span class="l" data-en="avg reply" data-fr="réponse moy.">avg reply</span></div>
+          <div class="fs"><span class="n">24/7</span><span class="l" data-en="uptime" data-fr="actif">uptime</span></div>
+        </div>
       </div>
       <div class="feat">
         <span class="feat-bg" aria-hidden="true"></span>
@@ -1621,6 +1641,14 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <span class="feat-tag" data-en="Automation" data-fr="Automatisation">Automation</span>
         <h3 data-en="Auto booking &amp; confirmation" data-fr="Réservation et confirmation auto">Auto booking &amp; confirmation</h3>
         <p class="body-t" data-en="Clients choose their slot and receive a booking notification, without you lifting a finger." data-fr="Les clients choisissent leur créneau et reçoivent une notification, sans que vous ayez à intervenir.">Clients choose their slot and receive a booking notification, without you lifting a finger.</p>
+        <div class="feat-mock" aria-hidden="true">
+          <div class="fm-row"><span class="fm-dot"></span><span data-en="<b>14:00 Thursday</b> · ✓ Confirmed" data-fr="<b>14:00 jeudi</b> · ✓ Confirmé"><b>14:00 Thursday</b> · ✓ Confirmed</span></div>
+          <div class="fm-row muted"><span class="fm-dot"></span><span data-en="Reminder sent · D-1" data-fr="Rappel envoyé · J-1">Reminder sent · D-1</span></div>
+        </div>
+        <div class="feat-stat-row">
+          <div class="fs"><span class="n">100%</span><span class="l" data-en="automatic" data-fr="automatique">automatic</span></div>
+          <div class="fs"><span class="n">0</span><span class="l" data-en="clicks needed" data-fr="clics requis">clicks needed</span></div>
+        </div>
       </div>
       <div class="feat">
         <span class="feat-bg" aria-hidden="true"></span>
@@ -1629,6 +1657,14 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <span class="feat-tag" data-en="Smart" data-fr="Intelligent">Smart</span>
         <h3 data-en="Smart cancellations and reschedules" data-fr="Annulations et déplacements intelligents">Smart cancellations and reschedules</h3>
         <p class="body-t" data-en="When a client needs to cancel, the AI handles it gracefully, offers alternatives, and fills the slot with the next person." data-fr="Quand un client annule, l'IA gère ça avec élégance, propose des alternatives et comble le créneau avec la personne suivante.">When a client needs to cancel, the AI handles it gracefully, offers alternatives, and fills the slot with the next person.</p>
+        <div class="feat-mock" aria-hidden="true">
+          <div class="fm-row muted"><span class="fm-dot"></span><span data-en="Slot freed · 16:00" data-fr="Créneau libéré · 16h">Slot freed · 16:00</span></div>
+          <div class="fm-row"><span class="fm-dot"></span><span data-en="→ <b>Yassine</b> notified · ✓ booked" data-fr="→ <b>Yassine</b> notifié · ✓ réservé">→ <b>Yassine</b> notified · ✓ booked</span></div>
+        </div>
+        <div class="feat-stat-row">
+          <div class="fs"><span class="n">&lt;3 min</span><span class="l" data-en="refill time" data-fr="comblage">refill time</span></div>
+          <div class="fs"><span class="n">0</span><span class="l" data-en="empty slots" data-fr="trous">empty slots</span></div>
+        </div>
       </div>
       <div class="feat">
         <span class="feat-bg" aria-hidden="true"></span>
@@ -1637,6 +1673,14 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
           <span class="feat-tag" data-en="Integration" data-fr="Intégration">Integration</span>
           <h3 data-en="Google Calendar sync" data-fr="Sync Google Calendar">Google Calendar sync</h3>
           <p class="body-t" data-en="Every booking lands directly in your Google Calendar. No double entries, no manual updates." data-fr="Chaque réservation arrive directement dans votre Google Calendar. Pas de doublons, pas de mises à jour manuelles.">Every booking lands directly in your Google Calendar. No double entries, no manual updates.</p>
+          <div class="feat-mock" aria-hidden="true">
+            <div class="fm-row"><span class="fm-dot"></span><span><b>Google Calendar</b> ⇄ TrimSync</span></div>
+            <div class="fm-row muted"><span class="fm-dot"></span><span data-en="Real-time sync · no double entries" data-fr="Sync temps réel · zéro doublon">Real-time sync · no double entries</span></div>
+          </div>
+          <div class="feat-stat-row">
+            <div class="fs"><span class="n" data-en="Real-time" data-fr="Temps réel">Real-time</span><span class="l">sync</span></div>
+            <div class="fs"><span class="n">2-way</span><span class="l" data-en="bidirectional" data-fr="bidirectionnel">bidirectional</span></div>
+          </div>
         </div>
       </div>
     </div>

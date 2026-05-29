@@ -35,8 +35,7 @@
   --fb:'Figtree',system-ui,sans-serif;
   --ex:cubic-bezier(0.16,1,0.3,1);
   --r:8px;--max:1240px;
-  --stat-positive:oklch(0.72 0.14 162);--stat-negative:oklch(0.62 0.20 25);
-  --miel:oklch(0.65 0.14 60);
+  --stat-muted:oklch(0.54 0.016 220);
   --grain-uri:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -1209,7 +1208,6 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
    À éviter sur des conteneurs dont les enfants directs sont déjà absolute (ex: .feat avec .feat-bg). */
 .grain-overlay > *{position:relative;z-index:1}
 
-.glow-miel{box-shadow:0 0 60px -10px oklch(0.65 0.14 60/.25),0 0 120px -30px oklch(0.65 0.14 60/.15)}
 .glow-cyan{box-shadow:0 0 60px -10px oklch(0.76 0.13 193/.30), 0 0 120px -30px oklch(0.76 0.13 193/.18)}
 
 /* Stat strip — 3 ou + micro-chiffres en ligne */
@@ -1217,14 +1215,14 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .stat-strip .stat{display:flex;flex-direction:column;gap:.15rem;min-width:60px}
 .stat-strip .stat .n{font-size:1.35rem;font-weight:700;letter-spacing:-.02em;color:var(--a);font-feature-settings:"tnum";line-height:1}
 .stat-strip .stat .l{font-size:.62rem;color:var(--t3);letter-spacing:.08em;text-transform:uppercase;line-height:1.3}
-.stat-strip .stat.negative .n{color:var(--stat-negative)}
-.stat-strip .stat.positive .n{color:var(--stat-positive)}
+.stat-strip .stat.negative .n{color:var(--stat-muted)}
+.stat-strip .stat.positive .n{color:var(--a)}
 
 /* Compare row — "● Sans X / ● Avec Y" */
 .compare-row{display:flex;flex-direction:column;gap:.45rem;margin-top:.9rem;padding:.8rem 1rem;background:oklch(0.13 0.009 222/.6);border:1px solid oklch(1 0 0/.06);border-radius:10px}
 .compare-row .cr-line{display:flex;align-items:center;gap:.6rem;font-size:.78rem;color:var(--t2);line-height:1.4}
 .compare-row .cr-line .dot{width:8px;height:8px;border-radius:50%;flex:none}
-.compare-row .cr-line.bad .dot{background:var(--stat-negative);box-shadow:0 0 8px var(--stat-negative)}
+.compare-row .cr-line.bad .dot{background:var(--stat-muted)}
 .compare-row .cr-line.good .dot{background:var(--a);box-shadow:0 0 8px var(--a)}
 .compare-row .cr-line b{color:var(--t1);font-weight:500}
 
@@ -1235,10 +1233,10 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 /* DM mock — capsule chat Insta réutilisable */
 .dm-mock{background:linear-gradient(180deg,oklch(0.14 0.008 218) 0%,oklch(0.10 0.008 218) 100%);border:1px solid oklch(1 0 0/.08);border-radius:14px;padding:.85rem;display:flex;flex-direction:column;gap:.5rem;font-family:inherit}
 .dm-mock .dm-head{display:flex;align-items:center;gap:.55rem;padding-bottom:.5rem;border-bottom:1px solid oklch(1 0 0/.06)}
-.dm-mock .dm-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--miel),oklch(0.40 0.10 50));display:grid;place-items:center;font-size:.6rem;font-weight:700;color:#fff;flex:none}
+.dm-mock .dm-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,oklch(0.32 0.04 200),oklch(0.18 0.02 215));display:grid;place-items:center;font-size:.6rem;font-weight:700;color:#fff;flex:none}
 .dm-mock .dm-name{font-size:.7rem;color:var(--t2);letter-spacing:.01em}
-.dm-mock .dm-ai{font-size:.6rem;color:var(--miel);margin-left:auto;display:flex;align-items:center;gap:.3rem}
-.dm-mock .dm-ai::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--miel);box-shadow:0 0 8px var(--miel)}
+.dm-mock .dm-ai{font-size:.6rem;color:var(--a);margin-left:auto;display:flex;align-items:center;gap:.3rem}
+.dm-mock .dm-ai::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--a);box-shadow:0 0 8px var(--a)}
 .dm-mock .bubble{padding:.5rem .7rem;font-size:.72rem;border-radius:14px;max-width:80%;line-height:1.4}
 .dm-mock .bubble.client{background:oklch(0.20 0.008 218);color:var(--t1);align-self:flex-start;border-bottom-left-radius:4px}
 .dm-mock .bubble.ai{background:var(--a);color:var(--ink);align-self:flex-end;border-bottom-right-radius:4px;font-weight:500}
@@ -1278,14 +1276,14 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .sparkline-7d{background:oklch(0.13 0.009 222);border:1px solid oklch(1 0 0/.08);border-radius:12px;padding:1rem 1.1rem;margin-bottom:1.4rem}
 .sparkline-7d .sl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.7rem}
 .sparkline-7d .sl-title{font-size:.7rem;color:var(--t2);letter-spacing:.05em;text-transform:uppercase}
-.sparkline-7d .sl-peak{font-size:.7rem;color:var(--miel);font-weight:500}
+.sparkline-7d .sl-peak{font-size:.7rem;color:var(--a);font-weight:500}
 .sparkline-7d .sl-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:60px;margin-bottom:.55rem}
-.sparkline-7d .sl-bar{background:linear-gradient(180deg,var(--a),oklch(0.50 0.13 195));border-radius:3px 3px 0 0;position:relative;opacity:.85;transition:opacity .25s}
-.sparkline-7d .sl-bar.weekend{background:linear-gradient(180deg,var(--miel),oklch(0.45 0.12 55))}
+.sparkline-7d .sl-bar{background:linear-gradient(180deg,oklch(0.46 0.04 210),oklch(0.30 0.03 215));border-radius:3px 3px 0 0;position:relative;opacity:.9;transition:opacity .25s}
+.sparkline-7d .sl-bar.weekend{background:linear-gradient(180deg,var(--a),oklch(0.55 0.13 195))}
 .sparkline-7d .sl-bar:hover{opacity:1}
 .sparkline-7d .sl-labels{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;font-size:.55rem;color:var(--t3);text-align:center;letter-spacing:.05em;text-transform:uppercase}
 .sparkline-7d .sl-foot{margin-top:.7rem;padding-top:.7rem;border-top:1px solid oklch(1 0 0/.06);font-size:.72rem;color:var(--t2);line-height:1.5}
-.sparkline-7d .sl-foot b{color:var(--miel)}
+.sparkline-7d .sl-foot b{color:var(--a)}
 
 /* Task 3 — enrichissement pain cards : compare-row + stats injectés dans .pain-right */
 .pain{min-height:40vh}
@@ -1315,10 +1313,10 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 /* Task 6 — bot-demo en thread vertical (remplace .bot-demo-preview) */
 .bot-thread{max-width:340px;margin:0 auto;background:linear-gradient(180deg,oklch(0.14 0.008 218),oklch(0.10 0.008 218));border:1px solid oklch(1 0 0/.10);border-radius:22px;padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.55rem;position:relative}
 .bot-thread .bt-head{display:flex;align-items:center;gap:.65rem;padding-bottom:.7rem;border-bottom:1px solid oklch(1 0 0/.06)}
-.bot-thread .bt-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--miel),oklch(0.40 0.10 50));display:grid;place-items:center;font-size:.7rem;font-weight:700;color:#fff;flex:none}
+.bot-thread .bt-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,oklch(0.32 0.04 200),oklch(0.18 0.02 215));display:grid;place-items:center;font-size:.7rem;font-weight:700;color:#fff;flex:none}
 .bot-thread .bt-name{font-size:.78rem;color:var(--t1);font-weight:500}
-.bot-thread .bt-ai{font-size:.62rem;color:var(--miel);margin-left:auto;display:flex;align-items:center;gap:.3rem}
-.bot-thread .bt-ai::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--miel);box-shadow:0 0 8px var(--miel)}
+.bot-thread .bt-ai{font-size:.62rem;color:var(--a);margin-left:auto;display:flex;align-items:center;gap:.3rem}
+.bot-thread .bt-ai::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--a);box-shadow:0 0 8px var(--a)}
 @media(prefers-reduced-motion:no-preference){.bot-thread .bt-ai::before{animation:botpulse 2s ease-in-out infinite}}
 @keyframes botpulse{0%,100%{opacity:1}50%{opacity:.4}}
 .bot-thread .bt-msg{padding:.55rem .8rem;font-size:.8rem;border-radius:16px;max-width:80%;line-height:1.4}
@@ -1347,13 +1345,13 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .cta-final .body-lg{max-width:none;margin:0 0 2rem;text-align:left}
 .cta-final .cta-acts{justify-content:flex-start;display:flex}
 .cta-final .label{text-align:left;display:inline-block}
-.cta-glow{background:radial-gradient(ellipse 70% 80% at 62% 50%,oklch(0.65 0.14 60/.16) 0%,oklch(0.76 0.13 193/.09) 32%,transparent 70%)}
+.cta-glow{background:radial-gradient(ellipse 70% 80% at 62% 50%,oklch(0.76 0.13 193/.14) 0%,oklch(0.76 0.13 193/.05) 35%,transparent 70%)}
 .cta-proof-strip{margin-top:1.6rem;padding-top:1.2rem;border-top:1px solid oklch(1 0 0/.08);display:flex;gap:1.8rem;flex-wrap:wrap}
 .cta-proof-strip .ps{display:flex;flex-direction:column;gap:.12rem}
 .cta-proof-strip .ps .n{font-size:1.15rem;font-weight:700;color:var(--a);letter-spacing:-.02em;font-feature-settings:"tnum";line-height:1}
 .cta-proof-strip .ps .l{font-size:.6rem;color:var(--t3);letter-spacing:.06em;text-transform:uppercase}
 .cta-phone-mock{display:flex;justify-content:center;align-items:center;min-height:340px}
-.cta-phone-mock .pf{width:248px;background:linear-gradient(180deg,oklch(0.12 0.008 218),oklch(0.075 0.008 218));border:8px solid oklch(0.17 0.008 218);border-radius:38px;padding:1.5rem .8rem 1.3rem;display:flex;flex-direction:column;gap:.7rem;position:relative;box-shadow:0 30px 80px -20px oklch(0.65 0.14 60/.4),0 0 0 1px oklch(1 0 0/.05)}
+.cta-phone-mock .pf{width:248px;background:linear-gradient(180deg,oklch(0.12 0.008 218),oklch(0.075 0.008 218));border:8px solid oklch(0.17 0.008 218);border-radius:38px;padding:1.5rem .8rem 1.3rem;display:flex;flex-direction:column;gap:.7rem;position:relative;box-shadow:0 30px 80px -22px oklch(0.76 0.13 193/.26),0 0 0 1px oklch(1 0 0/.05)}
 .cta-phone-mock .pf::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:60px;height:5px;background:oklch(0.17 0.008 218);border-radius:100px}
 .cta-phone-mock .pf-time{font-size:.6rem;color:var(--t3);text-align:center;letter-spacing:.05em;margin-bottom:.2rem}
 @keyframes popnotif{from{opacity:0;transform:translateY(-10px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
@@ -1754,7 +1752,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     </div>
     <div class="bot-demo-inner rv d1">
       <p class="body-lg" style="max-width:48ch;text-align:center" data-en="Set up your barbershop in 2 minutes. Then chat with your AI — exactly as your clients will." data-fr="Configure ton salon en 2 minutes. Puis discute avec ton IA — exactement comme le vivront tes clients.">Set up your barbershop in 2 minutes. Then chat with your AI — exactly as your clients will.</p>
-      <div class="bot-thread glow-miel" aria-hidden="true">
+      <div class="bot-thread glow-cyan" aria-hidden="true">
         <div class="bt-head">
           <div class="bt-av">BP</div>
           <span class="bt-name">BarberShop Pro</span>
@@ -2081,7 +2079,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
           </div>
         </div>
         <div class="pf-notif phone-notif" style="background:oklch(0.13 0.009 222/.85)">
-          <div class="pn-ico" style="background:linear-gradient(135deg,var(--stat-positive),oklch(0.50 0.12 165))">✓</div>
+          <div class="pn-ico" style="background:linear-gradient(135deg,oklch(0.55 0.10 200),oklch(0.40 0.08 205))">✓</div>
           <div class="pn-body">
             <div class="pn-meta"><span data-en="Auto-confirmed" data-fr="Auto-confirmé">Auto-confirmed</span></div>
             <div class="pn-title" data-en="Reminder scheduled" data-fr="Rappel programmé">Reminder scheduled</div>

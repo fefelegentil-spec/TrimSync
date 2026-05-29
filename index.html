@@ -1359,12 +1359,25 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .cta-proof-strip .ps{display:flex;flex-direction:column;gap:.12rem}
 .cta-proof-strip .ps .n{font-size:1.15rem;font-weight:700;color:var(--a);letter-spacing:-.02em;font-feature-settings:"tnum";line-height:1}
 .cta-proof-strip .ps .l{font-size:.6rem;color:var(--t3);letter-spacing:.06em;text-transform:uppercase}
-.cta-phone-mock{display:flex;justify-content:center;align-items:center;min-height:340px}
-.cta-phone-mock .pf{width:248px;background:linear-gradient(180deg,oklch(0.12 0.008 218),oklch(0.075 0.008 218));border:8px solid oklch(0.17 0.008 218);border-radius:38px;padding:1.5rem .8rem 1.3rem;display:flex;flex-direction:column;gap:.7rem;position:relative;box-shadow:0 30px 80px -22px oklch(0.76 0.13 193/.26),0 0 0 1px oklch(1 0 0/.05)}
-.cta-phone-mock .pf::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:60px;height:5px;background:oklch(0.17 0.008 218);border-radius:100px}
-.cta-phone-mock .pf-time{font-size:.6rem;color:var(--t3);text-align:center;letter-spacing:.05em;margin-bottom:.2rem}
+.cta-phone-mock{display:flex;justify-content:center;align-items:center;min-height:580px}
+.iphone{position:relative;width:272px;height:560px;border-radius:56px;padding:13px;
+  background:linear-gradient(155deg,oklch(0.26 0.008 220),oklch(0.14 0.008 220));
+  box-shadow:0 45px 90px -28px oklch(0.76 0.13 193/.30),0 0 0 2px oklch(0.32 0.008 220),inset 0 1px 1px oklch(1 0 0/.10)}
+.iphone .ip-screen{position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;display:flex;flex-direction:column;
+  background:radial-gradient(125% 70% at 50% -5%,oklch(0.24 0.035 215),oklch(0.085 0.008 222) 58%)}
+.ip-island{position:absolute;top:16px;left:50%;transform:translateX(-50%);width:92px;height:27px;background:#04070a;border-radius:100px;z-index:6}
+.ip-status{display:flex;justify-content:space-between;align-items:center;padding:.85rem 1.5rem .3rem;font-size:.72rem;font-weight:600;color:var(--t1);position:relative;z-index:4}
+.ip-status .ip-stat-r{display:flex;align-items:center;gap:5px}
+.ip-status svg{display:block}
+.ip-lock{text-align:center;margin-top:1.9rem;padding:0 1rem}
+.ip-lock .ip-date{font-size:.74rem;color:var(--t2);letter-spacing:.02em}
+.ip-lock .ip-clock{font-family:var(--fd);font-size:3.7rem;font-weight:700;letter-spacing:-.03em;color:var(--t1);line-height:1;margin-top:.15rem}
+.ip-notifs{margin-top:auto;display:flex;flex-direction:column;gap:.55rem;padding:0 .7rem 2rem}
+.ip-notifs .phone-notif{max-width:none}
+.ip-home{position:absolute;bottom:9px;left:50%;transform:translateX(-50%);width:118px;height:5px;border-radius:100px;background:oklch(1 0 0/.55);z-index:6}
 @keyframes popnotif{from{opacity:0;transform:translateY(-10px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
-@media(prefers-reduced-motion:no-preference){.cta-phone-mock .pf-notif{animation:popnotif .6s var(--ex) both}.cta-phone-mock .pf-notif:nth-of-type(3){animation-delay:1.2s}}
+@media(prefers-reduced-motion:no-preference){.ip-notifs .phone-notif{animation:popnotif .6s var(--ex) both}.ip-notifs .phone-notif:nth-of-type(2){animation-delay:1.1s}}
+@media(max-width:900px){.cta-phone-mock{min-height:auto}.iphone{transform:scale(.92)}}
 @media(max-width:900px){
   .cta-final .wrap{grid-template-columns:1fr;gap:2rem;text-align:center}
   .cta-final h2,.cta-final .body-lg{text-align:center;margin-left:auto;margin-right:auto}
@@ -2051,23 +2064,40 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     </div>
 
     <div class="cta-phone-mock rv d2" aria-hidden="true">
-      <div class="pf">
-        <div class="pf-time">9:41 · TrimSync</div>
-        <div class="pf-notif phone-notif">
-          <div class="pn-ico">TS</div>
-          <div class="pn-body">
-            <div class="pn-meta"><span data-en="TrimSync · now" data-fr="TrimSync · maintenant">TrimSync · now</span></div>
-            <div class="pn-title" data-en="New booking · #47" data-fr="Nouveau RDV · #47">New booking · #47</div>
-            <div class="pn-msg" data-en="Mehdi P. · Thursday 6pm · Cut + beard" data-fr="Mehdi P. · Jeudi 18h · Coupe + barbe">Mehdi P. · Thursday 6pm · Cut + beard</div>
+      <div class="iphone">
+        <div class="ip-screen">
+          <div class="ip-island"></div>
+          <div class="ip-status">
+            <span class="ip-time-sb">9:41</span>
+            <span class="ip-stat-r">
+              <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg>
+              <svg width="16" height="11" viewBox="0 0 16 11" fill="none"><path d="M1 3.5C3 1.8 5.4 1 8 1s5 .8 7 2.5M3 6c1.4-1.2 3.1-1.8 5-1.8S11.6 4.8 13 6M5.3 8.4c.8-.6 1.7-.9 2.7-.9s1.9.3 2.7.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="8" cy="10" r="1" fill="currentColor"/></svg>
+              <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="3" stroke="currentColor" stroke-width="1.1" opacity=".5"/><rect x="2.8" y="2.8" width="14" height="6.4" rx="1.5" fill="currentColor"/><rect x="22.5" y="4" width="1.6" height="4" rx=".8" fill="currentColor" opacity=".5"/></svg>
+            </span>
           </div>
-        </div>
-        <div class="pf-notif phone-notif" style="background:oklch(0.13 0.009 222/.85)">
-          <div class="pn-ico" style="background:linear-gradient(135deg,oklch(0.55 0.10 200),oklch(0.40 0.08 205))">✓</div>
-          <div class="pn-body">
-            <div class="pn-meta"><span data-en="Auto-confirmed" data-fr="Auto-confirmé">Auto-confirmed</span></div>
-            <div class="pn-title" data-en="Reminder scheduled" data-fr="Rappel programmé">Reminder scheduled</div>
-            <div class="pn-msg" data-en="SMS D-1 · 9pm" data-fr="SMS J-1 · 21h">SMS D-1 · 9pm</div>
+          <div class="ip-lock">
+            <div class="ip-date" data-en="Thursday, June 12" data-fr="Jeudi 12 juin">Thursday, June 12</div>
+            <div class="ip-clock">9:41</div>
           </div>
+          <div class="ip-notifs">
+            <div class="phone-notif">
+              <div class="pn-ico">TS</div>
+              <div class="pn-body">
+                <div class="pn-meta"><span data-en="TrimSync · now" data-fr="TrimSync · maintenant">TrimSync · now</span></div>
+                <div class="pn-title" data-en="New booking · #47" data-fr="Nouveau RDV · #47">New booking · #47</div>
+                <div class="pn-msg" data-en="Mehdi P. · Thursday 6pm · Cut + beard" data-fr="Mehdi P. · Jeudi 18h · Coupe + barbe">Mehdi P. · Thursday 6pm · Cut + beard</div>
+              </div>
+            </div>
+            <div class="phone-notif" style="background:oklch(0.13 0.009 222/.85)">
+              <div class="pn-ico" style="background:linear-gradient(135deg,oklch(0.55 0.10 200),oklch(0.40 0.08 205))">✓</div>
+              <div class="pn-body">
+                <div class="pn-meta"><span data-en="Auto-confirmed" data-fr="Auto-confirmé">Auto-confirmed</span></div>
+                <div class="pn-title" data-en="Reminder scheduled" data-fr="Rappel programmé">Reminder scheduled</div>
+                <div class="pn-msg" data-en="SMS D-1 · 9pm" data-fr="SMS J-1 · 21h">SMS D-1 · 9pm</div>
+              </div>
+            </div>
+          </div>
+          <div class="ip-home"></div>
         </div>
       </div>
     </div>

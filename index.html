@@ -159,7 +159,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 /* dashboard preview (offre 2) — vrai dashboard embarqué + mis à l'échelle */
 .dash-frame{position:relative;width:100%;border-radius:16px;overflow:hidden;clip-path:inset(0 round 16px);border:1px solid var(--bd2);background:oklch(0.10 0.008 240);box-shadow:0 24px 60px oklch(0.04 0.005 218/.55)}
 .dash-frame iframe{position:absolute;top:0;left:0;border:0;transform-origin:top left;pointer-events:none;background:oklch(0.10 0.008 240)}
-.dash-frame::after{content:'';position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 -60px 50px -30px oklch(0.10 0.008 240/.9)}
+.dash-frame::after{content:'';position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 1px oklch(1 0 0/.04)}
 .dash-frame-cta{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:2;display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:100px;background:oklch(0.18 0.02 220/.85);backdrop-filter:blur(6px);border:1px solid var(--bd2);color:var(--t);font-family:var(--fd);font-size:.76rem;font-weight:700;cursor:pointer;transition:background .2s,transform .2s var(--ex);opacity:0}
 .dash-frame:hover .dash-frame-cta{opacity:1}
 .dash-frame-cta:hover{background:var(--a);color:var(--on-a);transform:translateX(-50%) translateY(-2px)}
@@ -2631,19 +2631,16 @@ restartChat('chat-msgs');
   const ifr=document.getElementById('dash-embed');
   if(!frame||!ifr)return;
   const BASE_W=1280, BASE_H=900; /* dimensions logiques rendues par le dashboard */
-  const phone=document.querySelector('.hero-prop--bot .chat-phone');
   ifr.style.width=BASE_W+'px';
   ifr.style.height=BASE_H+'px';
   function fit(){
     const w=frame.clientWidth;
     if(!w)return;
-    /* hauteur calée sur le téléphone bot (désormais stable) */
-    const h=phone?Math.round(phone.getBoundingClientRect().height):Math.round(w*0.7);
+    /* échelle « contain largeur » : le dashboard entier est visible, aucun rognage */
+    const s=w/BASE_W;
+    const h=Math.round(BASE_H*s);
     frame.style.height=h+'px';
-    /* échelle « cover » : remplit le cadre sans laisser de vide, le surplus est rogné */
-    const s=Math.max(w/BASE_W, h/BASE_H);
-    const tx=Math.round((w-BASE_W*s)/2);
-    ifr.style.transform=`translateX(${tx}px) scale(${s})`;
+    ifr.style.transform=`scale(${s})`;
   }
   fit();
   ifr.addEventListener('load',fit);

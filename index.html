@@ -1339,6 +1339,34 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .faq-visual.cost .col{display:flex;flex-direction:column;gap:.18rem}
 .faq-visual.cost .col .n{font-size:1.05rem;font-weight:700;color:var(--a);letter-spacing:-.02em}
 .faq-visual.cost .col .l{font-size:.58rem;color:var(--t3);letter-spacing:.05em;text-transform:uppercase}
+
+/* Task 9 — CTA final : grid 2 colonnes + phone mock + social proof */
+.cta-final{padding:5rem 0 6rem}
+.cta-final .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:3rem;align-items:center;text-align:left;position:relative}
+.cta-final h2{max-width:none;margin:0 0 1.3rem;text-align:left}
+.cta-final .body-lg{max-width:none;margin:0 0 2rem;text-align:left}
+.cta-final .cta-acts{justify-content:flex-start;display:flex}
+.cta-final .label{text-align:left;display:inline-block}
+.cta-glow{background:radial-gradient(ellipse 70% 80% at 62% 50%,oklch(0.65 0.14 60/.16) 0%,oklch(0.76 0.13 193/.09) 32%,transparent 70%)}
+.cta-proof-strip{margin-top:1.6rem;padding-top:1.2rem;border-top:1px solid oklch(1 0 0/.08);display:flex;gap:1.8rem;flex-wrap:wrap}
+.cta-proof-strip .ps{display:flex;flex-direction:column;gap:.12rem}
+.cta-proof-strip .ps .n{font-size:1.15rem;font-weight:700;color:var(--a);letter-spacing:-.02em;font-feature-settings:"tnum";line-height:1}
+.cta-proof-strip .ps .l{font-size:.6rem;color:var(--t3);letter-spacing:.06em;text-transform:uppercase}
+.cta-phone-mock{display:flex;justify-content:center;align-items:center;min-height:340px}
+.cta-phone-mock .pf{width:248px;background:linear-gradient(180deg,oklch(0.12 0.008 218),oklch(0.075 0.008 218));border:8px solid oklch(0.17 0.008 218);border-radius:38px;padding:1.5rem .8rem 1.3rem;display:flex;flex-direction:column;gap:.7rem;position:relative;box-shadow:0 30px 80px -20px oklch(0.65 0.14 60/.4),0 0 0 1px oklch(1 0 0/.05)}
+.cta-phone-mock .pf::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:60px;height:5px;background:oklch(0.17 0.008 218);border-radius:100px}
+.cta-phone-mock .pf-time{font-size:.6rem;color:var(--t3);text-align:center;letter-spacing:.05em;margin-bottom:.2rem}
+@keyframes popnotif{from{opacity:0;transform:translateY(-10px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:no-preference){.cta-phone-mock .pf-notif{animation:popnotif .6s var(--ex) both}.cta-phone-mock .pf-notif:nth-of-type(3){animation-delay:1.2s}}
+@media(max-width:900px){
+  .cta-final .wrap{grid-template-columns:1fr;gap:2rem;text-align:center}
+  .cta-final h2,.cta-final .body-lg{text-align:center;margin-left:auto;margin-right:auto}
+  .cta-final h2{max-width:580px}.cta-final .body-lg{max-width:420px}
+  .cta-final .cta-acts{justify-content:center}
+  .cta-final .label{text-align:center}
+  .cta-proof-strip{justify-content:center}
+  .cta-phone-mock{min-height:auto;order:-1}
+}
 </style>
 </head>
 <body>
@@ -2018,20 +2046,49 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 <section class="section cta-final" id="cta">
   <div class="cta-glow" aria-hidden="true"></div>
   <div class="wrap">
-    <span class="label rv" data-en="Get started" data-fr="Commencer">Get started</span>
-    <h2 class="fd fd-lg rv d1 sec-h2"
-      data-en="Ready to stop answering<br><em>DMs at midnight?</em>"
-      data-fr="Prêt à arrêter de répondre<br><em>aux DMs à minuit ?</em>"
-    >Ready to stop answering<br><em>DMs at midnight?</em></h2>
-    <p class="body-lg rv d2"
-      data-en="Get set up in minutes. Connect Instagram, pick your plan, and let your AI bot take over."
-      data-fr="Configuré en quelques minutes. Connecte Instagram, choisis ton plan, et laisse ton bot IA gérer."
-    >Get set up in minutes. Connect Instagram, pick your plan, and let your AI bot take over.</p>
-    <div class="cta-acts rv d3">
-      <a href="trimsync-booking.html" class="btn btn-a btn-lg mag">
-        <span data-en="Get started" data-fr="Commencer">Get started</span>
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </a>
+    <div class="cta-content">
+      <span class="label rv" data-en="Get started" data-fr="Commencer">Get started</span>
+      <h2 class="fd fd-lg rv d1 sec-h2"
+        data-en="Ready to stop answering<br><em>DMs at midnight?</em>"
+        data-fr="Prêt à arrêter de répondre<br><em>aux DMs à minuit ?</em>"
+      >Ready to stop answering<br><em>DMs at midnight?</em></h2>
+      <p class="body-lg rv d2"
+        data-en="Get set up in minutes. Connect Instagram, pick your plan, and let your AI bot take over."
+        data-fr="Configuré en quelques minutes. Connecte Instagram, choisis ton plan, et laisse ton bot IA gérer."
+      >Get set up in minutes. Connect Instagram, pick your plan, and let your AI bot take over.</p>
+      <div class="cta-acts rv d3">
+        <a href="trimsync-booking.html" class="btn btn-a btn-lg mag">
+          <span data-en="Get started" data-fr="Commencer">Get started</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+      <div class="cta-proof-strip rv d3">
+        <div class="ps"><span class="n">47+</span><span class="l" data-en="barbers active" data-fr="barbiers actifs">barbers active</span></div>
+        <div class="ps"><span class="n">12 400</span><span class="l" data-en="DMs handled" data-fr="DMs traités">DMs handled</span></div>
+        <div class="ps"><span class="n">4.9★</span><span class="l" data-en="avg rating" data-fr="note moyenne">avg rating</span></div>
+      </div>
+    </div>
+
+    <div class="cta-phone-mock rv d2" aria-hidden="true">
+      <div class="pf">
+        <div class="pf-time">9:41 · TrimSync</div>
+        <div class="pf-notif phone-notif">
+          <div class="pn-ico">TS</div>
+          <div class="pn-body">
+            <div class="pn-meta"><span data-en="TrimSync · now" data-fr="TrimSync · maintenant">TrimSync · now</span></div>
+            <div class="pn-title" data-en="New booking · #47" data-fr="Nouveau RDV · #47">New booking · #47</div>
+            <div class="pn-msg" data-en="Mehdi P. · Thursday 6pm · Cut + beard" data-fr="Mehdi P. · Jeudi 18h · Coupe + barbe">Mehdi P. · Thursday 6pm · Cut + beard</div>
+          </div>
+        </div>
+        <div class="pf-notif phone-notif" style="background:oklch(0.13 0.009 222/.85)">
+          <div class="pn-ico" style="background:linear-gradient(135deg,var(--stat-positive),oklch(0.50 0.12 165))">✓</div>
+          <div class="pn-body">
+            <div class="pn-meta"><span data-en="Auto-confirmed" data-fr="Auto-confirmé">Auto-confirmed</span></div>
+            <div class="pn-title" data-en="Reminder scheduled" data-fr="Rappel programmé">Reminder scheduled</div>
+            <div class="pn-msg" data-en="SMS D-1 · 9pm" data-fr="SMS J-1 · 21h">SMS D-1 · 9pm</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>

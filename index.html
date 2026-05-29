@@ -769,24 +769,19 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   pointer-events:none;z-index:0;
 }
 .pain-left .pain-ico{
-  position:absolute;top:2rem;left:2rem;z-index:2;
+  position:static;z-index:2;display:grid;place-items:center;
+  width:104px;height:104px;border-radius:50%;
+  background:radial-gradient(circle at 50% 45%,oklch(0.76 0.13 193/.12),transparent 70%);
+  box-shadow:inset 0 0 0 1px oklch(0.76 0.13 193/.20);
+  transition:box-shadow .4s,background .4s;
 }
 .pain-left .pain-ico svg{
-  width:36px;height:36px;
-  filter:drop-shadow(0 0 8px oklch(0.76 0.13 193/.38));
+  width:48px;height:48px;
+  filter:drop-shadow(0 0 10px oklch(0.76 0.13 193/.40));
   transition:filter .4s;
 }
-.pain-num{
-  font-size:clamp(8rem,17vw,13rem);
-  font-weight:900;letter-spacing:-.06em;line-height:.82;
-  color:oklch(0.76 0.13 193/.16);
-  position:absolute;
-  top:50%;left:50%;
-  transform:translate(-50%,-52%);
-  bottom:auto;right:auto;
-  pointer-events:none;z-index:1;
-}
-.pain:hover .pain-num{color:oklch(0.76 0.13 193/.26)}
+.pain-num{display:none}
+.pain:hover .pain-left .pain-ico{box-shadow:inset 0 0 0 1px oklch(0.76 0.13 193/.40);background:radial-gradient(circle at 50% 45%,oklch(0.76 0.13 193/.18),transparent 70%)}
 .pain:hover .pain-left .pain-ico svg{filter:drop-shadow(0 0 14px oklch(0.76 0.13 193/.60))}
 .pain-right{
   background:oklch(0.095 0.007 220);
@@ -3373,15 +3368,11 @@ window.bConnectInstagram = function() {
     },{rootMargin:'-8% 0px',threshold:0.1});
   }
 
-  /* ── PROBLEM — clipPath wipe cinématique ── */
+  /* ── PROBLEM — reveal doux (fade + translate) ── */
   if(!pref){
-    document.querySelectorAll('.pain-left').forEach(el=>{el.style.clipPath='inset(0 100% 0 0)';});
-    document.querySelectorAll('.pain-right').forEach(el=>{el.style.clipPath='inset(0 0 0 100%)';});
+    document.querySelectorAll('.pain').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(22px)';});
     once('.pain',(t)=>{
-      const L=t.querySelector('.pain-left');
-      const R=t.querySelector('.pain-right');
-      if(L) animate(L,{clipPath:['inset(0 100% 0 0)','inset(0 0% 0 0)']},{duration:0.90,easing:EX});
-      if(R) animate(R,{clipPath:['inset(0 0 0 100%)','inset(0 0% 0 0%)']},{duration:0.90,delay:0.09,easing:EX});
+      animate(t,{opacity:[0,1],y:[22,0]},{duration:0.6,easing:EX});
     },{rootMargin:'-10% 0px',threshold:0.12});
   }
 

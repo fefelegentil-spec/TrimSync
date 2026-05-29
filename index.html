@@ -1311,6 +1311,22 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .feat-stat-row .fs .n{font-size:1.05rem;font-weight:700;color:var(--a);letter-spacing:-.02em;font-feature-settings:"tnum";line-height:1}
 .feat-stat-row .fs .l{font-size:.56rem;color:var(--t3);letter-spacing:.06em;text-transform:uppercase}
 .feat:nth-child(4) .feat-mock{max-width:420px}
+
+/* Task 6 — bot-demo en thread vertical (remplace .bot-demo-preview) */
+.bot-thread{max-width:340px;margin:0 auto;background:linear-gradient(180deg,oklch(0.14 0.008 218),oklch(0.10 0.008 218));border:1px solid oklch(1 0 0/.10);border-radius:22px;padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.55rem;position:relative}
+.bot-thread .bt-head{display:flex;align-items:center;gap:.65rem;padding-bottom:.7rem;border-bottom:1px solid oklch(1 0 0/.06)}
+.bot-thread .bt-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--miel),oklch(0.40 0.10 50));display:grid;place-items:center;font-size:.7rem;font-weight:700;color:#fff;flex:none}
+.bot-thread .bt-name{font-size:.78rem;color:var(--t1);font-weight:500}
+.bot-thread .bt-ai{font-size:.62rem;color:var(--miel);margin-left:auto;display:flex;align-items:center;gap:.3rem}
+.bot-thread .bt-ai::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--miel);box-shadow:0 0 8px var(--miel)}
+@media(prefers-reduced-motion:no-preference){.bot-thread .bt-ai::before{animation:botpulse 2s ease-in-out infinite}}
+@keyframes botpulse{0%,100%{opacity:1}50%{opacity:.4}}
+.bot-thread .bt-msg{padding:.55rem .8rem;font-size:.8rem;border-radius:16px;max-width:80%;line-height:1.4}
+.bot-thread .bt-msg.client{background:oklch(0.20 0.008 218);color:var(--t1);align-self:flex-start;border-bottom-left-radius:5px}
+.bot-thread .bt-msg.ai{background:var(--a);color:var(--ink);align-self:flex-end;border-bottom-right-radius:5px;font-weight:500}
+.bot-thread .bt-arrow{font-size:.55rem;color:var(--t3);text-align:center;letter-spacing:.12em;text-transform:uppercase;margin:.05rem 0}
+.bot-thread .bt-result{margin-top:.55rem;padding-top:.75rem;border-top:1px solid oklch(1 0 0/.06);display:flex;justify-content:space-between;align-items:center;font-size:.66rem;color:var(--t3);letter-spacing:.04em}
+.bot-thread .bt-result b{color:var(--a);font-weight:600}
 </style>
 </head>
 <body>
@@ -1698,21 +1714,20 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     </div>
     <div class="bot-demo-inner rv d1">
       <p class="body-lg" style="max-width:48ch;text-align:center" data-en="Set up your barbershop in 2 minutes. Then chat with your AI — exactly as your clients will." data-fr="Configure ton salon en 2 minutes. Puis discute avec ton IA — exactement comme le vivront tes clients.">Set up your barbershop in 2 minutes. Then chat with your AI — exactly as your clients will.</p>
-      <div class="bot-demo-preview" aria-hidden="true">
-        <div class="bot-prev-card">
-          <div class="bpc-lbl" data-en="Client" data-fr="Client">Client</div>
-          <div class="bpc-msg" data-en="Hey, any spots tomorrow at 2pm?" data-fr="Bonjour, dispo demain à 14h ?">Hey, any spots tomorrow at 2pm?</div>
-          <div class="bpc-tag" data-en="Answered instantly" data-fr="Répondu instantanément">Answered instantly</div>
+      <div class="bot-thread glow-miel" aria-hidden="true">
+        <div class="bt-head">
+          <div class="bt-av">BP</div>
+          <span class="bt-name">BarberShop Pro</span>
+          <span class="bt-ai" data-en="AI Active" data-fr="IA Active">AI Active</span>
         </div>
-        <div class="bot-prev-card">
-          <div class="bpc-lbl" data-en="Your AI" data-fr="Ton IA">Your AI</div>
-          <div class="bpc-msg" data-en="14:00 is available! What service?" data-fr="14h c'est libre ! Quelle prestation ?">14:00 is available! What service?</div>
-          <div class="bpc-tag" data-en="Automatic" data-fr="Automatique">Automatic</div>
-        </div>
-        <div class="bot-prev-card">
-          <div class="bpc-lbl" data-en="Result" data-fr="Résultat">Result</div>
-          <div class="bpc-msg" data-en="✓ Booked — Haircut + Beard, 14:00" data-fr="✓ Réservé — Coupe + Barbe, 14h">✓ Booked — Haircut + Beard, 14:00</div>
-          <div class="bpc-tag" data-en="Zero manual work" data-fr="Zéro effort manuel">Zero manual work</div>
+        <div class="bt-msg client" data-en="Hey, any spots tomorrow at 2pm?" data-fr="Bonjour, dispo demain à 14h ?">Hey, any spots tomorrow at 2pm?</div>
+        <div class="bt-arrow" data-en="↓ replies in 4s" data-fr="↓ répond en 4s">↓ replies in 4s</div>
+        <div class="bt-msg ai" data-en="14:00 is available! What service?" data-fr="14h c'est libre ! Quelle prestation ?">14:00 is available! What service?</div>
+        <div class="bt-msg client" data-en="Cut + beard" data-fr="Coupe + barbe">Cut + beard</div>
+        <div class="bt-msg ai" data-en="✓ Booked — Cut + Beard, 14:00" data-fr="✓ Réservé — Coupe + Barbe, 14h">✓ Booked — Cut + Beard, 14:00</div>
+        <div class="bt-result">
+          <span data-en="Zero manual work" data-fr="Zéro effort manuel">Zero manual work</span>
+          <b data-en="12s total" data-fr="12s au total">12s total</b>
         </div>
       </div>
       <div class="bot-demo-cta">

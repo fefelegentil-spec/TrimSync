@@ -300,8 +300,9 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .setup-price-row{display:flex;align-items:baseline;gap:.75rem}
 .setup-old{font-family:var(--fd);font-size:1.5rem;font-weight:700;color:var(--t3);text-decoration:line-through;text-decoration-color:oklch(0.66 0.16 25/.65)}
 .setup-free{font-family:var(--fd);font-size:clamp(2.4rem,5vw,3.4rem);font-weight:800;letter-spacing:-.03em;color:oklch(0.80 0.13 193);line-height:1}
-.plans-wrap{display:grid;grid-template-columns:3fr 2fr;gap:4rem;align-items:start}
-.plans-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.85rem}
+.plans-wrap{display:block}
+.plans-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.1rem;max-width:760px;margin:0 auto}
+.plans-reassure{text-align:center;margin:1.7rem auto 0;font-size:.84rem;color:var(--t3);letter-spacing:.01em}
 .plan{background:oklch(0.11 0.008 222);border:1px solid oklch(0.76 0.13 193/.15);border-radius:18px;padding:1.75rem 1.5rem;display:flex;flex-direction:column;gap:1.3rem;position:relative;transition:transform .35s var(--ex),box-shadow .35s var(--ex),border-color .3s}
 .plan:hover{transform:translateY(-5px);box-shadow:0 24px 64px oklch(0 0 0/.35);border-color:oklch(0.76 0.13 193/.42)}
 .plan-pop{background:oklch(0.14 0.010 222);border-color:oklch(0.76 0.13 193/.40);box-shadow:0 8px 32px oklch(0 0 0/.28),0 0 0 1px oklch(0.76 0.13 193/.10)}
@@ -661,27 +662,19 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
    ═══════════════════════════════════════════════════════════════ */
 
 /* feat-bg — enfant absolu décoratif : ne touche pas background-attachment:fixed de [data-glow] */
-.feat-bg{
-  position:absolute;inset:0;border-radius:inherit;
-  pointer-events:none;overflow:hidden;z-index:0;
-}
+.feat-bg{display:none}
 /* Contenu au-dessus du layer décoratif */
 .feat > :not(.feat-bg){position:relative;z-index:1}
 
 /* ── Cards : base commune dark, halo subtil + top-edge teal ── */
 .feat:nth-child(1),.feat:nth-child(2),.feat:nth-child(3),.feat:nth-child(4){
-  background-color:oklch(0.105 0.008 222);
-  border-color:oklch(0.76 0.13 193/.16);
-  box-shadow:
-    0 1.5rem 3rem -1rem oklch(0 0 0/.55),
-    0 0 0 1px oklch(0.76 0.13 193/.08),
-    inset 0 1px 0 oklch(0.76 0.13 193/.32);
+  background-color:oklch(0.11 0.008 222);
+  border:1px solid oklch(0.76 0.13 193/.15);
+  box-shadow:0 10px 34px -10px oklch(0 0 0/.45);
 }
 .feat:nth-child(1):hover,.feat:nth-child(2):hover,.feat:nth-child(3):hover,.feat:nth-child(4):hover{
-  box-shadow:
-    0 2.5rem 5rem -1rem oklch(0 0 0/.65),
-    0 0 0 1px oklch(0.76 0.13 193/.22),
-    inset 0 1px 0 oklch(0.76 0.13 193/.48);
+  border-color:oklch(0.76 0.13 193/.38);
+  box-shadow:0 24px 60px -14px oklch(0 0 0/.55),0 0 0 1px oklch(0.76 0.13 193/.14);
 }
 
 /* ── Halo unique par carte — chaque carte a une "source lumineuse" différente ── */
@@ -1873,55 +1866,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
       </div><!-- /plans-grid -->
 
-      <!-- Tableau ROI — conservé intact -->
-      <div class="price-right rv d3">
-        <div class="sparkline-7d" aria-hidden="true">
-          <div class="sl-head">
-            <span class="sl-title" data-en="DMs received · this week" data-fr="DMs reçus · cette semaine">DMs received · this week</span>
-            <span class="sl-peak" data-en="Sat 10pm · peak" data-fr="Sam 22h · pic">Sat 10pm · peak</span>
-          </div>
-          <div class="sl-bars">
-            <div class="sl-bar" style="height:32%"></div>
-            <div class="sl-bar" style="height:48%"></div>
-            <div class="sl-bar" style="height:38%"></div>
-            <div class="sl-bar" style="height:55%"></div>
-            <div class="sl-bar" style="height:68%"></div>
-            <div class="sl-bar weekend" style="height:100%"></div>
-            <div class="sl-bar weekend" style="height:82%"></div>
-          </div>
-          <div class="sl-labels">
-            <span data-en="M" data-fr="L">M</span><span data-en="T" data-fr="M">T</span><span data-en="W" data-fr="M">W</span><span data-en="T" data-fr="J">T</span><span data-en="F" data-fr="V">F</span><span data-en="S" data-fr="S">S</span><span data-en="S" data-fr="D">S</span>
-          </div>
-          <div class="sl-foot" data-en="<b>Sat 10pm–2am</b> = 38% of weekly DMs. You're off. TrimSync isn't." data-fr="<b>Sam 22h–2h</b> = 38% des DMs de la semaine. Toi t'es off. TrimSync, non."><b>Sat 10pm–2am</b> = 38% of weekly DMs. You're off. TrimSync isn't.</div>
-        </div>
-        <p class="vs-lbl" data-en="Manual booking costs more than you think" data-fr="La gestion manuelle vous coûte plus cher que vous ne le pensez">Manual booking costs more than you think</p>
-        <div class="vs-row">
-          <span data-en="Time on DMs (est.)" data-fr="Temps passé sur DMs (estimation)">Time on DMs (est.)</span>
-          <span class="vs-old" data-en="~2h/day" data-fr="~2h/jour">~2h/day</span>
-        </div>
-        <div class="vs-row">
-          <span data-en="Missed bookings/month" data-fr="RDV manqués par mois">Missed bookings/month</span>
-          <span class="vs-old">8–15</span>
-        </div>
-        <div class="vs-row">
-          <span data-en="Revenue lost to no-shows" data-fr="CA perdu en no-shows">Revenue lost to no-shows</span>
-          <span class="vs-old" data-en="€200–400/mo" data-fr="200–400€/mois">€200–400/mo</span>
-        </div>
-        <div class="vs-row">
-          <span><strong data-en="TrimSync Starter" data-fr="TrimSync Starter">TrimSync Starter</strong></span>
-          <span class="vs-new">€59<span data-en="/mo" data-fr="/mois">/mo</span></span>
-        </div>
-        <div class="price-roi-foot">
-          <a href="trimsync-booking.html" class="btn-on-a mag">
-            <span data-en="Get started" data-fr="Commencer">Get started</span>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </a>
-          <div class="price-free" style="margin-top:.75rem">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="5" stroke="oklch(0.35 0.09 200)" stroke-width="1.2"/><path d="M4 6l1.5 1.5L8 4" stroke="oklch(0.35 0.09 200)" stroke-width="1.2" stroke-linecap="round"/></svg>
-            <span data-en="No commitment. Cancel anytime." data-fr="Sans engagement. Résiliez quand vous voulez.">No commitment. Cancel anytime.</span>
-          </div>
-        </div>
-      </div><!-- /price-right -->
+      <p class="plans-reassure" data-en="No commitment. Cancel anytime. First month free." data-fr="Sans engagement. Résiliez quand vous voulez. Premier mois offert.">No commitment. Cancel anytime. First month free.</p>
 
     </div><!-- /plans-wrap -->
   </div>
@@ -2451,36 +2396,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
             </div><!-- /plans-grid -->
 
-            <!-- Tableau ROI -->
-            <div class="price-right">
-              <p class="vs-lbl" data-en="Manual booking costs more than you think" data-fr="La gestion manuelle vous coûte plus cher que vous ne le pensez">Manual booking costs more than you think</p>
-              <div class="vs-row">
-                <span data-en="Time on DMs (est.)" data-fr="Temps passé sur DMs (estimation)">Time on DMs (est.)</span>
-                <span class="vs-old" data-en="~2h/day" data-fr="~2h/jour">~2h/day</span>
-              </div>
-              <div class="vs-row">
-                <span data-en="Missed bookings/month" data-fr="RDV manqués par mois">Missed bookings/month</span>
-                <span class="vs-old">8–15</span>
-              </div>
-              <div class="vs-row">
-                <span data-en="Revenue lost to no-shows" data-fr="CA perdu en no-shows">Revenue lost to no-shows</span>
-                <span class="vs-old" data-en="€200–400/mo" data-fr="200–400€/mois">€200–400/mo</span>
-              </div>
-              <div class="vs-row">
-                <span><strong data-en="TrimSync Starter" data-fr="TrimSync Starter">TrimSync Starter</strong></span>
-                <span class="vs-new">€59<span data-en="/mo" data-fr="/mois">/mo</span></span>
-              </div>
-              <div class="price-roi-foot">
-                <a href="trimsync-booking.html" class="btn-on-a mag" onclick="closeBotModal()">
-                  <span data-en="Get started" data-fr="Commencer">Get started</span>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </a>
-                <div class="price-free" style="margin-top:.75rem">
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="5" stroke="oklch(0.35 0.09 200)" stroke-width="1.2"/><path d="M4 6l1.5 1.5L8 4" stroke="oklch(0.35 0.09 200)" stroke-width="1.2" stroke-linecap="round"/></svg>
-                  <span data-en="No commitment. Cancel anytime." data-fr="Sans engagement. Résiliez quand vous voulez.">No commitment. Cancel anytime.</span>
-                </div>
-              </div>
-            </div><!-- /price-right -->
+            <p class="plans-reassure" data-en="No commitment. Cancel anytime. First month free." data-fr="Sans engagement. Résiliez quand vous voulez. Premier mois offert.">No commitment. Cancel anytime. First month free.</p>
 
           </div><!-- /plans-wrap -->
         </div><!-- /wrap -->

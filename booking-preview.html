@@ -19,7 +19,8 @@
   --fb:'Figtree',sans-serif;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
-html,body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:14px;line-height:1.5;min-height:100vh;overflow-x:hidden}
+html{background:var(--bg)}
+body{background:transparent;color:var(--text);font-family:var(--fb);font-size:14px;line-height:1.5;min-height:100vh;overflow-x:hidden}
 button{background:none;border:none;cursor:pointer;font-family:inherit;color:inherit}
 
 /* Noise overlay (par-dessus le WebGL) */
@@ -43,7 +44,8 @@ body::after{
 
 /* ── Splash ── */
 #splash{
-  position:fixed;inset:0;z-index:999;background:transparent;
+  position:fixed;inset:0;z-index:999;
+  background:radial-gradient(circle at 50% 42%, #0e1719 0%, #060606 68%);
   display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;
   transition:opacity .55s var(--ease);
 }
@@ -553,11 +555,11 @@ body::after{
    ══════════════════════════════════════════════════════ */
 const SERVICES = [
   {id:'coupe-classique', name:'Coupe classique',    price:25, duration:30, icon:'ti-scissors'},
-  {id:'coupe-premium',   name:'Coupe premium',       price:35, duration:45, icon:'ti-diamond'},
+  {id:'coupe-premium',   name:'Coupe premium',       price:35, duration:45, icon:'ti-crown'},
   {id:'barbe',           name:'Barbe',               price:20, duration:25, icon:'ti-razor-electric'},
-  {id:'coupe-barbe',     name:'Coupe + Barbe',       price:45, duration:60, icon:'ti-bolt'},
-  {id:'rasage',          name:'Rasage traditionnel', price:30, duration:35, icon:'ti-sparkles'},
-  {id:'kids',            name:'Coupe enfant',        price:20, duration:25, icon:'ti-heart'},
+  {id:'coupe-barbe',     name:'Coupe + Barbe',       price:45, duration:60, icon:'ti-user-check'},
+  {id:'rasage',          name:'Rasage traditionnel', price:30, duration:35, icon:'ti-razor'},
+  {id:'kids',            name:'Coupe enfant',        price:20, duration:25, icon:'ti-mood-kid'},
 ];
 
 let state = {step:1, svc:null, date:null, time:null, calDate:new Date()};

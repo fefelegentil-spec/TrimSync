@@ -1293,6 +1293,12 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .pain-right .compare-row,.pain-right .stat-strip{margin-top:0}
 .pain-right .stat-strip .stat .n{font-size:1.5rem}
 @media(max-width:760px){.pain{min-height:auto}}
+
+/* Task 4 — mockups produit dans la timeline solution (.sol-step-empty rendu visible via .step-mock) */
+.sol-step-empty.step-mock{opacity:1;pointer-events:auto;display:flex;align-items:center;justify-content:center;padding:1rem}
+.sol-step--right .sol-step-empty.step-mock{padding-right:2.5rem}
+.sol-step--left .sol-step-empty.step-mock{padding-left:2.5rem}
+@media(max-width:760px){.sol-step-empty.step-mock{display:none}}
 </style>
 </head>
 <body>
@@ -1513,7 +1519,17 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
       <!-- Étape 1 — droite -->
       <div class="sol-step sol-step--right">
-        <div class="sol-step-empty" aria-hidden="true"></div>
+        <div class="sol-step-empty step-mock" aria-hidden="true">
+          <div class="oauth-card">
+            <div class="oc-head">
+              <div class="oc-ig"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="4.5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3.8" stroke="currentColor" stroke-width="1.8"/><circle cx="17" cy="7" r="1" fill="currentColor"/></svg></div>
+              <span class="oc-title" data-en="TrimSync wants to access your DMs" data-fr="TrimSync souhaite accéder à tes DMs">TrimSync wants to access your DMs</span>
+            </div>
+            <p class="oc-body" data-en="Read &amp; reply to Instagram messages on your behalf." data-fr="Lire et répondre aux messages Instagram en ton nom.">Read &amp; reply to Instagram messages on your behalf.</p>
+            <span class="oc-btn" data-en="Authorize" data-fr="Autoriser">Authorize</span>
+            <div class="oc-tick" data-en="Connected in 47s" data-fr="Connecté en 47s">Connected in 47s</div>
+          </div>
+        </div>
         <div class="sol-step-node">
           <div class="sol-step-num">1</div>
         </div>
@@ -1534,12 +1550,36 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <div class="sol-step-node">
           <div class="sol-step-num">2</div>
         </div>
-        <div class="sol-step-empty" aria-hidden="true"></div>
+        <div class="sol-step-empty step-mock" aria-hidden="true">
+          <div class="dm-mock" style="max-width:250px;width:100%">
+            <div class="dm-head">
+              <div class="dm-av">M</div>
+              <span class="dm-name">@mehdi_paris</span>
+              <span class="dm-ai" data-en="AI Active" data-fr="IA Active">AI Active</span>
+            </div>
+            <div class="bubble client" data-en="Free Saturday 2pm?" data-fr="Dispo samedi 14h ?">Free Saturday 2pm?</div>
+            <div class="bubble ai" data-en="Yes! Locking the slot for you. <small>auto · 4s</small>" data-fr="Yes ! J'te bloque le slot. <small>auto · 4s</small>">Yes! Locking the slot for you. <small>auto · 4s</small></div>
+          </div>
+        </div>
       </div>
 
       <!-- Étape 3 — droite -->
       <div class="sol-step sol-step--right">
-        <div class="sol-step-empty" aria-hidden="true"></div>
+        <div class="sol-step-empty step-mock" aria-hidden="true">
+          <div class="mini-cal" style="max-width:230px;width:100%">
+            <div class="mc-head">
+              <span data-en="This week" data-fr="Cette semaine">This week</span>
+              <span class="mc-badge">+1</span>
+            </div>
+            <div class="mc-grid">
+              <div class="mc-cell busy"></div><div class="mc-cell"></div><div class="mc-cell"></div><div class="mc-cell busy"></div><div class="mc-cell"></div><div class="mc-cell"></div><div class="mc-cell busy"></div>
+              <div class="mc-cell"></div><div class="mc-cell busy"></div><div class="mc-cell"></div><div class="mc-cell"></div><div class="mc-cell busy"></div><div class="mc-cell slot"></div><div class="mc-cell"></div>
+              <div class="mc-cell busy"></div><div class="mc-cell"></div><div class="mc-cell busy"></div><div class="mc-cell"></div><div class="mc-cell"></div><div class="mc-cell"></div><div class="mc-cell busy"></div>
+              <div class="mc-cell"></div><div class="mc-cell busy"></div><div class="mc-cell"></div><div class="mc-cell"></div><div class="mc-cell busy"></div><div class="mc-cell"></div><div class="mc-cell"></div>
+            </div>
+            <div class="mc-foot" data-en="14:00 Mehdi · auto-booked" data-fr="14:00 Mehdi · auto-réservé">14:00 Mehdi · auto-booked</div>
+          </div>
+        </div>
         <div class="sol-step-node">
           <div class="sol-step-num">3</div>
         </div>

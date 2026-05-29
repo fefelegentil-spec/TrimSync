@@ -1286,6 +1286,13 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .sparkline-7d .sl-labels{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;font-size:.55rem;color:var(--t3);text-align:center;letter-spacing:.05em;text-transform:uppercase}
 .sparkline-7d .sl-foot{margin-top:.7rem;padding-top:.7rem;border-top:1px solid oklch(1 0 0/.06);font-size:.72rem;color:var(--t2);line-height:1.5}
 .sparkline-7d .sl-foot b{color:var(--miel)}
+
+/* Task 3 — enrichissement pain cards : compare-row + stats injectés dans .pain-right */
+.pain{min-height:40vh}
+.pain-right{gap:1rem}
+.pain-right .compare-row,.pain-right .stat-strip{margin-top:0}
+.pain-right .stat-strip .stat .n{font-size:1.5rem}
+@media(max-width:760px){.pain{min-height:auto}}
 </style>
 </head>
 <body>
@@ -1432,6 +1439,15 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <div class="pain-right">
           <h3 data-en="Hours lost answering the same DMs" data-fr="Des heures perdues à répondre aux mêmes DMs">Hours lost answering the same DMs</h3>
           <p class="body-t" data-en='"Available Friday? What time?" The same question, a dozen times a day, pulling you away from your chair.' data-fr='"Disponible vendredi ? À quelle heure ?" La même question, des dizaines de fois par jour, à chaque coup de ciseau.'>"Available Friday? What time?" The same question, a dozen times a day, pulling you away from your chair.</p>
+          <div class="compare-row">
+            <div class="cr-line bad"><span class="dot"></span><span data-en="<b>Without TrimSync</b> · 22 DMs waiting · avg delay 4h47" data-fr="<b>Sans TrimSync</b> · 22 DMs en attente · délai moyen 4h47"><b>Without TrimSync</b> · 22 DMs waiting · avg delay 4h47</span></div>
+            <div class="cr-line good"><span class="dot"></span><span data-en="<b>With TrimSync</b> · 22 DMs handled · avg delay 4s" data-fr="<b>Avec TrimSync</b> · 22 DMs traités · délai moyen 4s"><b>With TrimSync</b> · 22 DMs handled · avg delay 4s</span></div>
+          </div>
+          <div class="stat-strip">
+            <div class="stat positive"><span class="n">3h22</span><span class="l" data-en="/day saved" data-fr="/jour gagnées">/day saved</span></div>
+            <div class="stat positive"><span class="n">+18</span><span class="l" data-en="bookings/mo" data-fr="RDV/mois">bookings/mo</span></div>
+            <div class="stat positive"><span class="n">100%</span><span class="l" data-en="DMs handled" data-fr="DMs traités">DMs handled</span></div>
+          </div>
         </div>
       </div>
 
@@ -1443,6 +1459,15 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <div class="pain-right">
           <h3 data-en="Bookings lost to slow replies" data-fr="Des RDV perdus à cause des réponses lentes">Bookings lost to slow replies</h3>
           <p class="body-t" data-en="A client messages at 11pm and books the first barber who responds. If that's not you, it's your competition." data-fr="Un client écrit à 23h et réserve chez le premier barbier qui répond. Si ce n'est pas vous, c'est votre concurrent.">A client messages at 11pm and books the first barber who responds. If that's not you, it's your competition.</p>
+          <div class="compare-row">
+            <div class="cr-line bad"><span class="dot"></span><span data-en="<b>11pm DM</b> → competitor replies first → booking lost" data-fr="<b>DM 23h</b> → le concurrent répond d'abord → RDV perdu"><b>11pm DM</b> → competitor replies first → booking lost</span></div>
+            <div class="cr-line good"><span class="dot"></span><span data-en="<b>11pm DM</b> → instant AI reply → slot locked" data-fr="<b>DM 23h</b> → réponse IA instantanée → slot bloqué"><b>11pm DM</b> → instant AI reply → slot locked</span></div>
+          </div>
+          <div class="stat-strip">
+            <div class="stat positive"><span class="n">40%</span><span class="l" data-en="bookings after 7pm" data-fr="RDV après 19h">bookings after 7pm</span></div>
+            <div class="stat positive"><span class="n">0</span><span class="l" data-en="lost at midnight" data-fr="perdus à minuit">lost at midnight</span></div>
+            <div class="stat positive"><span class="n">24/7</span><span class="l" data-en="always on" data-fr="jamais off">always on</span></div>
+          </div>
         </div>
       </div>
 
@@ -1454,6 +1479,15 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <div class="pain-right">
           <h3 data-en="No-shows killing your revenue" data-fr="Les no-shows plombent votre CA">No-shows killing your revenue</h3>
           <p class="body-t" data-en="An empty chair is lost money. Without proper confirmations and reminders, no-shows will keep haunting your schedule." data-fr="Une chaise vide, c'est de l'argent perdu. Sans confirmations automatiques, les no-shows vont continuer à hanter votre agenda.">An empty chair is lost money. Without proper confirmations and reminders, no-shows will keep haunting your schedule.</p>
+          <div class="compare-row">
+            <div class="cr-line bad"><span class="dot"></span><span data-en="<b>No reminder</b> · ~12% no-show · empty chair" data-fr="<b>Aucun rappel</b> · ~12% no-show · chaise vide"><b>No reminder</b> · ~12% no-show · empty chair</span></div>
+            <div class="cr-line good"><span class="dot"></span><span data-en="<b>Auto reminder D-1</b> · ~3% no-show · slot filled" data-fr="<b>Rappel auto J-1</b> · ~3% no-show · slot comblé"><b>Auto reminder D-1</b> · ~3% no-show · slot filled</span></div>
+          </div>
+          <div class="stat-strip">
+            <div class="stat positive"><span class="n">-75%</span><span class="l" data-en="no-shows" data-fr="no-shows">no-shows</span></div>
+            <div class="stat positive"><span class="n">+250€</span><span class="l" data-en="/mo recovered" data-fr="/mois récupérés">/mo recovered</span></div>
+            <div class="stat positive"><span class="n">2</span><span class="l" data-en="auto reminders" data-fr="rappels auto">auto reminders</span></div>
+          </div>
         </div>
       </div>
 

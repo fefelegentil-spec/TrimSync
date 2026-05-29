@@ -1227,6 +1227,65 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .compare-row .cr-line.bad .dot{background:var(--stat-negative);box-shadow:0 0 8px var(--stat-negative)}
 .compare-row .cr-line.good .dot{background:var(--a);box-shadow:0 0 8px var(--a)}
 .compare-row .cr-line b{color:var(--t1);font-weight:500}
+
+/* ============================================
+   ENRICHISSEMENT VISUEL — composants réutilisables
+   ============================================ */
+
+/* DM mock — capsule chat Insta réutilisable */
+.dm-mock{background:linear-gradient(180deg,oklch(0.14 0.008 218) 0%,oklch(0.10 0.008 218) 100%);border:1px solid oklch(1 0 0/.08);border-radius:14px;padding:.85rem;display:flex;flex-direction:column;gap:.5rem;font-family:inherit}
+.dm-mock .dm-head{display:flex;align-items:center;gap:.55rem;padding-bottom:.5rem;border-bottom:1px solid oklch(1 0 0/.06)}
+.dm-mock .dm-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--miel),oklch(0.40 0.10 50));display:grid;place-items:center;font-size:.6rem;font-weight:700;color:#fff;flex:none}
+.dm-mock .dm-name{font-size:.7rem;color:var(--t2);letter-spacing:.01em}
+.dm-mock .dm-ai{font-size:.6rem;color:var(--miel);margin-left:auto;display:flex;align-items:center;gap:.3rem}
+.dm-mock .dm-ai::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--miel);box-shadow:0 0 8px var(--miel)}
+.dm-mock .bubble{padding:.5rem .7rem;font-size:.72rem;border-radius:14px;max-width:80%;line-height:1.4}
+.dm-mock .bubble.client{background:oklch(0.20 0.008 218);color:var(--t1);align-self:flex-start;border-bottom-left-radius:4px}
+.dm-mock .bubble.ai{background:var(--a);color:var(--ink);align-self:flex-end;border-bottom-right-radius:4px;font-weight:500}
+.dm-mock .bubble small{display:block;font-size:.5rem;opacity:.7;margin-top:.25rem;letter-spacing:.08em;text-transform:uppercase}
+
+/* Mini-calendrier 7×4 — grille semaine avec slot mis en évidence */
+.mini-cal{background:oklch(0.13 0.009 222);border:1px solid oklch(1 0 0/.08);border-radius:12px;padding:.75rem;font-family:inherit}
+.mini-cal .mc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.55rem;font-size:.6rem;color:var(--t3);letter-spacing:.1em;text-transform:uppercase}
+.mini-cal .mc-badge{background:var(--a);color:var(--ink);padding:.1rem .4rem;border-radius:100px;font-size:.55rem;font-weight:700;letter-spacing:.05em}
+.mini-cal .mc-grid{display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(4,12px);gap:3px}
+.mini-cal .mc-cell{background:oklch(1 0 0/.04);border-radius:2px}
+.mini-cal .mc-cell.slot{background:var(--a);box-shadow:0 0 8px var(--a)}
+.mini-cal .mc-cell.busy{background:oklch(1 0 0/.10)}
+.mini-cal .mc-foot{display:flex;align-items:center;gap:.35rem;margin-top:.55rem;font-size:.62rem;color:var(--t2)}
+.mini-cal .mc-foot::before{content:"✓";color:var(--a);font-weight:700}
+
+/* OAuth card — mini-modal autorisation Meta Instagram */
+.oauth-card{background:oklch(0.13 0.009 222);border:1px solid oklch(1 0 0/.10);border-radius:14px;padding:.9rem;font-family:inherit;max-width:240px}
+.oauth-card .oc-head{display:flex;align-items:center;gap:.55rem;margin-bottom:.6rem}
+.oauth-card .oc-ig{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);display:grid;place-items:center}
+.oauth-card .oc-ig svg{width:14px;height:14px;color:#fff}
+.oauth-card .oc-title{font-size:.7rem;color:var(--t1);font-weight:500;line-height:1.3}
+.oauth-card .oc-body{font-size:.65rem;color:var(--t2);line-height:1.5;margin-bottom:.7rem}
+.oauth-card .oc-btn{display:block;width:100%;text-align:center;background:var(--a);color:var(--ink);font-weight:600;padding:.45rem;border-radius:8px;font-size:.7rem;letter-spacing:.01em}
+.oauth-card .oc-tick{display:flex;align-items:center;gap:.35rem;margin-top:.55rem;font-size:.6rem;color:var(--a)}
+.oauth-card .oc-tick::before{content:"✓";font-weight:700}
+
+/* Phone notif — capsule notif iOS pour CTA final */
+.phone-notif{background:oklch(0.13 0.009 222/.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid oklch(1 0 0/.10);border-radius:14px;padding:.75rem .85rem;display:flex;gap:.65rem;align-items:flex-start;max-width:280px}
+.phone-notif .pn-ico{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--a),oklch(0.50 0.13 195));display:grid;place-items:center;flex:none;font-size:.7rem;font-weight:800;color:var(--ink)}
+.phone-notif .pn-body{flex:1;min-width:0}
+.phone-notif .pn-meta{display:flex;justify-content:space-between;align-items:center;font-size:.55rem;color:var(--t3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.2rem}
+.phone-notif .pn-title{font-size:.72rem;color:var(--t1);font-weight:600;line-height:1.3;margin-bottom:.15rem}
+.phone-notif .pn-msg{font-size:.65rem;color:var(--t2);line-height:1.4}
+
+/* Sparkline 7 jours — wrapper pour SVG bars hebdo */
+.sparkline-7d{background:oklch(0.13 0.009 222);border:1px solid oklch(1 0 0/.08);border-radius:12px;padding:1rem 1.1rem;margin-bottom:1.4rem}
+.sparkline-7d .sl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.7rem}
+.sparkline-7d .sl-title{font-size:.7rem;color:var(--t2);letter-spacing:.05em;text-transform:uppercase}
+.sparkline-7d .sl-peak{font-size:.7rem;color:var(--miel);font-weight:500}
+.sparkline-7d .sl-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:60px;margin-bottom:.55rem}
+.sparkline-7d .sl-bar{background:linear-gradient(180deg,var(--a),oklch(0.50 0.13 195));border-radius:3px 3px 0 0;position:relative;opacity:.85;transition:opacity .25s}
+.sparkline-7d .sl-bar.weekend{background:linear-gradient(180deg,var(--miel),oklch(0.45 0.12 55))}
+.sparkline-7d .sl-bar:hover{opacity:1}
+.sparkline-7d .sl-labels{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;font-size:.55rem;color:var(--t3);text-align:center;letter-spacing:.05em;text-transform:uppercase}
+.sparkline-7d .sl-foot{margin-top:.7rem;padding-top:.7rem;border-top:1px solid oklch(1 0 0/.06);font-size:.72rem;color:var(--t2);line-height:1.5}
+.sparkline-7d .sl-foot b{color:var(--miel)}
 </style>
 </head>
 <body>

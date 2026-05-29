@@ -789,13 +789,10 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   display:flex;flex-direction:column;justify-content:center;gap:1.25rem;
 }
 .pain-right::before{
-  content:counter(pain,decimal-leading-zero);
-  font-family:var(--fd);font-size:.68rem;font-weight:700;
-  letter-spacing:.24em;text-transform:uppercase;color:var(--a);
-  display:block;
-  padding-bottom:.8rem;
-  border-bottom:1px solid oklch(0.76 0.13 193/.18);
-  width:2.5rem;
+  content:'';display:block;
+  width:2.2rem;height:2px;border-radius:2px;
+  background:var(--a);opacity:.5;
+  margin-bottom:1rem;
 }
 .pain-right h3{
   font-size:clamp(1.65rem,2.8vw,2.3rem);
@@ -1416,7 +1413,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
     <!-- PANNEAU 1 : LE BOT (fond cyan) -->
     <div class="hero-prop hero-prop--bot">
-      <span class="hero-eyebrow"><b>01</b> <span data-en="The bot" data-fr="Le bot">The bot</span></span>
+      <span class="hero-eyebrow"><span data-en="The bot" data-fr="Le bot">The bot</span></span>
       <h2 class="fd hero-h" id="hero-prop-1"
         data-en="Your AI bot answers every Instagram DM"
         data-fr="Ton bot IA répond à chaque DM Instagram">Your AI bot answers every Instagram DM</h2>
@@ -1454,7 +1451,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
     <!-- PANNEAU 2 : LA PLATEFORME (fond sombre) -->
     <div class="hero-prop hero-prop--dash">
-      <span class="hero-eyebrow"><b>02</b> <span data-en="The platform" data-fr="La plateforme">The platform</span></span>
+      <span class="hero-eyebrow"><span data-en="The platform" data-fr="La plateforme">The platform</span></span>
       <h2 class="fd hero-h" id="hero-prop-2"
         data-en="Run your whole shop from one dashboard"
         data-fr="Gère tout ton salon depuis un seul dashboard">Run your whole shop from one dashboard</h2>

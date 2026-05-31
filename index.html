@@ -1424,77 +1424,88 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
 <main>
 
-<!-- HERO -->
-<section class="hero" id="home">
-  <!-- shadow-bg : effet déplacé vers #page-bg (fixed full-site) -->
-  <div class="hero-head wrap">
-    <h1 class="hero-title"
-      data-en="Your <em>chair</em> fills itself."
-      data-fr="Ton <em>agenda</em> se remplit tout seul.">Your <em>chair</em> fills itself.</h1>
-  </div>
-  <div class="hero-inner wrap">
+<!-- IMPORTMAP (doit précéder tout <script type="module">) — pour le hero 3D -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
 
-    <!-- PANNEAU 1 : LE BOT (fond cyan) -->
-    <div class="hero-prop hero-prop--bot">
-      <span class="hero-eyebrow"><span data-en="The bot" data-fr="Le bot">The bot</span></span>
-      <h2 class="fd hero-h" id="hero-prop-1"
-        data-en="Your AI bot answers every Instagram DM"
-        data-fr="Ton bot IA répond à chaque DM Instagram">Your AI bot answers every Instagram DM</h2>
-      <p class="hero-sub"
-        data-en="It replies, qualifies and books for you — 24/7, in your tone."
-        data-fr="Il répond, qualifie et réserve à ta place — 24h/24, dans ton ton.">It replies, qualifies and books for you — 24/7, in your tone.</p>
-      <div class="hero-cta-row">
-        <button type="button" class="btn btn-dark mag" onclick="openBotModal()">
-          <span data-en="Test the bot" data-fr="Tester le bot">Test the bot</span>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-      <div class="hero-visual chat-wrap" aria-label="AI handles Instagram DMs">
-        <div class="chat-phone">
-          <div class="chat-bar">
-            <div class="chat-av" aria-hidden="true">BP</div>
-            <div class="chat-info">
-              <span class="chat-name">BarberShop Pro</span>
-              <span class="chat-ai"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true"><circle cx="4" cy="4" r="3.5" fill="currentColor" opacity=".4"/><circle cx="4" cy="4" r="1.5" fill="currentColor"/></svg> AI Active</span>
-            </div>
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-label="Instagram" role="img"><rect x="3" y="3" width="12" height="12" rx="3.5" stroke="oklch(0.50 0.007 58)" stroke-width="1.3"/><circle cx="9" cy="9" r="2.8" stroke="oklch(0.50 0.007 58)" stroke-width="1.3"/><circle cx="13" cy="5" r=".7" fill="oklch(0.50 0.007 58)"/></svg>
-          </div>
-          <div class="chat-msgs" id="chat-msgs" aria-live="polite" aria-label="Conversation demo"></div>
-          <div class="chat-foot" aria-hidden="true">
-            <div class="chat-inp" id="chat-inp-fake">
-              <span id="chat-inp-txt" data-en="Message..." data-fr="Message...">Message...</span>
-            </div>
-            <div class="chat-send">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="oklch(0.10 0.008 218)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-          </div>
-        </div>
-      </div>
+<style id="hero3d-css">
+/* ===== HERO 3D (WebGL buttermax-like) — scopé .hero3d / IDs dédiés ===== */
+.hero3d{position:relative;height:500vh;z-index:1}
+.hero3d-stick{position:sticky;top:0;height:100vh;width:100%;overflow:hidden;display:flex;align-items:center}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero3d .overlay{position:relative;z-index:2;max-width:560px;padding:0 6vw;pointer-events:none}
+.hero3d .overlay .eyebrow{font-family:var(--fd);font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--a);margin-bottom:18px;display:inline-block}
+.hero3d .overlay h1{font-family:var(--fd);font-size:clamp(36px,5.4vw,76px);line-height:.96;letter-spacing:-.028em;font-weight:300;color:var(--t);margin-bottom:18px}
+.hero3d .overlay h1 .word{display:inline-block;overflow:hidden;vertical-align:top}
+.hero3d .overlay h1 .char{display:inline-block;will-change:transform,opacity}
+.hero3d .overlay p{font-family:var(--fb);font-size:18px;color:var(--t2);max-width:440px}
+.hero3d .scene-cta{display:inline-flex;align-items:center;gap:10px;margin-top:28px;padding:14px 22px;border-radius:10px;background:var(--a);color:#0a1010;font-family:var(--fd);font-weight:600;font-size:15px;pointer-events:auto;opacity:0;transform:translateY(12px);transition:all .6s var(--ex);box-shadow:0 12px 36px oklch(0.76 0.13 193/.45)}
+.hero3d .scene-cta.is-visible{opacity:1;transform:none}
+.hero3d .scene-cta svg{width:16px;height:16px}
+.hero3d .timeline-rail{position:absolute;right:32px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:18px;align-items:center}
+.hero3d .timeline-dot{width:8px;height:8px;border-radius:50%;background:oklch(0.94 0.01 200/.25);transition:all .4s var(--ex);position:relative;border:none;padding:0;cursor:pointer}
+.hero3d .timeline-dot.is-current{background:var(--a);width:10px;height:10px;box-shadow:0 0 24px var(--a)}
+.hero3d .timeline-dot.is-past{background:var(--a);opacity:.5}
+.hero3d .sound-toggle{position:absolute;right:28px;bottom:28px;z-index:3;width:40px;height:40px;border-radius:50%;background:oklch(0.12 0.008 222/.6);backdrop-filter:blur(8px);display:grid;place-items:center;color:var(--t2);transition:all .3s var(--ex);border:none;cursor:pointer}
+.hero3d .sound-toggle.is-on{color:var(--a);box-shadow:0 0 16px oklch(0.76 0.13 193/.35)}
+.hero3d .sound-toggle svg{width:16px;height:16px}
+.hero3d.light-scene .overlay h1{color:oklch(0.22 0.03 220)}
+.hero3d.light-scene .overlay p{color:oklch(0.40 0.02 220)}
+.hero3d.light-scene .overlay .eyebrow{color:oklch(0.50 0.13 193)}
+/* Mobile fallback (DOM dégradé, zéro WebGL) */
+body.m-fallback .hero3d{height:auto}
+body.m-fallback .hero3d-stick{display:none}
+.hero3d .scene.m-scene{height:auto;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;padding:96px 24px;text-align:center}
+.hero3d .m-copy{max-width:540px;opacity:0;transform:translateY(24px);transition:opacity .7s var(--ex),transform .7s var(--ex)}
+.hero3d .m-scene.m-in .m-copy{opacity:1;transform:none}
+.hero3d .m-eyebrow{font-family:var(--fd);font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--a);display:block;margin-bottom:14px}
+.hero3d .m-title{font-family:var(--fd);font-weight:300;font-size:clamp(30px,8.5vw,46px);line-height:1;letter-spacing:-.02em;margin-bottom:14px;color:var(--t)}
+.hero3d .m-sub{font-family:var(--fb);font-size:16px;line-height:1.55;color:var(--t2);margin-inline:auto;max-width:42ch}
+.hero3d .m-cta{display:inline-block;margin-top:24px;padding:14px 24px;border-radius:10px;background:var(--a);color:#0a1010;font-family:var(--fd);font-weight:600}
+.hero3d .m-phone{position:relative;width:min(66vw,250px);aspect-ratio:540/1170;border-radius:36px;background:#0b0d11;padding:7px;box-shadow:0 40px 90px -28px rgba(0,0,0,.7),0 0 0 2px rgba(255,255,255,.05) inset;opacity:0;transform:translateY(46px) scale(.95);transition:opacity .85s var(--ex),transform .85s var(--ex)}
+.hero3d .m-scene.m-in .m-phone{opacity:1;transform:none}
+.hero3d .m-screen{width:100%;height:100%;border-radius:30px;display:block}
+.hero3d .m-island{position:absolute;top:18px;left:50%;transform:translateX(-50%);width:62px;height:18px;border-radius:12px;background:#000}
+body.m-fallback .hero3d.light-scene .m-title{color:oklch(0.22 0.03 220)}
+body.m-fallback .hero3d.light-scene .m-sub{color:oklch(0.42 0.02 220)}
+@media(max-width:768px){.hero3d .timeline-rail{display:none}}
+@media(prefers-reduced-motion:reduce){.hero3d .m-copy,.hero3d .m-phone{transition:none;opacity:1;transform:none}}
+</style>
+
+<!-- HERO 3D — iPhone WebGL qui morph au scroll (fallback DOM sur mobile) -->
+<section class="hero3d" id="home" aria-label="TrimSync — your chair fills itself">
+  <div class="hero3d-stick">
+    <canvas id="hero-canvas" aria-hidden="true"></canvas>
+    <div class="overlay" id="overlay">
+      <span class="eyebrow" id="overlayEyebrow">01 · The lost DM</span>
+      <h1 id="overlayTitle" aria-live="polite">
+        <span class="word"><span class="char">Y</span><span class="char">o</span><span class="char">u</span><span class="char">r</span></span>
+        <span class="word"><span class="char">c</span><span class="char">h</span><span class="char">a</span><span class="char">i</span><span class="char">r</span></span>
+        <span class="word"><span class="char">f</span><span class="char">i</span><span class="char">l</span><span class="char">l</span><span class="char">s</span></span>
+        <span class="word"><span class="char">i</span><span class="char">t</span><span class="char">s</span><span class="char">e</span><span class="char">l</span><span class="char">f</span><span class="char">.</span></span>
+      </h1>
+      <p id="overlaySub">While you sleep, the DMs that used to die in your inbox become booked appointments.</p>
+      <a href="#cta" class="scene-cta" id="sceneCta">
+        <span data-en="Start free — 10 min setup" data-fr="Commencer — installation 10 min">Start free — 10 min setup</span>
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8h10M9 3l5 5-5 5"/></svg>
+      </a>
     </div>
-
-    <!-- PANNEAU 2 : LA PLATEFORME (fond sombre) -->
-    <div class="hero-prop hero-prop--dash">
-      <span class="hero-eyebrow"><span data-en="The platform" data-fr="La plateforme">The platform</span></span>
-      <h2 class="fd hero-h" id="hero-prop-2"
-        data-en="Run your whole shop from one dashboard"
-        data-fr="Gère tout ton salon depuis un seul dashboard">Run your whole shop from one dashboard</h2>
-      <p class="hero-sub"
-        data-en="Bookings, clients, revenue — your all-in-one. Replace Planity &amp; Booksy."
-        data-fr="RDV, clients, chiffre — ton tout-en-un. Remplace Planity &amp; Booksy.">Bookings, clients, revenue — your all-in-one. Replace Planity &amp; Booksy.</p>
-      <div class="hero-cta-row">
-        <button type="button" class="btn btn-a mag" onclick="openPreview('dashboard')">
-          <span data-en="Test the dashboard" data-fr="Tester le dashboard">Test the dashboard</span>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-      <div class="hero-visual dash-frame" aria-label="Aperçu du dashboard TrimSync" role="img">
-        <iframe id="dash-embed" title="Aperçu dashboard" tabindex="-1" scrolling="no" loading="lazy"
-          src="dashboard-preview.html?salon=Mon%20Salon&color=%233bbfcc"></iframe>
-        <button type="button" class="dash-frame-cta" onclick="openPreview('dashboard')"
-          data-en="Open live dashboard" data-fr="Ouvrir le dashboard en live">Open live dashboard</button>
-      </div>
-    </div>
-
+    <nav class="timeline-rail" id="timelineRail" aria-label="Scene navigation">
+      <button class="timeline-dot is-current" data-scene="0" aria-label="Scene 1"></button>
+      <button class="timeline-dot" data-scene="1" aria-label="Scene 2"></button>
+      <button class="timeline-dot" data-scene="2" aria-label="Scene 3"></button>
+      <button class="timeline-dot" data-scene="3" aria-label="Scene 4"></button>
+      <button class="timeline-dot" data-scene="4" aria-label="Scene 5"></button>
+    </nav>
+    <button class="sound-toggle" id="soundToggle" aria-label="Toggle sound" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M23 9l-6 6M17 9l6 6"/></svg>
+    </button>
   </div>
 </section>
 
@@ -3457,5 +3468,7 @@ window.bConnectInstagram = function() {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script src="js/waves-bg.js"></script>
+<!-- Hero 3D (module ESM, importmap défini plus haut) — mode embarqué auto-détecté -->
+<script type="module" src="js/hero3d/main.js"></script>
 </body>
 </html>

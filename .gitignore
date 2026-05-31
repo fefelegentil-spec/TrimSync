@@ -2,3 +2,13 @@ node_modules/
 dist/
 
 .superpowers/
+
+# Outils & artefacts de dev (capture/preview)
+.claude/
+.playwright-mcp/
+buttermax-*.png
+buttermax-*.jpeg
+render-*.jpeg
+pain-sections-*.png
+feat-cards-*.png
+index-legacy-*.html

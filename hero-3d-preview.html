@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<title>TrimSync — Hero 3D Preview</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  /* Brand tokens (alignés sur PRODUCT.md / index.html actuel) */
+  --bg:oklch(0.12 0.008 222);
+  --bg-warm:oklch(0.68 0.14 60);
+  --bg-light:oklch(0.94 0.01 200);
+  --t:oklch(0.94 0.010 200);
+  --t2:oklch(0.68 0.015 210);
+  --t3:oklch(0.46 0.012 215);
+  --a:oklch(0.76 0.13 193);                       /* teal accent */
+  --a-deep:oklch(0.42 0.13 193);
+  --a-light:oklch(0.86 0.10 193);
+  --bd:oklch(0.24 0.011 218);
+
+  --fd:'Bricolage Grotesque',system-ui,sans-serif;
+  --fb:'Figtree',system-ui,sans-serif;
+  --ex:cubic-bezier(0.16,1,0.3,1);
+
+  --grain-uri:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:auto}    /* Lenis gère le smooth */
+body{
+  background-color:var(--bg);
+  color:var(--t);
+  font-family:var(--fb);
+  font-size:16px;
+  line-height:1.5;
+  overflow-x:clip;
+  cursor:none;                                                     /* curseur custom */
+  transition:background-color 800ms var(--ex);
+}
+img,svg,canvas{display:block}
+button{cursor:none;border:none;background:none;font:inherit;color:inherit}
+
+/* ─── Layer stack ───────────────────────────────
+   z0  body bg (couleur qui interpole)
+   z1  grain
+   z2  ambient orbs
+   z3  canvas WebGL (l'iPhone)
+   z4  overlay HTML : titres / sous-titres
+   z5  UI fixe : nav, timeline indicator, scroll hint, sound toggle
+   z9  curseur custom
+*/
+
+/* Grain */
+.grain{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background-image:var(--grain-uri);background-size:200px;
+  mix-blend-mode:overlay;opacity:.18;
+}
+
+/* Ambient orbs */
+.page-bg{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(140px);will-change:transform;opacity:.7;mix-blend-mode:screen}
+.orb-a{width:90vmax;height:90vmax;background:radial-gradient(circle,var(--a) 0%,transparent 70%);top:-30%;left:-28%;animation:orb-a 28s ease-in-out infinite alternate}
+.orb-b{width:70vmax;height:70vmax;background:radial-gradient(circle,var(--a-deep) 0%,transparent 68%);bottom:-30%;right:-24%;animation:orb-b 34s ease-in-out infinite alternate}
+.orb-c{width:55vmax;height:55vmax;background:radial-gradient(circle,var(--a) 0%,transparent 70%);top:42%;left:30%;animation:orb-c 22s ease-in-out 6s infinite alternate;opacity:.45}
+@keyframes orb-a{to{transform:translate(32%,48%) scale(1.35)}}
+@keyframes orb-b{to{transform:translate(-38%,-32%) scale(0.72)}}
+@keyframes orb-c{to{transform:translate(-25%,30%) scale(1.28)}}
+@media(prefers-reduced-motion:reduce){.orb{animation:none}}
+
+/* WebGL canvas */
+#hero-canvas{
+  position:fixed;inset:0;z-index:3;width:100vw;height:100vh;
+  pointer-events:none;
+}
+
+/* Loader (visible avant que la 1ère frame WebGL ne soit prête) */
+.loader{
+  position:fixed;inset:0;z-index:8;display:grid;place-items:center;
+  background:var(--bg);transition:opacity 700ms var(--ex),visibility 0s linear 700ms;
+}
+.loader.gone{opacity:0;visibility:hidden}
+.loader-ring{
+  width:48px;height:48px;border-radius:50%;
+  background:radial-gradient(circle at center,var(--a) 0%,transparent 70%);
+  animation:pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{transform:scale(.85);opacity:.6}50%{transform:scale(1.15);opacity:1}}
+
+/* Nav top */
+.nav-top{
+  position:fixed;top:0;left:0;right:0;z-index:6;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 32px;
+  font-family:var(--fd);font-weight:500;font-size:14px;letter-spacing:-0.01em;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  background:linear-gradient(180deg,oklch(0.12 0.008 222/.4) 0%,transparent 100%);
+}
+.nav-top .brand{font-family:var(--fd);font-weight:700;font-size:18px;letter-spacing:-0.02em}
+.nav-top .brand .dot{color:var(--a)}
+.nav-top .right{display:flex;gap:24px;align-items:center}
+.nav-top a, .nav-top button{font-family:var(--fb);font-size:13px;font-weight:500;color:var(--t2);transition:color 200ms}
+.nav-top a:hover, .nav-top button:hover{color:var(--t)}
+.nav-cta{
+  padding:8px 16px;border-radius:8px;background:var(--a);color:#0a1010;font-weight:600;
+  transition:transform 200ms var(--ex),box-shadow 300ms;
+}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 8px 24px oklch(0.76 0.13 193/.35)}
+
+/* Timeline indicator droite */
+.timeline-rail{
+  position:fixed;right:32px;top:50%;transform:translateY(-50%);
+  z-index:6;display:flex;flex-direction:column;gap:18px;align-items:center;
+}
+.timeline-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:oklch(0.94 0.01 200/.25);
+  transition:all 400ms var(--ex);
+  cursor:none;position:relative;
+}
+.timeline-dot::before{
+  content:"";position:absolute;inset:-12px;border-radius:50%;
+}
+.timeline-dot.is-current{background:var(--a);width:10px;height:10px;box-shadow:0 0 24px var(--a)}
+.timeline-dot.is-past{background:var(--a-light);opacity:.6}
+.timeline-dot:hover{transform:scale(1.4)}
+.timeline-label{
+  position:absolute;right:18px;top:50%;transform:translateY(-50%);
+  font-family:var(--fd);font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--t2);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 200ms;
+}
+.timeline-dot:hover .timeline-label{opacity:1}
+
+/* Sections (5×100vh, invisibles mais réelles pour le scroll natif/SEO) */
+.scenes{position:relative;z-index:0}
+.scene{
+  height:100vh;width:100%;position:relative;
+  /* invisible mais présent dans le DOM pour le scroll + SEO */
+}
+.scene[data-idx="0"]::after{
+  content:"";
+  position:absolute;left:50%;bottom:32px;transform:translateX(-50%);
+  width:1px;height:48px;background:linear-gradient(to bottom,transparent,var(--t2),transparent);
+  animation:scrollHint 2s ease-in-out infinite;
+}
+@keyframes scrollHint{0%,100%{opacity:0;height:24px}50%{opacity:1;height:48px}}
+
+/* Overlay HTML (titres) — fixe au centre-gauche */
+.overlay{
+  position:fixed;top:50%;left:6vw;transform:translateY(-50%);
+  z-index:4;max-width:560px;pointer-events:none;
+}
+.overlay .eyebrow{
+  font-family:var(--fd);font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--a);margin-bottom:18px;display:inline-block;
+}
+.overlay h1{
+  font-family:var(--fd);
+  font-size:clamp(36px,5.4vw,76px);
+  line-height:0.96;letter-spacing:-0.028em;
+  font-weight:300;
+  font-variation-settings:'wght' 300,'opsz' 18;
+  color:var(--t);
+  margin-bottom:18px;
+}
+.overlay h1 .word{display:inline-block;overflow:hidden;vertical-align:top}
+.overlay h1 .char{display:inline-block;will-change:transform,opacity}
+.overlay p{
+  font-family:var(--fb);font-size:18px;color:var(--t2);max-width:440px;
+  font-weight:400;
+}
+
+/* CTA contextuel (apparaît en scène 5) */
+.scene-cta{
+  display:inline-flex;align-items:center;gap:10px;
+  margin-top:28px;
+  padding:14px 22px;border-radius:10px;
+  background:var(--a);color:#0a1010;
+  font-family:var(--fd);font-weight:600;font-size:15px;letter-spacing:-0.01em;
+  pointer-events:auto;cursor:none;
+  opacity:0;transform:translateY(12px);transition:all 600ms var(--ex);
+  box-shadow:0 12px 36px oklch(0.76 0.13 193/.45);
+}
+.scene-cta.is-visible{opacity:1;transform:translateY(0)}
+.scene-cta:hover{transform:translateY(-2px) scale(1.02)}
+.scene-cta svg{width:16px;height:16px}
+
+/* Sound toggle */
+.sound-toggle{
+  position:fixed;right:32px;bottom:32px;z-index:6;
+  width:40px;height:40px;border-radius:50%;
+  background:oklch(0.12 0.008 222/.6);backdrop-filter:blur(8px);
+  display:grid;place-items:center;
+  color:var(--t2);transition:all 300ms var(--ex);
+}
+.sound-toggle:hover{color:var(--t);transform:scale(1.08)}
+.sound-toggle.is-on{color:var(--a);box-shadow:0 0 16px oklch(0.76 0.13 193/.35)}
+.sound-toggle svg{width:16px;height:16px}
+
+/* Curseur magnétique custom */
+.cursor-dot{
+  position:fixed;top:0;left:0;z-index:9;
+  width:8px;height:8px;border-radius:50%;background:var(--a);
+  pointer-events:none;mix-blend-mode:difference;
+  transform:translate(-50%,-50%);
+  transition:width 220ms var(--ex),height 220ms var(--ex),opacity 200ms,background 300ms;
+  opacity:.95;
+}
+.cursor-dot.is-hover{width:42px;height:42px;background:oklch(0.76 0.13 193/.18);border:1.5px solid var(--a)}
+.cursor-dot.is-press{width:24px;height:24px}
+@media(hover:none){.cursor-dot{display:none} body,button{cursor:auto}}
+
+/* Sticky CTA (apparaît à partir de la scène 3) */
+.sticky-cta{
+  position:fixed;left:32px;bottom:32px;z-index:6;
+  padding:10px 18px;border-radius:999px;
+  background:var(--a);color:#0a1010;font-family:var(--fd);font-weight:600;font-size:13px;
+  opacity:0;transform:translateY(12px);transition:all 500ms var(--ex);
+  box-shadow:0 12px 30px oklch(0.76 0.13 193/.4);
+  pointer-events:none;
+}
+.sticky-cta.is-visible{opacity:1;transform:translateY(0);pointer-events:auto}
+
+/* Footer space (pour le hand-off vers la suite) */
+.handoff-spacer{height:50vh;background:linear-gradient(to bottom,transparent,var(--bg))}
+
+/* Mobile / reduced motion */
+@media(max-width:768px){
+  .timeline-rail{right:16px}
+  .overlay{left:5vw;right:5vw;max-width:none}
+  .overlay h1{font-size:clamp(32px,9vw,52px)}
+  .nav-top{padding:14px 20px}
+  .nav-top .right .nav-link{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .scene-cta,.sticky-cta,.timeline-dot,.cursor-dot{transition:none}
+  body{transition:none}
+}
+
+/* Light scene (scène 5 ROI, fond clair) — bascule texte/nav en sombre
+   pour rester lisible. Toggle piloté par le JS (body.light-scene). */
+body.light-scene .overlay h1{color:oklch(0.22 0.03 220)}
+body.light-scene .overlay p{color:oklch(0.40 0.02 220)}
+body.light-scene .overlay .eyebrow{color:oklch(0.50 0.13 193)}
+body.light-scene .nav-top .brand{color:oklch(0.20 0.02 220)}
+body.light-scene .nav-top a,
+body.light-scene .nav-top button{color:oklch(0.38 0.02 220)}
+body.light-scene .nav-top a:hover,
+body.light-scene .nav-top button:hover{color:oklch(0.20 0.02 220)}
+body.light-scene .timeline-dot{background:oklch(0.20 0.02 220/.25)}
+
+/* SR-only */
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+</style>
+</head>
+<body>
+
+<!-- ── Layers ── -->
+<div class="grain"></div>
+<div class="page-bg" aria-hidden="true">
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+  <div class="orb orb-c"></div>
+</div>
+
+<canvas id="hero-canvas" aria-hidden="true"></canvas>
+
+<!-- ── Loader ── -->
+<div class="loader" id="loader"><div class="loader-ring"></div></div>
+
+<!-- ── Nav top ── -->
+<nav class="nav-top" aria-label="Main navigation">
+  <a href="/" class="brand">TrimSync<span class="dot">.</span></a>
+  <div class="right">
+    <a href="#pricing" class="nav-link">Pricing</a>
+    <a href="#features" class="nav-link">Features</a>
+    <button class="nav-link" aria-label="Switch language">EN / FR</button>
+    <a href="#cta" class="nav-cta">Start free</a>
+  </div>
+</nav>
+
+<!-- ── Timeline indicator ── -->
+<nav class="timeline-rail" id="timelineRail" aria-label="Section navigation">
+  <button class="timeline-dot is-current" data-scene="0" aria-label="Scene 1: The lost DM">
+    <span class="timeline-label">01 · Lost DM</span>
+  </button>
+  <button class="timeline-dot" data-scene="1" aria-label="Scene 2: AI replies">
+    <span class="timeline-label">02 · AI replies</span>
+  </button>
+  <button class="timeline-dot" data-scene="2" aria-label="Scene 3: Booked">
+    <span class="timeline-label">03 · Booked</span>
+  </button>
+  <button class="timeline-dot" data-scene="3" aria-label="Scene 4: Agenda">
+    <span class="timeline-label">04 · Agenda</span>
+  </button>
+  <button class="timeline-dot" data-scene="4" aria-label="Scene 5: ROI">
+    <span class="timeline-label">05 · ROI</span>
+  </button>
+</nav>
+
+<!-- ── Overlay titres (un seul, le contenu change selon la scène) ── -->
+<div class="overlay" id="overlay">
+  <span class="eyebrow" id="overlayEyebrow">01 · The lost DM</span>
+  <h1 id="overlayTitle" aria-live="polite">
+    <span class="word"><span class="char">Y</span><span class="char">o</span><span class="char">u</span><span class="char">r</span></span>
+    <span class="word"><span class="char">c</span><span class="char">h</span><span class="char">a</span><span class="char">i</span><span class="char">r</span></span>
+    <span class="word"><span class="char">f</span><span class="char">i</span><span class="char">l</span><span class="char">l</span><span class="char">s</span></span>
+    <span class="word"><span class="char">i</span><span class="char">t</span><span class="char">s</span><span class="char">e</span><span class="char">l</span><span class="char">f</span><span class="char">.</span></span>
+  </h1>
+  <p id="overlaySub">While you sleep, the DMs that used to die in your inbox become booked appointments.</p>
+  <a href="#cta" class="scene-cta" id="sceneCta">
+    Start free — 10 minutes setup
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 3l5 5-5 5"/></svg>
+  </a>
+</div>
+
+<!-- ── Sticky CTA ── -->
+<a href="#cta" class="sticky-cta" id="stickyCta">Start free →</a>
+
+<!-- ── Sound toggle ── -->
+<button class="sound-toggle" id="soundToggle" aria-label="Toggle sound" aria-pressed="false">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="soundIconOff">
+    <path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M23 9l-6 6M17 9l6 6"/>
+  </svg>
+</button>
+
+<!-- ── Sections virtuelles (scroll natif + SEO) ── -->
+<main class="scenes" id="scenes">
+  <section class="scene" data-idx="0" aria-label="The lost DM — 2:47am Instagram message"></section>
+  <section class="scene" data-idx="1" aria-label="AI replies in your voice"></section>
+  <section class="scene" data-idx="2" aria-label="Appointment booked and confirmed"></section>
+  <section class="scene" data-idx="3" aria-label="Your week, autopiloted"></section>
+  <section class="scene" data-idx="4" aria-label="ROI — €340 per month back"></section>
+</main>
+
+<!-- ── Curseur custom ── -->
+<div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+
+<!-- ── Scripts ── -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="js/hero3d/main.js"></script>
+
+</body>
+</html>

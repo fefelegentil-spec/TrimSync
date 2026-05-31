@@ -253,6 +253,45 @@ body.light-scene .nav-top a:hover,
 body.light-scene .nav-top button:hover{color:oklch(0.20 0.02 220)}
 body.light-scene .timeline-dot{background:oklch(0.20 0.02 220/.25)}
 
+/* ── Mobile fallback (DOM dégradé, sans WebGL) ──
+   Réutilise les écrans canvas2D dans une maquette iPhone CSS,
+   scroll natif, entrées au scroll, morph de fond via JS. */
+body.m-fallback{cursor:auto}
+body.m-fallback #hero-canvas,
+body.m-fallback .grain{display:none}
+body.m-fallback .scenes{position:relative;z-index:3}
+body.m-fallback .scene{
+  height:auto;min-height:100svh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:34px;padding:96px 24px;text-align:center;
+}
+body.m-fallback .scene[data-idx="0"]::after{display:none}
+.m-copy{
+  max-width:540px;
+  opacity:0;transform:translateY(24px);
+  transition:opacity .7s var(--ex),transform .7s var(--ex);
+}
+.m-scene.m-in .m-copy{opacity:1;transform:none}
+.m-eyebrow{font-family:var(--fd);font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--a);display:block;margin-bottom:14px}
+.m-title{font-family:var(--fd);font-weight:300;font-size:clamp(30px,8.5vw,46px);line-height:1.0;letter-spacing:-.02em;margin-bottom:14px;color:var(--t)}
+.m-sub{font-family:var(--fb);font-size:16px;line-height:1.55;color:var(--t2);margin-inline:auto;max-width:42ch}
+.m-cta{display:inline-block;margin-top:24px;padding:14px 24px;border-radius:10px;background:var(--a);color:#0a1010;font-family:var(--fd);font-weight:600;box-shadow:0 12px 36px oklch(0.76 0.13 193/.4)}
+.m-phone{
+  position:relative;width:min(66vw,250px);aspect-ratio:540/1170;
+  border-radius:36px;background:#0b0d11;padding:7px;
+  box-shadow:0 40px 90px -28px rgba(0,0,0,.7),0 0 0 2px rgba(255,255,255,.05) inset;
+  opacity:0;transform:translateY(46px) scale(.95);
+  transition:opacity .85s var(--ex),transform .85s var(--ex);
+}
+.m-scene.m-in .m-phone{opacity:1;transform:none}
+.m-screen{width:100%;height:100%;border-radius:30px;display:block}
+.m-island{position:absolute;top:18px;left:50%;transform:translateX(-50%);width:62px;height:18px;border-radius:12px;background:#000}
+body.m-fallback.light-scene .m-title{color:oklch(0.22 0.03 220)}
+body.m-fallback.light-scene .m-sub{color:oklch(0.42 0.02 220)}
+@media(prefers-reduced-motion:reduce){
+  .m-copy,.m-phone{transition:none;opacity:1;transform:none}
+}
+
 /* SR-only */
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
 </style>

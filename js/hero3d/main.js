@@ -15,14 +15,19 @@
    "HTML/CSS/JS vanilla, inline (pas de bundler)".
    ──────────────────────────────────────────────────────────────────────────── */
 
-import * as THREE from 'three';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-import { RGBShiftShader } from 'three/addons/shaders/RGBShiftShader.js';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+// Three.js & addons chargés DYNAMIQUEMENT (chemin desktop uniquement).
+// Le fallback mobile ne télécharge JAMAIS le moteur WebGL (~180 KB).
+let THREE, EffectComposer, RenderPass, UnrealBloomPass, OutputPass, ShaderPass, RGBShiftShader, RoomEnvironment;
+async function loadThree() {
+  THREE = await import('three');
+  ({ EffectComposer } = await import('three/addons/postprocessing/EffectComposer.js'));
+  ({ RenderPass } = await import('three/addons/postprocessing/RenderPass.js'));
+  ({ UnrealBloomPass } = await import('three/addons/postprocessing/UnrealBloomPass.js'));
+  ({ OutputPass } = await import('three/addons/postprocessing/OutputPass.js'));
+  ({ ShaderPass } = await import('three/addons/postprocessing/ShaderPass.js'));
+  ({ RGBShiftShader } = await import('three/addons/shaders/RGBShiftShader.js'));
+  ({ RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js'));
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    1. CONSTANTES & TOKENS
@@ -743,7 +748,8 @@ let renderer, scene, camera, composer, bloomPass, rgbShift;
 let iphone;
 let envTarget, envCamera;
 
-function initThree() {
+async function initThree() {
+  await loadThree();
   const canvas = document.getElementById('hero-canvas');
   renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
   renderer.setSize(innerWidth, innerHeight, false);
@@ -1152,13 +1158,95 @@ timelineDots.forEach((dot, i) => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   14b. FALLBACK MOBILE / DOM dégradé (zéro WebGL)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+function hasWebGL() {
+  try {
+    const c = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl')));
+  } catch (e) { return false; }
+}
+
+function initMobileFallback() {
+  document.body.classList.add('m-fallback');
+  // On démonte tout l'appareillage WebGL/desktop
+  ['hero-canvas', 'overlay', 'timelineRail', 'stickyCta'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const sections = [...document.querySelectorAll('.scene')];
+  sections.forEach((sec, i) => {
+    const s = SCENES[i];
+    sec.classList.add('m-scene');
+
+    const copy = document.createElement('div');
+    copy.className = 'm-copy';
+    copy.innerHTML =
+      `<span class="m-eyebrow">${s.eyebrow[currentLang]}</span>` +
+      `<h2 class="m-title">${s.title[currentLang]}</h2>` +
+      `<p class="m-sub">${s.sub[currentLang]}</p>` +
+      (s.cta ? `<a class="m-cta" href="#cta">${currentLang === 'fr' ? 'Commencer — 10 min' : 'Start free — 10 min'}</a>` : '');
+
+    const phone = document.createElement('div');
+    phone.className = 'm-phone';
+    const cv = document.createElement('canvas');
+    cv.width = SCREEN_W; cv.height = SCREEN_H; cv.className = 'm-screen';
+    // Rendu COMPLET statique de l'écran de la scène (réutilise les renderers)
+    SCREEN_RENDERERS[i](cv.getContext('2d'), 1);
+    const island = document.createElement('div');
+    island.className = 'm-island';
+    phone.append(cv, island);
+
+    sec.append(copy, phone);
+  });
+
+  // Fond + light-scene pilotés par IntersectionObserver (scroll natif)
+  const applyScene = (i) => {
+    const s = SCENES[i];
+    document.body.style.backgroundColor = `oklch(${s.bg[0]} ${s.bg[1]} ${s.bg[2]})`;
+    document.body.classList.toggle('light-scene', s.bg[0] > 0.6);
+  };
+  applyScene(0);
+
+  if ('IntersectionObserver' in window) {
+    // Bande centrale : une section devient "active" quand elle croise le
+    // milieu du viewport. Robuste même si la section est plus haute que
+    // l'écran (le seuil 0.5 ne se déclenchait jamais dans ce cas).
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          applyScene(+e.target.dataset.idx);
+          e.target.classList.add('m-in');
+        }
+      });
+    }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+    sections.forEach(sec => io.observe(sec));
+  } else {
+    sections.forEach(sec => sec.classList.add('m-in'));
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    15. BOOTSTRAP
    ═══════════════════════════════════════════════════════════════════════════ */
 
 (async function bootstrap() {
   console.log('[hero3d] bootstrap start');
   try {
-    initThree();
+    // Branche fallback : mobile, reduced-motion, petit écran ou pas de WebGL
+    // → mode DOM dégradé, Three.js n'est jamais chargé.
+    const FALLBACK = PREF_RM || IS_TOUCH || innerWidth < 768 || !hasWebGL();
+    if (FALLBACK) {
+      console.log('[hero3d] mode fallback (mobile / reduced-motion / no-webgl)');
+      initMobileFallback();
+      const ld = document.getElementById('loader');
+      if (ld) ld.classList.add('gone');
+      return;
+    }
+
+    await initThree();
     console.log('[hero3d] Three.js initialized');
     await initLenis();
     console.log('[hero3d] Lenis ready (or skipped)');

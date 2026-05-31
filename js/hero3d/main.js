@@ -923,7 +923,7 @@ const cursorDot = document.getElementById('cursorDot');
 let mouseX = innerWidth / 2, mouseY = innerHeight / 2;
 let cursorX = mouseX, cursorY = mouseY;
 
-if (!IS_TOUCH) {
+if (cursorDot && !IS_TOUCH) {
   addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
   addEventListener('mousedown', () => cursorDot.classList.add('is-press'));
   addEventListener('mouseup', () => cursorDot.classList.remove('is-press'));
@@ -943,7 +943,7 @@ let audioCtx = null;
 let soundEnabled = false;
 const soundToggle = document.getElementById('soundToggle');
 
-soundToggle.addEventListener('click', () => {
+soundToggle?.addEventListener('click', () => {
   soundEnabled = !soundEnabled;
   soundToggle.classList.toggle('is-on', soundEnabled);
   soundToggle.setAttribute('aria-pressed', String(soundEnabled));
@@ -1027,7 +1027,18 @@ let lastIdx = -1;
 let frame = 0;
 let _lastIsLight = false;
 
+// Mode embarqué : si une section .hero3d existe (intégration dans index.html),
+// le scroll est mesuré par rapport à cette section (canvas sticky) et le fond
+// ne touche pas le body. Sinon (preview standalone) : scroll plein écran.
+const HERO_SECTION = document.querySelector('.hero3d');
+const EMBEDDED = !!HERO_SECTION;
+
 function getScrollProgress() {
+  if (EMBEDDED) {
+    const rect = HERO_SECTION.getBoundingClientRect();
+    const span = rect.height - innerHeight;
+    return span > 0 ? clamp(-rect.top / span, 0, 1) : 0;
+  }
   const scrollEnd = (SCENE_COUNT - 1) * innerHeight;
   const y = lenis ? lenis.scroll : window.scrollY;
   return clamp(y / scrollEnd, 0, 1);
@@ -1080,14 +1091,16 @@ function loop(time) {
   bloomPass.strength = (isLight ? 0.10 : 0.22) + state.rim * 0.28;
 
   /* — Background color (morph signature buttermax) — */
-  document.body.style.backgroundColor = oklchLerp(state.bg, state.bg, 0);
   const [br, bgc, bbl] = oklchToSRGB(state.bg[0], state.bg[1], state.bg[2]);
   if (scene.background) scene.background.setRGB(br, bgc, bbl, THREE.SRGBColorSpace);
+  // En embarqué on ne peint PAS le body (le reste de la landing garde son fond).
+  if (!EMBEDDED) document.body.style.backgroundColor = oklchLerp(state.bg, state.bg, 0);
 
-  /* — Light scene : bascule le texte/nav en sombre quand le fond est clair — */
+  /* — Light scene : texte en sombre quand le fond est clair. Scopé à la
+     section en embarqué pour ne pas polluer le reste de la page. */
   if (isLight !== _lastIsLight) {
     _lastIsLight = isLight;
-    document.body.classList.toggle('light-scene', isLight);
+    (EMBEDDED ? HERO_SECTION : document.body).classList.toggle('light-scene', isLight);
   }
 
   /* — Screen content (canvas2D) — */
@@ -1122,14 +1135,14 @@ function loop(time) {
   }
 
   /* — Sticky CTA visibility — */
-  stickyCta.classList.toggle('is-visible', state.sceneFloat >= 2.0);
+  if (stickyCta) stickyCta.classList.toggle('is-visible', state.sceneFloat >= 2.0);
 
   /* — Maybe swap overlay scene (sens-agnostique : avant/arrière/saut) — */
   const dominantIdx = clamp(Math.round(state.sceneFloat), 0, SCENE_COUNT - 1);
   maybeSwapScene(dominantIdx);
 
   /* — Cursor follow (smooth) — */
-  if (!IS_TOUCH) {
+  if (cursorDot && !IS_TOUCH) {
     cursorX = lerp(cursorX, mouseX, 0.18);
     cursorY = lerp(cursorY, mouseY, 0.18);
     cursorDot.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
@@ -1147,7 +1160,10 @@ function loop(time) {
 
 timelineDots.forEach((dot, i) => {
   dot.addEventListener('click', () => {
-    const targetY = i * innerHeight;
+    // En embarqué : cible dans la section hero (offset + fraction).
+    const targetY = EMBEDDED
+      ? HERO_SECTION.offsetTop + (i / (SCENE_COUNT - 1)) * (HERO_SECTION.offsetHeight - innerHeight)
+      : i * innerHeight;
     if (lenis) {
       lenis.scrollTo(targetY, { duration: 1.4 });
     } else {
@@ -1176,7 +1192,18 @@ function initMobileFallback() {
     if (el) el.style.display = 'none';
   });
 
-  const sections = [...document.querySelectorAll('.scene')];
+  // Preview : les .scene existent déjà. Embarqué (index.html) : on les crée
+  // dans la section hero et on la repasse en hauteur auto (plus de 500vh).
+  let sections = [...document.querySelectorAll('.scene')];
+  if (sections.length === 0 && HERO_SECTION) {
+    HERO_SECTION.style.height = 'auto';
+    sections = SCENES.map((_, i) => {
+      const d = document.createElement('section');
+      d.className = 'scene'; d.dataset.idx = i;
+      HERO_SECTION.appendChild(d);
+      return d;
+    });
+  }
   sections.forEach((sec, i) => {
     const s = SCENES[i];
     sec.classList.add('m-scene');
@@ -1248,20 +1275,33 @@ function initMobileFallback() {
 
     await initThree();
     console.log('[hero3d] Three.js initialized');
-    await initLenis();
-    console.log('[hero3d] Lenis ready (or skipped)');
-    initGyro();
 
-    // Reset scroll au boot — évite la désync Lenis/natif quand le
-    // navigateur restaure une position de scroll au reload.
-    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-    window.scrollTo(0, 0);
-    if (lenis) lenis.scrollTo(0, { immediate: true });
+    if (!EMBEDDED) {
+      // Lenis + reset scroll : seulement en preview standalone. En embarqué
+      // on garde le scroll natif de la landing (évite tout conflit avec sa
+      // navigation, sec-nav et ancres existantes).
+      await initLenis();
+      initGyro();
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+      window.scrollTo(0, 0);
+      if (lenis) lenis.scrollTo(0, { immediate: true });
+    }
+
+    // Langue initiale depuis <html data-lang> (système bilingue de la landing)
+    currentLang = document.documentElement.dataset.lang === 'fr' ? 'fr' : 'en';
 
     // Initial overlay setup
     setOverlayContent(0, currentLang);
     currentSceneIdx = 0;
     animateOverlayIn();
+
+    // Re-render l'overlay quand la langue de la landing change (toggle EN/FR)
+    if (EMBEDDED) {
+      new MutationObserver(() => {
+        const lng = document.documentElement.dataset.lang === 'fr' ? 'fr' : 'en';
+        if (lng !== currentLang) { currentLang = lng; setOverlayContent(currentSceneIdx, currentLang); }
+      }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-lang'] });
+    }
 
     // Expose debugging hooks
     window.__hero3d = {
@@ -1281,9 +1321,9 @@ function initMobileFallback() {
     scheduleNext(loop);
     console.log('[hero3d] RAF loop scheduled');
 
-    // Hide loader after first paint
+    // Hide loader after first paint (absent en embarqué → garde null)
     setTimeout(() => {
-      document.getElementById('loader').classList.add('gone');
+      document.getElementById('loader')?.classList.add('gone');
     }, 600);
   } catch (err) {
     console.error('[hero3d] bootstrap error', err);

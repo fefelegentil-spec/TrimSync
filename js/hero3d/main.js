@@ -17,7 +17,7 @@
 
 // Three.js & addons chargés DYNAMIQUEMENT (chemin desktop uniquement).
 // Le fallback mobile ne télécharge JAMAIS le moteur WebGL (~180 KB).
-let THREE, EffectComposer, RenderPass, UnrealBloomPass, OutputPass, ShaderPass, RGBShiftShader, RoomEnvironment;
+let THREE, EffectComposer, RenderPass, UnrealBloomPass, OutputPass, ShaderPass, RGBShiftShader, RectAreaLightUniformsLib;
 async function loadThree() {
   THREE = await import('three');
   ({ EffectComposer } = await import('three/addons/postprocessing/EffectComposer.js'));
@@ -26,7 +26,7 @@ async function loadThree() {
   ({ OutputPass } = await import('three/addons/postprocessing/OutputPass.js'));
   ({ ShaderPass } = await import('three/addons/postprocessing/ShaderPass.js'));
   ({ RGBShiftShader } = await import('three/addons/shaders/RGBShiftShader.js'));
-  ({ RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js'));
+  ({ RectAreaLightUniformsLib } = await import('three/addons/lights/RectAreaLightUniformsLib.js'));
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -178,13 +178,25 @@ function makeRoundedBox(w, h, d, radius, segments) {
   shape.lineTo(x, y + radius);
   shape.quadraticCurveTo(x, y, x + radius, y);
 
-  // Bevel FIN : un gros bevel (radius*0.5) faisait bomber la face avant
-  // à z≈0.17 et ensevelissait l'écran (z 0.085) dans le corps opaque.
-  const extrudeSettings = { depth: d, bevelEnabled: true, bevelSegments: segments, steps: 1, bevelSize: 0.04, bevelThickness: 0.02, curveSegments: segments };
+  // Bevel fin = arête de châssis nette (et écran posé devant la face avant).
+  const extrudeSettings = { depth: d, bevelEnabled: true, bevelSegments: segments, steps: 1, bevelSize: 0.02, bevelThickness: 0.01, curveSegments: segments };
   const geom = new THREE.ExtrudeGeometry(shape, extrudeSettings);
   geom.translate(0, 0, -d / 2);
   geom.computeVertexNormals();
   return geom;
+}
+
+// Plan à coins arrondis (bezel, verre, plateau caméra). Matériau uni →
+// les UV de ShapeGeometry n'ont pas d'importance ici.
+function makeRoundedPlane(w, h, r) {
+  const s = new THREE.Shape();
+  const x = -w / 2, y = -h / 2;
+  s.moveTo(x + r, y);
+  s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
+  s.lineTo(x + w, y + h - r); s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r);
+  s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
+  return new THREE.ShapeGeometry(s, 24);
 }
 
 class iPhone {
@@ -198,95 +210,104 @@ class iPhone {
   }
 
   _build() {
-    // Dimensions iPhone 15 Pro (proportions)
-    const W = 1.42;   // largeur
-    const H = 2.92;   // hauteur
-    const D = 0.16;   // épaisseur
-    const R = 0.18;   // radius coins
+    // Proportions iPhone 15 Pro, coins squircle (R généreux)
+    const W = 1.40, H = 2.88, D = 0.135, R = 0.30;
+    const frontZ = D / 2 + 0.01;   // face avant du châssis (bevelThickness 0.01)
+    const backZ  = -(D / 2 + 0.01);
 
-    /* — Corps titanium — */
-    const bodyGeom = makeRoundedBox(W, H, D, R, 12);
-    const bodyMat = new THREE.MeshPhysicalMaterial({
-      color: 0x121419,
-      metalness: 0.95,
-      roughness: 0.40,
-      clearcoat: 0.6,
-      clearcoatRoughness: 0.3,
-      envMapIntensity: 0.5    // RoomEnvironment est lumineux → on baisse pour garder le dark premium
-    });
-    const body = new THREE.Mesh(bodyGeom, bodyMat);
-    body.castShadow = true;
+    /* — Châssis titane (dos + rail) : métal poli, reflets nets — */
+    const body = new THREE.Mesh(
+      makeRoundedBox(W, H, D, R, 18),
+      new THREE.MeshPhysicalMaterial({
+        color: 0x1c1e22, metalness: 1.0, roughness: 0.26,
+        envMapIntensity: 1.0, clearcoat: 0.35, clearcoatRoughness: 0.25
+      })
+    );
     this.group.add(body);
 
-    /* — Écran (CanvasTexture dynamique) — */
+    /* — Bezel noir : masque la face avant titane et cadre l'écran — */
+    const bezel = new THREE.Mesh(
+      makeRoundedPlane(W - 0.05, H - 0.05, R - 0.03),
+      new THREE.MeshPhysicalMaterial({
+        color: 0x050609, metalness: 0.0, roughness: 0.4,
+        clearcoat: 1.0, clearcoatRoughness: 0.08, envMapIntensity: 0.5
+      })
+    );
+    bezel.position.z = frontZ + 0.002;
+    this.group.add(bezel);
+
+    /* — Écran (CanvasTexture dynamique), encastré sous le verre — */
     this.screenCanvas = document.createElement('canvas');
     this.screenCanvas.width = 540;
-    this.screenCanvas.height = 1170;  // ratio 19.5:9 iPhone
-    this.screenCtx = this.screenCanvas.getContext('2d');
+    this.screenCanvas.height = 1170;  // ratio 19.5:9
+    this.screenCtx = this.screenCanvas.getContext('2d', { willReadFrequently: false });
     this.screenTexture = new THREE.CanvasTexture(this.screenCanvas);
     this.screenTexture.colorSpace = THREE.SRGBColorSpace;
     this.screenTexture.anisotropy = 8;
-
-    const screenW = W - 0.10;
-    const screenH = H - 0.20;
-    const screenGeom = new THREE.PlaneGeometry(screenW, screenH);
-    const screenMat = new THREE.MeshBasicMaterial({
-      map: this.screenTexture,
-      toneMapped: false
-    });
-    const screen = new THREE.Mesh(screenGeom, screenMat);
-    screen.position.z = D / 2 + 0.045;   // devant la face avant (bevel 0.02)
+    const screen = new THREE.Mesh(
+      new THREE.PlaneGeometry(W - 0.13, H - 0.15),   // bezel fin uniforme
+      new THREE.MeshBasicMaterial({ map: this.screenTexture, toneMapped: false })
+    );
+    screen.position.z = frontZ + 0.006;
     this.group.add(screen);
 
-    /* — Vitre (B1 corrigé) — La transmission éteignait l'écran.
-       On garde une fine couche spéculaire ADDITIVE qui capte
-       l'environnement (reflets "verre") sans soustraire la
-       luminosité de l'écran en dessous. depthWrite:false pour
-       ne jamais occulter le contenu. */
-    const glassGeom = new THREE.PlaneGeometry(W, H);
-    const glassMat = new THREE.MeshPhysicalMaterial({
-      transparent: true,
-      opacity: 0.06,          // très subtil : ne doit pas laiteuser l'écran
-      metalness: 0.0,
-      roughness: 0.05,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.04,
-      ior: 1.45,
-      reflectivity: 0.3,
-      color: 0xffffff,
-      envMapIntensity: 0.5,
-      depthWrite: false       // blend NORMAL (plus d'additive qui ajoutait du blanc partout)
-    });
-    const glass = new THREE.Mesh(glassGeom, glassMat);
-    glass.position.z = D / 2 + 0.05;
+    /* — Verre avant affleurant : glossy, réfléchit le softbox (le vrai
+         "tell" du produit photo). Pas de transmission (ça éteignait l'écran),
+         juste une fine couche spéculaire très réfléchissante. — */
+    const glass = new THREE.Mesh(
+      makeRoundedPlane(W - 0.015, H - 0.015, R - 0.012),
+      new THREE.MeshPhysicalMaterial({
+        transparent: true, opacity: 0.05, color: 0xffffff,
+        metalness: 0.0, roughness: 0.03, clearcoat: 0.5, clearcoatRoughness: 0.03,
+        ior: 1.5, reflectivity: 0.6, envMapIntensity: 0.9, depthWrite: false
+      })
+    );
+    glass.position.z = frontZ + 0.012;
     this.group.add(glass);
 
     /* — Dynamic Island — */
-    const diGeom = new THREE.CapsuleGeometry(0.06, 0.18, 8, 16);
+    const diGeom = new THREE.CapsuleGeometry(0.052, 0.17, 6, 16);
     diGeom.rotateZ(Math.PI / 2);
-    const diMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-    const di = new THREE.Mesh(diGeom, diMat);
-    di.position.set(0, H / 2 - 0.24, D / 2 + 0.055);
+    const di = new THREE.Mesh(diGeom, new THREE.MeshBasicMaterial({ color: 0x000000 }));
+    di.position.set(0, H / 2 - 0.22, frontZ + 0.014);
     this.group.add(di);
 
-    /* — Side buttons (titanium relief) — */
-    const btnMat = new THREE.MeshPhysicalMaterial({ color: 0x121215, metalness: 1.0, roughness: 0.45 });
-    const power = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.32, 0.08), btnMat);
-    power.position.set(W / 2 + 0.005, 0.45, 0);
-    this.group.add(power);
-    const volU = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.22, 0.08), btnMat);
-    volU.position.set(-W / 2 - 0.005, 0.6, 0);
-    this.group.add(volU);
-    const volD = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.22, 0.08), btnMat);
-    volD.position.set(-W / 2 - 0.005, 0.25, 0);
-    this.group.add(volD);
+    /* — Bosse caméra au dos (haut-gauche) : plateau + 3 objectifs — */
+    const camCX = -W / 2 + 0.40, camCY = H / 2 - 0.42;
+    const plate = new THREE.Mesh(
+      makeRoundedPlane(0.64, 0.64, 0.20),
+      new THREE.MeshPhysicalMaterial({ color: 0x1a1c21, metalness: 1.0, roughness: 0.35, envMapIntensity: 1.1 })
+    );
+    plate.position.set(camCX, camCY, backZ - 0.012);
+    plate.rotation.y = Math.PI;   // face vers l'arrière
+    this.group.add(plate);
+    const ringMat = new THREE.MeshStandardMaterial({ color: 0x33373d, metalness: 1.0, roughness: 0.3 });
+    const lensMat = new THREE.MeshPhysicalMaterial({ color: 0x070809, metalness: 0.6, roughness: 0.08, clearcoat: 1.0, envMapIntensity: 1.6 });
+    [[-0.13, 0.13], [0.13, 0.13], [0, -0.14]].forEach(([lx, ly]) => {
+      const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.125, 0.125, 0.06, 28), ringMat);
+      ring.rotation.x = Math.PI / 2;
+      ring.position.set(camCX + lx, camCY + ly, backZ - 0.04);
+      this.group.add(ring);
+      const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.07, 28), lensMat);
+      lens.rotation.x = Math.PI / 2;
+      lens.position.set(camCX + lx, camCY + ly, backZ - 0.05);
+      this.group.add(lens);
+    });
 
-    /* — Rim light (B2) — PointLight derrière l'écran qui éclaire le bord — */
+    /* — Boutons latéraux (titane) — */
+    const btnMat = new THREE.MeshPhysicalMaterial({ color: 0x232529, metalness: 1.0, roughness: 0.3, envMapIntensity: 1.2 });
+    const power = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.34, 0.07), btnMat);
+    power.position.set(W / 2 + 0.004, 0.42, 0); this.group.add(power);
+    const volU = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.22, 0.07), btnMat);
+    volU.position.set(-W / 2 - 0.004, 0.62, 0); this.group.add(volU);
+    const volD = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.22, 0.07), btnMat);
+    volD.position.set(-W / 2 - 0.004, 0.30, 0); this.group.add(volD);
+
+    /* — Back-rim glow (teal) : halo derrière, n'éclaire pas l'écran — */
     this.glowLight = new THREE.PointLight(0x60c4c8, 1.2, 4.0, 2);
-    this.glowLight.position.set(0, 0, -(D / 2 + 0.35));  // DERRIÈRE : back-rim halo, ne lave plus l'écran
+    this.glowLight.position.set(0, 0, backZ - 0.35);
     this.group.add(this.glowLight);
 
-    /* Position de base */
     this.group.position.set(0, 0, 0);
     this.group.rotation.set(0, 0, 0);
   }
@@ -748,6 +769,37 @@ let renderer, scene, camera, composer, bloomPass, rgbShift;
 let iphone;
 let envTarget, envCamera;
 
+// Environnement studio procédural : fond sombre + softbox blancs + bande
+// teal (marque). Donne au métal/verre des reflets francs et mobiles.
+function makeStudioEnvTexture() {
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 512;
+  const g = c.getContext('2d');
+  const base = g.createLinearGradient(0, 0, 0, 512);
+  base.addColorStop(0, '#28303a');
+  base.addColorStop(0.42, '#0c1014');
+  base.addColorStop(1, '#04060a');
+  g.fillStyle = base; g.fillRect(0, 0, 1024, 512);
+  const strip = (cx, w, a) => {
+    const lg = g.createLinearGradient(cx - w, 0, cx + w, 0);
+    lg.addColorStop(0, 'rgba(255,255,255,0)');
+    lg.addColorStop(0.5, `rgba(255,255,255,${a})`);
+    lg.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = lg; g.fillRect(cx - w, 0, w * 2, 512);
+  };
+  strip(250, 95, 0.95);
+  strip(760, 55, 0.55);
+  const teal = g.createLinearGradient(520, 0, 660, 0);
+  teal.addColorStop(0, 'rgba(96,196,200,0)');
+  teal.addColorStop(0.5, 'rgba(96,196,200,0.40)');
+  teal.addColorStop(1, 'rgba(96,196,200,0)');
+  g.fillStyle = teal; g.fillRect(520, 0, 140, 512);
+  const tex = new THREE.CanvasTexture(c);
+  tex.mapping = THREE.EquirectangularReflectionMapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
 async function initThree() {
   await loadThree();
   const canvas = document.getElementById('hero-canvas');
@@ -756,7 +808,7 @@ async function initThree() {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  renderer.toneMappingExposure = 1.12;
 
   scene = new THREE.Scene();
   // Le composer (bloom) peint du noir opaque sur les zones vides → un
@@ -774,30 +826,37 @@ async function initThree() {
   envCamera.position.set(0, 0, 0);
   scene.add(envCamera);
 
-  /* — Lighting 3-point + ambient — */
-  scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+  /* — Éclairage studio — ambient bas + key + 2 softbox (RectAreaLight).
+     Les RectAreaLight produisent le reflet rectangulaire net sur le verre
+     et le métal : c'est LA signature d'un rendu produit photoréaliste. */
+  RectAreaLightUniformsLib.init();
+  scene.add(new THREE.AmbientLight(0xffffff, 0.12));
 
-  const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
-  keyLight.position.set(3, 4, 5);
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+  keyLight.position.set(3, 5, 6);
   scene.add(keyLight);
 
-  const fillLight = new THREE.DirectionalLight(0x60c4c8, 0.6);
-  fillLight.position.set(-4, 1, 3);
-  scene.add(fillLight);
+  const softTop = new THREE.RectAreaLight(0xffffff, 3.2, 3.2, 6.5);
+  softTop.position.set(-2.4, 2.6, 3.2);
+  softTop.lookAt(0, 0, 0);
+  scene.add(softTop);
 
-  const rimLight = new THREE.DirectionalLight(0xffffff, 0.5);
-  rimLight.position.set(0, -2, -5);
-  scene.add(rimLight);
+  const softSide = new THREE.RectAreaLight(0x9fe8ea, 1.8, 4.5, 3.5);
+  softSide.position.set(3.2, -1.0, 2.6);
+  softSide.lookAt(0, 0, 0);
+  scene.add(softSide);
 
   /* — iPhone — */
   iphone = new iPhone();
   scene.add(iphone.group);
 
-  // Environment — RoomEnvironment via PMREM : vrais reflets studio
-  // sur le titane et le verre (zéro asset externe, ~1 frame de coût).
+  // Environment studio custom (bandes lumineuses) via PMREM : des reflets
+  // francs qui GLISSENT sur le titane et le verre quand l'iPhone tourne.
+  const envTex = makeStudioEnvTexture();
   const pmrem = new THREE.PMREMGenerator(renderer);
-  const envRT = pmrem.fromScene(new RoomEnvironment(), 0.04);
+  const envRT = pmrem.fromEquirectangular(envTex);
   scene.environment = envRT.texture;
+  envTex.dispose();
   pmrem.dispose();
 
   /* — Post-processing : Bloom (B2 rim emissive) + RGBShift léger (B1 glitch) — */
@@ -1109,6 +1168,9 @@ function loop(time) {
   const screenT = t;
   const ctx = iphone.screenCtx;
   ctx.clearRect(0, 0, SCREEN_W, SCREEN_H);
+  ctx.save();
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+  roundRect(ctx, 0, 0, SCREEN_W, SCREEN_H, 72); ctx.clip();   // coins d'écran arrondis
 
   const localT = state.localT;
   if (localT < 0.7) {
@@ -1122,6 +1184,7 @@ function loop(time) {
     SCREEN_RENDERERS[Math.min(state.idx + 1, SCENE_COUNT - 1)](ctx, 0.05);
     ctx.globalAlpha = 1;
   }
+  ctx.restore();
   iphone.markScreenDirty();
 
   /* — Timeline dots — */

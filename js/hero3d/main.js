@@ -875,10 +875,10 @@ async function loadPhoneModelWrapper() {
     });
   });
 
-  // 6) Écran : plan lumineux dimensionné EXACTEMENT sur le mesh d'affichage
-  //    réel (Screen_BG) et posé juste devant la dalle. UV propres de
-  //    PlaneGeometry → contenu net et droit ; taille = écran réel → fini le
-  //    carré collé surdimensionné. (Mapper sur les UV du modèle = atlas → noir.)
+  // 6) Écran : on mappe NOTRE texture DIRECTEMENT sur le mesh d'affichage réel
+  //    (Screen_BG), coplanaire avec la dalle → vrai écran incrusté, qui tourne
+  //    avec le téléphone, ZÉRO offset/parallaxe/superposition. On recalcule des
+  //    UV planaires (les UV d'origine = atlas baké → rendu noir).
   const screenCanvas = document.createElement('canvas');
   screenCanvas.width = 540; screenCanvas.height = 1170;
   const screenCtx = screenCanvas.getContext('2d');
@@ -888,20 +888,25 @@ async function loadPhoneModelWrapper() {
   const screenMat = new THREE.MeshBasicMaterial({ map: screenTexture, toneMapped: false });
   let disp2 = null;
   model.traverse(o => { if (o.isMesh && /screen_bg/i.test(o.material && o.material.name || '')) disp2 = o; });
-  let sw, sh, scx = 0, scy = 0, frontZ;
   if (disp2) {
-    const wb = new THREE.Box3().setFromObject(disp2);   // group.scale=1 → world == group-local
-    const c = wb.getCenter(new THREE.Vector3()); const sz = wb.getSize(new THREE.Vector3());
-    sw = Math.max(sz.x, 0.01) * 0.945;   // léger bezel : on voit le châssis autour
-    sh = Math.max(sz.y, 0.01) * 0.955;
-    scx = c.x; scy = c.y; frontZ = wb.max.z;
+    const g = disp2.geometry;
+    g.computeBoundingBox();
+    const bb = g.boundingBox, pos = g.attributes.position;
+    const sx = (bb.max.x - bb.min.x) || 1, sz = (bb.max.z - bb.min.z) || 1;
+    const uv = new Float32Array(pos.count * 2);
+    for (let i = 0; i < pos.count; i++) {
+      uv[i * 2]     = (pos.getX(i) - bb.min.x) / sx;            // largeur ← X local
+      uv[i * 2 + 1] = (pos.getZ(i) - bb.min.z) / sz;            // hauteur ← Z local
+    }
+    g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    disp2.material = screenMat;
+    disp2.renderOrder = 2;
   } else {
     const wb = new THREE.Box3().setFromObject(holder); const sz = wb.getSize(new THREE.Vector3());
-    sw = sz.x * 0.88; sh = sz.y * 0.93; frontZ = wb.max.z;
+    const ov = new THREE.Mesh(new THREE.PlaneGeometry(sz.x * 0.9, sz.y * 0.94), screenMat);
+    ov.position.set(0, 0, wb.max.z + 0.2);
+    group.add(ov);
   }
-  const screen = new THREE.Mesh(new THREE.PlaneGeometry(sw, sh), screenMat);
-  screen.position.set(scx, scy, frontZ + 0.35);   // au ras de la dalle
-  group.add(screen);
 
   // 7) Back-rim glow teal (derrière le téléphone)
   const hbz = new THREE.Box3().setFromObject(holder);

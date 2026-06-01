@@ -17,7 +17,7 @@
 
 // Three.js & addons chargés DYNAMIQUEMENT (chemin desktop uniquement).
 // Le fallback mobile ne télécharge JAMAIS le moteur WebGL (~180 KB).
-let THREE, EffectComposer, RenderPass, UnrealBloomPass, OutputPass, ShaderPass, RGBShiftShader, RectAreaLightUniformsLib;
+let THREE, EffectComposer, RenderPass, UnrealBloomPass, OutputPass, ShaderPass, RGBShiftShader, RectAreaLightUniformsLib, GLTFLoader, RGBELoader, DRACOLoader;
 async function loadThree() {
   THREE = await import('three');
   ({ EffectComposer } = await import('three/addons/postprocessing/EffectComposer.js'));
@@ -27,6 +27,9 @@ async function loadThree() {
   ({ ShaderPass } = await import('three/addons/postprocessing/ShaderPass.js'));
   ({ RGBShiftShader } = await import('three/addons/shaders/RGBShiftShader.js'));
   ({ RectAreaLightUniformsLib } = await import('three/addons/lights/RectAreaLightUniformsLib.js'));
+  ({ GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js'));
+  ({ RGBELoader } = await import('three/addons/loaders/RGBELoader.js'));
+  ({ DRACOLoader } = await import('three/addons/loaders/DRACOLoader.js'));
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -800,6 +803,107 @@ function makeStudioEnvTexture() {
   return tex;
 }
 
+// Charge l'iPhone GLTF réel (public/3d/iphone.glb), le redresse/centre/cadre,
+// améliore ses matériaux pour le studio, et superpose NOTRE écran lumineux
+// (canvas) sur la face avant — indépendant des UV du modèle. Expose la même
+// interface que la classe iPhone (group, pose, setRimIntensity, screenCtx…).
+async function loadPhoneModelWrapper() {
+  const loader = new GLTFLoader();
+  try {
+    const draco = new DRACOLoader();
+    draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/');
+    loader.setDRACOLoader(draco);
+  } catch (e) { /* draco optionnel */ }
+
+  const gltf = await loader.loadAsync(new URL('public/3d/iphone.glb', document.baseURI).href);
+  const model = gltf.scene;
+
+  // 1) Centrer le modèle à l'origine de son holder
+  model.updateMatrixWorld(true);
+  const pre = new THREE.Box3().setFromObject(model);
+  const preSize = pre.getSize(new THREE.Vector3());
+  const center = pre.getCenter(new THREE.Vector3());
+  model.position.sub(center);
+
+  const holder = new THREE.Group();
+  holder.add(model);
+
+  // 2) Redresser : amener l'axe LE PLUS COURT (épaisseur) vers Z (face caméra)
+  //    et le PLUS LONG (hauteur) vers Y. (Ce modèle : Y court, Z long → rot X.)
+  const dims = [preSize.x, preSize.y, preSize.z];
+  const shortest = dims.indexOf(Math.min(...dims));
+  if (shortest === 1)      holder.rotation.x = -Math.PI / 2;   // Y court → Z
+  else if (shortest === 0) holder.rotation.y =  Math.PI / 2;   // X court → Z
+  holder.updateMatrixWorld(true);
+  // si après ça le plus long n'est pas sur Y, swap via rotation Z
+  let rb = new THREE.Box3().setFromObject(holder);
+  let rs = rb.getSize(new THREE.Vector3());
+  if (rs.x > rs.y) { holder.rotation.z += Math.PI / 2; holder.updateMatrixWorld(true); rb = new THREE.Box3().setFromObject(holder); rs = rb.getSize(new THREE.Vector3()); }
+
+  // 3) Orienter l'écran vers la caméra (+Z) : centroïde des meshes "screen"
+  let zsum = 0, n = 0;
+  holder.traverse(o => {
+    if (o.isMesh && /screen/i.test(o.material && o.material.name || '')) {
+      if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+      const c = o.geometry.boundingBox.getCenter(new THREE.Vector3()).applyMatrix4(o.matrixWorld);
+      zsum += c.z; n++;
+    }
+  });
+  if (n && zsum / n < 0) { holder.rotation.y += Math.PI; holder.updateMatrixWorld(true); }
+  rb = new THREE.Box3().setFromObject(holder); rs = rb.getSize(new THREE.Vector3());
+
+  // 4) Échelle cible (hauteur ≈ 3 unités, comme le modèle codé)
+  const group = new THREE.Group();
+  group.add(holder);
+  group.scale.setScalar(3.0 / rs.y);
+
+  // 5) Matériaux : reflets studio appuyés, écran modèle neutralisé
+  model.traverse(o => {
+    if (!o.isMesh || !o.material) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    mats.forEach(m => {
+      m.envMapIntensity = 0.7;
+      if (m.metalness !== undefined && m.metalness > 0.4 && m.roughness !== undefined) {
+        m.roughness = Math.max(Math.min(m.roughness, 0.42), 0.18);   // évite le liseré miroir cramé
+      }
+      if (/screen_bg|screen_glass/i.test(m.name || '')) { m.color && m.color.setHex(0x000000); }
+      m.needsUpdate = true;
+    });
+  });
+
+  // 6) Notre écran lumineux superposé (canvas 540×1170), juste devant la face
+  const screenCanvas = document.createElement('canvas');
+  screenCanvas.width = 540; screenCanvas.height = 1170;
+  const screenCtx = screenCanvas.getContext('2d');
+  const screenTexture = new THREE.CanvasTexture(screenCanvas);
+  screenTexture.colorSpace = THREE.SRGBColorSpace;
+  screenTexture.anisotropy = 8;
+  const screen = new THREE.Mesh(
+    new THREE.PlaneGeometry(rs.x * 0.90, rs.y * 0.945),
+    new THREE.MeshBasicMaterial({ map: screenTexture, toneMapped: false })
+  );
+  screen.position.set(0, 0, rb.max.z + rs.z * 0.12);
+  group.add(screen);
+
+  // 7) Back-rim glow teal
+  const glow = new THREE.PointLight(0x60c4c8, 1.2, 5.0 / group.scale.x, 2);
+  glow.position.set(0, 0, rb.min.z - rs.z * 2);
+  group.add(glow);
+
+  return {
+    group, screenCanvas, screenCtx, screenTexture, _glow: glow,
+    pose({ px, py, pz, rx, ry, rz, scale }) {
+      group.position.set(px, py, pz);
+      // rotation appliquée au group : compose avec l'orientation du holder
+      group.rotation.set(rx, ry, rz);
+      const baseScale = 3.0 / rs.y;
+      group.scale.setScalar(baseScale * scale);
+    },
+    setRimIntensity(i) { if (glow) glow.intensity = i * 2.5; },
+    markScreenDirty() { screenTexture.needsUpdate = true; }
+  };
+}
+
 async function initThree() {
   await loadThree();
   const canvas = document.getElementById('hero-canvas');
@@ -808,7 +912,7 @@ async function initThree() {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.12;
+  renderer.toneMappingExposure = 0.95;
 
   scene = new THREE.Scene();
   // Le composer (bloom) peint du noir opaque sur les zones vides → un
@@ -836,36 +940,50 @@ async function initThree() {
   keyLight.position.set(3, 5, 6);
   scene.add(keyLight);
 
-  const softTop = new THREE.RectAreaLight(0xffffff, 3.2, 3.2, 6.5);
+  const softTop = new THREE.RectAreaLight(0xffffff, 2.2, 3.2, 6.5);
   softTop.position.set(-2.4, 2.6, 3.2);
   softTop.lookAt(0, 0, 0);
   scene.add(softTop);
 
-  const softSide = new THREE.RectAreaLight(0x9fe8ea, 1.8, 4.5, 3.5);
+  const softSide = new THREE.RectAreaLight(0x9fe8ea, 1.2, 4.5, 3.5);
   softSide.position.set(3.2, -1.0, 2.6);
   softSide.lookAt(0, 0, 0);
   scene.add(softSide);
 
-  /* — iPhone — */
-  iphone = new iPhone();
-  scene.add(iphone.group);
-
-  // Environment studio custom (bandes lumineuses) via PMREM : des reflets
-  // francs qui GLISSENT sur le titane et le verre quand l'iPhone tourne.
-  const envTex = makeStudioEnvTexture();
+  // Environment — HDRI studio RÉEL (reflets photoréalistes) via PMREM ;
+  // fallback sur l'env procédural si le .hdr ne charge pas.
   const pmrem = new THREE.PMREMGenerator(renderer);
-  const envRT = pmrem.fromEquirectangular(envTex);
-  scene.environment = envRT.texture;
-  envTex.dispose();
+  try {
+    const hdr = await new RGBELoader().loadAsync(new URL('public/3d/studio.hdr', document.baseURI).href);
+    hdr.mapping = THREE.EquirectangularReflectionMapping;
+    scene.environment = pmrem.fromEquirectangular(hdr).texture;
+    hdr.dispose();
+    console.log('[hero3d] HDRI studio chargé');
+  } catch (e) {
+    console.warn('[hero3d] HDRI KO → env procédural', e);
+    const envTex = makeStudioEnvTexture();
+    scene.environment = pmrem.fromEquirectangular(envTex).texture;
+    envTex.dispose();
+  }
   pmrem.dispose();
+
+  /* — iPhone : modèle GLTF réel, fallback sur le modèle codé — */
+  try {
+    iphone = await loadPhoneModelWrapper();
+    console.log('[hero3d] iPhone GLTF chargé');
+  } catch (e) {
+    console.warn('[hero3d] GLTF KO → modèle codé (fallback)', e);
+    iphone = new iPhone();
+  }
+  scene.add(iphone.group);
 
   /* — Post-processing : Bloom (B2 rim emissive) + RGBShift léger (B1 glitch) — */
   composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
 
   bloomPass = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.45, 0.6, 0.2);
-  bloomPass.threshold = 0.4;
-  bloomPass.strength = 0.45;
+  bloomPass.threshold = 0.72;   // seuil haut : seuls les vrais éclats blooment (pas tout le liseré HDRI)
+  bloomPass.strength = 0.25;
   bloomPass.radius = 0.6;
   composer.addPass(bloomPass);
 
@@ -1147,7 +1265,7 @@ function loop(time) {
   /* — Bloom intensity follows rim — */
   // Bloom adouci : l'ancien réglage cramait l'écran clair (scène ROI)
   // et faisait disparaître l'iPhone sur fond blanc.
-  bloomPass.strength = (isLight ? 0.10 : 0.22) + state.rim * 0.28;
+  bloomPass.strength = (isLight ? 0.05 : 0.13) + state.rim * 0.2;
 
   /* — Background color (morph signature buttermax) — */
   const [br, bgc, bbl] = oklchToSRGB(state.bg[0], state.bg[1], state.bg[2]);

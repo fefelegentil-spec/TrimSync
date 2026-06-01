@@ -840,55 +840,82 @@ async function loadPhoneModelWrapper() {
   let rs = rb.getSize(new THREE.Vector3());
   if (rs.x > rs.y) { holder.rotation.z += Math.PI / 2; holder.updateMatrixWorld(true); rb = new THREE.Box3().setFromObject(holder); rs = rb.getSize(new THREE.Vector3()); }
 
-  // 3) Orienter l'écran vers la caméra (+Z) : centroïde des meshes "screen"
-  let zsum = 0, n = 0;
-  holder.traverse(o => {
-    if (o.isMesh && /screen/i.test(o.material && o.material.name || '')) {
-      if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
-      const c = o.geometry.boundingBox.getCenter(new THREE.Vector3()).applyMatrix4(o.matrixWorld);
-      zsum += c.z; n++;
-    }
-  });
-  if (n && zsum / n < 0) { holder.rotation.y += Math.PI; holder.updateMatrixWorld(true); }
+  // 3) Orienter l'ÉCRAN (mesh Screen_BG) vers la caméra (+Z) via sa NORMALE.
+  //    Ne pas se baser sur tous les meshes "screen" : les 3 objectifs caméra
+  //    sont aussi nommés "Screen_Glass" et faussaient le calcul (→ dos visible).
+  holder.updateMatrixWorld(true);
+  let disp = null;
+  holder.traverse(o => { if (o.isMesh && /screen_bg/i.test(o.material && o.material.name || '')) disp = o; });
+  if (disp && disp.geometry.attributes.normal) {
+    const na = disp.geometry.attributes.normal;
+    const nrm = new THREE.Vector3(na.getX(0), na.getY(0), na.getZ(0))
+      .applyNormalMatrix(new THREE.Matrix3().getNormalMatrix(disp.matrixWorld)).normalize();
+    if (nrm.z < 0) { holder.rotation.y += Math.PI; holder.updateMatrixWorld(true); }
+  }
   rb = new THREE.Box3().setFromObject(holder); rs = rb.getSize(new THREE.Vector3());
 
   // 4) Échelle cible (hauteur ≈ 3 unités, comme le modèle codé)
   const group = new THREE.Group();
   group.add(holder);
-  group.scale.setScalar(3.0 / rs.y);
+  group.scale.setScalar(1);
+  group.updateMatrixWorld(true);
+  const TARGET_H = 2.6;   // hauteur monde visée (tient dans le viewport ~3.5 avec marge)
 
   // 5) Matériaux : reflets studio appuyés, écran modèle neutralisé
   model.traverse(o => {
     if (!o.isMesh || !o.material) return;
     const mats = Array.isArray(o.material) ? o.material : [o.material];
     mats.forEach(m => {
-      m.envMapIntensity = 0.7;
+      m.envMapIntensity = 1.0;
       if (m.metalness !== undefined && m.metalness > 0.4 && m.roughness !== undefined) {
-        m.roughness = Math.max(Math.min(m.roughness, 0.42), 0.18);   // évite le liseré miroir cramé
+        m.roughness = Math.max(Math.min(m.roughness, 0.42), 0.20);   // métal lisible, sans liseré miroir cramé
       }
       if (/screen_bg|screen_glass/i.test(m.name || '')) { m.color && m.color.setHex(0x000000); }
       m.needsUpdate = true;
     });
   });
 
-  // 6) Notre écran lumineux superposé (canvas 540×1170), juste devant la face
+  // 6) Écran : plan lumineux dimensionné EXACTEMENT sur le mesh d'affichage
+  //    réel (Screen_BG) et posé juste devant la dalle. UV propres de
+  //    PlaneGeometry → contenu net et droit ; taille = écran réel → fini le
+  //    carré collé surdimensionné. (Mapper sur les UV du modèle = atlas → noir.)
   const screenCanvas = document.createElement('canvas');
   screenCanvas.width = 540; screenCanvas.height = 1170;
   const screenCtx = screenCanvas.getContext('2d');
   const screenTexture = new THREE.CanvasTexture(screenCanvas);
   screenTexture.colorSpace = THREE.SRGBColorSpace;
   screenTexture.anisotropy = 8;
-  const screen = new THREE.Mesh(
-    new THREE.PlaneGeometry(rs.x * 0.90, rs.y * 0.945),
-    new THREE.MeshBasicMaterial({ map: screenTexture, toneMapped: false })
-  );
-  screen.position.set(0, 0, rb.max.z + rs.z * 0.12);
+  const screenMat = new THREE.MeshBasicMaterial({ map: screenTexture, toneMapped: false });
+  let disp2 = null;
+  model.traverse(o => { if (o.isMesh && /screen_bg/i.test(o.material && o.material.name || '')) disp2 = o; });
+  let sw, sh, scx = 0, scy = 0, frontZ;
+  if (disp2) {
+    const wb = new THREE.Box3().setFromObject(disp2);   // group.scale=1 → world == group-local
+    const c = wb.getCenter(new THREE.Vector3()); const sz = wb.getSize(new THREE.Vector3());
+    sw = Math.max(sz.x, 0.01) * 0.945;   // léger bezel : on voit le châssis autour
+    sh = Math.max(sz.y, 0.01) * 0.955;
+    scx = c.x; scy = c.y; frontZ = wb.max.z;
+  } else {
+    const wb = new THREE.Box3().setFromObject(holder); const sz = wb.getSize(new THREE.Vector3());
+    sw = sz.x * 0.88; sh = sz.y * 0.93; frontZ = wb.max.z;
+  }
+  const screen = new THREE.Mesh(new THREE.PlaneGeometry(sw, sh), screenMat);
+  screen.position.set(scx, scy, frontZ + 0.35);   // au ras de la dalle
   group.add(screen);
 
-  // 7) Back-rim glow teal
-  const glow = new THREE.PointLight(0x60c4c8, 1.2, 5.0 / group.scale.x, 2);
-  glow.position.set(0, 0, rb.min.z - rs.z * 2);
+  // 7) Back-rim glow teal (derrière le téléphone)
+  const hbz = new THREE.Box3().setFromObject(holder);
+  const glow = new THREE.PointLight(0x60c4c8, 1.4, 0, 2);
+  glow.position.set(0, 0, hbz.min.z - 1.5);
   group.add(glow);
+
+  // 8) Échelle finale FIABLE : on mesure le group ASSEMBLÉ (scale 1) → vraie
+  //    hauteur. (rs/rb intermédiaires étaient faussés par les scales de nœuds
+  //    internes du GLTF → le téléphone débordait du viewport.)
+  group.updateMatrixWorld(true);
+  const realH = new THREE.Box3().setFromObject(group).getSize(new THREE.Vector3()).y || 1;
+  const baseScale = TARGET_H / realH;
+  group.scale.setScalar(baseScale);
 
   return {
     group, screenCanvas, screenCtx, screenTexture, _glow: glow,
@@ -896,7 +923,6 @@ async function loadPhoneModelWrapper() {
       group.position.set(px, py, pz);
       // rotation appliquée au group : compose avec l'orientation du holder
       group.rotation.set(rx, ry, rz);
-      const baseScale = 3.0 / rs.y;
       group.scale.setScalar(baseScale * scale);
     },
     setRimIntensity(i) { if (glow) glow.intensity = i * 2.5; },
@@ -912,7 +938,7 @@ async function initThree() {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.95;
+  renderer.toneMappingExposure = 1.15;   // remonté : le châssis était trop sombre/invisible
 
   scene = new THREE.Scene();
   // Le composer (bloom) peint du noir opaque sur les zones vides → un
@@ -936,9 +962,12 @@ async function initThree() {
   RectAreaLightUniformsLib.init();
   scene.add(new THREE.AmbientLight(0xffffff, 0.12));
 
-  const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.7);
   keyLight.position.set(3, 5, 6);
   scene.add(keyLight);
+  const fillLight = new THREE.DirectionalLight(0x9fe8ea, 0.5);
+  fillLight.position.set(-4, -1, 3);
+  scene.add(fillLight);
 
   const softTop = new THREE.RectAreaLight(0xffffff, 2.2, 3.2, 6.5);
   softTop.position.set(-2.4, 2.6, 3.2);
@@ -1233,7 +1262,7 @@ function loop(time) {
   const t = time / 1000;
   const progress = getScrollProgress();
   const state = evaluateTimeline(progress);
-  const isLight = state.bg[0] > 0.6;   // fond clair (scène ROI) → ajuste bloom + texte
+  const isLight = false;   // fond sombre constant (morph couleur retiré à la demande)
 
   /* — iPhone pose — */
   // Add gyro & mouse drift
@@ -1267,18 +1296,8 @@ function loop(time) {
   // et faisait disparaître l'iPhone sur fond blanc.
   bloomPass.strength = (isLight ? 0.05 : 0.13) + state.rim * 0.2;
 
-  /* — Background color (morph signature buttermax) — */
-  const [br, bgc, bbl] = oklchToSRGB(state.bg[0], state.bg[1], state.bg[2]);
-  if (scene.background) scene.background.setRGB(br, bgc, bbl, THREE.SRGBColorSpace);
-  // En embarqué on ne peint PAS le body (le reste de la landing garde son fond).
-  if (!EMBEDDED) document.body.style.backgroundColor = oklchLerp(state.bg, state.bg, 0);
-
-  /* — Light scene : texte en sombre quand le fond est clair. Scopé à la
-     section en embarqué pour ne pas polluer le reste de la page. */
-  if (isLight !== _lastIsLight) {
-    _lastIsLight = isLight;
-    (EMBEDDED ? HERO_SECTION : document.body).classList.toggle('light-scene', isLight);
-  }
+  /* — Fond : constant sombre (le morph de couleur a été retiré à la demande).
+     scene.background est posé une seule fois dans initThree, on n'y touche plus. */
 
   /* — Screen content (canvas2D) — */
   // Update the iPhone screen with the current scene renderer

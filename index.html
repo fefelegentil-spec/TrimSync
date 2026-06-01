@@ -1448,7 +1448,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .hero3d .scene-cta{display:inline-flex;align-items:center;gap:10px;margin-top:28px;padding:14px 22px;border-radius:10px;background:var(--a);color:#0a1010;font-family:var(--fd);font-weight:600;font-size:15px;pointer-events:auto;opacity:0;transform:translateY(12px);transition:all .6s var(--ex);box-shadow:0 12px 36px oklch(0.76 0.13 193/.45)}
 .hero3d .scene-cta.is-visible{opacity:1;transform:none}
 .hero3d .scene-cta svg{width:16px;height:16px}
-.hero3d .timeline-rail{position:absolute;right:32px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:18px;align-items:center}
+.hero3d .timeline-rail{display:none}   /* le site a déjà sa propre sec-nav à droite → on masque la nôtre */
 .hero3d .timeline-dot{width:8px;height:8px;border-radius:50%;background:oklch(0.94 0.01 200/.25);transition:all .4s var(--ex);position:relative;border:none;padding:0;cursor:pointer}
 .hero3d .timeline-dot.is-current{background:var(--a);width:10px;height:10px;box-shadow:0 0 24px var(--a)}
 .hero3d .timeline-dot.is-past{background:var(--a);opacity:.5}

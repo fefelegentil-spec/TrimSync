@@ -1345,6 +1345,8 @@ function playWhisper() {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 let gyroX = 0, gyroY = 0;
+// Cursor drift lerp state — voir la boucle pour le détail (style Buttermax).
+let smoothMouseRx = 0, smoothMouseRy = 0;
 function initGyro() {
   if (!IS_TOUCH) return;
   if (typeof DeviceOrientationEvent !== 'undefined') {
@@ -1412,22 +1414,32 @@ function loop(time) {
   const isLight = false;   // fond sombre constant (morph couleur retiré à la demande)
 
   /* — iPhone pose — */
-  // Mouse drift retiré à la demande : le téléphone ne suit plus le curseur.
-  // Gyro retiré du calcul aussi (il n'avait d'effet QUE sur mobile, et le
-  // mobile passe en fallback DOM → cette branche n'est jamais touchée).
   const finalPose = { ...state.pose };
 
-  // ANIMATIONS DE FOND — plus amples pour casser le côté "statique".
-  //   py : flottement vertical sin lent (amplitude 0.10)
-  //   pz : breathe avant/arrière sin très lent (0.18) → le téléphone vient
-  //        vers nous et recule en boucle, comme s'il respirait.
-  //   rx/ry/rz : micro-rotations désynchronisées sur les trois axes pour
-  //        que l'orientation vibre légèrement sans jamais "se fixer".
-  finalPose.py += Math.sin(t * 0.55) * 0.10;
-  finalPose.pz += Math.sin(t * 0.38) * 0.18 + 0.05;  // bias +0.05 → légèrement plus proche
-  finalPose.ry += Math.sin(t * 0.22) * 0.05;
-  finalPose.rx += Math.sin(t * 0.31 + 1.3) * 0.035;
-  finalPose.rz += Math.sin(t * 0.43 + 2.1) * 0.025;
+  // ANIMATIONS AUTONOMES — amplitudes appuyées pour que le téléphone vive.
+  // Fréquences volontairement irrationnelles entre elles → la boucle ne se
+  // répète jamais à l'identique, l'œil ne capte pas de pattern.
+  //   py : flottement vertical (±0.14)
+  //   pz : respiration avant/arrière (±0.25, bias +0.06 → légèrement vers nous)
+  //   px : dérive latérale légère (±0.08)
+  //   rx/ry/rz : micro-rotations multi-axes désync
+  finalPose.py += Math.sin(t * 0.55) * 0.14;
+  finalPose.pz += Math.sin(t * 0.38) * 0.25 + 0.06;
+  finalPose.px += Math.sin(t * 0.28 + 0.7) * 0.08;
+  finalPose.ry += Math.sin(t * 0.22) * 0.07;
+  finalPose.rx += Math.sin(t * 0.31 + 1.3) * 0.05;
+  finalPose.rz += Math.sin(t * 0.43 + 2.1) * 0.035;
+
+  // CURSOR DRIFT — style Buttermax : la cible bouge instantanément avec la
+  // souris, mais la valeur appliquée converge vers la cible avec un lerp
+  // doux (0.05/frame ≈ ~300ms à 60Hz) → glissement buttery, jamais
+  // d'accroche dure. Amplitude légère pour rester subliminal.
+  const tgtRy = ((mouseX / innerWidth)  - 0.5) * 0.18;   // ±0.09 rad max (~5°)
+  const tgtRx = ((mouseY / innerHeight) - 0.5) * 0.12;
+  smoothMouseRy = lerp(smoothMouseRy, tgtRy, 0.05);
+  smoothMouseRx = lerp(smoothMouseRx, tgtRx, 0.05);
+  finalPose.ry += smoothMouseRy;
+  finalPose.rx += -smoothMouseRx;   // souris vers le haut → téléphone se penche vers nous
 
   // Easter egg : "non" rotation if triggered
   if (easterPhase > 0) {

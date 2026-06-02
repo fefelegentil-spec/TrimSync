@@ -343,7 +343,22 @@ class iPhone {
 const SCREEN_W = 540;
 const SCREEN_H = 1170;
 
-// Helper draw rounded rect
+// Palette TrimSync — alignée sur les tokens CSS du site (--a, --bg, --bg2…).
+const C = {
+  teal:     '#5fbfc3',
+  tealDim:  '#9bd6d8',
+  tealDark: '#3a8589',
+  bg:       '#0e0f13',
+  bg2:      '#1c1e22',
+  bg3:      '#262a30',
+  text:     '#eaf1f3',
+  text2:    '#9bb0b5',
+  text3:    '#6a7a80',
+  igBubble: '#262626',
+  igInput:  '#1a1a1a',
+  white:    '#ffffff'
+};
+
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -354,380 +369,819 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-// Common chrome (status bar + dynamic island shadow)
-function drawChrome(ctx, isDark = true) {
-  ctx.fillStyle = isDark ? '#000' : '#fff';
-  ctx.font = '600 28px Figtree, system-ui';
+// Status bar iOS authentique : 9:41 SF-Pro à gauche, signal/wifi/batterie à
+// droite. Tout en chemins canvas, pas d'emoji ni glyphes système (qui
+// rendaient mal selon les polices disponibles). La Dynamic Island est gérée
+// par le mesh 3D capsule — on laisse le centre vide ici.
+function drawStatusBar(ctx, light = false) {
+  const fg = light ? '#0a0a0a' : '#ffffff';
+  ctx.fillStyle = fg;
+  ctx.strokeStyle = fg;
+
+  // Heure 9:41 (système iOS) — gauche
+  ctx.font = '700 30px -apple-system, "SF Pro Display", "Bricolage Grotesque", system-ui';
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = isDark ? '#fff' : '#000';
   ctx.textAlign = 'left';
-  ctx.fillText('9:41', 40, 56);
-  ctx.textAlign = 'right';
-  ctx.fillText('●●●  ⌃  ▮', SCREEN_W - 40, 56);
-}
+  ctx.fillText('9:41', 50, 62);
 
-// Scene 0 — Instagram DM at 2:47am
-function drawScreen0(ctx, t) {
-  // Background: Instagram dark
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
-  drawChrome(ctx);
+  // Bloc de droite : signal (4 barres) + wifi (3 arcs) + batterie (96)
+  let rx = SCREEN_W - 50;   // bord droit, on remplit vers la gauche
 
-  // Header
-  ctx.fillStyle = '#fff';
-  ctx.font = '700 32px Figtree, system-ui';
-  ctx.textAlign = 'left';
-  ctx.fillText('@_kev.cuts', 50, 160);
-  ctx.fillStyle = '#888';
-  ctx.font = '500 22px Figtree, system-ui';
-  ctx.fillText('Active 2h ago', 50, 192);
-
-  // Time stamp
-  ctx.fillStyle = '#666';
-  ctx.font = '500 20px Figtree, system-ui';
-  ctx.textAlign = 'center';
-  ctx.fillText('Today  ·  2:47 AM', SCREEN_W / 2, 280);
-
-  // Client bubble (gray, left)
-  const bubbleW = 380;
-  const bubbleH = 110;
-  const bubbleX = 40;
-  const bubbleY = 320;
-  ctx.fillStyle = '#262626';
-  roundRect(ctx, bubbleX, bubbleY, bubbleW, bubbleH, 24);
+  // Batterie : capsule arrondie + terminal + remplissage
+  const bw = 50, bh = 24, by = 62 - bh / 2;
+  const bx = rx - bw;
+  ctx.lineWidth = 2;
+  roundRect(ctx, bx, by, bw, bh, 6);
+  ctx.globalAlpha = 0.45;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+  // Terminal +
+  ctx.fillRect(bx + bw + 2, by + 7, 3, 10);
+  // Remplissage 96%
+  const fill = 0.96;
+  roundRect(ctx, bx + 3, by + 3, (bw - 6) * fill, bh - 6, 3);
   ctx.fill();
-  ctx.fillStyle = '#fff';
-  ctx.font = '500 26px Figtree, system-ui';
-  ctx.textAlign = 'left';
-  ctx.fillText('Yo frérot tu peux me', bubbleX + 28, bubbleY + 40);
-  ctx.fillText('prendre demain ?', bubbleX + 28, bubbleY + 76);
+  rx = bx - 12;
 
-  // Typing indicator that pulses (animated)
-  const pulse = 0.5 + 0.5 * Math.sin(t * 4);
-  ctx.fillStyle = `rgba(96, 196, 200, ${0.3 + pulse * 0.4})`;
+  // Wi-Fi : 3 arcs concentriques + dot central
+  const wx = rx - 14, wy = 62;
+  for (let i = 0; i < 3; i++) {
+    const r = 6 + i * 5;
+    ctx.beginPath();
+    ctx.arc(wx, wy + 4, r, -2.2, -0.94);
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
   ctx.beginPath();
-  ctx.arc(bubbleX + 30, bubbleY + 180, 8, 0, Math.PI * 2);
-  ctx.arc(bubbleX + 60, bubbleY + 180, 8, 0, Math.PI * 2);
-  ctx.arc(bubbleX + 90, bubbleY + 180, 8, 0, Math.PI * 2);
+  ctx.arc(wx, wy + 4, 2.2, 0, Math.PI * 2);
   ctx.fill();
+  rx = wx - 18;
 
-  // Input bar bottom (faded)
-  ctx.fillStyle = '#1a1a1a';
-  roundRect(ctx, 40, SCREEN_H - 140, SCREEN_W - 80, 80, 40);
-  ctx.fill();
-  ctx.fillStyle = '#444';
-  ctx.font = '500 26px Figtree, system-ui';
-  ctx.textAlign = 'left';
-  ctx.fillText('Message…', 80, SCREEN_H - 100);
-
-  // Notification banner sliding in top (fades according to t)
-  const notifY = -180 + Math.min(t * 600, 180);
-  if (notifY > -100) {
-    ctx.fillStyle = 'rgba(20, 20, 22, 0.95)';
-    roundRect(ctx, 30, notifY, SCREEN_W - 60, 140, 28);
-    ctx.fill();
-    ctx.fillStyle = '#60c4c8';
-    ctx.font = '700 22px Figtree, system-ui';
-    ctx.textAlign = 'left';
-    ctx.fillText('TRIMSYNC', 56, notifY + 44);
-    ctx.fillStyle = '#fff';
-    ctx.font = '500 24px Figtree, system-ui';
-    ctx.fillText('New DM — replying for you…', 56, notifY + 88);
+  // Signal cellulaire : 4 barres croissantes (toutes pleines = full signal)
+  const barW = 4, gap = 3, barBase = 72;
+  for (let i = 0; i < 4; i++) {
+    const h = 6 + i * 4;
+    const x = rx - (4 - i) * (barW + gap);
+    ctx.fillRect(x, barBase - h, barW, h);
   }
 }
 
-// Scene 1 — TrimSync AI responding
-function drawScreen1(ctx, t) {
-  // Background teal-tinted
-  const grad = ctx.createLinearGradient(0, 0, 0, SCREEN_H);
-  grad.addColorStop(0, '#0a1418');
-  grad.addColorStop(1, '#102024');
+// Avatar Instagram du client (cercle dégradé orange→rose→violet IG).
+function drawIGAvatar(ctx, cx, cy, r) {
+  const grad = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
+  grad.addColorStop(0, '#fcb045');
+  grad.addColorStop(0.5, '#fd1d1d');
+  grad.addColorStop(1, '#833ab4');
   ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
-  drawChrome(ctx);
-
-  // Header
-  ctx.fillStyle = '#60c4c8';
-  ctx.font = '700 32px Figtree, system-ui';
-  ctx.textAlign = 'left';
-  ctx.fillText('TrimSync · AI', 50, 160);
-  ctx.fillStyle = '#a0d6d8';
-  ctx.font = '500 22px Figtree, system-ui';
-  ctx.fillText('Active · replying in your voice', 50, 192);
-
-  // Client message
-  ctx.fillStyle = '#1f2c30';
-  roundRect(ctx, 40, 260, 380, 90, 22);
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
   ctx.fill();
+  // Initiale blanche
   ctx.fillStyle = '#fff';
-  ctx.font = '500 24px Figtree, system-ui';
-  ctx.fillText('Yo frérot tu peux me prendre demain ?', 60, 312);
-
-  // AI bubble (teal, right)
-  const aiY = 380;
-  ctx.fillStyle = '#60c4c8';
-  roundRect(ctx, 100, aiY, SCREEN_W - 140, 130, 22);
-  ctx.fill();
-  ctx.fillStyle = '#0a1010';
-  ctx.font = '600 24px Figtree, system-ui';
-  ctx.textAlign = 'left';
-  ctx.fillText('Yo ! J\'ai 3 créneaux demain', 124, aiY + 44);
-  ctx.fillText('14:00, 16:30, 18:00.', 124, aiY + 76);
-  ctx.font = '500 22px Figtree, system-ui';
-  ctx.fillText('Tu veux lequel ?', 124, aiY + 108);
-
-  // 3 time slot chips that fade-in staggered
-  const slots = ['14:00', '16:30', '18:00'];
-  slots.forEach((s, i) => {
-    const delay = i * 0.25;
-    const localT = clamp((t - delay) * 1.5, 0, 1);
-    if (localT <= 0) return;
-    const opacity = localT;
-    const y = 560 + i * 110;
-    const offsetX = (1 - localT) * 40;
-    ctx.fillStyle = `rgba(96, 196, 200, ${0.15 * opacity})`;
-    ctx.strokeStyle = `rgba(96, 196, 200, ${opacity})`;
-    ctx.lineWidth = 2;
-    roundRect(ctx, 60 + offsetX, y, SCREEN_W - 120, 84, 18);
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = `rgba(255,255,255,${opacity})`;
-    ctx.font = '600 28px Figtree, system-ui';
-    ctx.textAlign = 'left';
-    ctx.fillText(s, 96 + offsetX, y + 54);
-    ctx.font = '500 22px Figtree, system-ui';
-    ctx.fillStyle = `rgba(160, 214, 216, ${opacity})`;
-    ctx.textAlign = 'right';
-    ctx.fillText('Tap to book', SCREEN_W - 96 + offsetX, y + 54);
-  });
+  ctx.font = '700 26px -apple-system, system-ui';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('K', cx, cy + 1);
 }
 
-// Scene 2 — Booked & confirmed
-function drawScreen2(ctx, t) {
-  // Background bright teal-tinted
-  const grad = ctx.createLinearGradient(0, 0, 0, SCREEN_H);
-  grad.addColorStop(0, '#102a30');
-  grad.addColorStop(1, '#1a4248');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
-  drawChrome(ctx);
+// Header Instagram DM — back arrow + avatar + nom + status + call/video icons
+function drawIGHeader(ctx, name = '_kev.cuts', status = 'Active 12m ago') {
+  // Fine ligne séparation sous le header
+  ctx.strokeStyle = '#222';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, 240); ctx.lineTo(SCREEN_W, 240); ctx.stroke();
 
-  // Big circular checkmark (animated draw-on)
-  const cx = SCREEN_W / 2, cy = 500;
-  const r = 130;
-  const ringT = clamp(t * 1.5, 0, 1);
-  ctx.strokeStyle = '#60c4c8';
-  ctx.lineWidth = 8;
+  // Back arrow ‹
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
   ctx.beginPath();
-  ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + ringT * Math.PI * 2);
+  ctx.moveTo(46, 148); ctx.lineTo(28, 168); ctx.lineTo(46, 188);
   ctx.stroke();
 
-  if (ringT >= 1) {
-    const checkT = clamp((t - 0.7) * 2, 0, 1);
-    ctx.strokeStyle = '#60c4c8';
-    ctx.lineWidth = 12;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(cx - 50, cy + 5);
-    const midX = cx - 12, midY = cy + 45;
-    const endX = cx + 56, endY = cy - 38;
-    if (checkT < 0.5) {
-      const p = checkT / 0.5;
-      ctx.lineTo(cx - 50 + (midX - (cx - 50)) * p, cy + 5 + (midY - (cy + 5)) * p);
-    } else {
-      ctx.lineTo(midX, midY);
-      const p = (checkT - 0.5) / 0.5;
-      ctx.lineTo(midX + (endX - midX) * p, midY + (endY - midY) * p);
-    }
-    ctx.stroke();
-  }
+  // Avatar + halo dégradé IG (story ring)
+  drawIGAvatar(ctx, 100, 168, 28);
 
-  // Booking card
-  ctx.fillStyle = 'rgba(255,255,255,0.06)';
-  roundRect(ctx, 60, 720, SCREEN_W - 120, 280, 28);
-  ctx.fill();
-  ctx.fillStyle = '#60c4c8';
-  ctx.font = '700 22px Figtree, system-ui';
-  ctx.textAlign = 'left';
-  ctx.fillText('CONFIRMED', 96, 768);
+  // Nom + statut
   ctx.fillStyle = '#fff';
-  ctx.font = '700 36px Bricolage Grotesque, system-ui';
-  ctx.fillText('Saturday · 2:00 PM', 96, 820);
-  ctx.fillStyle = '#a0d6d8';
-  ctx.font = '500 24px Figtree, system-ui';
-  ctx.fillText('Coupe Premium · 45 min · 35 €', 96, 868);
-  ctx.fillText('Client: @_kev.cuts', 96, 908);
-  ctx.fillStyle = '#60c4c8';
-  ctx.font = '600 22px Figtree, system-ui';
-  ctx.fillText('Added to your agenda  →', 96, 968);
+  ctx.font = '700 24px -apple-system, "Figtree", system-ui';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(name, 142, 158);
+  ctx.fillStyle = '#8e9498';
+  ctx.font = '500 18px -apple-system, "Figtree", system-ui';
+  ctx.fillText(status, 142, 184);
+
+  // Icônes call (téléphone) + video (caméra), à droite
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 2.4;
+  // Téléphone
+  const phx = SCREEN_W - 100, phy = 168;
+  ctx.beginPath();
+  ctx.moveTo(phx - 11, phy - 11);
+  ctx.quadraticCurveTo(phx - 14, phy - 14, phx - 6, phy - 6);
+  ctx.lineTo(phx - 2, phy - 2);
+  ctx.quadraticCurveTo(phx + 1, phy + 1, phx + 1, phy + 4);
+  ctx.quadraticCurveTo(phx + 4, phy + 14, phx + 14, phy + 11);
+  ctx.stroke();
+  // Caméra (rectangle + triangle)
+  const cmx = SCREEN_W - 50, cmy = 168;
+  roundRect(ctx, cmx - 14, cmy - 9, 22, 18, 4);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cmx + 8, cmy - 5);
+  ctx.lineTo(cmx + 16, cmy - 9);
+  ctx.lineTo(cmx + 16, cmy + 9);
+  ctx.lineTo(cmx + 8, cmy + 5);
+  ctx.closePath();
+  ctx.stroke();
 }
 
-// Scene 3 — Barbier's agenda (week view)
-function drawScreen3(ctx, t) {
-  // Warm copper background
-  const grad = ctx.createLinearGradient(0, 0, 0, SCREEN_H);
-  grad.addColorStop(0, '#1a1410');
-  grad.addColorStop(1, '#2a1f18');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
-  drawChrome(ctx);
-
-  // Header
+function drawIGInputBar(ctx, placeholder = 'Message…') {
+  const y = SCREEN_H - 130;
+  // Camera button rond gauche (teal IG → on garde le bleu IG natif)
+  ctx.fillStyle = '#0095f6';
+  ctx.beginPath();
+  ctx.arc(70, y + 35, 26, 0, Math.PI * 2);
+  ctx.fill();
+  // Icône caméra dedans
   ctx.fillStyle = '#fff';
-  ctx.font = '700 30px Figtree, system-ui';
+  roundRect(ctx, 56, y + 25, 28, 20, 4);
+  ctx.fill();
+  ctx.fillStyle = '#0095f6';
+  ctx.beginPath();
+  ctx.arc(70, y + 35, 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Champ texte pilule
+  ctx.fillStyle = C.igInput;
+  roundRect(ctx, 110, y, SCREEN_W - 130, 70, 35);
+  ctx.fill();
+  ctx.fillStyle = '#777';
+  ctx.font = '500 22px -apple-system, "Figtree", system-ui';
   ctx.textAlign = 'left';
-  ctx.fillText('This week', 50, 160);
-  ctx.fillStyle = '#d4a574';
-  ctx.font = '500 22px Figtree, system-ui';
-  ctx.fillText('17 bookings · 720 €', 50, 192);
-
-  // Days
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const colW = (SCREEN_W - 80) / 6;
-  const startY = 240;
-
-  // Headers
+  ctx.textBaseline = 'middle';
+  ctx.fillText(placeholder, 138, y + 35);
+  // Mic + gallery + sticker à droite du placeholder
   ctx.fillStyle = '#888';
-  ctx.font = '600 18px Figtree, system-ui';
+  ctx.beginPath();
+  ctx.arc(SCREEN_W - 110, y + 35, 4, 0, Math.PI * 2);
+  ctx.arc(SCREEN_W - 88, y + 35, 4, 0, Math.PI * 2);
+  ctx.arc(SCREEN_W - 66, y + 35, 4, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// Scene 0 — DM Instagram réel à 2h47, banner TrimSync qui descend du haut.
+function drawScreen0(ctx, t) {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+  drawStatusBar(ctx);
+  drawIGHeader(ctx, '_kev.cuts', 'Active 12m ago');
+
+  // Timestamp centré
+  ctx.fillStyle = '#666';
+  ctx.font = '600 18px -apple-system, "Figtree", system-ui';
   ctx.textAlign = 'center';
-  days.forEach((d, i) => {
-    ctx.fillText(d, 40 + colW * i + colW / 2, startY + 24);
-  });
+  ctx.textBaseline = 'middle';
+  ctx.fillText('TODAY  ·  2:47 AM', SCREEN_W / 2, 290);
 
-  // Booking blocks (simulated)
-  const blocks = [
-    { day: 0, start: 0.1, dur: 0.08, label: '10h', col: '#60c4c8' },
-    { day: 0, start: 0.25, dur: 0.08, label: '12h', col: '#60c4c8' },
-    { day: 1, start: 0.15, dur: 0.08, label: '11h', col: '#d4a574' },
-    { day: 1, start: 0.35, dur: 0.10, label: '14h', col: '#d4a574' },
-    { day: 1, start: 0.55, dur: 0.08, label: '17h', col: '#60c4c8' },
-    { day: 2, start: 0.08, dur: 0.10, label: '09h', col: '#d4a574' },
-    { day: 2, start: 0.28, dur: 0.12, label: '13h', col: '#60c4c8' },
-    { day: 2, start: 0.48, dur: 0.08, label: '16h', col: '#d4a574' },
-    { day: 3, start: 0.18, dur: 0.10, label: '12h', col: '#60c4c8' },
-    { day: 3, start: 0.40, dur: 0.10, label: '15h', col: '#d4a574' },
-    { day: 4, start: 0.10, dur: 0.08, label: '10h', col: '#d4a574' },
-    { day: 4, start: 0.30, dur: 0.12, label: '13h', col: '#60c4c8' },
-    { day: 4, start: 0.55, dur: 0.10, label: '17h', col: '#d4a574' },
-    { day: 5, start: 0.05, dur: 0.10, label: '09h', col: '#60c4c8' },
-    { day: 5, start: 0.25, dur: 0.10, label: '12h', col: '#d4a574' },
-    { day: 5, start: 0.45, dur: 0.10, label: '15h', col: '#60c4c8' }
-  ];
+  // Bulle entrante du client (gris foncé IG, coin bas-gauche arrondi moins)
+  const bx = 40, by = 340, bw = 360, bh = 110;
+  ctx.fillStyle = C.igBubble;
+  ctx.beginPath();
+  ctx.moveTo(bx + 26, by);
+  ctx.arcTo(bx + bw, by, bx + bw, by + bh, 26);
+  ctx.arcTo(bx + bw, by + bh, bx, by + bh, 26);
+  ctx.arcTo(bx, by + bh, bx, by, 8);   // coin bas-gauche petit = pointe vers avatar
+  ctx.arcTo(bx, by, bx + bw, by, 26);
+  ctx.closePath();
+  ctx.fill();
 
-  const gridStartY = startY + 48;
-  const gridH = SCREEN_H - gridStartY - 100;
-  blocks.forEach((b, i) => {
-    const localT = clamp(t * 2.5 - i * 0.04, 0, 1);
-    if (localT <= 0) return;
-    const x = 40 + colW * b.day + 6;
-    const w = colW - 12;
-    const y = gridStartY + b.start * gridH;
-    const h = b.dur * gridH;
-    ctx.globalAlpha = localT;
-    ctx.fillStyle = b.col;
-    roundRect(ctx, x, y, w, h, 6);
+  ctx.fillStyle = '#fff';
+  ctx.font = '500 24px -apple-system, "Figtree", system-ui';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('Yo frérot tu peux me prendre', bx + 26, by + 38);
+  ctx.fillText('demain matin stp ?', bx + 26, by + 72);
+
+  // Bulle typing animée (3 dots) — montre que c'est en train de répondre
+  const tBubX = bx, tBubY = by + bh + 18;
+  ctx.fillStyle = C.igBubble;
+  roundRect(ctx, tBubX, tBubY, 100, 56, 28);
+  ctx.fill();
+  for (let i = 0; i < 3; i++) {
+    const phase = (t * 3) - i * 0.4;
+    const yOff = Math.sin(phase) * 4;
+    const alpha = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(phase));
+    ctx.fillStyle = `rgba(180, 190, 200, ${alpha})`;
+    ctx.beginPath();
+    ctx.arc(tBubX + 26 + i * 22, tBubY + 28 + yOff, 6, 0, Math.PI * 2);
     ctx.fill();
+  }
+
+  drawIGInputBar(ctx, 'Message…');
+
+  // Banner notification TrimSync qui slide depuis le haut (sous la DI)
+  const slideT = clamp(t * 1.8 - 0.1, 0, 1);
+  const notifY = -150 + slideT * 280;
+  if (notifY > -120) {
+    const a = clamp(slideT * 2, 0, 1);
+    ctx.globalAlpha = a;
+    // Card glass effect
+    ctx.fillStyle = 'rgba(20, 22, 26, 0.92)';
+    roundRect(ctx, 30, notifY, SCREEN_W - 60, 130, 28);
+    ctx.fill();
+    // Liseré teal en haut (subtil)
+    ctx.fillStyle = C.teal;
+    roundRect(ctx, 30, notifY, SCREEN_W - 60, 3, 28);
+    ctx.fill();
+    // Mark TrimSync (carré teal arrondi avec T)
+    ctx.fillStyle = C.teal;
+    roundRect(ctx, 54, notifY + 28, 50, 50, 12);
+    ctx.fill();
+    ctx.fillStyle = C.bg;
+    ctx.font = '800 28px "Bricolage Grotesque", system-ui';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('T', 79, notifY + 54);
+    // Texte
+    ctx.fillStyle = '#fff';
+    ctx.font = '700 20px -apple-system, "Figtree", system-ui';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('TrimSync', 122, notifY + 42);
+    ctx.fillStyle = '#a0aab0';
+    ctx.font = '500 18px -apple-system, "Figtree", system-ui';
+    ctx.fillText('now', SCREEN_W - 50 - ctx.measureText('now').width, notifY + 42);
+    ctx.fillStyle = '#dcdfe2';
+    ctx.font = '500 22px -apple-system, "Figtree", system-ui';
+    ctx.fillText('New DM — drafting reply…', 122, notifY + 78);
+    ctx.globalAlpha = 1;
+  }
+}
+
+// Scene 1 — Toujours dans Instagram, mais l'IA TrimSync compose la réponse.
+// Le client voit une vraie conversation IG ; le barbier voit la magie opérer.
+function drawScreen1(ctx, t) {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+  drawStatusBar(ctx);
+  drawIGHeader(ctx, '_kev.cuts', 'TrimSync replying for you');
+
+  // Timestamp
+  ctx.fillStyle = '#666';
+  ctx.font = '600 18px -apple-system, "Figtree", system-ui';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('TODAY  ·  2:47 AM', SCREEN_W / 2, 290);
+
+  // Bulle entrante du client (statique)
+  let bx = 40, by = 330, bw = 360, bh = 64;
+  ctx.fillStyle = C.igBubble;
+  roundRect(ctx, bx, by, bw, bh, 22);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.font = '500 22px -apple-system, "Figtree", system-ui';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('Yo tu peux me prendre demain ?', bx + 26, by + 32);
+
+  // Bulle sortante TrimSync (bleu IG = bulle "envoyée par toi")
+  const aT = clamp(t * 1.4, 0, 1);
+  if (aT > 0) {
+    ctx.globalAlpha = aT;
+    const ax = 100, ay = 420, aw = SCREEN_W - 140, ah = 130;
+    // Gradient bleu IG (style bulle envoyée)
+    const grad = ctx.createLinearGradient(ax, ay, ax + aw, ay + ah);
+    grad.addColorStop(0, '#3897f0');
+    grad.addColorStop(1, '#0095f6');
+    ctx.fillStyle = grad;
+    // Coin bas-droite plus pointu (vers l'avatar utilisateur implicite)
+    ctx.beginPath();
+    ctx.moveTo(ax + 24, ay);
+    ctx.arcTo(ax + aw, ay, ax + aw, ay + ah, 24);
+    ctx.arcTo(ax + aw, ay + ah, ax, ay + ah, 8);
+    ctx.arcTo(ax, ay + ah, ax, ay, 24);
+    ctx.arcTo(ax, ay, ax + aw, ay, 24);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = '500 23px -apple-system, "Figtree", system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText('Yo ! Demain j\'ai 3 créneaux libres :', ax + 22, ay + 36);
+    ctx.fillText('10h, 14h ou 18h. Tu préfères ?', ax + 22, ay + 70);
+    ctx.font = '600 17px -apple-system, "Figtree", system-ui';
+    ctx.fillStyle = 'rgba(255,255,255,0.78)';
+    ctx.fillText('Delivered · 2:47 AM', ax + 22, ay + 110);
+    ctx.globalAlpha = 1;
+  }
+
+  // Quick reply chips IG (3 horloges) — apparition staggerée
+  const slots = ['10:00', '14:00', '18:00'];
+  const chipY = 600;
+  slots.forEach((s, i) => {
+    const lT = clamp((t - 0.4 - i * 0.18) * 2.2, 0, 1);
+    if (lT <= 0) return;
+    const x = 50 + i * 152;
+    const yOff = (1 - lT) * 16;
+    ctx.globalAlpha = lT;
+    // Chip bleu IG
+    ctx.fillStyle = 'rgba(0, 149, 246, 0.15)';
+    ctx.strokeStyle = '#0095f6';
+    ctx.lineWidth = 2;
+    roundRect(ctx, x, chipY + yOff, 142, 68, 34);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.font = '700 28px "Bricolage Grotesque", system-ui';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(s, x + 71, chipY + yOff + 38);
     ctx.globalAlpha = 1;
   });
 
-  // "New booking" highlight that pulses
-  const newT = clamp((t - 0.65) * 3, 0, 1);
-  if (newT > 0) {
-    const pulse = 0.6 + 0.4 * Math.sin(t * 6);
-    const lastBlock = blocks[blocks.length - 1];
-    const x = 40 + colW * lastBlock.day + 6;
-    const w = colW - 12;
-    const y = gridStartY + lastBlock.start * gridH;
-    const h = lastBlock.dur * gridH;
-    ctx.strokeStyle = `rgba(255,255,255,${newT * pulse})`;
-    ctx.lineWidth = 3;
-    roundRect(ctx, x - 4, y - 4, w + 8, h + 8, 10);
+  // Petit toast TrimSync en bas — "AI is typing in your voice"
+  const toastY = SCREEN_H - 280;
+  ctx.fillStyle = 'rgba(95, 191, 195, 0.12)';
+  ctx.strokeStyle = C.teal;
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, 40, toastY, SCREEN_W - 80, 70, 18);
+  ctx.fill();
+  ctx.stroke();
+  // Mark T
+  ctx.fillStyle = C.teal;
+  roundRect(ctx, 58, toastY + 16, 38, 38, 9);
+  ctx.fill();
+  ctx.fillStyle = C.bg;
+  ctx.font = '800 22px "Bricolage Grotesque", system-ui';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('T', 77, toastY + 36);
+  ctx.fillStyle = C.tealDim;
+  ctx.font = '600 20px -apple-system, "Figtree", system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillText('TrimSync replying in your voice', 112, toastY + 35);
+
+  drawIGInputBar(ctx, 'AI is typing…');
+}
+
+// Stepper TrimSync (3 étapes). Reproduit le composant .step / .step-sep
+// du booking trimsync (Slot · Info · Done).
+function drawTrimsyncStepper(ctx, doneCount = 3) {
+  const cy = 168;
+  const labels = ['Slot', 'Info', 'Done'];
+  const positions = [110, 270, 430];
+  // Ligne reliant les steps
+  ctx.strokeStyle = '#2a2e34';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(positions[0] + 20, cy);
+  ctx.lineTo(positions[2] - 20, cy);
+  ctx.stroke();
+  // Ligne teal pour les portions complétées
+  ctx.strokeStyle = C.teal;
+  ctx.beginPath();
+  if (doneCount >= 2) { ctx.moveTo(positions[0] + 20, cy); ctx.lineTo(positions[Math.min(doneCount - 1, 2)] - 20, cy); }
+  ctx.stroke();
+  // Cercles
+  labels.forEach((lab, i) => {
+    const x = positions[i];
+    const isDone = i < doneCount - 1;
+    const isActive = i === doneCount - 1;
+    ctx.fillStyle = isDone || isActive ? C.teal : C.bg2;
+    ctx.strokeStyle = isDone || isActive ? C.teal : '#3a3e44';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, cy, 22, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    if (isDone) {
+      // checkmark blanc
+      ctx.strokeStyle = C.bg;
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x - 8, cy);
+      ctx.lineTo(x - 2, cy + 6);
+      ctx.lineTo(x + 9, cy - 6);
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = isActive ? C.bg : C.text3;
+      ctx.font = '800 18px "Bricolage Grotesque", system-ui';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(i + 1), x, cy + 1);
+    }
+    // Label
+    ctx.fillStyle = isActive ? C.teal : (isDone ? C.text2 : C.text3);
+    ctx.font = '700 14px -apple-system, "Figtree", system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(lab.toUpperCase(), x, cy + 48);
+  });
+}
+
+// Scene 2 — Booking confirmé. Reproduit l'étape 3 (Done) du booking
+// TrimSync : stepper full-green + mark + titre + card RDV.
+function drawScreen2(ctx, t) {
+  // Background TrimSync dark teal (matche --bg du site)
+  const grad = ctx.createLinearGradient(0, 0, 0, SCREEN_H);
+  grad.addColorStop(0, C.bg);
+  grad.addColorStop(1, '#16181d');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+  drawStatusBar(ctx);
+
+  // Stepper en haut — 3 étapes toutes complétées
+  drawTrimsyncStepper(ctx, 3);
+
+  // Splash mark TrimSync (carré teal "T" avec halo)
+  const cx = SCREEN_W / 2, cy = 420;
+  const popT = clamp(t * 2.5, 0, 1);
+  const ease3 = ease(popT);
+  const size = 90 * (0.6 + 0.4 * ease3);
+  // Halo teal pulsé
+  const haloR = 70 + 30 * ease3 + Math.sin(t * 2) * 6;
+  const haloAlpha = 0.35 * ease3;
+  const haloGrad = ctx.createRadialGradient(cx, cy, 30, cx, cy, haloR + 80);
+  haloGrad.addColorStop(0, `rgba(95, 191, 195, ${haloAlpha})`);
+  haloGrad.addColorStop(1, 'rgba(95, 191, 195, 0)');
+  ctx.fillStyle = haloGrad;
+  ctx.fillRect(cx - 200, cy - 200, 400, 400);
+  // Carré teal
+  ctx.fillStyle = C.teal;
+  roundRect(ctx, cx - size / 2, cy - size / 2, size, size, size * 0.22);
+  ctx.fill();
+  // T blanc à l'intérieur
+  ctx.fillStyle = C.bg;
+  ctx.font = `800 ${Math.round(size * 0.55)}px "Bricolage Grotesque", system-ui`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('T', cx, cy + size * 0.04);
+
+  // Titre "Demo confirmed!" (matche la H2 du booking step 3)
+  const titleT = clamp((t - 0.25) * 2, 0, 1);
+  ctx.globalAlpha = titleT;
+  ctx.fillStyle = C.text;
+  ctx.font = '800 42px "Bricolage Grotesque", system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('Demo confirmed!', cx, 580);
+  ctx.fillStyle = C.text2;
+  ctx.font = '500 22px -apple-system, "Figtree", system-ui';
+  ctx.fillText('Saturday 28 · 2:00 PM', cx, 622);
+  ctx.globalAlpha = 1;
+
+  // Card détails (mime .success-info-grid du booking)
+  const cardT = clamp((t - 0.4) * 2, 0, 1);
+  if (cardT > 0) {
+    ctx.globalAlpha = cardT;
+    const cardX = 50, cardY = 690, cardW = SCREEN_W - 100, cardH = 260;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+    ctx.strokeStyle = 'rgba(95, 191, 195, 0.2)';
+    ctx.lineWidth = 1;
+    roundRect(ctx, cardX, cardY, cardW, cardH, 20);
+    ctx.fill();
     ctx.stroke();
 
-    ctx.fillStyle = `rgba(255,255,255,${newT})`;
-    ctx.font = '600 20px Figtree, system-ui';
-    ctx.textAlign = 'left';
-    ctx.fillText('+ Just booked', 50, SCREEN_H - 60);
+    // 3 lignes d'info icone + label + value
+    const rows = [
+      { ic: 'cal', label: 'Date',   val: 'Sat · Mar 28' },
+      { ic: 'usr', label: 'Client', val: '@_kev.cuts' },
+      { ic: 'eur', label: 'Service', val: 'Coupe Premium · 35 €' }
+    ];
+    rows.forEach((r, i) => {
+      const ry = cardY + 30 + i * 72;
+      // Icône stylisée (cercle teal pâle + glyph)
+      ctx.fillStyle = 'rgba(95, 191, 195, 0.15)';
+      ctx.beginPath();
+      ctx.arc(cardX + 36, ry + 22, 18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = C.teal;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      if (r.ic === 'cal') {
+        roundRect(ctx, cardX + 28, ry + 13, 16, 18, 3); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cardX + 32, ry + 11); ctx.lineTo(cardX + 32, ry + 16); ctx.moveTo(cardX + 40, ry + 11); ctx.lineTo(cardX + 40, ry + 16); ctx.stroke();
+      } else if (r.ic === 'usr') {
+        ctx.beginPath(); ctx.arc(cardX + 36, ry + 18, 5, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cardX + 36, ry + 32, 8, Math.PI, 0); ctx.stroke();
+      } else {
+        ctx.fillStyle = C.teal;
+        ctx.font = '800 18px -apple-system, "Bricolage Grotesque", system-ui';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('€', cardX + 36, ry + 22);
+      }
+      // Labels
+      ctx.fillStyle = C.text3;
+      ctx.font = '600 13px -apple-system, "Figtree", system-ui';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(r.label.toUpperCase(), cardX + 70, ry + 14);
+      ctx.fillStyle = C.text;
+      ctx.font = '600 22px -apple-system, "Figtree", system-ui';
+      ctx.fillText(r.val, cardX + 70, ry + 38);
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  // Bouton CTA bas
+  const btnT = clamp((t - 0.6) * 2.5, 0, 1);
+  if (btnT > 0) {
+    ctx.globalAlpha = btnT;
+    const by = SCREEN_H - 180;
+    ctx.fillStyle = C.teal;
+    roundRect(ctx, 50, by, SCREEN_W - 100, 80, 16);
+    ctx.fill();
+    ctx.fillStyle = C.bg;
+    ctx.font = '700 22px -apple-system, "Figtree", system-ui';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Add to Google Calendar  →', SCREEN_W / 2, by + 40);
+    ctx.globalAlpha = 1;
   }
 }
 
-// Scene 4 — ROI stats
+// Scene 3 — Dashboard TrimSync : vue agenda semaine. Match les tokens
+// du dashboard réel (palette dark teal, fonts Bricolage + Figtree).
+function drawScreen3(ctx, t) {
+  // Fond TrimSync dark
+  ctx.fillStyle = C.bg;
+  ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+  drawStatusBar(ctx);
+
+  // Header app : logo + nom + bouton "Today"
+  ctx.fillStyle = C.teal;
+  roundRect(ctx, 50, 140, 44, 44, 11);
+  ctx.fill();
+  ctx.fillStyle = C.bg;
+  ctx.font = '800 22px "Bricolage Grotesque", system-ui';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('T', 72, 163);
+  ctx.fillStyle = C.text;
+  ctx.font = '800 26px "Bricolage Grotesque", system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillText('TrimSync', 110, 163);
+  // Pill "Today" à droite
+  ctx.fillStyle = C.bg2;
+  roundRect(ctx, SCREEN_W - 140, 145, 90, 36, 18);
+  ctx.fill();
+  ctx.fillStyle = C.text2;
+  ctx.font = '700 14px -apple-system, "Figtree", system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('Today', SCREEN_W - 95, 165);
+
+  // Section title + stats inline
+  ctx.fillStyle = C.text;
+  ctx.font = '700 32px "Bricolage Grotesque", system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillText('This week', 50, 240);
+  ctx.fillStyle = C.tealDim;
+  ctx.font = '600 18px -apple-system, "Figtree", system-ui';
+  ctx.fillText('17 bookings  ·  720 € revenue', 50, 274);
+
+  // KPI row : 2 small cards
+  const kx = 50, ky = 310, kw = (SCREEN_W - 110) / 2;
+  ['+12 h freed', '7-day full'].forEach((lbl, i) => {
+    const x = kx + i * (kw + 10);
+    ctx.fillStyle = C.bg2;
+    roundRect(ctx, x, ky, kw, 80, 14);
+    ctx.fill();
+    ctx.fillStyle = C.teal;
+    ctx.font = '800 26px "Bricolage Grotesque", system-ui';
+    ctx.fillText(lbl.split(' ')[0], x + 16, ky + 36);
+    ctx.fillStyle = C.text2;
+    ctx.font = '500 15px -apple-system, "Figtree", system-ui';
+    ctx.fillText(lbl.split(' ').slice(1).join(' '), x + 16, ky + 60);
+  });
+
+  // Headers jours
+  const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  const todayIdx = 2;   // mercredi en surbrillance
+  const gridX = 50;
+  const colW = (SCREEN_W - 100) / 6;
+  const gridTop = 430;
+
+  days.forEach((d, i) => {
+    const cx = gridX + i * colW + colW / 2;
+    const isToday = i === todayIdx;
+    if (isToday) {
+      ctx.fillStyle = C.teal;
+      ctx.beginPath();
+      ctx.arc(cx, gridTop, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = isToday ? C.teal : C.text3;
+    ctx.font = '700 13px -apple-system, "Figtree", system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(d, cx, gridTop + 22);
+  });
+
+  // Grille agenda avec blocs
+  const gridY = gridTop + 50;
+  const gridH = SCREEN_H - gridY - 180;
+  // Lignes horizontales très subtiles (heures)
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let h = 0; h <= 4; h++) {
+    const y = gridY + (gridH * h) / 4;
+    ctx.beginPath(); ctx.moveTo(gridX, y); ctx.lineTo(SCREEN_W - 50, y); ctx.stroke();
+  }
+
+  const blocks = [
+    { day: 0, start: 0.10, dur: 0.10, lbl: '10:00' },
+    { day: 0, start: 0.30, dur: 0.09, lbl: '12h' },
+    { day: 1, start: 0.18, dur: 0.10, lbl: '11h' },
+    { day: 1, start: 0.40, dur: 0.12, lbl: '14h' },
+    { day: 1, start: 0.62, dur: 0.10, lbl: '17h' },
+    { day: 2, start: 0.08, dur: 0.10, lbl: '09h' },
+    { day: 2, start: 0.30, dur: 0.14, lbl: '13h' },
+    { day: 2, start: 0.55, dur: 0.10, lbl: '16h' },
+    { day: 2, start: 0.72, dur: 0.10, lbl: '18h' },
+    { day: 3, start: 0.20, dur: 0.10, lbl: '11h' },
+    { day: 3, start: 0.42, dur: 0.12, lbl: '14h' },
+    { day: 4, start: 0.12, dur: 0.10, lbl: '10h' },
+    { day: 4, start: 0.34, dur: 0.14, lbl: '13h' },
+    { day: 4, start: 0.60, dur: 0.12, lbl: '16h' },
+    { day: 5, start: 0.08, dur: 0.10, lbl: '09h' },
+    { day: 5, start: 0.28, dur: 0.12, lbl: '12h' },
+    { day: 5, start: 0.50, dur: 0.10, lbl: '15h' }
+  ];
+  blocks.forEach((b, i) => {
+    const lT = clamp(t * 2.8 - i * 0.05, 0, 1);
+    if (lT <= 0) return;
+    const x = gridX + colW * b.day + 4;
+    const w = colW - 8;
+    const y = gridY + b.start * gridH;
+    const h = b.dur * gridH;
+    ctx.globalAlpha = lT;
+    // Bloc teal avec liseré gauche plus saturé
+    ctx.fillStyle = 'rgba(95, 191, 195, 0.22)';
+    roundRect(ctx, x, y, w, h, 5);
+    ctx.fill();
+    ctx.fillStyle = C.teal;
+    ctx.fillRect(x, y, 3, h);
+    ctx.globalAlpha = 1;
+  });
+
+  // Nouveau RDV highlight (le dernier bloc, samedi 15h)
+  const newT = clamp((t - 0.55) * 3, 0, 1);
+  if (newT > 0) {
+    const pulse = 0.55 + 0.45 * Math.sin(t * 5);
+    const lb = blocks[blocks.length - 1];
+    const x = gridX + colW * lb.day + 4;
+    const w = colW - 8;
+    const y = gridY + lb.start * gridH;
+    const h = lb.dur * gridH;
+    ctx.strokeStyle = `rgba(95, 191, 195, ${newT * pulse})`;
+    ctx.lineWidth = 2.5;
+    roundRect(ctx, x - 3, y - 3, w + 6, h + 6, 8);
+    ctx.stroke();
+    // Toast "Just booked"
+    ctx.globalAlpha = newT;
+    ctx.fillStyle = C.teal;
+    roundRect(ctx, 50, SCREEN_H - 230, SCREEN_W - 100, 56, 14);
+    ctx.fill();
+    ctx.fillStyle = C.bg;
+    ctx.font = '700 19px -apple-system, "Figtree", system-ui';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('+ Just booked — Sat 15:00 · @_kev.cuts', SCREEN_W / 2, SCREEN_H - 202);
+    ctx.globalAlpha = 1;
+  }
+
+  // Bottom tab bar iOS-style
+  const tbY = SCREEN_H - 130;
+  ctx.fillStyle = 'rgba(255,255,255,0.04)';
+  ctx.fillRect(0, tbY, SCREEN_W, 130);
+  const tabs = ['Home', 'Agenda', 'Clients', 'Stats'];
+  const activeT = 1;   // agenda
+  tabs.forEach((tab, i) => {
+    const tx = (SCREEN_W / 4) * i + (SCREEN_W / 8);
+    ctx.fillStyle = i === activeT ? C.teal : C.text3;
+    ctx.beginPath();
+    ctx.arc(tx, tbY + 32, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.font = `${i === activeT ? '700' : '500'} 14px -apple-system, "Figtree", system-ui`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(tab, tx, tbY + 64);
+  });
+  // Home indicator (bas iOS)
+  ctx.fillStyle = '#fff';
+  roundRect(ctx, SCREEN_W / 2 - 70, SCREEN_H - 22, 140, 5, 3);
+  ctx.fill();
+}
+
+// Scene 4 — ROI mensuel. Cards style TrimSync (palette dark conservée, on
+// inverse en clair pour matcher la transition bg→light de la dernière scène).
 function drawScreen4(ctx, t) {
-  // Clean off-white background
+  // Fond clair (matche la dernière scène bg [0.88, 0.04, 200])
   const grad = ctx.createLinearGradient(0, 0, 0, SCREEN_H);
-  grad.addColorStop(0, '#f4f6f8');
-  grad.addColorStop(1, '#e4eaed');
+  grad.addColorStop(0, '#f1f4f6');
+  grad.addColorStop(1, '#e1e8eb');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+  drawStatusBar(ctx, true);
 
-  // Status bar (dark text on light)
-  ctx.fillStyle = '#000';
-  ctx.font = '600 28px Figtree, system-ui';
+  // Header app (logo + nom) en mode light
+  ctx.fillStyle = C.teal;
+  roundRect(ctx, 50, 140, 44, 44, 11);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.font = '800 22px "Bricolage Grotesque", system-ui';
+  ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
+  ctx.fillText('T', 72, 163);
+  ctx.fillStyle = '#0e0f13';
+  ctx.font = '800 26px "Bricolage Grotesque", system-ui';
   ctx.textAlign = 'left';
-  ctx.fillText('9:41', 40, 56);
+  ctx.fillText('Your month', 110, 163);
 
-  // Header
-  ctx.fillStyle = '#0a1010';
-  ctx.font = '700 30px Figtree, system-ui';
-  ctx.textAlign = 'left';
-  ctx.fillText('Your month', 50, 160);
-  ctx.fillStyle = '#666';
-  ctx.font = '500 22px Figtree, system-ui';
-  ctx.fillText('Compared to last month', 50, 192);
-
-  // Big number that counts up
+  // Compteur géant +€340 (counts up)
   const target = 340;
   const countT = ease(clamp(t * 1.2, 0, 1));
   const value = Math.round(target * countT);
-  ctx.fillStyle = '#60c4c8';
-  ctx.font = '700 140px Bricolage Grotesque, system-ui';
+  ctx.fillStyle = C.teal;
+  ctx.font = '800 160px "Bricolage Grotesque", system-ui';
   ctx.textAlign = 'left';
-  ctx.fillText('+€' + value, 50, 380);
-  ctx.fillStyle = '#0a1010';
-  ctx.font = '500 26px Figtree, system-ui';
-  ctx.fillText('recovered DMs this month', 50, 430);
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText('+€' + value, 50, 400);
+  // Underline subtle
+  ctx.fillStyle = 'rgba(95, 191, 195, 0.18)';
+  ctx.fillRect(50, 408, 380, 6);
 
-  // Bar chart (DMs missed → 0)
-  const barY = 510;
+  ctx.fillStyle = '#3a4348';
+  ctx.font = '600 22px -apple-system, "Figtree", system-ui';
+  ctx.fillText('Recovered from DMs that used', 50, 460);
+  ctx.fillText('to die unanswered.', 50, 492);
+
+  // Bar chart : DMs ratés par semaine, déclinant
+  const barY = 550;
+  const barH = 180;
   const barW = (SCREEN_W - 100) / 8;
   const bars = [42, 38, 35, 28, 22, 14, 8, 2];
+  ctx.fillStyle = '#5a6469';
+  ctx.font = '600 14px -apple-system, "Figtree", system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillText('DMs missed per week (TrimSync ON week 6)', 50, barY - 16);
+
   bars.forEach((bv, i) => {
-    const localT = clamp(t * 2 - i * 0.06, 0, 1);
-    const h = bv * 5 * localT;
-    const x = 50 + i * barW + 6;
-    const y = barY + 200 - h;
-    ctx.fillStyle = i < 6 ? '#cbd5d8' : '#60c4c8';
-    roundRect(ctx, x, y, barW - 12, h, 4);
+    const lT = clamp(t * 2 - i * 0.06, 0, 1);
+    const h = (bv / 42) * barH * lT;
+    const x = 50 + i * barW + 4;
+    const y = barY + barH - h;
+    // Couleur : gris pour les 6 premiers (avant TrimSync), teal après
+    ctx.fillStyle = i < 6 ? '#c3ccd0' : C.teal;
+    roundRect(ctx, x, y, barW - 10, h, 4);
     ctx.fill();
   });
-  ctx.fillStyle = '#666';
-  ctx.font = '500 18px Figtree, system-ui';
-  ctx.textAlign = 'center';
-  ctx.fillText('DMs missed per week', SCREEN_W / 2, barY + 250);
+  // Légende W1...W8
+  ['W1','W2','W3','W4','W5','W6','W7','W8'].forEach((lab, i) => {
+    ctx.fillStyle = '#8a9498';
+    ctx.font = '500 12px -apple-system, "Figtree", system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(lab, 50 + i * barW + barW / 2 - 5, barY + barH + 20);
+  });
 
-  // Time badge
-  ctx.fillStyle = '#0a1010';
-  roundRect(ctx, 50, 980, 220, 80, 16);
-  ctx.fill();
-  ctx.fillStyle = '#60c4c8';
-  ctx.font = '700 36px Bricolage Grotesque, system-ui';
-  ctx.textAlign = 'left';
-  ctx.fillText('12h', 80, 1030);
-  ctx.fillStyle = '#fff';
-  ctx.font = '500 18px Figtree, system-ui';
-  ctx.fillText('gained', 160, 1030);
+  // 3 cards stats du bas (12h gained, 64 bookings, 7×ROI)
+  const cy = 920;
+  const cw = (SCREEN_W - 100 - 24) / 3;
+  const stats = [
+    { big: '12h', sub: 'time saved' },
+    { big: '64',  sub: 'bookings'   },
+    { big: '7×',  sub: 'ROI'        }
+  ];
+  stats.forEach((s, i) => {
+    const cx = 50 + i * (cw + 12);
+    ctx.fillStyle = '#0e0f13';
+    roundRect(ctx, cx, cy, cw, 100, 14);
+    ctx.fill();
+    ctx.fillStyle = C.teal;
+    ctx.font = '800 38px "Bricolage Grotesque", system-ui';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(s.big, cx + cw / 2, cy + 38);
+    ctx.fillStyle = '#a8b3b8';
+    ctx.font = '500 14px -apple-system, "Figtree", system-ui';
+    ctx.fillText(s.sub, cx + cw / 2, cy + 74);
+  });
 
-  // Bookings count
-  ctx.fillStyle = '#0a1010';
-  roundRect(ctx, 290, 980, 220, 80, 16);
-  ctx.fill();
-  ctx.fillStyle = '#60c4c8';
-  ctx.font = '700 36px Bricolage Grotesque, system-ui';
-  ctx.fillText('64', 320, 1030);
-  ctx.fillStyle = '#fff';
-  ctx.font = '500 18px Figtree, system-ui';
-  ctx.fillText('bookings', 380, 1030);
+  // Bouton CTA bas
+  const btnT = clamp((t - 0.55) * 2.5, 0, 1);
+  if (btnT > 0) {
+    ctx.globalAlpha = btnT;
+    const by = SCREEN_H - 130;
+    ctx.fillStyle = C.teal;
+    roundRect(ctx, 50, by, SCREEN_W - 100, 70, 14);
+    ctx.fill();
+    ctx.fillStyle = C.bg;
+    ctx.font = '700 20px -apple-system, "Figtree", system-ui';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Start free — 10 min setup  →', SCREEN_W / 2, by + 35);
+    ctx.globalAlpha = 1;
+  }
 }
 
 const SCREEN_RENDERERS = [drawScreen0, drawScreen1, drawScreen2, drawScreen3, drawScreen4];
@@ -1487,12 +1941,57 @@ function loop(time) {
     // Show current scene fully
     SCREEN_RENDERERS[state.idx](ctx, localT / 0.7);
   } else {
-    // Cross-fade between current and next
-    const fadeT = (localT - 0.7) / 0.3;
+    // BRUSH WIPE — la scène suivante apparaît sous un masque vertical dont
+    // le bord est PERTURBÉ par deux sinus (basse fréquence + haute) → look
+    // de coup de pinceau encreur. La bande balaye depuis la gauche avec une
+    // marge généreuse pour que l'entrée et la sortie soient propres. On
+    // ajoute en bonus une fine ligne teal le long du bord pour "l'encre
+    // fraîche".
+    const wipeT = (localT - 0.7) / 0.3;
     SCREEN_RENDERERS[state.idx](ctx, 1.0);
-    ctx.globalAlpha = fadeT;
-    SCREEN_RENDERERS[Math.min(state.idx + 1, SCENE_COUNT - 1)](ctx, 0.05);
-    ctx.globalAlpha = 1;
+
+    const nextIdx = Math.min(state.idx + 1, SCENE_COUNT - 1);
+    const easeWipe = ease(wipeT);
+    // wipeX traverse [-margin, SCREEN_W + margin] pour entrer/sortir clean
+    const margin = 140;
+    const wipeX = -margin + easeWipe * (SCREEN_W + margin * 2);
+    const phase = screenT * 0.8 + state.idx;
+
+    ctx.save();
+    ctx.beginPath();
+    // Bord du pinceau, point par point sur la hauteur
+    const STEP = 8;
+    for (let y = 0; y <= SCREEN_H + STEP; y += STEP) {
+      const lowFreq  = Math.sin(y * 0.011 + phase * 1.2)  * 55;
+      const highFreq = Math.sin(y * 0.062 + phase * 2.7)  * 18;
+      const tiny     = Math.sin(y * 0.18  + phase * 5.0)  * 6;
+      const x = wipeX + lowFreq + highFreq + tiny;
+      if (y === 0) ctx.moveTo(x, -10);
+      else ctx.lineTo(x, y);
+    }
+    // Fermeture vers la gauche (hors écran)
+    ctx.lineTo(-margin * 2, SCREEN_H + 10);
+    ctx.lineTo(-margin * 2, -10);
+    ctx.closePath();
+    ctx.clip();
+    SCREEN_RENDERERS[nextIdx](ctx, 0.05);
+    ctx.restore();
+
+    // Liseré "encre" le long du bord (sans clip cette fois)
+    ctx.save();
+    ctx.strokeStyle = `rgba(95, 191, 195, ${0.55 * (1 - Math.abs(wipeT - 0.5) * 1.6)})`;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    for (let y = 0; y <= SCREEN_H; y += STEP) {
+      const lowFreq  = Math.sin(y * 0.011 + phase * 1.2)  * 55;
+      const highFreq = Math.sin(y * 0.062 + phase * 2.7)  * 18;
+      const tiny     = Math.sin(y * 0.18  + phase * 5.0)  * 6;
+      const x = wipeX + lowFreq + highFreq + tiny;
+      if (y === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.restore();
   }
   ctx.restore();
   iphone.markScreenDirty();

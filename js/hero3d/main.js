@@ -1117,9 +1117,11 @@ async function initThree() {
   bloomPass.radius = 0.5;
   composer.addPass(bloomPass);
 
+  // RGB shift retiré à la demande — plus d'effet glitch sur les transitions.
+  // L'instance reste pour ne pas casser les références (loop, debug), mais elle
+  // n'est PAS ajoutée au composer → aucun coût visuel.
   rgbShift = new ShaderPass(RGBShiftShader);
   rgbShift.uniforms.amount.value = 0.0;
-  composer.addPass(rgbShift);
 
   composer.addPass(new OutputPass());
 
@@ -1382,15 +1384,17 @@ function loop(time) {
     finalPose.ry += Math.sin(t * 14) * 0.3 * easterPhase;
   }
 
+  // SPIN : tour complet (360°) sur Y pendant la transition scène 3 → 4
+  // (Booked → Dashboard de la semaine). Le moment "victoire" où le téléphone
+  // pivote sur lui-même avant de révéler l'agenda complet. smoothstep pour un
+  // démarrage doux et un atterrissage propre — pas de saut à la fin.
+  if (state.idx === 2) {
+    const spinT = smoothstep(0.20, 0.90, state.localT);
+    finalPose.ry += spinT * Math.PI * 2;
+  }
+
   iphone.pose(finalPose);
   iphone.setRimIntensity(state.rim);
-
-  /* — RGB shift (glitch) durant la transition — */
-  if (state.titleTransition > 0) {
-    rgbShift.uniforms.amount.value = state.titleTransition * 0.006;
-  } else {
-    rgbShift.uniforms.amount.value *= 0.85;
-  }
 
   /* — Bloom intensity follows rim — */
   // Bloom adouci : l'ancien réglage cramait l'écran clair (scène ROI)

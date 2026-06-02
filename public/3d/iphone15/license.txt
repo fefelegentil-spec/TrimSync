@@ -1,0 +1,11 @@
+Model Information:
+* title:	IPhone 15 Pro
+* source:	https://sketchfab.com/3d-models/iphone-15-pro-9e045e469d514fea9dda2ccd161f5fa3
+* author:	Sketcher (https://sketchfab.com/jnanbr07)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "IPhone 15 Pro" (https://sketchfab.com/3d-models/iphone-15-pro-9e045e469d514fea9dda2ccd161f5fa3) by Sketcher (https://sketchfab.com/jnanbr07) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

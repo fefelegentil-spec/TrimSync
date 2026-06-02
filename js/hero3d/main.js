@@ -815,7 +815,17 @@ async function loadPhoneModelWrapper() {
     loader.setDRACOLoader(draco);
   } catch (e) { /* draco optionnel */ }
 
-  const gltf = await loader.loadAsync(new URL('public/3d/iphone.glb', document.baseURI).href);
+  // iPhone 15 Pro — bundle Sketchfab CC-BY-4.0 (Sketcher / jnanbr07).
+  // glTF non-binaire : scene.gltf + scene.bin + textures/ (PBR baseColor +
+  // metallicRoughness + normal + emissive). On garde un fallback sur l'ancien
+  // .glb si jamais le nouveau pack disparaît.
+  let gltf;
+  try {
+    gltf = await loader.loadAsync(new URL('public/3d/iphone15/scene.gltf', document.baseURI).href);
+  } catch (e) {
+    console.warn('[hero3d] iphone15/scene.gltf KO → fallback iphone.glb', e);
+    gltf = await loader.loadAsync(new URL('public/3d/iphone.glb', document.baseURI).href);
+  }
   const model = gltf.scene;
 
   // 1) Centrer le modèle à l'origine de son holder
@@ -840,12 +850,34 @@ async function loadPhoneModelWrapper() {
   let rs = rb.getSize(new THREE.Vector3());
   if (rs.x > rs.y) { holder.rotation.z += Math.PI / 2; holder.updateMatrixWorld(true); rb = new THREE.Box3().setFromObject(holder); rs = rb.getSize(new THREE.Vector3()); }
 
-  // 3) Orienter l'ÉCRAN (mesh Screen_BG) vers la caméra (+Z) via sa NORMALE.
-  //    Ne pas se baser sur tous les meshes "screen" : les 3 objectifs caméra
-  //    sont aussi nommés "Screen_Glass" et faussaient le calcul (→ dos visible).
+  // 3) Orienter l'ÉCRAN vers la caméra (+Z) via sa NORMALE.
+  //    Détection robuste de l'écran sur DEUX modèles différents :
+  //      a) ancien .glb : matériau "Screen_BG"
+  //      b) nouveau Sketchfab : matériau "pIJKfZsazmcpEiU" (baseColor noir +
+  //         emissiveMap = wallpaper). On garde aussi un filet général "tout
+  //         matériau avec emissiveMap = candidat écran" et on retient le plus
+  //         grand (les objectifs caméra peuvent avoir un emissive parasite).
+  function findScreenMesh(root) {
+    let best = null, bestArea = 0;
+    root.traverse(o => {
+      if (!o.isMesh || !o.material) return;
+      const mats = Array.isArray(o.material) ? o.material : [o.material];
+      const isScreen = mats.some(m => m && (
+        m.emissiveMap ||
+        /screen_bg/i.test(m.name || '') ||
+        /pIJKfZsazmcpEiU/i.test(m.name || '')
+      ));
+      if (!isScreen) return;
+      o.geometry.computeBoundingBox();
+      const sz = o.geometry.boundingBox.getSize(new THREE.Vector3());
+      // surface max parmi les trois faces : on garde le mesh "plat et large"
+      const area = Math.max(sz.x * sz.y, sz.x * sz.z, sz.y * sz.z);
+      if (area > bestArea) { bestArea = area; best = o; }
+    });
+    return best;
+  }
   holder.updateMatrixWorld(true);
-  let disp = null;
-  holder.traverse(o => { if (o.isMesh && /screen_bg/i.test(o.material && o.material.name || '')) disp = o; });
+  let disp = findScreenMesh(holder);
   if (disp && disp.geometry.attributes.normal) {
     const na = disp.geometry.attributes.normal;
     const nrm = new THREE.Vector3(na.getX(0), na.getY(0), na.getZ(0))
@@ -861,16 +893,29 @@ async function loadPhoneModelWrapper() {
   group.updateMatrixWorld(true);
   const TARGET_H = 2.6;   // hauteur monde visée (tient dans le viewport ~3.5 avec marge)
 
-  // 5) Matériaux : reflets studio appuyés, écran modèle neutralisé
+  // 5) Matériaux : tuning studio.
+  //    Règle : on RESPECTE les textures PBR si elles existent (le modèle
+  //    Sketchfab a baseColor + metallicRoughness + normal → on ne casse pas
+  //    l'auteur). On override uniquement metalness/roughness sur les
+  //    matériaux SANS map (héritage de l'ancien .glb plastique). Et on
+  //    pousse `envMapIntensity` partout pour faire chanter la HDRI studio.
   model.traverse(o => {
     if (!o.isMesh || !o.material) return;
     const mats = Array.isArray(o.material) ? o.material : [o.material];
     mats.forEach(m => {
-      m.envMapIntensity = 1.0;
-      if (m.metalness !== undefined && m.metalness > 0.4 && m.roughness !== undefined) {
-        m.roughness = Math.max(Math.min(m.roughness, 0.42), 0.20);   // métal lisible, sans liseré miroir cramé
+      const hasPBRMap = !!(m.metalnessMap || m.roughnessMap || m.map);
+      if (hasPBRMap) {
+        // Modèle PBR-textured : on fait confiance à l'asset, juste un boost env.
+        m.envMapIntensity = 1.4;
+      } else {
+        // Pas de texture → ancien régime "force titane" pour éviter le plastique.
+        const isMetal = (m.metalness !== undefined && m.metalness >= 0.35);
+        if (isMetal) { m.metalness = 1.0; m.roughness = 0.30; m.envMapIntensity = 1.6; }
+        else         { m.envMapIntensity = 1.1; }
       }
-      if (/screen_bg|screen_glass/i.test(m.name || '')) { m.color && m.color.setHex(0x000000); }
+      if (/screen_bg|screen_glass|pIJKfZsazmcpEiU/i.test(m.name || '')) {
+        if (m.color) m.color.setHex(0x000000);
+      }
       m.needsUpdate = true;
     });
   });
@@ -886,17 +931,26 @@ async function loadPhoneModelWrapper() {
   screenTexture.colorSpace = THREE.SRGBColorSpace;
   screenTexture.anisotropy = 8;
   const screenMat = new THREE.MeshBasicMaterial({ map: screenTexture, toneMapped: false });
-  let disp2 = null;
-  model.traverse(o => { if (o.isMesh && /screen_bg/i.test(o.material && o.material.name || '')) disp2 = o; });
+  const disp2 = findScreenMesh(model);
   if (disp2) {
+    // UV planaires sur les DEUX axes les plus longs du mesh écran (l'axe le plus
+    // court est l'épaisseur de la dalle, parfaitement plate). Indépendant de
+    // l'orientation du modèle — fonctionne pour l'ancien .glb ET le nouveau.
     const g = disp2.geometry;
     g.computeBoundingBox();
     const bb = g.boundingBox, pos = g.attributes.position;
-    const sx = (bb.max.x - bb.min.x) || 1, sz = (bb.max.z - bb.min.z) || 1;
+    const sizes = [
+      { axis: 'x', len: bb.max.x - bb.min.x, min: bb.min.x },
+      { axis: 'y', len: bb.max.y - bb.min.y, min: bb.min.y },
+      { axis: 'z', len: bb.max.z - bb.min.z, min: bb.min.z }
+    ].sort((a, b) => b.len - a.len);
+    const H = sizes[0], W = sizes[1];   // [0]=hauteur dalle, [1]=largeur
+    const sw = W.len || 1, sh = H.len || 1;
+    const getter = { x: (i) => pos.getX(i), y: (i) => pos.getY(i), z: (i) => pos.getZ(i) };
     const uv = new Float32Array(pos.count * 2);
     for (let i = 0; i < pos.count; i++) {
-      uv[i * 2]     = (pos.getX(i) - bb.min.x) / sx;            // largeur ← X local
-      uv[i * 2 + 1] = (pos.getZ(i) - bb.min.z) / sz;            // hauteur ← Z local
+      uv[i * 2]     = (getter[W.axis](i) - W.min) / sw;
+      uv[i * 2 + 1] = (getter[H.axis](i) - H.min) / sh;
     }
     g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
     disp2.material = screenMat;
@@ -965,22 +1019,21 @@ async function initThree() {
      Les RectAreaLight produisent le reflet rectangulaire net sur le verre
      et le métal : c'est LA signature d'un rendu produit photoréaliste. */
   RectAreaLightUniformsLib.init();
-  scene.add(new THREE.AmbientLight(0xffffff, 0.12));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.06));   // ambient bas → contraste studio
 
-  const keyLight = new THREE.DirectionalLight(0xffffff, 1.7);
+  const keyLight = new THREE.DirectionalLight(0xffffff, 0.5);   // doux : l'HDRI + softbox font le gros
   keyLight.position.set(3, 5, 6);
   scene.add(keyLight);
-  const fillLight = new THREE.DirectionalLight(0x9fe8ea, 0.5);
-  fillLight.position.set(-4, -1, 3);
-  scene.add(fillLight);
 
-  const softTop = new THREE.RectAreaLight(0xffffff, 2.2, 3.2, 6.5);
-  softTop.position.set(-2.4, 2.6, 3.2);
+  // Softbox (RectAreaLight) : grands panneaux qui créent le reflet rectangulaire
+  // net qui GLISSE sur le titane — la signature d'un rendu produit.
+  const softTop = new THREE.RectAreaLight(0xffffff, 4.5, 3.6, 7.5);
+  softTop.position.set(-2.6, 2.4, 3.4);
   softTop.lookAt(0, 0, 0);
   scene.add(softTop);
 
-  const softSide = new THREE.RectAreaLight(0x9fe8ea, 1.2, 4.5, 3.5);
-  softSide.position.set(3.2, -1.0, 2.6);
+  const softSide = new THREE.RectAreaLight(0xbfeff0, 2.6, 5.0, 4.0);
+  softSide.position.set(3.2, -1.2, 2.6);
   softSide.lookAt(0, 0, 0);
   scene.add(softSide);
 
@@ -1011,14 +1064,35 @@ async function initThree() {
   }
   scene.add(iphone.group);
 
+  // Backdrop dégradé radial derrière le téléphone : profondeur + surface à
+  // refléter sur le titane + le produit ressort du noir (look studio).
+  const bdC = document.createElement('canvas'); bdC.width = bdC.height = 512;
+  const bx = bdC.getContext('2d');
+  const bgrad = bx.createRadialGradient(256, 220, 30, 256, 256, 380);
+  bgrad.addColorStop(0, '#1b2832'); bgrad.addColorStop(0.5, '#0b1014'); bgrad.addColorStop(1, '#05080b');
+  bx.fillStyle = bgrad; bx.fillRect(0, 0, 512, 512);
+  const bdTex = new THREE.CanvasTexture(bdC); bdTex.colorSpace = THREE.SRGBColorSpace;
+  const backdrop = new THREE.Mesh(
+    new THREE.PlaneGeometry(46, 46),
+    new THREE.MeshBasicMaterial({ map: bdTex, depthWrite: false })
+  );
+  backdrop.position.set(0, 0, -7);
+  scene.add(backdrop);
+
   /* — Post-processing : Bloom (B2 rim emissive) + RGBShift léger (B1 glitch) — */
-  composer = new EffectComposer(renderer);
+  // Render target MULTISAMPLE (MSAA ×4) : bords nets dans le post-processing
+  // (sans ça, le composer bypass l'antialias du canvas → crénelage "cheap").
+  const _dpr = renderer.getDrawingBufferSize(new THREE.Vector2());
+  const _rt = new THREE.WebGLRenderTarget(_dpr.x, _dpr.y, { samples: 4, type: THREE.HalfFloatType });
+  composer = new EffectComposer(renderer, _rt);
   composer.addPass(new RenderPass(scene, camera));
 
-  bloomPass = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.45, 0.6, 0.2);
-  bloomPass.threshold = 0.72;   // seuil haut : seuls les vrais éclats blooment (pas tout le liseré HDRI)
-  bloomPass.strength = 0.25;
-  bloomPass.radius = 0.6;
+  // Bloom très discret + seuil haut : on ne veut PAS de halo flou autour du
+  // téléphone (c'est le tell "rendu 3D cheap"), juste un léger éclat sur l'écran.
+  bloomPass = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.12, 0.5, 0.85);
+  bloomPass.threshold = 0.85;
+  bloomPass.strength = 0.12;
+  bloomPass.radius = 0.5;
   composer.addPass(bloomPass);
 
   rgbShift = new ShaderPass(RGBShiftShader);
@@ -1299,7 +1373,7 @@ function loop(time) {
   /* — Bloom intensity follows rim — */
   // Bloom adouci : l'ancien réglage cramait l'écran clair (scène ROI)
   // et faisait disparaître l'iPhone sur fond blanc.
-  bloomPass.strength = (isLight ? 0.05 : 0.13) + state.rim * 0.2;
+  bloomPass.strength = 0.04 + state.rim * 0.06;   // minimal : pas de halo autour du châssis
 
   /* — Fond : constant sombre (le morph de couleur a été retiré à la demande).
      scene.background est posé une seule fois dans initThree, on n'y touche plus. */

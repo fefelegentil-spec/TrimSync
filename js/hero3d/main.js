@@ -1086,20 +1086,64 @@ async function initThree() {
   }
   scene.add(iphone.group);
 
-  // Backdrop dégradé radial derrière le téléphone : profondeur + surface à
-  // refléter sur le titane + le produit ressort du noir (look studio).
-  const bdC = document.createElement('canvas'); bdC.width = bdC.height = 512;
-  const bx = bdC.getContext('2d');
-  const bgrad = bx.createRadialGradient(256, 220, 30, 256, 256, 380);
-  bgrad.addColorStop(0, '#1b2832'); bgrad.addColorStop(0.5, '#0b1014'); bgrad.addColorStop(1, '#05080b');
-  bx.fillStyle = bgrad; bx.fillRect(0, 0, 512, 512);
-  const bdTex = new THREE.CanvasTexture(bdC); bdTex.colorSpace = THREE.SRGBColorSpace;
-  const backdrop = new THREE.Mesh(
-    new THREE.PlaneGeometry(46, 46),
-    new THREE.MeshBasicMaterial({ map: bdTex, depthWrite: false })
-  );
+  // Backdrop SHADER : radial gradient + glow teal qui dérive lentement +
+  // grain de film + vignette. Donne de la vie au fond (l'ancien canvas
+  // statique faisait "produit blanc sur table morte"). Tout en WebGL, zéro
+  // texture chargée.
+  const backdropMat = new THREE.ShaderMaterial({
+    depthWrite: false,
+    uniforms: {
+      uTime:   { value: 0 },
+      uBase:   { value: new THREE.Color(0x05080b) },   // noir bleuté (extérieur)
+      uCenter: { value: new THREE.Color(0x1c2a36) },   // gris bleu (centre)
+      uAccent: { value: new THREE.Color(0x60c4c8) }    // teal marque (glow drift)
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+    `,
+    fragmentShader: `
+      precision highp float;
+      varying vec2 vUv;
+      uniform float uTime;
+      uniform vec3 uBase, uCenter, uAccent;
+
+      float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+
+      void main() {
+        vec2 p = vUv - 0.5;
+
+        // Radial gradient : centre éclairci → bord sombre (vignette intégrée)
+        float r = length(p);
+        vec3 col = mix(uCenter, uBase, smoothstep(0.05, 0.75, r));
+
+        // Glow teal qui dérive en Lissajous lent (jamais au repos)
+        vec2 glowCenter = vec2(sin(uTime * 0.13) * 0.22, cos(uTime * 0.10) * 0.16);
+        float glowD = length(p - glowCenter);
+        float glow = exp(-glowD * 5.5);
+        col = mix(col, uAccent, glow * 0.22);
+
+        // Second halo plus diffus, contre-rotation, légèrement violet-shifté
+        vec2 g2 = vec2(cos(uTime * 0.08 + 1.7) * 0.30, sin(uTime * 0.11 + 2.3) * 0.20);
+        float glow2 = exp(-length(p - g2) * 3.5);
+        col += vec3(0.10, 0.18, 0.24) * glow2 * 0.18;
+
+        // Grain de film subtil — anti-banding et "filmic feel"
+        float grain = hash(vUv * 1024.0 + uTime * 60.0) - 0.5;
+        col += grain * 0.012;
+
+        // Vignette finale (en plus du gradient) pour ancrer les coins
+        col *= 1.0 - r * 0.55;
+
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `
+  });
+  const backdrop = new THREE.Mesh(new THREE.PlaneGeometry(46, 46), backdropMat);
   backdrop.position.set(0, 0, -7);
   scene.add(backdrop);
+  // Exposé pour que la boucle d'anim mette à jour uTime chaque frame.
+  scene.userData.backdropMat = backdropMat;
 
   /* — Post-processing : Bloom (B2 rim emissive) + RGBShift léger (B1 glitch) — */
   // Render target MULTISAMPLE (MSAA ×4) : bords nets dans le post-processing
@@ -1368,15 +1412,22 @@ function loop(time) {
   const isLight = false;   // fond sombre constant (morph couleur retiré à la demande)
 
   /* — iPhone pose — */
-  // Add gyro & mouse drift
-  const mouseDriftX = ((mouseX / innerWidth) - 0.5) * 0.06;
-  const mouseDriftY = ((mouseY / innerHeight) - 0.5) * 0.04;
+  // Mouse drift retiré à la demande : le téléphone ne suit plus le curseur.
+  // Gyro retiré du calcul aussi (il n'avait d'effet QUE sur mobile, et le
+  // mobile passe en fallback DOM → cette branche n'est jamais touchée).
   const finalPose = { ...state.pose };
-  finalPose.ry += mouseDriftX + gyroY * 0.3;
-  finalPose.rx += -mouseDriftY + gyroX * 0.3;
-  // Subtle floating
-  finalPose.py += Math.sin(t * 0.7) * 0.04;
-  finalPose.rz += Math.sin(t * 0.5) * 0.015;
+
+  // ANIMATIONS DE FOND — plus amples pour casser le côté "statique".
+  //   py : flottement vertical sin lent (amplitude 0.10)
+  //   pz : breathe avant/arrière sin très lent (0.18) → le téléphone vient
+  //        vers nous et recule en boucle, comme s'il respirait.
+  //   rx/ry/rz : micro-rotations désynchronisées sur les trois axes pour
+  //        que l'orientation vibre légèrement sans jamais "se fixer".
+  finalPose.py += Math.sin(t * 0.55) * 0.10;
+  finalPose.pz += Math.sin(t * 0.38) * 0.18 + 0.05;  // bias +0.05 → légèrement plus proche
+  finalPose.ry += Math.sin(t * 0.22) * 0.05;
+  finalPose.rx += Math.sin(t * 0.31 + 1.3) * 0.035;
+  finalPose.rz += Math.sin(t * 0.43 + 2.1) * 0.025;
 
   // Easter egg : "non" rotation if triggered
   if (easterPhase > 0) {
@@ -1395,6 +1446,11 @@ function loop(time) {
 
   iphone.pose(finalPose);
   iphone.setRimIntensity(state.rim);
+
+  // Backdrop shader — tick le temps pour faire dériver le glow teal et grainer.
+  if (scene.userData.backdropMat) {
+    scene.userData.backdropMat.uniforms.uTime.value = t;
+  }
 
   /* — Bloom intensity follows rim — */
   // Bloom adouci : l'ancien réglage cramait l'écran clair (scène ROI)

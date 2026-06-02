@@ -36,6 +36,9 @@ async function loadThree() {
    1. CONSTANTES & TOKENS
    ═══════════════════════════════════════════════════════════════════════════ */
 
+// Toutes les poses : py ≤ -0.05 → l'iPhone reste sous la ligne médiane du
+// viewport et ne mange JAMAIS la nav fixe en haut (68px). Scale capé à 0.9
+// pour qu'aucune scène n'envoie le téléphone toucher la barre du dessus.
 const SCENES = [
   {
     eyebrow: { en: '01 · The lost DM',         fr: '01 · Le DM oublié' },
@@ -43,7 +46,7 @@ const SCENES = [
     sub:     { en: 'While you sleep, the DMs that used to die in your inbox become booked appointments.',
                fr: 'Pendant que tu dors, les DMs qui mouraient dans ta boîte deviennent des RDV pris.' },
     bg: [0.12, 0.008, 222],         // quasi-noir
-    iphone: { px: -0.15, py: 0.0,  pz: 0.0,  rx: -0.05, ry: -0.18, rz: 0.04, scale: 1.00 },
+    iphone: { px: -0.15, py: -0.10, pz: 0.0, rx: -0.05, ry: -0.18, rz: 0.04, scale: 0.80 },
     rim: 0.4,
     cta: false
   },
@@ -53,7 +56,7 @@ const SCENES = [
     sub:     { en: 'Not on web text. Real conversations, real slang, real bookings.',
                fr: 'Pas sur du texte web. De vraies conversations, du vrai slang, de vrais RDV.' },
     bg: [0.30, 0.10, 200],          // teal sombre
-    iphone: { px:  0.10, py: 0.05, pz: 0.4,  rx: -0.10, ry:  0.22, rz: 0.02, scale: 1.06 },
+    iphone: { px:  0.10, py: -0.08, pz: 0.4, rx: -0.10, ry:  0.22, rz: 0.02, scale: 0.86 },
     rim: 0.7,
     cta: false
   },
@@ -63,7 +66,7 @@ const SCENES = [
     sub:     { en: 'No reply needed. The slot lands in your agenda — and on the client\'s calendar.',
                fr: 'Pas besoin de répondre. Le créneau atterrit dans ton agenda et dans le calendrier du client.' },
     bg: [0.55, 0.13, 193],          // teal pleine puissance
-    iphone: { px:  0.00, py: 0.10, pz: 0.6,  rx:  0.00, ry:  0.00, rz: 0.0,  scale: 1.10 },
+    iphone: { px:  0.00, py: -0.05, pz: 0.6, rx:  0.00, ry:  0.00, rz: 0.0,  scale: 0.90 },
     rim: 1.0,
     cta: false
   },
@@ -73,7 +76,7 @@ const SCENES = [
     sub:     { en: 'Every slot already booked, every client tracked, every euro counted.',
                fr: 'Chaque créneau déjà pris, chaque client suivi, chaque euro compté.' },
     bg: [0.48, 0.13, 60],           // cuivre chaud (salon)
-    iphone: { px:  0.10, py: -0.05, pz: 0.2, rx:  0.12, ry:  0.55, rz: -0.05, scale: 1.04 },
+    iphone: { px:  0.10, py: -0.15, pz: 0.2, rx:  0.12, ry:  0.55, rz: -0.05, scale: 0.84 },
     rim: 0.8,
     cta: false
   },
@@ -83,7 +86,7 @@ const SCENES = [
     sub:     { en: 'That\'s the average barber saves with TrimSync. Ten minutes to set up.',
                fr: 'C\'est ce que récupère le barbier moyen avec TrimSync. Dix minutes pour l\'installer.' },
     bg: [0.88, 0.04, 200],          // blanc cassé
-    iphone: { px: -0.20, py: 0.0,   pz: -0.4, rx: -0.05, ry: -0.30, rz: 0.0, scale: 0.92 },
+    iphone: { px: -0.20, py: -0.10, pz: -0.4, rx: -0.05, ry: -0.30, rz: 0.0, scale: 0.74 },
     rim: 0.5,
     cta: true
   }
@@ -886,12 +889,16 @@ async function loadPhoneModelWrapper() {
   }
   rb = new THREE.Box3().setFromObject(holder); rs = rb.getSize(new THREE.Vector3());
 
-  // 4) Échelle cible (hauteur ≈ 3 unités, comme le modèle codé)
+  // 4) Échelle cible. La nav fixe en haut fait 68px sur ~900px de viewport
+  //    (≈7.5%). Au scale max (0.90) en scène 3, la hauteur écran-monde devient
+  //    1.9 * 0.90 = 1.71. Sur un viewport-monde de ~3.5 (FOV 28°, dist 7), le
+  //    haut du téléphone arrive à 0.86 du centre = 25% de la hauteur viewport
+  //    → marge confortable de 17% au-dessus avant la nav. Réglable d'un coup.
   const group = new THREE.Group();
   group.add(holder);
   group.scale.setScalar(1);
   group.updateMatrixWorld(true);
-  const TARGET_H = 2.6;   // hauteur monde visée (tient dans le viewport ~3.5 avec marge)
+  const TARGET_H = 1.9;
 
   // 5) Matériaux : tuning studio.
   //    Règle : on RESPECTE les textures PBR si elles existent (le modèle
@@ -904,14 +911,21 @@ async function loadPhoneModelWrapper() {
     const mats = Array.isArray(o.material) ? o.material : [o.material];
     mats.forEach(m => {
       const hasPBRMap = !!(m.metalnessMap || m.roughnessMap || m.map);
+      const isMetal = (m.metalness !== undefined && m.metalness >= 0.35);
       if (hasPBRMap) {
         // Modèle PBR-textured : on fait confiance à l'asset, juste un boost env.
         m.envMapIntensity = 1.4;
       } else {
         // Pas de texture → ancien régime "force titane" pour éviter le plastique.
-        const isMetal = (m.metalness !== undefined && m.metalness >= 0.35);
         if (isMetal) { m.metalness = 1.0; m.roughness = 0.30; m.envMapIntensity = 1.6; }
         else         { m.envMapIntensity = 1.1; }
+      }
+      // Anisotropie titane : le reflet allongé qui GLISSE quand le téléphone
+      // tourne — c'est CE détail qui transforme un métal "réaliste" en métal
+      // "buttermax". MeshPhysicalMaterial.anisotropy (Three.js r152+).
+      if (isMetal && 'anisotropy' in m) {
+        m.anisotropy = 0.85;
+        m.anisotropyRotation = 0;   // brossage vertical (long axis du téléphone)
       }
       if (/screen_bg|screen_glass|pIJKfZsazmcpEiU/i.test(m.name || '')) {
         if (m.color) m.color.setHex(0x000000);
@@ -948,9 +962,12 @@ async function loadPhoneModelWrapper() {
     const sw = W.len || 1, sh = H.len || 1;
     const getter = { x: (i) => pos.getX(i), y: (i) => pos.getY(i), z: (i) => pos.getZ(i) };
     const uv = new Float32Array(pos.count * 2);
+    // FLIP U + V (rotation 180°). Le wrap d'UV planaire posait le texte à
+    // l'envers sur le mesh écran de l'asset Sketchfab (sa face avant pointe
+    // dans l'autre sens). Constantes — pas de "détection auto" qui se trompe.
     for (let i = 0; i < pos.count; i++) {
-      uv[i * 2]     = (getter[W.axis](i) - W.min) / sw;
-      uv[i * 2 + 1] = (getter[H.axis](i) - H.min) / sh;
+      uv[i * 2]     = 1 - (getter[W.axis](i) - W.min) / sw;
+      uv[i * 2 + 1] = 1 - (getter[H.axis](i) - H.min) / sh;
     }
     g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
     disp2.material = screenMat;
@@ -1516,6 +1533,11 @@ function initMobileFallback() {
   };
   applyScene(0);
 
+  // La 1re scène est révélée IMMÉDIATEMENT (avant qu'on ait pu scroller). Sans
+  // ça l'utilisateur arrivait sur du contenu invisible (opacity 0) — "pas
+  // d'animations" venait de là.
+  if (sections[0]) sections[0].classList.add('m-in');
+
   if ('IntersectionObserver' in window) {
     // Bande centrale : une section devient "active" quand elle croise le
     // milieu du viewport. Robuste même si la section est plus haute que
@@ -1527,7 +1549,7 @@ function initMobileFallback() {
           e.target.classList.add('m-in');
         }
       });
-    }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+    }, { rootMargin: '-30% 0px -30% 0px', threshold: 0 });
     sections.forEach(sec => io.observe(sec));
   } else {
     sections.forEach(sec => sec.classList.add('m-in'));

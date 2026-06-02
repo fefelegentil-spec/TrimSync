@@ -947,27 +947,32 @@ async function loadPhoneModelWrapper() {
   const screenMat = new THREE.MeshBasicMaterial({ map: screenTexture, toneMapped: false });
   const disp2 = findScreenMesh(model);
   if (disp2) {
-    // UV planaires sur les DEUX axes les plus longs du mesh écran (l'axe le plus
-    // court est l'épaisseur de la dalle, parfaitement plate). Indépendant de
-    // l'orientation du modèle — fonctionne pour l'ancien .glb ET le nouveau.
+    // UV en ESPACE MONDE : on projette chaque vertex via matrixWorld, puis on
+    // mappe U = (worldX - xMin)/xRange et V = (worldY - yMin)/yRange. Comme
+    // toutes les rotations de redressage ont déjà été appliquées au holder,
+    // le monde a +X = droite du téléphone et +Y = haut du téléphone.
+    // Avec CanvasTexture.flipY=true (défaut), canvas(0,0) → texture(u=0,v=1),
+    // donc V=1 (max Y monde) = haut du téléphone = top du canvas. Déterministe
+    // peu importe l'orientation locale du mesh dans le GLTF d'origine.
+    group.updateMatrixWorld(true);
     const g = disp2.geometry;
-    g.computeBoundingBox();
-    const bb = g.boundingBox, pos = g.attributes.position;
-    const sizes = [
-      { axis: 'x', len: bb.max.x - bb.min.x, min: bb.min.x },
-      { axis: 'y', len: bb.max.y - bb.min.y, min: bb.min.y },
-      { axis: 'z', len: bb.max.z - bb.min.z, min: bb.min.z }
-    ].sort((a, b) => b.len - a.len);
-    const H = sizes[0], W = sizes[1];   // [0]=hauteur dalle, [1]=largeur
-    const sw = W.len || 1, sh = H.len || 1;
-    const getter = { x: (i) => pos.getX(i), y: (i) => pos.getY(i), z: (i) => pos.getZ(i) };
-    const uv = new Float32Array(pos.count * 2);
-    // FLIP U + V (rotation 180°). Le wrap d'UV planaire posait le texte à
-    // l'envers sur le mesh écran de l'asset Sketchfab (sa face avant pointe
-    // dans l'autre sens). Constantes — pas de "détection auto" qui se trompe.
+    const pos = g.attributes.position;
+    const wm = disp2.matrixWorld;
+    const tmp = new THREE.Vector3();
+    let wMinX = Infinity, wMinY = Infinity, wMaxX = -Infinity, wMaxY = -Infinity;
     for (let i = 0; i < pos.count; i++) {
-      uv[i * 2]     = 1 - (getter[W.axis](i) - W.min) / sw;
-      uv[i * 2 + 1] = 1 - (getter[H.axis](i) - H.min) / sh;
+      tmp.set(pos.getX(i), pos.getY(i), pos.getZ(i)).applyMatrix4(wm);
+      if (tmp.x < wMinX) wMinX = tmp.x;
+      if (tmp.y < wMinY) wMinY = tmp.y;
+      if (tmp.x > wMaxX) wMaxX = tmp.x;
+      if (tmp.y > wMaxY) wMaxY = tmp.y;
+    }
+    const sw = (wMaxX - wMinX) || 1, sh = (wMaxY - wMinY) || 1;
+    const uv = new Float32Array(pos.count * 2);
+    for (let i = 0; i < pos.count; i++) {
+      tmp.set(pos.getX(i), pos.getY(i), pos.getZ(i)).applyMatrix4(wm);
+      uv[i * 2]     = (tmp.x - wMinX) / sw;
+      uv[i * 2 + 1] = (tmp.y - wMinY) / sh;
     }
     g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
     disp2.material = screenMat;

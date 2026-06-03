@@ -1891,9 +1891,11 @@ function loop(time) {
   //   pz : respiration avant/arrière (±0.25, bias +0.06 → légèrement vers nous)
   //   px : dérive latérale légère (±0.08)
   //   rx/ry/rz : micro-rotations multi-axes désync
-  finalPose.py += Math.sin(t * 0.55) * 0.14;
-  finalPose.pz += Math.sin(t * 0.38) * 0.25 + 0.06;
-  finalPose.px += Math.sin(t * 0.28 + 0.7) * 0.08;
+  finalPose.py += Math.sin(t * 0.55) * 0.10;
+  finalPose.pz += Math.sin(t * 0.38) * 0.22 + 0.06;
+  // px : swing autonome RÉDUIT (0.08 → 0.035) pour que l'iPhone ne dérive
+  // jamais assez à gauche/droite pour chevaucher le bloc texte au repos.
+  finalPose.px += Math.sin(t * 0.28 + 0.7) * 0.035;
   finalPose.ry += Math.sin(t * 0.22) * 0.07;
   finalPose.rx += Math.sin(t * 0.31 + 1.3) * 0.05;
   finalPose.rz += Math.sin(t * 0.43 + 2.1) * 0.035;
@@ -1907,9 +1909,9 @@ function loop(time) {
   smoothMouseRx = lerp(smoothMouseRx, tgtRx, 0.08);
   finalPose.ry += smoothMouseRy;
   finalPose.rx += -smoothMouseRx;
-  // En BONUS : le téléphone se DÉCALE légèrement sur px/py vers la souris
-  // (parallaxe magnétique) — ajoute du caractère, comme s'il était attiré.
-  finalPose.px += ((mouseX / innerWidth)  - 0.5) * 0.10;
+  // Parallaxe magnétique RÉDUITE sur px (0.10 → 0.04) pour ne jamais
+  // chevaucher le texte ; py garde son swing complet.
+  finalPose.px += ((mouseX / innerWidth)  - 0.5) * 0.04;
   finalPose.py += ((mouseY / innerHeight) - 0.5) * -0.06;
 
   // Easter egg : "non" rotation if triggered
@@ -1924,24 +1926,35 @@ function loop(time) {
   // fenêtre étroite → le téléphone avance vers nous EXACTEMENT pendant
   // qu'il traverse, recule en atterrissant à sa nouvelle place.
   if (state.idx < SCENE_COUNT - 1) {
-    // SPIN 360° sur la fenêtre [0.35, 0.65] — direction alignée sur le sens
-    // du déplacement (CW vers la droite, CCW vers la gauche).
-    const spinT = smoothstep(0.35, 0.65, state.localT);
+    // CHAQUE TRANSITION A SA PERSONNALITÉ. Plus de "spin Y" répétitif sur
+    // toutes les scènes — on alterne les axes pour casser la monotonie.
+    //
+    //   0→1 : spin Y + arc + roulis (classique, comme une page qui tourne)
+    //   1→2 : TUMBLE X (avance vers nous en faisant la roulade)
+    //   2→3 : spin Z (in-plane, comme une aiguille d'horloge) + ZOOM in+out
+    //   3→4 : spin Y inverse + arc HAUT (l'iPhone saute par-dessus)
+    const TRANSITIONS = [
+      { spinX: 0, spinY: 1, spinZ: 0, arcY: 0.18, popZ: 0.85, roll: 0.12 },
+      { spinX: 1, spinY: 0, spinZ: 0, arcY: 0.06, popZ: 0.55, roll: 0.00 },
+      { spinX: 0, spinY: 0, spinZ: 1, arcY: 0.00, popZ: 1.35, roll: 0.00 },
+      { spinX: 0, spinY: 1, spinZ: 0, arcY: 0.32, popZ: 0.50, roll: 0.20 }
+    ];
+    const tr = TRANSITIONS[state.idx];
     const direction = (SCENES[state.idx + 1].iphone.px - SCENES[state.idx].iphone.px) >= 0 ? 1 : -1;
-    finalPose.ry += spinT * Math.PI * 2 * direction;
 
-    // POP Z amplifié — l'iPhone avance VRAIMENT vers la caméra au milieu
-    // du chemin, puis recule à l'atterrissage. Cloche sin sur [0.35, 0.65].
+    // Spin sur l'axe défini par la transition (peut être X, Y ou Z)
+    const spinT = smoothstep(0.35, 0.65, state.localT);
+    const spinAmount = spinT * Math.PI * 2;
+    finalPose.rx += spinAmount * tr.spinX;
+    finalPose.ry += spinAmount * tr.spinY * direction;
+    finalPose.rz += spinAmount * tr.spinZ * direction;
+
+    // Arc + pop Z + roulis dans le sens du virage (cloche sin sur [0.35, 0.65])
     const popPhase = clamp((state.localT - 0.35) / 0.30, 0, 1);
-    finalPose.pz += Math.sin(popPhase * Math.PI) * 0.85;
-
-    // ARC VERTICAL — l'iPhone fait un petit saut au milieu de la traversée,
-    // comme un sauteur en longueur. +py monte légèrement à mi-chemin.
-    finalPose.py += Math.sin(popPhase * Math.PI) * 0.18;
-
-    // Petit ROULIS (rz) pendant la traversée : le téléphone s'incline dans
-    // le sens du mouvement, comme une moto qui penche en virage.
-    finalPose.rz += Math.sin(popPhase * Math.PI) * 0.12 * direction;
+    const bell = Math.sin(popPhase * Math.PI);
+    finalPose.py += bell * tr.arcY;
+    finalPose.pz += bell * tr.popZ;
+    finalPose.rz += bell * tr.roll * direction;
   }
 
   iphone.pose(finalPose);

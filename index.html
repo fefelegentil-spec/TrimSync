@@ -1436,10 +1436,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
 <style id="hero3d-css">
 /* ===== HERO 3D (WebGL buttermax-like) — scopé .hero3d / IDs dédiés ===== */
-/* Hauteur 800vh = 160vh par scène (5 scènes). Avant 500vh = 100vh/scène,
-   les transitions flush trop vite au scroll. À 160vh on a le temps de
-   voir chaque étape stable + le transit étalé sur [0.35, 0.65] du localT. */
-.hero3d{position:relative;height:800vh;z-index:1}
+.hero3d{position:relative;height:500vh;z-index:1}
 .hero3d-stick{position:sticky;top:0;height:100vh;width:100%;overflow:hidden;display:flex;align-items:center}
 #hero-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 /* max-width responsive : sur viewport étroit (900-1200px) on rétrécit pour

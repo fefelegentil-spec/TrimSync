@@ -1203,12 +1203,11 @@ function evaluateTimeline(progress) {
   const titleStable = localT < 0.7;
   const titleTransition = localT >= 0.7 ? (localT - 0.7) / 0.3 : 0;
 
-  // Pose : on tient à gauche/droite pendant [0..0.35], on traverse pendant
-  // [0.35..0.65] (30% du transit, bien étalé pour qu'on voie l'arc + le
-  // spin + le pop), puis on tient à la nouvelle place [0.65..1]. Le texte
-  // est hidden dans [0.28..0.72] → il a disparu AVANT que l'iPhone bouge
-  // et revient APRÈS qu'il se soit posé. Plus aucun croisement.
-  const poseT = smoothstep(0.35, 0.65, localT);
+  // Pose : on tient à gauche/droite pendant [0..0.25], on traverse pendant
+  // [0.25..0.75] (50% du transit — étalé pour ne plus être "flash"), puis
+  // on tient à la nouvelle place [0.75..1]. Texte hidden dans [0.20..0.80]
+  // → disparait AVANT que l'iPhone bouge et revient APRÈS qu'il se pose.
+  const poseT = smoothstep(0.25, 0.75, localT);
 
   const from = SCENES[idx];
   const to = SCENES[Math.min(idx + 1, SCENE_COUNT - 1)];
@@ -1953,15 +1952,17 @@ function loop(time) {
     const tr = TRANSITIONS[state.idx];
     const direction = (SCENES[state.idx + 1].iphone.px - SCENES[state.idx].iphone.px) >= 0 ? 1 : -1;
 
-    // Spin sur l'axe défini par la transition (peut être X, Y ou Z)
-    const spinT = smoothstep(0.35, 0.65, state.localT);
+    // Spin sur l'axe défini — fenêtre élargie [0.25, 0.75] (50% du localT)
+    // pour étaler la rotation et qu'elle ne soit plus "flash".
+    const spinT = smoothstep(0.25, 0.75, state.localT);
     const spinAmount = spinT * Math.PI * 2;
     finalPose.rx += spinAmount * tr.spinX;
     finalPose.ry += spinAmount * tr.spinY * direction;
     finalPose.rz += spinAmount * tr.spinZ * direction;
 
-    // Arc + pop Z + roulis dans le sens du virage (cloche sin sur [0.35, 0.65])
-    const popPhase = clamp((state.localT - 0.35) / 0.30, 0, 1);
+    // Arc + pop Z + roulis : cloche sin centrée sur localT=0.5, fenêtre
+    // [0.25, 0.75] (même que pose/spin) → tout est synchronisé.
+    const popPhase = clamp((state.localT - 0.25) / 0.50, 0, 1);
     const bell = Math.sin(popPhase * Math.PI);
     finalPose.py += bell * tr.arcY;
     finalPose.pz += bell * tr.popZ;
@@ -2099,12 +2100,13 @@ function loop(time) {
     if (state.idx >= SCENE_COUNT - 1) {
       opacity = 1;
     } else {
-      // Hidden dans [0.28, 0.72] (englobe largement la fenêtre de pose
-      // [0.35, 0.65]) avec fade rapide aux bords [0.20, 0.28] et
-      // [0.72, 0.80]. Le texte disparaît AVANT que l'iPhone bouge et
-      // revient APRÈS qu'il se soit posé.
+      // Hidden dans [0.20, 0.80] (englobe la fenêtre de pose élargie
+      // [0.25, 0.75]) avec fade aux bords [0.15, 0.20] et [0.80, 0.85].
+      // Le texte disparaît AVANT que l'iPhone bouge et revient APRÈS
+      // qu'il se soit posé. Visible 30% du localT (50vh sur 100vh par
+      // scène) — assez pour lire confortablement.
       const dist = Math.abs(state.localT - 0.5);
-      opacity = clamp((dist - 0.22) / 0.08, 0, 1);
+      opacity = clamp((dist - 0.20) / 0.05, 0, 1);
     }
     overlayEl.style.opacity = opacity.toFixed(3);
   }

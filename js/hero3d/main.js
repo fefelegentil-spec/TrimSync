@@ -1203,10 +1203,12 @@ function evaluateTimeline(progress) {
   const titleStable = localT < 0.7;
   const titleTransition = localT >= 0.7 ? (localT - 0.7) / 0.3 : 0;
 
-  // Pose : on TIENT à gauche/droite pendant [0..0.45], on snap vers l'autre
-  // côté pendant [0.45..0.55] (très étroit → "d'un coup"), puis on tient
-  // pendant [0.55..1]. Plus de vague continue gauche↔droite.
-  const poseT = smoothstep(0.45, 0.55, localT);
+  // Pose : on tient à gauche/droite pendant [0..0.35], on traverse pendant
+  // [0.35..0.65] (30% du transit, bien étalé pour qu'on voie l'arc + le
+  // spin + le pop), puis on tient à la nouvelle place [0.65..1]. Le texte
+  // est hidden dans [0.28..0.72] → il a disparu AVANT que l'iPhone bouge
+  // et revient APRÈS qu'il se soit posé. Plus aucun croisement.
+  const poseT = smoothstep(0.35, 0.65, localT);
 
   const from = SCENES[idx];
   const to = SCENES[Math.min(idx + 1, SCENE_COUNT - 1)];
@@ -1896,16 +1898,19 @@ function loop(time) {
   finalPose.rx += Math.sin(t * 0.31 + 1.3) * 0.05;
   finalPose.rz += Math.sin(t * 0.43 + 2.1) * 0.035;
 
-  // CURSOR DRIFT — style Buttermax : la cible bouge instantanément avec la
-  // souris, mais la valeur appliquée converge vers la cible avec un lerp
-  // doux (0.05/frame ≈ ~300ms à 60Hz) → glissement buttery, jamais
-  // d'accroche dure. Amplitude légère pour rester subliminal.
-  const tgtRy = ((mouseX / innerWidth)  - 0.5) * 0.18;   // ±0.09 rad max (~5°)
-  const tgtRx = ((mouseY / innerHeight) - 0.5) * 0.12;
-  smoothMouseRy = lerp(smoothMouseRy, tgtRy, 0.05);
-  smoothMouseRx = lerp(smoothMouseRx, tgtRx, 0.05);
+  // CURSOR DRIFT — amplitude doublée et lerp légèrement plus rapide. Le
+  // téléphone te SUIT visiblement maintenant (±10° sur Y, ±7° sur X), pas
+  // juste un détail subliminal. Reste smooth grâce au lerp 0.08.
+  const tgtRy = ((mouseX / innerWidth)  - 0.5) * 0.36;   // ±0.18 rad max (~10°)
+  const tgtRx = ((mouseY / innerHeight) - 0.5) * 0.24;   // ±0.12 rad max (~7°)
+  smoothMouseRy = lerp(smoothMouseRy, tgtRy, 0.08);
+  smoothMouseRx = lerp(smoothMouseRx, tgtRx, 0.08);
   finalPose.ry += smoothMouseRy;
-  finalPose.rx += -smoothMouseRx;   // souris vers le haut → téléphone se penche vers nous
+  finalPose.rx += -smoothMouseRx;
+  // En BONUS : le téléphone se DÉCALE légèrement sur px/py vers la souris
+  // (parallaxe magnétique) — ajoute du caractère, comme s'il était attiré.
+  finalPose.px += ((mouseX / innerWidth)  - 0.5) * 0.10;
+  finalPose.py += ((mouseY / innerHeight) - 0.5) * -0.06;
 
   // Easter egg : "non" rotation if triggered
   if (easterPhase > 0) {
@@ -1919,12 +1924,24 @@ function loop(time) {
   // fenêtre étroite → le téléphone avance vers nous EXACTEMENT pendant
   // qu'il traverse, recule en atterrissant à sa nouvelle place.
   if (state.idx < SCENE_COUNT - 1) {
-    const spinT = smoothstep(0.45, 0.55, state.localT);
+    // SPIN 360° sur la fenêtre [0.35, 0.65] — direction alignée sur le sens
+    // du déplacement (CW vers la droite, CCW vers la gauche).
+    const spinT = smoothstep(0.35, 0.65, state.localT);
     const direction = (SCENES[state.idx + 1].iphone.px - SCENES[state.idx].iphone.px) >= 0 ? 1 : -1;
     finalPose.ry += spinT * Math.PI * 2 * direction;
-    // Pop Z : cloche serrée centrée sur localT=0.5, fenêtre [0.45, 0.55]
-    const popPhase = clamp((state.localT - 0.45) / 0.10, 0, 1);
-    finalPose.pz += Math.sin(popPhase * Math.PI) * 0.55;
+
+    // POP Z amplifié — l'iPhone avance VRAIMENT vers la caméra au milieu
+    // du chemin, puis recule à l'atterrissage. Cloche sin sur [0.35, 0.65].
+    const popPhase = clamp((state.localT - 0.35) / 0.30, 0, 1);
+    finalPose.pz += Math.sin(popPhase * Math.PI) * 0.85;
+
+    // ARC VERTICAL — l'iPhone fait un petit saut au milieu de la traversée,
+    // comme un sauteur en longueur. +py monte légèrement à mi-chemin.
+    finalPose.py += Math.sin(popPhase * Math.PI) * 0.18;
+
+    // Petit ROULIS (rz) pendant la traversée : le téléphone s'incline dans
+    // le sens du mouvement, comme une moto qui penche en virage.
+    finalPose.rz += Math.sin(popPhase * Math.PI) * 0.12 * direction;
   }
 
   iphone.pose(finalPose);
@@ -2041,11 +2058,12 @@ function loop(time) {
     if (state.idx >= SCENE_COUNT - 1) {
       opacity = 1;
     } else {
-      // Caché net dans [0.40, 0.60] (large que la fenêtre de pose [0.45, 0.55]
-      // pour que le texte ne réapparaisse pas pendant l'atterrissage), fade
-      // rapide aux bords [0.32, 0.40] et [0.60, 0.68].
+      // Hidden dans [0.28, 0.72] (englobe largement la fenêtre de pose
+      // [0.35, 0.65]) avec fade rapide aux bords [0.20, 0.28] et
+      // [0.72, 0.80]. Le texte disparaît AVANT que l'iPhone bouge et
+      // revient APRÈS qu'il se soit posé.
       const dist = Math.abs(state.localT - 0.5);
-      opacity = clamp((dist - 0.10) / 0.08, 0, 1);
+      opacity = clamp((dist - 0.22) / 0.08, 0, 1);
     }
     overlayEl.style.opacity = opacity.toFixed(3);
   }

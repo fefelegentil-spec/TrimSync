@@ -1936,18 +1936,20 @@ function loop(time) {
     //   1→2 : TUMBLE X (avance vers nous en faisant la roulade)
     //   2→3 : spin Z (in-plane, comme une aiguille d'horloge) + ZOOM in+out
     //   3→4 : spin Y inverse + arc HAUT (l'iPhone saute par-dessus)
-    // spin{X,Y,Z} : nombre de TOURS COMPLETS (1 = 360°, 0.5 = demi-tour).
-    // Dosage révisé après retours user : pas de spin Z (aiguille d'horloge
-    // trop violente), demi-tour X plus élégant que la roulade complète.
-    //   0→1 : tour Y plein (classique page qui tourne)
-    //   1→2 : demi-tour X (flip avant, plus élégant qu'une roulade)
-    //   2→3 : demi-tour Y + zoom doux (vient se révéler de profil)
-    //   3→4 : tour Y plein + arc haut (saute par-dessus)
+    // spin{X,Y,Z} : nombre de TOURS COMPLETS. TOUJOURS un nombre entier
+    // (1, 2, …) pour garantir qu'à la fin de la transition le téléphone
+    // soit FACE caméra. Les demi-tours (0.5) laissaient le dos visible
+    // → bug visible sur la scène Booked. La variété vient désormais
+    // de l'axe + arc + pop Z + roll, pas de l'angle de rotation.
+    //   0→1 : tour Y (page qui tourne) + arc + roll dans le virage
+    //   1→2 : tour X (roulade avant) + pop Z doux
+    //   2→3 : tour Y + GROS pop Z (zoom rentrant)
+    //   3→4 : tour Y + ARC HAUT (saute par-dessus)
     const TRANSITIONS = [
-      { spinX: 0,   spinY: 1,   spinZ: 0, arcY: 0.18, popZ: 0.85, roll: 0.12 },
-      { spinX: 0.5, spinY: 0,   spinZ: 0, arcY: 0.10, popZ: 0.45, roll: 0.00 },
-      { spinX: 0,   spinY: 0.5, spinZ: 0, arcY: 0.05, popZ: 0.95, roll: 0.06 },
-      { spinX: 0,   spinY: 1,   spinZ: 0, arcY: 0.32, popZ: 0.50, roll: 0.20 }
+      { spinX: 0, spinY: 1, spinZ: 0, arcY: 0.18, popZ: 0.65, roll: 0.12 },
+      { spinX: 1, spinY: 0, spinZ: 0, arcY: 0.08, popZ: 0.45, roll: 0.00 },
+      { spinX: 0, spinY: 1, spinZ: 0, arcY: 0.05, popZ: 1.10, roll: 0.04 },
+      { spinX: 0, spinY: 1, spinZ: 0, arcY: 0.32, popZ: 0.40, roll: 0.20 }
     ];
     const tr = TRANSITIONS[state.idx];
     const direction = (SCENES[state.idx + 1].iphone.px - SCENES[state.idx].iphone.px) >= 0 ? 1 : -1;

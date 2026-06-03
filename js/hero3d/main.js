@@ -36,17 +36,20 @@ async function loadThree() {
    1. CONSTANTES & TOKENS
    ═══════════════════════════════════════════════════════════════════════════ */
 
-// Toutes les poses : py ≤ -0.05 → l'iPhone reste sous la ligne médiane du
-// viewport et ne mange JAMAIS la nav fixe en haut (68px). Scale capé à 0.9
-// pour qu'aucune scène n'envoie le téléphone toucher la barre du dessus.
+// L'iPhone change de CÔTÉ à chaque scène (px ±1.0). Le texte d'overlay
+// fait l'inverse (géré par CSS .overlay.is-right + toggle JS). Toutes les
+// py restent ≤ -0.05 → on ne touche jamais la nav fixe (68px).
+//
+//   pair (0,2,4) → iPhone DROITE  (px = +1.0), texte à GAUCHE
+//   impair (1,3) → iPhone GAUCHE  (px = -1.0), texte à DROITE
 const SCENES = [
   {
     eyebrow: { en: '01 · The lost DM',         fr: '01 · Le DM oublié' },
     title:   { en: 'Your chair fills itself.', fr: 'Ta chaise se remplit toute seule.' },
     sub:     { en: 'While you sleep, the DMs that used to die in your inbox become booked appointments.',
                fr: 'Pendant que tu dors, les DMs qui mouraient dans ta boîte deviennent des RDV pris.' },
-    bg: [0.12, 0.008, 222],         // quasi-noir
-    iphone: { px: -0.15, py: -0.10, pz: 0.0, rx: -0.05, ry: -0.18, rz: 0.04, scale: 0.80 },
+    bg: [0.12, 0.008, 222],
+    iphone: { px:  1.00, py: -0.10, pz: 0.0, rx: -0.05, ry: -0.18, rz: 0.04, scale: 0.80 },
     rim: 0.4,
     cta: false
   },
@@ -55,8 +58,8 @@ const SCENES = [
     title:   { en: 'Trained on barber DMs.',   fr: 'Entraînée sur des DMs de barbiers.' },
     sub:     { en: 'Not on web text. Real conversations, real slang, real bookings.',
                fr: 'Pas sur du texte web. De vraies conversations, du vrai slang, de vrais RDV.' },
-    bg: [0.30, 0.10, 200],          // teal sombre
-    iphone: { px:  0.10, py: -0.08, pz: 0.4, rx: -0.10, ry:  0.22, rz: 0.02, scale: 0.86 },
+    bg: [0.30, 0.10, 200],
+    iphone: { px: -1.00, py: -0.08, pz: 0.4, rx: -0.10, ry:  0.22, rz: 0.02, scale: 0.86 },
     rim: 0.7,
     cta: false
   },
@@ -65,8 +68,8 @@ const SCENES = [
     title:   { en: 'Booked. Synced. Done.',    fr: 'Pris. Synchro. Bouclé.' },
     sub:     { en: 'No reply needed. The slot lands in your agenda — and on the client\'s calendar.',
                fr: 'Pas besoin de répondre. Le créneau atterrit dans ton agenda et dans le calendrier du client.' },
-    bg: [0.55, 0.13, 193],          // teal pleine puissance
-    iphone: { px:  0.00, py: -0.05, pz: 0.6, rx:  0.00, ry:  0.00, rz: 0.0,  scale: 0.90 },
+    bg: [0.55, 0.13, 193],
+    iphone: { px:  1.00, py: -0.05, pz: 0.6, rx:  0.00, ry:  0.00, rz: 0.0,  scale: 0.90 },
     rim: 1.0,
     cta: false
   },
@@ -75,8 +78,8 @@ const SCENES = [
     title:   { en: 'Open the dashboard. Smile.',  fr: 'Ouvre le dashboard. Souris.' },
     sub:     { en: 'Every slot already booked, every client tracked, every euro counted.',
                fr: 'Chaque créneau déjà pris, chaque client suivi, chaque euro compté.' },
-    bg: [0.48, 0.13, 60],           // cuivre chaud (salon)
-    iphone: { px:  0.10, py: -0.15, pz: 0.2, rx:  0.12, ry:  0.55, rz: -0.05, scale: 0.84 },
+    bg: [0.48, 0.13, 60],
+    iphone: { px: -1.00, py: -0.15, pz: 0.2, rx:  0.12, ry:  0.55, rz: -0.05, scale: 0.84 },
     rim: 0.8,
     cta: false
   },
@@ -85,8 +88,8 @@ const SCENES = [
     title:   { en: '€340 a month, back.',      fr: '340 € par mois, récupérés.' },
     sub:     { en: 'That\'s the average barber saves with TrimSync. Ten minutes to set up.',
                fr: 'C\'est ce que récupère le barbier moyen avec TrimSync. Dix minutes pour l\'installer.' },
-    bg: [0.88, 0.04, 200],          // blanc cassé
-    iphone: { px: -0.20, py: -0.10, pz: -0.4, rx: -0.05, ry: -0.30, rz: 0.0, scale: 0.74 },
+    bg: [0.88, 0.04, 200],
+    iphone: { px:  1.00, py: -0.10, pz: -0.4, rx: -0.05, ry: -0.30, rz: 0.0, scale: 0.74 },
     rim: 0.5,
     cta: true
   }
@@ -1718,6 +1721,12 @@ function maybeSwapScene(dominantIdx) {
   animateOverlayOut();
   setTimeout(() => {
     setOverlayContent(dominantIdx, currentLang);
+    // Toggle côté gauche/droite : iPhone à DROITE sur pair (px=+1.0) →
+    // texte à GAUCHE (classe par défaut). iPhone à GAUCHE sur impair →
+    // texte à DROITE (.is-right). On swap pendant que le texte est encore
+    // invisible (entre out et in) → aucun saut visible.
+    const overlayEl = document.getElementById('overlay');
+    if (overlayEl) overlayEl.classList.toggle('is-right', dominantIdx % 2 === 1);
     animateOverlayIn();
   }, 200);
 }
@@ -1901,13 +1910,18 @@ function loop(time) {
     finalPose.ry += Math.sin(t * 14) * 0.3 * easterPhase;
   }
 
-  // SPIN : tour complet (360°) sur Y pendant la transition scène 3 → 4
-  // (Booked → Dashboard de la semaine). Le moment "victoire" où le téléphone
-  // pivote sur lui-même avant de révéler l'agenda complet. smoothstep pour un
-  // démarrage doux et un atterrissage propre — pas de saut à la fin.
-  if (state.idx === 2) {
-    const spinT = smoothstep(0.20, 0.90, state.localT);
-    finalPose.ry += spinT * Math.PI * 2;
+  // SPIN sur CHAQUE transition de scène. Direction du spin alignée sur le
+  // sens du déplacement latéral (px) : s'il va à gauche → tourne CCW (Y
+  // négatif), à droite → CW. Plus un POP forward sur Z (Math.sin → 0..1..0
+  // sur la traversée) → le téléphone avance vers la caméra au milieu du
+  // chemin, comme s'il "passait devant" avant de se reposer à sa nouvelle
+  // place. smoothstep(0.15, 0.85) → démarrage doux, atterrissage propre.
+  if (state.idx < SCENE_COUNT - 1) {
+    const spinT = smoothstep(0.15, 0.85, state.localT);
+    const direction = (SCENES[state.idx + 1].iphone.px - SCENES[state.idx].iphone.px) >= 0 ? 1 : -1;
+    finalPose.ry += spinT * Math.PI * 2 * direction;
+    // Pop forward (avance au milieu de la traversée, recule à l'atterrissage)
+    finalPose.pz += Math.sin(state.localT * Math.PI) * 0.4;
   }
 
   iphone.pose(finalPose);

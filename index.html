@@ -1440,6 +1440,13 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .hero3d-stick{position:sticky;top:0;height:100vh;width:100%;overflow:hidden;display:flex;align-items:center}
 #hero-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .hero3d .overlay{position:relative;z-index:2;max-width:560px;padding:0 6vw;pointer-events:none}
+/* Side-swap : la classe est togglée pendant que le texte est invisible
+   (entre animateOverlayOut et animateOverlayIn), donc pas besoin de
+   transition CSS — le swap est masqué par le fade. */
+.hero3d .overlay.is-right{margin-left:auto;text-align:right}
+.hero3d .overlay.is-right h1,.hero3d .overlay.is-right p{margin-left:auto}
+.hero3d .overlay.is-right p{margin-left:auto;max-width:440px}
+@media(max-width:768px){.hero3d .overlay.is-right{margin-left:0;text-align:left}}
 .hero3d .overlay .eyebrow{font-family:var(--fd);font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--a);margin-bottom:18px;display:inline-block}
 .hero3d .overlay h1{font-family:var(--fd);font-size:clamp(36px,5.4vw,76px);line-height:.96;letter-spacing:-.028em;font-weight:300;color:var(--t);margin-bottom:18px}
 .hero3d .overlay h1 .word{display:inline-block;overflow:hidden;vertical-align:top}

@@ -1848,11 +1848,10 @@ const timelineDots = document.querySelectorAll('.timeline-dot');
 const stickyCta = document.getElementById('stickyCta');
 let lastIdx = -1;
 let frame = 0;
-// Entrance time-based : capturé à la première frame, pilote l'animation
-// d'apparition de l'iPhone (Z lointain + petit + tourné de profil → pose
-// scène 0). Indépendant du scroll.
-let introStart = null;
-const INTRO_DURATION = 1.4;   // secondes
+// Entrance scroll-driven : appliquée pendant les premiers ~6% du scroll
+// de la section hero. Permet à l'utilisateur de contrôler la vitesse de
+// l'apparition au lieu d'une animation aveugle au scroll.
+const INTRO_PROGRESS = 0.06;
 let _lastIsLight = false;
 
 // Mode embarqué : si une section .hero3d existe (intégration dans index.html),
@@ -1969,16 +1968,13 @@ function loop(time) {
     finalPose.rz += bell * tr.roll * direction;
   }
 
-  // INTRO time-based (1.4s) : on lerp depuis une pose lointaine "drama"
-  // vers la finalPose. introT=0 → drama, introT=1 → pose normale. Une
-  // seule fois après le boot, ne se redéclenche pas si on remonte en haut
-  // (sauf reload). Le `t` est en secondes depuis l'origine RAF.
-  if (introStart === null) introStart = t;
-  const introT = clamp((t - introStart) / INTRO_DURATION, 0, 1);
+  // INTRO scroll-driven : tant que progress < INTRO_PROGRESS (6%), on lerp
+  // depuis la pose "drama" (loin, profil, petit) vers la pose scène 0.
+  // L'utilisateur contrôle la vitesse — il scroll lentement, l'iPhone se
+  // matérialise lentement. Il scroll vite, ça pop direct.
+  const introT = clamp(progress / INTRO_PROGRESS, 0, 1);
   if (introT < 1) {
     const e = ease(introT);   // ease-out-cubic
-    // Pose de départ "drama" : loin (Z=-3.5), petit (scale 0.35), de
-    // profil (ry = -π/2), légèrement en-dessous (py = -0.5).
     const intro = { px: finalPose.px * 0.4, py: finalPose.py - 0.45, pz: -3.5,
                     rx: finalPose.rx, ry: -Math.PI / 2, rz: finalPose.rz,
                     scale: finalPose.scale * 0.35 };

@@ -135,11 +135,10 @@ button{cursor:none;border:none;background:none;font:inherit;color:inherit}
 }
 .timeline-dot:hover .timeline-label{opacity:1}
 
-/* Sections (5×100vh, invisibles mais réelles pour le scroll natif/SEO) */
+/* Sections (5×160vh — scroll plus long par scène pour voir les transits) */
 .scenes{position:relative;z-index:0}
 .scene{
-  height:100vh;width:100%;position:relative;
-  /* invisible mais présent dans le DOM pour le scroll + SEO */
+  height:160vh;width:100%;position:relative;
 }
 .scene[data-idx="0"]::after{
   content:"";

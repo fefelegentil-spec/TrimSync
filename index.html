@@ -3476,9 +3476,11 @@ window.bConnectInstagram = function() {
   }
 })();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script src="js/waves-bg.js"></script>
-<!-- Hero 3D (module ESM, importmap défini plus haut) — mode embarqué auto-détecté -->
+<!-- waves-bg et hero3d sont tous les deux ESM et partagent l'unique
+     instance de Three.js définie par l'importmap (voir <head>).
+     Le UMD `three.min.js` a été retiré (causait "Multiple instances of
+     Three.js" + ~600 KB inutiles en mémoire). -->
+<script type="module" src="js/waves-bg.js"></script>
 <script type="module" src="js/hero3d/main.js"></script>
 </body>
 </html>

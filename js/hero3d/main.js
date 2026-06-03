@@ -1203,8 +1203,10 @@ function evaluateTimeline(progress) {
   const titleStable = localT < 0.7;
   const titleTransition = localT >= 0.7 ? (localT - 0.7) / 0.3 : 0;
 
-  // Sur la pose, on lerp tout le long (mouvement continu)
-  const poseT = ease(localT);
+  // Pose : on TIENT à gauche/droite pendant [0..0.45], on snap vers l'autre
+  // côté pendant [0.45..0.55] (très étroit → "d'un coup"), puis on tient
+  // pendant [0.55..1]. Plus de vague continue gauche↔droite.
+  const poseT = smoothstep(0.45, 0.55, localT);
 
   const from = SCENES[idx];
   const to = SCENES[Math.min(idx + 1, SCENE_COUNT - 1)];
@@ -1643,6 +1645,7 @@ function onResize() {
    8. TEXT GLITCH — titre overlay
    ═══════════════════════════════════════════════════════════════════════════ */
 
+const overlayEl      = document.getElementById('overlay');
 const overlayEyebrow = document.getElementById('overlayEyebrow');
 const overlayTitle   = document.getElementById('overlayTitle');
 const overlaySub     = document.getElementById('overlaySub');
@@ -1714,21 +1717,21 @@ function animateOverlayOut() {
 
 function maybeSwapScene(dominantIdx) {
   // Sens-agnostique : swap dès que la scène dominante change
-  // (avant, arrière, ou saut via la timeline). Plus de dépendance
-  // au sens de transition → l'overlay ne se désynchronise plus.
+  // (avant, arrière, ou saut via la timeline). L'opacité est désormais
+  // pilotée par le scroll DANS LA BOUCLE (cf. plus bas) → on swap le
+  // contenu IMMÉDIATEMENT, c'est l'opacity scroll-driven qui rend le
+  // changement invisible pendant la fenêtre [0.45, 0.55] de la traversée.
+  // Plus de setTimeout 200ms qui se désynchronisait à la moindre
+  // variation de vitesse de scroll.
   if (dominantIdx === currentSceneIdx) return;
   currentSceneIdx = dominantIdx;
-  animateOverlayOut();
-  setTimeout(() => {
-    setOverlayContent(dominantIdx, currentLang);
-    // Toggle côté gauche/droite : iPhone à DROITE sur pair (px=+1.0) →
-    // texte à GAUCHE (classe par défaut). iPhone à GAUCHE sur impair →
-    // texte à DROITE (.is-right). On swap pendant que le texte est encore
-    // invisible (entre out et in) → aucun saut visible.
-    const overlayEl = document.getElementById('overlay');
-    if (overlayEl) overlayEl.classList.toggle('is-right', dominantIdx % 2 === 1);
-    animateOverlayIn();
-  }, 200);
+  setOverlayContent(dominantIdx, currentLang);
+  if (overlayEl) overlayEl.classList.toggle('is-right', dominantIdx % 2 === 1);
+  // Per-char reveal du nouveau titre : se joue sous le voile de l'overlay
+  // (opacity scroll-driven) et finit d'animer pendant que l'overlay
+  // redevient visible. Le pop par-lettre reste perceptible pour ceux qui
+  // s'arrêtent juste après la transition.
+  animateOverlayIn();
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1910,18 +1913,18 @@ function loop(time) {
     finalPose.ry += Math.sin(t * 14) * 0.3 * easterPhase;
   }
 
-  // SPIN sur CHAQUE transition de scène. Direction du spin alignée sur le
-  // sens du déplacement latéral (px) : s'il va à gauche → tourne CCW (Y
-  // négatif), à droite → CW. Plus un POP forward sur Z (Math.sin → 0..1..0
-  // sur la traversée) → le téléphone avance vers la caméra au milieu du
-  // chemin, comme s'il "passait devant" avant de se reposer à sa nouvelle
-  // place. smoothstep(0.15, 0.85) → démarrage doux, atterrissage propre.
+  // SPIN sur CHAQUE transition, CONCENTRÉ dans la fenêtre [0.40, 0.60] —
+  // synchronisé avec le snap de pose. Direction alignée sur le sens du
+  // déplacement (CW à droite, CCW à gauche). Pop forward Z dans la même
+  // fenêtre étroite → le téléphone avance vers nous EXACTEMENT pendant
+  // qu'il traverse, recule en atterrissant à sa nouvelle place.
   if (state.idx < SCENE_COUNT - 1) {
-    const spinT = smoothstep(0.15, 0.85, state.localT);
+    const spinT = smoothstep(0.45, 0.55, state.localT);
     const direction = (SCENES[state.idx + 1].iphone.px - SCENES[state.idx].iphone.px) >= 0 ? 1 : -1;
     finalPose.ry += spinT * Math.PI * 2 * direction;
-    // Pop forward (avance au milieu de la traversée, recule à l'atterrissage)
-    finalPose.pz += Math.sin(state.localT * Math.PI) * 0.4;
+    // Pop Z : cloche serrée centrée sur localT=0.5, fenêtre [0.45, 0.55]
+    const popPhase = clamp((state.localT - 0.45) / 0.10, 0, 1);
+    finalPose.pz += Math.sin(popPhase * Math.PI) * 0.55;
   }
 
   iphone.pose(finalPose);
@@ -2026,6 +2029,26 @@ function loop(time) {
   /* — Maybe swap overlay scene (sens-agnostique : avant/arrière/saut) — */
   const dominantIdx = clamp(Math.round(state.sceneFloat), 0, SCENE_COUNT - 1);
   maybeSwapScene(dominantIdx);
+
+  /* — Overlay text fade : scroll-driven. CACHÉ pendant la fenêtre étroite
+     [0.45, 0.55] où l'iPhone traverse, fade rapide aux bords, full visible
+     en dehors de [0.35, 0.65]. Le contenu est swappé par maybeSwapScene
+     juste avant que l'opacity passe sous 0 — l'utilisateur ne voit jamais
+     le changement de texte. Différent de la dernière scène où il n'y a
+     plus de transit (idx === SCENE_COUNT - 1 OR aucune transition). */
+  if (overlayEl) {
+    let opacity;
+    if (state.idx >= SCENE_COUNT - 1) {
+      opacity = 1;
+    } else {
+      // Caché net dans [0.40, 0.60] (large que la fenêtre de pose [0.45, 0.55]
+      // pour que le texte ne réapparaisse pas pendant l'atterrissage), fade
+      // rapide aux bords [0.32, 0.40] et [0.60, 0.68].
+      const dist = Math.abs(state.localT - 0.5);
+      opacity = clamp((dist - 0.10) / 0.08, 0, 1);
+    }
+    overlayEl.style.opacity = opacity.toFixed(3);
+  }
 
   /* — Cursor follow (smooth) — */
   if (cursorDot && !IS_TOUCH) {

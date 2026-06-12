@@ -96,10 +96,11 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .cal-dn{font-size:9px;color:var(--t3);text-align:center;padding:4px 0;letter-spacing:1.5px;text-transform:uppercase;font-weight:700}
 .cal-d{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:13px;font-weight:600;color:var(--t);cursor:pointer;transition:.15s var(--ease);border:1px solid transparent;background:transparent;min-height:38px}
-.cal-d:hover:not(.past):not(.closed):not(.empty){background:var(--bg3);border-color:var(--bd)}
+.cal-d:hover:not(.past):not(.closed):not(.empty):not(.full){background:var(--bg3);border-color:var(--bd)}
 .cal-d.today{color:var(--a);font-weight:700}
 .cal-d.past,.cal-d.closed{opacity:.25;pointer-events:none}
 .cal-d.empty{pointer-events:none;opacity:0}
+.cal-d.full{opacity:.45;cursor:not-allowed;background:oklch(0.45 0.1 20/.10);border-color:oklch(0.55 0.1 20/.2);color:var(--t3);text-decoration:line-through}
 .cal-d.sel{background:var(--a);color:var(--bg);font-weight:800;border-color:var(--a);box-shadow:0 0 0 2px var(--amid),0 4px 14px var(--amid)}
 @media(max-width:500px){.cal-grid{gap:3px}.cal-d{font-size:12px;min-height:34px;border-radius:6px}}
 
@@ -326,6 +327,26 @@ function fmtDay(ds){
 }
 function toMins(t){const[h,m]=t.split(':').map(Number);return h*60+m;}
 
+/* ── JOUR COMPLET */
+function isDayFull(ds){
+  const dt=new Date(ds+'T12:00:00');
+  const dk=JS_DAY[dt.getDay()];
+  const day=HOURS[dk];
+  if(!day||!day.open) return false;
+  const [oH,oM]=day.start.split(':').map(Number);
+  const [cH,cM]=day.end.split(':').map(Number);
+  const slots=[];
+  let h=oH,m=oM;
+  while(h*60+m+SERVICE.duration<=cH*60+cM){
+    slots.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+    m+=30;h+=Math.floor(m/60);m%=60;
+  }
+  if(!slots.length) return true;
+  let taken=[];
+  try{taken=JSON.parse(localStorage.getItem('ts_taken_'+ds)||'[]');}catch(_){}
+  return slots.length>0&&slots.every(s=>taken.includes(s));
+}
+
 /* ── CALENDRIER */
 function renderCal(){
   const mArr=lang==='fr'?MONTHS_FR:MONTHS;
@@ -346,12 +367,15 @@ function renderCal(){
     const isSel=ds===selDate;
     const dk=JS_DAY[dt.getDay()];
     const isOpen=HOURS[dk]&&HOURS[dk].open;
+    const isFull=isOpen&&!isPast&&isDayFull(ds);
     let cls='cal-d';
     if(isPast) cls+=' past';
     else if(!isOpen) cls+=' closed';
+    else if(isFull) cls+=' full';
     else if(isToday) cls+=' today';
     if(isSel) cls+=' sel';
-    html+=`<div class="${cls}" onclick="selectDay('${ds}',this)">${d}</div>`;
+    const titleAttr=isFull?(lang==='fr'?' title="Complet"':' title="Fully booked"'):'';
+    html+=`<div class="${cls}"${titleAttr} onclick="selectDay('${ds}',this)">${d}</div>`;
   }
   grid.innerHTML=html;
 }
@@ -362,7 +386,7 @@ function calChange(dir){
   renderCal();
 }
 function selectDay(ds,el){
-  if(el.classList.contains('past')||el.classList.contains('closed')||el.classList.contains('empty'))return;
+  if(el.classList.contains('past')||el.classList.contains('closed')||el.classList.contains('empty')||el.classList.contains('full'))return;
   selDate=ds;selSlot=null;
   document.getElementById('btn-step1').disabled=true;
   document.querySelector('.cal-d.sel')?.classList.remove('sel');

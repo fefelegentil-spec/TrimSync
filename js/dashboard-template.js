@@ -1294,13 +1294,16 @@ function buildAgendaGrid(days, start, end){
     html += '</div>';
   });
   html += '</div></div>';
+  const prevScrollLeft = document.querySelector('.ag-days-wrap')?.scrollLeft ?? 0;
   document.getElementById('ag-container').innerHTML = html;
   initAgendaDnD();
 
-  // Scroll automatique à 10h
+  // Restaurer la position horizontale (ex : scroll sur samedi) puis scroller verticalement à 10h
   setTimeout(() => {
+    const wrap = document.querySelector('.ag-days-wrap');
+    if(wrap && prevScrollLeft > 0) wrap.scrollLeft = prevScrollLeft;
     const grid = document.querySelector('.ag-grid');
-    if(grid) grid.scrollTop = (10 * 60) - 120; // 10h = 600px, avec offset pour centrer
+    if(grid) grid.scrollTop = (10 * 60) - 120;
   }, 50);
 }
 

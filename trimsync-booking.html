@@ -293,7 +293,13 @@ let selDate=null, selSlot=null;
 let lang=localStorage.getItem('ts-lang')||'en';
 const _now=new Date();
 let calYear=_now.getFullYear(), calMonth=_now.getMonth();
-const TODAY_STR=_now.toISOString().slice(0,10);
+// Composantes *locales* : toISOString() bascule en UTC et renvoie encore la
+// veille entre minuit et 02h00 (heure d'été FR), ce qui décale « aujourd'hui »
+// d'un jour dans le calendrier et laisse la journée d'hier réservable.
+function ymd(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+const TODAY_STR=ymd(_now);
 let booking=null;
 
 /* ── LANG */

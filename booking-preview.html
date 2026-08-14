@@ -639,7 +639,9 @@ function renderCal(){
     const isToday = dt.toDateString()===today.toDateString();
     const isSel  = state.date && dt.toDateString()===new Date(state.date).toDateString();
     const cls = [past||isSun?'disabled':'', isToday?'today':'', isSel?'sel':''].filter(Boolean).join(' ');
-    const ds = dt.toISOString().slice(0,10);
+    // Composantes locales : `dt` est à minuit local, donc toISOString() renvoie
+    // la veille dès qu'on est à l'est d'UTC — le clic sur le 15 réservait le 14.
+    const ds = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
     const h = past||isSun ? '' : "selectDate('"+ds+"')";
     html+=`<div class="cal-d ${cls}" onclick="${h}">${day}</div>`;
   }

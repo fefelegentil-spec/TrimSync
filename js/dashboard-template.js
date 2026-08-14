@@ -145,7 +145,19 @@ const PIN_DEFAULT  = '0000';
 const FCUTZ_HEADER_KEY = 'unused';
 const BIO_KEY      = 'ts_bio_unused';
 const BIO_CRED_KEY = 'ts_bio_cred_unused';
-const TODAY = () => new Date().toISOString().slice(0,10);
+// Date calendaire → 'YYYY-MM-DD' à partir des composantes *locales*.
+// toISOString() convertit en UTC : entre minuit et 02h00 (heure d'été FR) il
+// renvoie encore la veille, et tout l'agenda se retrouve décalé d'un jour
+// (les RDV du vendredi s'affichent dans la colonne du samedi). Les heures, elles,
+// sont déjà lues en local via NOW_HHMM() — mélanger les deux fuseaux est la
+// source du décalage.
+function ymd(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function ym(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+const TODAY = () => ymd(new Date());
 const NOW_HHMM = () => new Date().toTimeString().slice(0,5);
 
 const DAY_KEYS = ['lun','mar','mer','jeu','ven','sam','dim'];
@@ -822,9 +834,9 @@ function pushNotif(type, text, color, rdvId){
 function formatNotifDate(dateStr){
   if(!dateStr) return '';
   const today = TODAY();
-  const tomorrow = (() => { const d = new Date(); d.setDate(d.getDate()+1); return d.toISOString().slice(0,10); })();
-  const weekFrom = (() => { const d = new Date(); d.setDate(d.getDate()+7); return d.toISOString().slice(0,10); })();
-  const twoWeeksFrom = (() => { const d = new Date(); d.setDate(d.getDate()+14); return d.toISOString().slice(0,10); })();
+  const tomorrow = (() => { const d = new Date(); d.setDate(d.getDate()+1); return ymd(d); })();
+  const weekFrom = (() => { const d = new Date(); d.setDate(d.getDate()+7); return ymd(d); })();
+  const twoWeeksFrom = (() => { const d = new Date(); d.setDate(d.getDate()+14); return ymd(d); })();
 
   if(dateStr === today) return 'aujourd\'hui';
   if(dateStr === tomorrow) return 'demain';
@@ -871,7 +883,7 @@ function renderDashboard(){
   const todayRdv = DB.appointments.filter(a => a.date === today && a.status !== 'cancelled').length;
   document.getElementById('kpi-rdv-today').textContent = todayRdv;
   const ydate = new Date(now); ydate.setDate(ydate.getDate()-1);
-  const ystr = ydate.toISOString().slice(0,10);
+  const ystr = ymd(ydate);
   const yRdv = DB.appointments.filter(a => a.date === ystr && a.status !== 'cancelled').length;
   setTrend('kpi-rdv-today-trend', todayRdv, yRdv, 'vs hier');
 
@@ -889,7 +901,7 @@ function renderDashboard(){
   const monthRdv = DB.appointments.filter(a => a.date >= monthStart && a.status !== 'cancelled').length;
   document.getElementById('kpi-rdv-month').textContent = monthRdv;
   const prevMonth = new Date(now); prevMonth.setMonth(prevMonth.getMonth()-1);
-  const pmStart = prevMonth.toISOString().slice(0,7) + '-01';
+  const pmStart = ym(prevMonth) + '-01';
   const pmEnd = today.slice(0,7) + '-01';
   const pmRdv = DB.appointments.filter(a => a.date >= pmStart && a.date < pmEnd && a.status !== 'cancelled').length;
   setTrend('kpi-rdv-trend', monthRdv, pmRdv, 'vs N-1');
@@ -954,14 +966,14 @@ function renderCompactAgenda(){
 
   let html = '<div class="agenda-compact"><div></div>';
   days.forEach((d,i) => {
-    const isToday = d.toISOString().slice(0,10) === today;
-    const dStr = d.toISOString().slice(0,10);
+    const isToday = ymd(d) === today;
+    const dStr = ymd(d);
     html += `<div class="ac-day-h ${isToday?'today':''}" onclick="agOpenDay('${dStr}')" title="Voir ce jour">${dayNames[i]}<span class="ac-day-num">${isToday ? `<span>${d.getDate()}</span>` : d.getDate()}</span></div>`;
   });
   hours.forEach(h => {
     html += `<div class="ac-time">${String(h).padStart(2,'0')}h</div>`;
     days.forEach(d => {
-      const dStr = d.toISOString().slice(0,10);
+      const dStr = ymd(d);
       const slot = DB.appointments.filter(a => a.date === dStr && a.status !== 'cancelled' && parseInt(a.time.split(':')[0]) === h);
       if(slot.length){
         const a = slot[0];
@@ -1176,11 +1188,11 @@ function renderCAChart(){
   const seriesPrev = [];
   for(let i=6; i>=0; i--){
     const d = new Date(now); d.setDate(d.getDate() - i);
-    const dStr = d.toISOString().slice(0,10);
+    const dStr = ymd(d);
     labels.push(['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'][d.getDay()===0?6:d.getDay()-1]);
     series.push(DB.payments.filter(p => p.date === dStr).reduce((s,p) => s + parseFloat(p.amount||0), 0));
     const prev = new Date(d); prev.setDate(prev.getDate() - 7);
-    const pStr = prev.toISOString().slice(0,10);
+    const pStr = ymd(prev);
     seriesPrev.push(DB.payments.filter(p => p.date === pStr).reduce((s,p) => s + parseFloat(p.amount||0), 0));
   }
   const ctx = document.getElementById('chart-ca');
@@ -1253,7 +1265,7 @@ function buildAgendaGrid(days, start, end){
   for(let h=start; h<=end; h++) html += `<div class="ag-time-cell">${String(h).padStart(2,'0')}h</div>`;
   html += '</div><div class="ag-days-wrap">';
   days.forEach(d => {
-    const dStr = d.toISOString().slice(0,10);
+    const dStr = ymd(d);
     const isToday = dStr === today;
     const dn = d.getDay() === 0 ? 6 : d.getDay() - 1;
     const switchAction = agView === 'week' ? `onclick="agOpenDay('${dStr}')"` : '';
@@ -1850,7 +1862,7 @@ async function refreshPayHistory(){
 function renderPayHistory(){
   const today = TODAY();
   const now = new Date();
-  const weekStart = (() => { const d = new Date(now); d.setDate(d.getDate()-7); return d.toISOString().slice(0,10); })();
+  const weekStart = (() => { const d = new Date(now); d.setDate(d.getDate()-7); return ymd(d); })();
   const monthStart = today.slice(0,7) + '-01';
   let pays;
   if(payPeriod === 'today') pays = DB.payments.filter(p => p.date === today);
@@ -1994,12 +2006,12 @@ function renderStats(){
   const today = TODAY();
   const monthStart = today.slice(0,7);
   const prevMonthDate = new Date(now.getFullYear(), now.getMonth()-1, 1);
-  const prevMonth = prevMonthDate.toISOString().slice(0,7);
+  const prevMonth = ym(prevMonthDate);
   const labels = [];
   const series = [];
   for(let i=11; i>=0; i--){
     const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
-    const m = d.toISOString().slice(0,7);
+    const m = ym(d);
     labels.push(['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sept','Oct','Nov','Déc'][d.getMonth()] + ' ' + String(d.getFullYear()).slice(2));
     series.push(Math.ceil(_caForPrefix(m)));
   }
@@ -2029,7 +2041,7 @@ function renderStats(){
   const caMonth = _caForPrefix(monthStart);
   const caPrevMonth = _caForPrefix(prevMonth);
   const weekStartDate = new Date(now); weekStartDate.setDate(weekStartDate.getDate()-7);
-  const weekStartStr = weekStartDate.toISOString().slice(0,10);
+  const weekStartStr = ymd(weekStartDate);
   const caWeek = DB.appointments
     .filter(a => a.status !== 'cancelled' && a.status !== 'noshow' && a.date && a.date >= weekStartStr)
     .reduce((s,a) => { const sv = SERVICES.find(x=>x.name===a.service); return s+(sv?sv.price:parseFloat(a.price||0)); }, 0);

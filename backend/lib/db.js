@@ -109,6 +109,8 @@ const SCHEMA = [
      salon_id TEXT NOT NULL REFERENCES salons(id) ON DELETE CASCADE,
      compte_id TEXT NOT NULL REFERENCES comptes(id) ON DELETE CASCADE,
      cles JSONB NOT NULL)`,
+  // Ajouts après la première mise en ligne : toujours en ALTER idempotent.
+  `ALTER TABLE rdv ADD COLUMN IF NOT EXISTS note TEXT NOT NULL DEFAULT ''`,
   `CREATE INDEX IF NOT EXISTS rdv_salon_date ON rdv (salon_id, date)`,
   `CREATE INDEX IF NOT EXISTS clients_salon ON clients (salon_id)`,
   `CREATE INDEX IF NOT EXISTS attente_salon_date ON attente (salon_id, date)`,

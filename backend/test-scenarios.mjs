@@ -178,6 +178,12 @@ async function main() {
   ok((await appel('PATCH', `/api/rdv/${onze.d?.rdv?.id}`, { statut: 'parti' }, A)).s === 400, 'statut inconnu refusé');
   const deplace = await appel('PATCH', `/api/rdv/${passe.d?.rdv?.id}`, { date: J, heure: '17:00' }, A);
   ok(deplace.s === 200 && deplace.d.rdv.date === J && !(await dispo()).includes('17:00'), 'rdv déplacé');
+  const noteRdv = await appel('POST', '/api/rdv', { client_nom: 'Noté', telephone: '0600000004', prestation_id: coupe.id, date: J, heure: '17:30', note: 'fade court' }, A);
+  ok(noteRdv.s === 201 && noteRdv.d.rdv.note === 'fade court', 'note enregistrée à la création', noteRdv.d);
+  const change = await appel('PATCH', `/api/rdv/${noteRdv.d?.rdv?.id}`, { prestation_id: barbe.id, client_nom: 'Renommé', note: 'barbe seule' }, A);
+  ok(change.s === 200 && change.d.rdv.prestation_nom === 'Barbe' && change.d.rdv.prix === 10 && change.d.rdv.duree_min === 20
+    && change.d.rdv.client_nom === 'Renommé' && change.d.rdv.note === 'barbe seule', 'prestation, client et note modifiés', change.d);
+  ok((await appel('PATCH', `/api/rdv/${noteRdv.d?.rdv?.id}`, { prestation_id: 'inconnue' }, A)).s === 404, 'prestation inconnue refusée');
   const agenda = await appel('GET', `/api/rdv?du=${J}&au=${J}`, undefined, A);
   ok(agenda.s === 200 && agenda.d.rdv.some(r => r.heure === '17:00') && agenda.d.rdv.every(r => r.date === J), 'agenda du jour', agenda.d);
 

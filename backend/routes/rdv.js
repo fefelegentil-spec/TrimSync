@@ -50,10 +50,10 @@ router.post('/api/rdv', exigerCompte, exigerEcriture, async (req, res) => {
       return res.status(409).json(CHEVAUCHEMENT);
     }
     const r = await pool.query(
-      `INSERT INTO rdv (id, salon_id, client_id, client_nom, telephone, prestation_id, prestation_nom, prix, duree_min, date, heure, source, jeton_annulation)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'dashboard', $12) RETURNING *`,
+      `INSERT INTO rdv (id, salon_id, client_id, client_nom, telephone, prestation_id, prestation_nom, prix, duree_min, date, heure, source, jeton_annulation, note)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'dashboard', $12, $13) RETURNING *`,
       [uid('r'), req.salonId, client.id, client.nom, client.telephone, presta.id, presta.nom, presta.prix, presta.duree_min,
-        b.date, b.heure, crypto.randomBytes(24).toString('hex')]);
+        b.date, b.heure, crypto.randomBytes(24).toString('hex'), sanitizeText(b.note, 300)]);
     res.status(201).json({ rdv: r.rows[0] });
   } catch (e) { erreurServeur(res, e, 'rdv/creer'); }
 });
@@ -70,14 +70,33 @@ router.patch('/api/rdv/:id', exigerCompte, exigerEcriture, async (req, res) => {
     };
     if (!estDate(apres.date) || !estHeure(apres.heure)) return res.status(400).json({ error: 'Date ou heure invalide' });
     if (!STATUTS.includes(apres.statut)) return res.status(400).json({ error: 'Statut inconnu' });
+    // Changer de prestation reprend son nom, son prix et sa durée actuels.
+    let presta = { id: avant.prestation_id, nom: avant.prestation_nom, prix: avant.prix, duree_min: avant.duree_min };
+    if (b.prestation_id !== undefined && b.prestation_id !== avant.prestation_id) {
+      presta = (await pool.query('SELECT * FROM prestations WHERE id = $1 AND salon_id = $2', [String(b.prestation_id), req.salonId])).rows[0];
+      if (!presta) return res.status(404).json({ error: 'Prestation introuvable' });
+    }
+    // Changer de client : même rapprochement nom + numéro qu'à la création.
+    let client = { id: avant.client_id, nom: avant.client_nom, telephone: avant.telephone };
+    const nouveauNom = b.client_nom !== undefined ? sanitizeText(b.client_nom, 80) : '';
+    if (nouveauNom && nouveauNom !== avant.client_nom) {
+      const tel = b.telephone !== undefined ? sanitizeText(b.telephone, 30) : avant.telephone;
+      const id = await trouverOuCreerClient(pool, req.salonId, { nom: nouveauNom, telephone: tel });
+      client = (await pool.query('SELECT id, nom, telephone FROM clients WHERE id = $1', [id])).rows[0];
+    }
+    const note = b.note !== undefined ? sanitizeText(b.note, 300) : avant.note;
     const bouge = apres.date !== avant.date || apres.heure !== avant.heure;
-    if (bouge && apres.statut === 'confirme' && !b.forcer
-      && chevauche(await rdvDuJour(req.salonId, apres.date), apres.date, apres.heure, avant.duree_min, avant.id)) {
+    const rallonge = presta.duree_min > avant.duree_min;
+    if ((bouge || rallonge) && apres.statut === 'confirme' && !b.forcer
+      && chevauche(await rdvDuJour(req.salonId, apres.date), apres.date, apres.heure, presta.duree_min, avant.id)) {
       return res.status(409).json(CHEVAUCHEMENT);
     }
     const r = await pool.query(
-      'UPDATE rdv SET date = $3, heure = $4, statut = $5 WHERE id = $1 AND salon_id = $2 RETURNING *',
-      [avant.id, req.salonId, apres.date, apres.heure, apres.statut]);
+      `UPDATE rdv SET date = $3, heure = $4, statut = $5, prestation_id = $6, prestation_nom = $7, prix = $8, duree_min = $9,
+              client_id = $10, client_nom = $11, telephone = $12, note = $13
+        WHERE id = $1 AND salon_id = $2 RETURNING *`,
+      [avant.id, req.salonId, apres.date, apres.heure, apres.statut, presta.id, presta.nom, presta.prix, presta.duree_min,
+        client.id, client.nom, client.telephone, note]);
     // L'ancienne place se libère si le RDV est annulé, marqué no-show ou déplacé.
     if (avant.statut === 'confirme' && (apres.statut !== 'confirme' || bouge)) await signalerPlaceLibre(req.salonId, avant.date);
     res.json({ rdv: r.rows[0] });

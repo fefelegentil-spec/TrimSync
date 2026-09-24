@@ -36,13 +36,13 @@ async function envoyer({ a, sujet, html, type, extra = {} }) {
 }
 
 function verification(a, jeton) {
-  const url = `${SITE()}/connexion?verifier=${jeton}`;
+  const url = `${SITE()}/app?verifier=${jeton}`;
   return envoyer({ a, type: 'verification', extra: { jeton }, sujet: 'Confirme ton adresse email',
     html: gabarit('Bienvenue sur TrimSync', ['Confirme ton adresse pour que je puisse te joindre au moment de brancher ton bot Instagram.'], { url, texte: 'Confirmer mon email' }) });
 }
 
 function reset(a, jeton) {
-  const url = `${SITE()}/connexion?reset=${jeton}`;
+  const url = `${SITE()}/app?reset=${jeton}`;
   return envoyer({ a, type: 'reset', extra: { jeton }, sujet: 'Nouveau mot de passe',
     html: gabarit('Choisis un nouveau mot de passe', ['Ce lien est valable une heure. Si tu n’as rien demandé, ignore cet email.'], { url, texte: 'Choisir un mot de passe' }) });
 }

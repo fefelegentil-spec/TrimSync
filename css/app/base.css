@@ -1,0 +1,2842 @@
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   FCUTZ DASHBOARD â€” Design System (v2.1 â€” Premium Responsive)
+   DA: Dark + Gold #A78BFA
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+
+/* Polices (Unbounded + Syne) : chargees par <link> dans dashboard.html.
+   Pas d'@import ici : il ajoutait un aller-retour reseau en serie apres le CSS,
+   d'ou des retombees en police systeme quand le reseau ne suivait pas. */
+
+/* â”€â”€â”€ DESIGN TOKENS â”€â”€â”€ */
+:root {
+  --ink-0:#06070A; --ink-1:#0E0F13; --ink-2:#14161B; --ink-3:#1B1E25; --ink-4:#262A33;
+  --marble-0:#F5F0E6; --marble-1:#C9C3B8; --marble-2:#8A857E; --marble-3:#4F4C47;
+  /* Couleur d'accent — pilotée par la teinte choisie dans Paramètres.
+     --accent-rgb est le triplet brut : il alimente les ~220 rgba() du fichier,
+     qui ne peuvent pas prendre une couleur composée. Les quatre nuances gardent
+     leurs saturations/luminosités d'origine, seule la teinte tourne. Valeurs
+     par défaut = le violet historique (#A78BFA), donc rien ne bouge tant que
+     l'utilisateur n'a rien choisi. */
+  --accent-h:255;
+  --accent-rgb:167,139,250;
+  --gold-0:hsl(var(--accent-h),92%,76%);
+  --gold-1:hsl(calc(var(--accent-h) - 4),95%,92%);
+  --gold-2:hsl(calc(var(--accent-h) - 4),91%,95%);
+  --gold-deep:hsl(calc(var(--accent-h) + 8),70%,50%);
+  --success:#4ABA6A; --danger:#E05050; --info:#4A8AC8; --warning:#E8A84A;
+  --svc-coupe:#4A9AC8; --svc-premium:#8A4AC8; --svc-transfo:#9B59B6;
+  --svc-dm:#C84A4A; --svc-barbe:#C8892A; --svc-design:#4AC8C8; --svc-paid:#4ABA6A; --svc-parrainage:#C8A85A;
+  /* Voile opaque glisse SOUS toutes les surfaces (cartes, tuiles, boutons).
+     Le fond anime doit se deviner derriere, pas se lire au travers : sans lui,
+     les cases ne pesaient que 2,5 % de creme et 8 % d'accent, et le motif
+     passait a travers comme si de rien n'etait. Un seul nombre pour toute
+     l'interface — monter vers 1 pour couper le fond, descendre pour le laisser
+     revenir. */
+  --voile:rgba(20,22,27,.80);
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:28px; --sp-7:40px; --sp-8:64px;
+  --r-xs:6px; --r-sm:10px; --r-md:14px; --r-lg:20px; --r-xl:28px;
+  --sh-sm:0 1px 2px rgba(0,0,0,.4);
+  --sh-md:0 4px 16px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.03);
+  --sh-lg:0 12px 40px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.04);
+  --sh-gold:0 0 0 1px rgba(var(--accent-rgb),.18), 0 12px 36px rgba(var(--accent-rgb),.15);
+  --ease-micro:cubic-bezier(.4,0,.2,1);
+  --ease-smooth:cubic-bezier(.4,0,.2,1);
+  --ease-bounce:cubic-bezier(.34,1.56,.64,1);
+  --ease-liquid:cubic-bezier(.65,.05,.35,1);
+  --sidebar-w:220px; --sidebar-w-collapsed:68px; --topbar-h:64px;
+}
+
+/* â”€â”€â”€ RESET â”€â”€â”€ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+/* Pas de height:100% ici — c'est le modele de MyLife, et il n'est pas anodin.
+   Avec html,body en height:100%, le body devient lui-meme la boite de
+   defilement (mesure : body.clientHeight 852 pour un scrollHeight de 2892) et
+   la page ne defile plus au niveau du document. En PWA iOS c'est une cause
+   connue de page qui ne s'etend pas jusqu'au bas de l'ecran : le contenu
+   s'arrete a la ligne de la zone sure et laisse la bande sombre du bas.
+   MyLife ne pose que `overflow-x:hidden` sur body et un `min-height` : le
+   document defile nativement et occupe tout l'ecran. */
+html,body{overscroll-behavior:none;overflow-x:hidden}
+/* Aplat pur, comme le `html { background: var(--bg) }` de MyLife (src/styles.css).
+   La peinture du fond de html est propagee au-dela du viewport : c'est elle, et
+   elle seule, qui couvre la bande du bas en PWA iOS. Toute nuance ajoutee ici se
+   retrouve donc dans cette bande — l'ancien radial ancre a 80% 100% la teintait
+   de violet a 4 %, pile a l'endroit du raccord. Le fond visible de la page vient
+   du canvas anime (js/background.js) ; html n'a qu'un role : servir de plaque
+   unie sur laquelle le bas du canvas vient se souder. */
+html{touch-action:manipulation;background:rgb(14,15,19)}
+/* Le fond du body doit rester TRANSPARENT. Le fond anime est un canvas WebGL
+   pose en position:fixed;z-index:-1 (js/background.js) : un z-index negatif se
+   peint APRES le fond de html mais AVANT celui du body. Un fond opaque ici
+   recouvre donc integralement l'animation. Le fond sombre vient de html, dont
+   la peinture est propagee a la totalite du canvas de rendu. */
+body{
+  font-family:'Figtree',sans-serif;font-size:14px;line-height:1.5;
+  background:transparent;color:var(--marble-1);
+  position:relative;overflow-x:hidden;
+  min-height:100vh;min-height:100dvh;   /* comme MyLife : min-height, jamais height */
+}
+body::before{display:none}
+/* Voile du haut : masque par defaut, il n'existe que sur mobile (voir
+   .voile-haut dans le bloc @media plus bas). */
+.voile-haut{display:none}
+/* Bas d'ecran uni — le modele de MyLife, transpose.
+   Rappel du symptome : en PWA iOS l'app fait 793 px de haut pour un ecran de
+   852. Les 59 px restants appartiennent bien a l'app (test du fond de html en
+   vert vif : la bande s'allume) mais ne sont peints QUE par le fond de html,
+   un aplat — le canvas du fond anime est en position:fixed et aucun element
+   fixe n'est peint au-dela du viewport.
+   MyLife n'a pas ce raccord a faire : son fond est
+   `linear-gradient(180deg, var(--bg-2), var(--bg) 34%)`, donc a partir du tiers
+   superieur l'ecran est deja l'aplat exact du fond de html. Il n'y a aucune
+   jointure a masquer, et la barre du bas se pose sur une surface unie.
+   C'est ce qui est repris ici. L'ancien fondu de 80 px soudait bien les deux
+   surfaces, mais il eteignait les ondes du canvas sur une distance trop courte :
+   l'oeil lisait la rupture texture/aplat comme une bande grise, juste sous la
+   barre. Le fondu est donc etale sur ~200 px, avec des paliers doux, et se
+   termine par une plaque pleinement opaque : la derniere ligne du viewport vaut
+   exactement rgb(14,15,19), la bande du bas aussi, le raccord disparait.
+   Place apres le canvas dans l'ordre de peinture (meme z-index negatif, mais
+   ::after est le dernier enfant de body, le canvas le premier), sous le contenu. */
+body::after{
+  content:'';position:fixed;left:0;right:0;bottom:0;
+  height:calc(200px + env(safe-area-inset-bottom,0px));
+  z-index:-1;pointer-events:none;
+  background:linear-gradient(to bottom,
+    rgba(14,15,19,0) 0%,
+    rgba(14,15,19,.16) 28%,
+    rgba(14,15,19,.52) 56%,
+    rgba(14,15,19,.86) 78%,
+    rgb(14,15,19) 92%);
+}
+input,select,button,textarea{font-family:inherit;font-size:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+button{background:none;border:none;cursor:pointer}
+input,select,textarea{outline:none}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(var(--accent-rgb),.35);border-radius:3px}
+
+/* â”€â”€â”€ LAYOUT â”€â”€â”€ */
+.layout{display:flex;min-height:100vh;position:relative;z-index:101}
+
+/* â”€â”€â”€ SIDEBAR â”€â”€â”€ */
+.sidebar{
+  width:var(--sidebar-w);min-height:100vh;
+  background:linear-gradient(180deg,rgba(20,22,27,.96) 0%,rgba(14,15,19,.98) 100%);
+  border-right:1px solid rgba(var(--accent-rgb),.12);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;z-index:130;
+  backdrop-filter:blur(12px);pointer-events:auto;
+}
+.sidebar-logo{
+  padding:max(var(--sp-5),env(safe-area-inset-top)) var(--sp-4) var(--sp-4);
+  border-bottom:1px solid rgba(var(--accent-rgb),.12);display:flex;align-items:center;gap:var(--sp-2);justify-content:flex-start;
+}
+.logo-mark{
+  width:42px;height:42px;border-radius:var(--r-sm);
+  background:linear-gradient(135deg,var(--gold-deep),var(--gold-0) 45%,var(--gold-1));
+  color:var(--ink-0);font-family:'Bricolage Grotesque',sans-serif;
+  font-size:14px;font-weight:900;letter-spacing:-.5px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--sh-gold);flex-shrink:0;
+}
+.logo-text{display:flex;flex-direction:column;line-height:1}
+.logo-name{font-family:'Bricolage Grotesque',sans-serif;font-weight:900;font-size:15px;color:var(--marble-0);letter-spacing:-.3px}
+.logo-sub{font-size:9px;letter-spacing:3px;color:var(--gold-0);text-transform:uppercase;margin-top:3px;font-weight:600}
+
+.sidebar-nav{padding:var(--sp-4) 0;flex:1;overflow-y:auto;scrollbar-width:none;pointer-events:auto}
+.sidebar-nav::-webkit-scrollbar{display:none}
+.nav-section{
+  font-size:9px;letter-spacing:2.5px;text-transform:uppercase;
+  color:rgba(var(--accent-rgb),.65);font-weight:700;
+  padding:var(--sp-4) var(--sp-5) var(--sp-2);
+}
+.nav-section:first-child{padding-top:var(--sp-2)}
+.nav-item{
+  display:flex;align-items:center;gap:var(--sp-3);
+  padding:12px var(--sp-5);min-height:48px;color:var(--marble-1);
+  font-size:13px;font-weight:500;letter-spacing:.2px;
+  transition:all 180ms var(--ease-smooth);
+  position:relative;cursor:pointer;pointer-events:auto;touch-action:manipulation;
+}
+.nav-item::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:transparent;transition:all 180ms var(--ease-smooth);
+}
+.nav-item.active{color:var(--gold-1);background:linear-gradient(90deg,rgba(var(--accent-rgb),.08),transparent)}
+.nav-item.active::before{background:var(--gold-0);box-shadow:0 0 12px rgba(var(--accent-rgb),.30)}
+.nav-item i{font-size:18px;width:20px;text-align:center;opacity:.85}
+.nav-item.active i{opacity:1}
+
+.sidebar-footer{padding:var(--sp-4) var(--sp-5);border-top:1px solid rgba(var(--accent-rgb),.12)}
+.barber-profile{display:flex;align-items:center;gap:var(--sp-3)}
+.barber-avatar{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold-0),var(--gold-1));
+  color:var(--ink-0);font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;
+}
+.barber-meta{flex:1;min-width:0}
+.barber-name{font-size:12.5px;font-weight:600;color:var(--marble-0)}
+.barber-role{font-size:10.5px;color:var(--marble-2);margin-top:1px}
+.backend-state{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--marble-2);margin-top:8px}
+.backend-state .dot{width:7px;height:7px;border-radius:50%;background:var(--marble-3)}
+.backend-state.online .dot{background:var(--success);box-shadow:0 0 6px var(--success)}
+.backend-state.offline .dot{background:var(--danger)}
+
+/* â”€â”€â”€ MAIN â”€â”€â”€ */
+.main{
+  margin-left:var(--sidebar-w);flex:1;min-height:100vh;
+  padding:max(var(--sp-6),env(safe-area-inset-top)) max(var(--sp-7),env(safe-area-inset-right)) max(var(--sp-6),env(safe-area-inset-bottom)) max(var(--sp-7),env(safe-area-inset-left));
+  max-width:calc(100vw - var(--sidebar-w));
+  position:relative;z-index:1;
+}
+
+/* â”€â”€â”€ TOPBAR â”€â”€â”€ */
+.topbar{
+  display:flex;align-items:center;justify-content:flex-start;
+  margin-bottom:5px;gap:12px;flex-wrap:nowrap;
+  padding-top:max(var(--sp-4),env(safe-area-inset-top));padding-bottom:12px;
+}
+.burger-btn{
+  width:36px;min-width:36px;height:36px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:4px;background:none;border:none;
+  cursor:pointer;padding:0;flex-shrink:0;
+}
+.burger-line{display:block;width:20px;height:2px;background:var(--marble-0);border-radius:1px;transition:all 200ms}
+/* La cloche fait face au burger, de l'autre cote du titre, et prend le meme
+   traitement : une icone nue posee sur la barre, sans tuile ni bordure — deux
+   reperes symetriques, pas deux boutons de plus. Elle etait dans le bandeau du
+   dessous, avec un raccourci « Encaisser » qui renvoyait sur une page deja
+   atteignable d'un tap par « Caisse ». */
+.topbar-notif{
+  position:relative;flex-shrink:0;
+  width:44px;height:44px;min-height:44px;
+  display:flex;align-items:center;justify-content:center;
+  background:none;border:0;padding:0;cursor:pointer;
+  color:var(--marble-0);font-size:23px;
+  transition:color 160ms var(--ease-smooth);
+}
+.topbar-notif:active{color:var(--gold-0)}
+.topbar-notif .badge-count{
+  position:absolute;top:2px;right:1px;min-width:18px;height:18px;padding:0 5px;
+  background:var(--gold-0);color:var(--ink-0);
+  border-radius:9px;font-size:10px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 2px rgb(14,15,19);
+}
+.topbar-notif .badge-count.hidden{display:none}
+/* Seul dans son bandeau, le bouton est arrondi de partout : les rayons 22/6 ne
+   servent qu'a souder plusieurs tuiles entre elles. */
+.action-btn-solo{border-radius:22px}
+.topbar-left{flex:1;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.page-title{font-family:'Bricolage Grotesque',sans-serif;font-size:30px;font-weight:900;color:var(--marble-0);letter-spacing:-1.2px;line-height:1;margin:0}
+.page-title .accent{color:var(--gold-0)}
+.page-subtitle{font-size:12px;color:var(--marble-2);margin:0;font-weight:500;line-height:1.2}
+
+/* â”€â”€â”€ ACTION BUTTONS â”€â”€â”€ */
+.action-buttons{
+  display:flex;gap:5px;margin-bottom:var(--sp-6);width:100%;
+}
+.action-btn{
+  flex:1;padding:var(--sp-5);min-height:72px;
+  background:linear-gradient(135deg,rgba(245,240,230,.025),rgba(var(--accent-rgb),.08)),var(--voile);
+  border:1px solid rgba(var(--accent-rgb),.12);
+  backdrop-filter:blur(10px);
+  color:var(--marble-0);font-family:'Figtree',sans-serif;font-size:0;font-weight:600;
+  cursor:pointer;
+  transition:background 200ms cubic-bezier(.16,1,.3,1),border-color 200ms cubic-bezier(.16,1,.3,1),box-shadow 200ms cubic-bezier(.16,1,.3,1);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;overflow:hidden;pointer-events:auto;
+}
+.action-btn i{font-size:28px;color:var(--gold-0);display:flex;align-items:center;justify-content:center;transition:color 200ms cubic-bezier(.16,1,.3,1)}
+.action-btn-first{border-radius:22px 6px 6px 22px}
+.action-btn-mid{border-radius:6px}
+.action-btn-last{border-radius:6px 22px 22px 6px}
+.action-btn:active{background:linear-gradient(135deg,rgba(245,240,230,.06),rgba(var(--accent-rgb),.18));transition-duration:80ms}
+
+/* â”€â”€â”€ BUTTONS â”€â”€â”€ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px 20px;min-height:44px;border-radius:var(--r-sm);font-family:'Figtree',sans-serif;
+  font-size:12.5px;font-weight:700;letter-spacing:.4px;cursor:pointer;
+  transition:all 200ms var(--ease-smooth);white-space:nowrap;
+}
+.btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+.btn-gold{background:rgba(var(--accent-rgb),.16);color:var(--gold-0);border:1px solid rgba(var(--accent-rgb),.32);backdrop-filter:blur(10px)}
+.btn-gold:active{transform:translateY(0)}
+.btn-out{background:linear-gradient(135deg,rgba(245,240,230,.025),rgba(var(--accent-rgb),.08)),var(--voile);color:var(--gold-0);border:1px solid rgba(var(--accent-rgb),.18);backdrop-filter:blur(10px)}
+.btn-out:active{transform:translateY(0)}
+.btn-ghost{background:rgba(var(--accent-rgb),.06);color:var(--marble-1);border:1px solid rgba(var(--accent-rgb),.12)}
+.btn-danger{background:rgba(224,80,80,.12);color:var(--danger);border:1px solid rgba(224,80,80,.3)}
+.btn-sm{padding:9px 15px;min-height:40px;font-size:11px}
+.btn-xs{padding:7px 12px;min-height:32px;font-size:10.5px;border-radius:var(--r-xs)}
+.btn-icon{
+  width:44px;height:44px;min-height:44px;border-radius:var(--r-sm);
+  background:rgba(var(--accent-rgb),.06);border:1px solid rgba(var(--accent-rgb),.12);
+  color:var(--marble-1);display:inline-flex;align-items:center;justify-content:center;
+  font-size:17px;cursor:pointer;transition:all 200ms var(--ease-smooth);position:relative;
+}
+.btn-icon .badge-count{
+  position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;
+  background:var(--gold-0);color:var(--ink-0);
+  border-radius:9px;font-size:10px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* â”€â”€â”€ PAGES â”€â”€â”€ */
+.page{display:none;animation:pageIn 280ms var(--ease-liquid)}
+.page.active{display:block}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* â”€â”€â”€ KPI GRID â”€â”€â”€ */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-bottom:var(--sp-6);grid-auto-rows:1fr}
+.kpi-grid.kpi-grid-6{grid-template-columns:repeat(6,minmax(0,1fr))}
+.kpi-card{
+  position:relative;background:linear-gradient(135deg,rgba(245,240,230,.025),rgba(var(--accent-rgb),.08)),var(--voile);
+  border:1px solid rgba(var(--accent-rgb),.12);border-radius:6px;
+  padding:var(--sp-5);overflow:hidden;min-width:0;
+  display:flex;flex-direction:column;justify-content:space-between;gap:6px;min-height:120px;
+  backdrop-filter:blur(10px);transition:all 250ms var(--ease-smooth);animation:slideUp 400ms var(--ease-bounce);
+}
+.kpi-card:nth-child(1){border-radius:22px 0 0 0}
+.kpi-card:nth-child(2){border-radius:0 22px 0 0}
+.kpi-card:nth-child(3){border-radius:0 0 0 22px}
+.kpi-card:nth-child(4){border-radius:0 0 22px 0}
+/* Grille 6 colonnes : arrondi seulement les coins extremes (1 seule ligne desktop) */
+.kpi-grid-6 .kpi-card{border-radius:6px}
+.kpi-grid-6 .kpi-card:nth-child(1){border-radius:22px 0 0 22px}
+.kpi-grid-6 .kpi-card:nth-child(6){border-radius:0 22px 22px 0}
+.kpi-card::before{
+  content:'';position:absolute;top:0;right:0;width:90px;height:90px;
+  background:radial-gradient(circle at top right,rgba(var(--accent-rgb),.08),transparent 70%);pointer-events:none;
+}
+.kpi-card::after{
+  content:'';position:absolute;inset:-2px;border-radius:inherit;padding:2px;
+  background:radial-gradient(
+    300px circle at var(--glow-x,-400px) var(--glow-y,-400px),
+    rgba(180,140,255,1),
+    rgba(var(--accent-rgb),.5) 35%,
+    transparent 60%
+  );
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  pointer-events:none;z-index:0;opacity:0;transition:opacity 200ms;
+}
+@media(hover:hover){
+.kpi-card:hover::after{opacity:1;}
+}
+.kpi-icon{position:absolute;top:var(--sp-4);right:var(--sp-4);font-size:22px;color:var(--gold-0);opacity:.55}
+.kpi-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--marble-2);font-weight:700;margin-bottom:var(--sp-2)}
+.kpi-value{font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:900;color:var(--marble-0);line-height:1;letter-spacing:-1px}
+.kpi-value .unit{font-size:16px;opacity:.65;margin-left:2px}
+/* Precision sous un KPI dont le total merite d'etre decompose (ex : les
+   no-shows comptes dans « RDV cette semaine »). Masquee quand il n'y a rien
+   a dire — un « dont 0 no-show » permanent serait du bruit. */
+.kpi-sub{font-size:11px;font-weight:600;color:var(--warning);margin-top:5px;letter-spacing:.2px}
+.kpi-sub[hidden]{display:none}
+
+/* Tuiles d'accueil : le chiffre est l'element principal de la case, pas une
+   ligne parmi trois. Il occupe tout le centre, le libelle n'est plus qu'une
+   annotation au-dessus. La taille suit la largeur de la tuile (cqi) ;
+   ajusterTaillesKpi() la rabote apres coup quand un CA a cinq chiffres deborde
+   encore. Regles limitees a #page-dashboard : les tuiles de la page Stats
+   gardent leur mise en forme compacte.
+   La hauteur minimale valait 140 px tant qu'une quatrieme ligne portait la
+   tendance « vs hier » ; celle-ci est partie dans la page Stats, et la hauteur
+   ne servait plus qu'a creuser un vide sous le chiffre. */
+#page-dashboard .kpi-card{container-type:inline-size;align-items:center;text-align:center;min-height:118px;padding:var(--sp-4) var(--sp-3)}
+#page-dashboard .kpi-icon{font-size:17px;opacity:.38;top:9px;right:10px}
+#page-dashboard .kpi-label{margin-bottom:0;padding:0 20px;letter-spacing:1.1px;line-height:1.3}
+#page-dashboard .kpi-value{
+  flex:1;width:100%;display:flex;align-items:center;justify-content:center;
+  white-space:nowrap;font-size:clamp(26px,23cqi,38px);letter-spacing:-1.4px;
+}
+/* L'euro reste une unite, pas un chiffre : plus petit, legerement decale vers
+   le bas pour se poser au pied du nombre plutot que d'en couper la hauteur. */
+#page-dashboard .kpi-value .unit{font-size:.42em;opacity:.55;margin-left:.14em;transform:translateY(.3em)}
+/* La precision sous le chiffre (no-shows / venus) est reservee sur les six
+   tuiles, meme vide : sinon la seule qui la porte tasse son chiffre vers le
+   haut pendant que les cinq autres gardent le leur au milieu. */
+#page-dashboard .kpi-sub{
+  margin-top:0;height:16px;flex:0 0 16px;line-height:1;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  font-size:12px;font-weight:800;letter-spacing:0;
+}
+#page-dashboard .kpi-sub[hidden]{display:flex;visibility:hidden}
+#page-dashboard .kpi-sub .ns{color:var(--warning)}
+#page-dashboard .kpi-sub .ok{color:var(--success)}
+#page-dashboard .kpi-sub .sep{color:var(--marble-3);font-weight:600;opacity:.7}
+
+/* LES SIX CHIFFRES DE L'ACCUEIL
+   Six cases separees par des interstices de 4 px, chacune portant un nombre de
+   38 px : le bloc pesait visuellement plus lourd que la fiche client au-dessus,
+   alors qu'on ne fait qu'y jeter un oeil. Il devient une seule surface — meme
+   fond, meme bordure, meme rayon que la fiche et que le bouton d'encaissement
+   — divisee par des filets d'un pixel : le fond du conteneur affleure dans un
+   gap de 1 px, ce qui trace la grille quel que soit le nombre de colonnes, sans
+   avoir a recompter les :nth-child a chaque point de rupture.
+   Le nombre redescend de 38 a 28 px au plus : a cette taille il rivalisait avec
+   le nom du client, qui est le vrai titre de l'ecran.
+   Les icones de coin disparaissent — douze glyphes decoratifs pour six cases
+   dont le libelle dit deja tout — mais le chevron reste, et devient visible sans
+   survol : sur un telephone il n'y a pas de survol, et c'est lui qui dit que la
+   case s'ouvre. Chaque case garde son propre clic. */
+#page-dashboard .kpi-grid-6{
+  gap:1px;
+  background:rgba(var(--accent-rgb),.16);
+  border:1px solid rgba(var(--accent-rgb),.12);
+  border-radius:var(--r-lg);
+  overflow:hidden;
+}
+#page-dashboard .kpi-grid-6 .kpi-card{
+  background:linear-gradient(135deg,rgba(245,240,230,.025),rgba(var(--accent-rgb),.08)),var(--voile);
+  border:0;border-radius:0;box-shadow:none;
+  min-height:0;padding:var(--sp-3) var(--sp-2);
+  justify-content:center;gap:5px;
+}
+/* Le chiffre collait a son libelle : 3 px entre deux elements de corps tres
+   different se lisent comme un seul bloc. 10 px sous l'intitule, 5 px pour le
+   reste — l'intitule annonce, le chiffre repond. */
+#page-dashboard .kpi-grid-6 .kpi-label{margin-bottom:5px}
+/* Le nombre ne prend plus toute la hauteur restante : c'est ce flex:1 qui
+   creusait 30 px de vide entre lui et la tendance. La case fait desormais la
+   hauteur de son contenu, et grid-auto-rows:1fr egalise les deux d'une rangee. */
+#page-dashboard .kpi-grid-6 .kpi-value{flex:0 0 auto}
+#page-dashboard .kpi-grid-6 .kpi-card::before{display:none}
+#page-dashboard .kpi-grid-6 .kpi-card::after{display:none}
+#page-dashboard .kpi-grid-6 .kpi-icon{display:none}
+#page-dashboard .kpi-grid-6 .kpi-more{opacity:.28;right:7px;bottom:5px;font-size:12px}
+#page-dashboard .kpi-grid-6 .kpi-label{font-size:9px;letter-spacing:1px;padding:0 6px}
+#page-dashboard .kpi-grid-6 .kpi-value{font-size:clamp(19px,14cqi,26px);letter-spacing:-.8px}
+#page-dashboard .kpi-grid-6 .kpi-sub{height:13px;flex:0 0 13px;font-size:10.5px}
+/* La ligne de precision (les no-shows comptes dans un total) est reservee sur
+   les six cases meme vide, sinon la seule qui la porte decale son chiffre par
+   rapport a sa voisine. Mais quand aucune des six n'a rien a preciser — le cas
+   ordinaire — la reservation ne sert plus qu'a creuser 13 px par rangee : on la
+   retire alors partout d'un coup, l'alignement etant preserve puisque personne
+   ne l'a. Navigateur sans :has() : elle reste reservee, comme avant. */
+#page-dashboard .kpi-grid-6:not(:has(.kpi-sub:not([hidden]))) .kpi-sub{display:none}
+@media(hover:hover){
+  #page-dashboard .kpi-grid-6 .kpi-card:hover{transform:none;box-shadow:none;background:linear-gradient(135deg,rgba(245,240,230,.05),rgba(var(--accent-rgb),.15)),var(--voile)}
+  #page-dashboard .kpi-grid-6 .kpi-card:hover .kpi-more{opacity:.85}
+}
+#page-dashboard .kpi-grid-6 .kpi-card:active{background:linear-gradient(135deg,rgba(245,240,230,.06),rgba(var(--accent-rgb),.18)),var(--voile)}
+
+/* â”€â”€â”€ STATS CARDS (3-column sections) â”€â”€â”€ */
+/* Case a cocher de formulaire : la cible fait 44 px de haut, comme les champs,
+   pour que le pouce l'attrape sans viser le carre de 18 px. */
+.f-check{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-size:13.5px;color:var(--marble-1)}
+.f-check input{width:19px;height:19px;flex-shrink:0;accent-color:var(--gold-0);margin:0}
+
+/* ─── PAGE STATISTIQUES ─── */
+/* Une section = une question, une carte = une section. Les chiffres d'abord,
+   les courbes ensuite : on vient ici pour savoir ou on en est, pas pour lire un
+   graphique.
+   Les cases de chiffres reprennent la grammaire des tuiles de l'accueil : une
+   seule surface divisee par des filets, valeur en 'Bricolage Grotesque', intitule en
+   micro-capitales. Elles etaient jusqu'ici des .kpi-card independantes portant
+   leurs rayons 22/6 en style en ligne, recopies a la main sur chaque case. */
+.st-card{margin-bottom:var(--sp-4)}
+.st-card:last-child{margin-bottom:0}
+.st-grid{
+  display:grid;gap:1px;
+  background:rgba(var(--accent-rgb),.14);
+  border:1px solid rgba(var(--accent-rgb),.12);
+  border-radius:var(--r-lg);overflow:hidden;
+}
+/* Trois montants a 375 px : la colonne fait 115 px, un CA annuel a cinq chiffres
+   n'y tient pas. Une ellipse sur un montant est un mensonge visuel (« 22 500 € »
+   coupe en « 22 5… »), alors on donne la place : deux cases en haut, l'annee sur
+   toute la largeur. A partir de 560 px les trois tiennent de front. */
+.st-grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}
+.st-grid-3 > :nth-child(3){grid-column:1/-1}
+.st-grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(min-width:560px){
+  .st-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .st-grid-3 > :nth-child(3){grid-column:auto}
+  .st-grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+/* Contenu cale en HAUT, pas centre : les montants tiennent tous sur une ligne,
+   donc les caler en haut aligne les chiffres entre eux ET les intitules en
+   dessous, sans une seule valeur ecrite en dur. Centres, ils flottaient chacun
+   a une hauteur differente selon la longueur de leur intitule. */
+.st-cell{
+  background:linear-gradient(135deg,rgba(245,240,230,.025),rgba(var(--accent-rgb),.08)),var(--voile);
+  padding:var(--sp-4) var(--sp-3);min-width:0;
+  display:flex;flex-direction:column;justify-content:flex-start;
+}
+.st-val{
+  font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(16px,4.6vw,21px);font-weight:800;
+  color:var(--gold-1);letter-spacing:-.6px;line-height:1.15;white-space:nowrap;
+}
+.st-lab{
+  margin-top:6px;font-size:9px;letter-spacing:.9px;text-transform:uppercase;
+  font-weight:700;color:var(--marble-2);line-height:1.3;white-space:nowrap;
+}
+/* La tendance a sa propre ligne sous la grille : logee dans la case du mois,
+   « ↗ 17 % vs mois −1 a date » tombait sur trois lignes et decalait ses voisines. */
+.st-tend{
+  display:flex;align-items:center;gap:6px;margin-top:var(--sp-3);
+  font-size:11.5px;font-weight:600;color:var(--marble-2);line-height:1.3;
+}
+.st-tend i{font-size:15px;flex-shrink:0}
+.st-tend b{font-family:'Bricolage Grotesque',sans-serif;font-size:12px;font-weight:700}
+.st-tend.up b, .st-tend.up i{color:var(--success)}
+.st-tend.down b, .st-tend.down i{color:var(--danger)}
+/* Intitule d'un groupe de cases, dans une carte qui en porte deux (les
+   comparatifs : les rendez-vous d'un cote, le chiffre d'affaires de l'autre).
+   Meme graphie que les intitules de cases, pour qu'il se lise comme un titre de
+   colonne et non comme une deuxieme phrase d'introduction. */
+.st-groupe{
+  margin:var(--sp-4) 0 var(--sp-2);
+  font-size:9px;letter-spacing:.9px;text-transform:uppercase;
+  font-weight:700;color:var(--marble-2);
+}
+.st-card .card-sub + .st-groupe{margin-top:0}
+/* Tendance d'une case de comparatif : « +12% vs hier » sous l'intitule. Le vert
+   et le rouge ne portent pas l'information seuls — la fleche et le signe la
+   disent aussi, pour qui ne distingue pas les deux teintes. */
+.st-cmp{
+  margin-top:8px;display:flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:600;white-space:nowrap;
+}
+.st-cmp.up{color:var(--success)}
+.st-cmp.down{color:var(--danger)}
+.st-cmp.flat{color:var(--marble-2)}
+/* Le detail technique sous « SumUp ne confirme pas » : codes HTTP renvoyes par
+   l'API. Illisible pour le barbier, mais c'est ce qu'on lui demande de
+   photographier quand un encaissement refuse de se solder tout seul. */
+.tm-journal{
+  margin-top:6px;font-size:10px;line-height:1.4;color:var(--marble-3);
+  word-break:break-word;font-family:ui-monospace,monospace;
+}
+/* Zone de trace. Une hauteur fixe : un canvas sans hauteur imposee se replie a
+   zero, Chart.js n'ayant rien a mesurer. */
+.st-chart{position:relative;height:220px;margin-top:var(--sp-2)}
+/* Sur un large ecran la carte s'etale : a hauteur constante la courbe
+   s'aplatit et les variations deviennent invisibles. */
+@media(min-width:900px){ .st-chart{height:300px} }
+/* Classement et remplissage : meme objet, un intitule, un nombre, une barre. */
+.st-rank{margin-top:var(--sp-3)}
+.st-rank:first-child{margin-top:var(--sp-2)}
+.st-rank-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:6px;min-width:0}
+.st-rank-nom{font-size:12.5px;color:var(--marble-1);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.st-rank-n{font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:700;color:var(--gold-0);flex-shrink:0;display:flex;align-items:baseline;gap:6px}
+.st-rank-pct{font-family:'Figtree',sans-serif;font-size:10.5px;font-weight:600;color:var(--marble-3)}
+.st-bar{height:8px;border-radius:4px;background:rgba(var(--accent-rgb),.10);overflow:hidden}
+/* Extremite arrondie et ancree a zero : une barre qui commence par un angle
+   droit et finit par un autre se lit moins bien qu'une capsule. */
+.st-bar-fill{height:100%;border-radius:4px;background:var(--gold-0);transition:width 420ms var(--ease-smooth)}
+/* Le taux de remplissage est un etat : trois couleurs de statut, et le chiffre
+   ecrit a cote pour que la couleur ne porte jamais l'information seule. */
+.st-plein{color:var(--success)}
+.st-moyen{color:var(--warning)}
+.st-creux{color:var(--danger)}
+.st-bar-fill.st-plein{background:var(--success)}
+.st-bar-fill.st-moyen{background:var(--warning)}
+.st-bar-fill.st-creux{background:var(--danger)}
+.st-note{display:flex;align-items:flex-start;gap:7px;margin-top:var(--sp-4);font-size:10.5px;line-height:1.45;color:var(--marble-2)}
+.st-note i{font-size:14px;flex-shrink:0;margin-top:1px}
+/* Un sous-titre se colle a son titre : le blanc du .card-h le detacherait
+   du titre qu'il explique et le rapprocherait des chiffres. */
+.st-card .card-h:has(+ .card-sub){margin-bottom:4px}
+.st-card .card-sub{display:block;margin:0 0 var(--sp-3);font-size:11px;color:var(--marble-2);line-height:1.45;max-width:44ch}
+
+
+/* â”€â”€â”€ GRIDS â”€â”€â”€ */
+.g-2-3{display:grid;grid-template-columns:2fr 1.3fr;gap:var(--sp-5);margin-bottom:var(--sp-5)}
+.g-3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-5);margin-bottom:var(--sp-5)}
+.g-4{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-5);margin-bottom:var(--sp-5)}
+.g-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-5);margin-bottom:var(--sp-5)}
+.col-stack{display:flex;flex-direction:column;gap:var(--sp-4);min-width:0;width:100%}
+
+/* â”€â”€â”€ CARDS â”€â”€â”€ */
+.card{
+  position:relative;
+  background:linear-gradient(135deg,rgba(245,240,230,.025),rgba(var(--accent-rgb),.08)),var(--voile);
+  border:1px solid rgba(var(--accent-rgb),.12);border-radius:var(--r-lg);
+  padding:var(--sp-5);backdrop-filter:blur(10px);transition:all 200ms var(--ease-smooth);animation:slideUp 400ms var(--ease-bounce);
+  overflow:hidden;min-width:0;
+}
+/* Spotlight border — bord qui brille sous le curseur */
+.card::before{
+  content:'';position:absolute;inset:-2px;border-radius:inherit;padding:2px;
+  background:radial-gradient(
+    450px circle at var(--glow-x,-400px) var(--glow-y,-400px),
+    rgba(180,140,255,1),
+    rgba(var(--accent-rgb),.5) 35%,
+    transparent 60%
+  );
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  pointer-events:none;z-index:0;opacity:0;transition:opacity 200ms;
+}
+/* Inner glow */
+.card::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:radial-gradient(
+    380px circle at var(--glow-x,-400px) var(--glow-y,-400px),
+    rgba(var(--accent-rgb),.13),
+    transparent 65%
+  );
+  pointer-events:none;z-index:0;opacity:0;transition:opacity 200ms;
+}
+.card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-3);gap:var(--sp-3);flex-wrap:wrap}
+.card-title{font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:700;color:var(--marble-0);letter-spacing:-.3px}
+.card-action{font-size:11.5px;color:var(--gold-0);font-weight:600;cursor:pointer;transition:color 180ms}
+.card-sub{font-size:11px;color:var(--marble-2);margin-top:2px;font-weight:500}
+
+/* â”€â”€â”€ CLIENT SORT BUTTONS â”€â”€â”€ */
+/* En-tete de la page Clients. Quatre pastilles de 72 px — Depenses, RDV,
+   Nouveau, SumUp — tenaient sur une seule rangee qui defilait
+   horizontalement : la quatrieme etait coupee au bord de la carte, et une
+   rangee qui defile ne dit pas qu'elle defile.
+   La recherche passe en premier, c'est ce qu'on utilise le plus. Le tri et
+   « Nouveau » se partagent la rangee suivante, en grille : plus rien ne
+   deborde. SumUp, qui n'est ni un tri ni une action du quotidien mais un
+   import ponctuel, se range en icone a cote du titre. */
+.cli-search{margin-bottom:var(--sp-3)}
+.cli-barre{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--sp-2);margin-bottom:var(--sp-3)}
+.tabs.cli-tri{display:grid;grid-template-columns:1fr 1fr;width:100%;min-width:0}
+.tabs.cli-tri .tab{padding:var(--sp-3) var(--sp-2);min-height:42px;font-size:12px}
+.cli-nouveau{min-height:52px;padding:0 var(--sp-4);flex-shrink:0;white-space:nowrap}
+.cli-sumup{min-height:38px;width:38px;padding:0;flex-shrink:0}
+
+/* â”€â”€â”€ KPI GRIDS (3 COLUMNS) â”€â”€â”€ */
+
+/* â”€â”€â”€ TABS â”€â”€â”€ */
+.tabs{display:inline-flex;gap:3px;padding:4px;background:var(--voile);border-radius:17px;border:1px solid rgba(var(--accent-rgb),.12);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%)}
+.tab{padding:var(--sp-4) var(--sp-5);min-height:44px;border-radius:13px;font-size:12px;font-weight:600;color:var(--marble-2);cursor:pointer;transition:color 180ms var(--ease-micro),background 180ms var(--ease-micro);white-space:nowrap;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid transparent}
+.tab.active{background:rgba(var(--accent-rgb),.15);color:var(--gold-1);border-color:rgba(var(--accent-rgb),.22)}
+
+/* â”€â”€â”€ CLIENT PAGE STYLING â”€â”€â”€ */
+#page-clients .card:nth-of-type(1) .btn{background:linear-gradient(135deg,rgba(245,240,230,.025),rgba(var(--accent-rgb),.08)),var(--voile);border:1px solid rgba(var(--accent-rgb),.12);border-radius:var(--r-lg);backdrop-filter:blur(10px);color:var(--marble-0);padding:var(--sp-4) var(--sp-5);min-height:44px}
+
+/* â”€â”€â”€ NEXT CLIENT â”€â”€â”€ */
+.next-client{
+  background:linear-gradient(135deg,rgba(var(--accent-rgb),.08),rgba(232,200,122,.06)),var(--voile);
+  border:1px solid rgba(var(--accent-rgb),.12);border-radius:var(--r-lg);padding:var(--sp-5);position:relative;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(var(--accent-rgb),.22), 0 12px 36px rgba(var(--accent-rgb),.20);animation:slideUp 400ms var(--ease-bounce);
+}
+/* La carte et son bandeau d'actions sont deux surfaces distinctes, mais du
+   meme geste : l'ecart au-dessus du bandeau est plus serre que celui qui le
+   separe de la suite. C'est la proximite qui dit l'appartenance, pas un
+   cadre commun. */
+/* Un seul ecart entre les blocs de l'accueil : 16 px, comme sous le bouton
+   « + ». Il y en avait trois — 16 sous le +, 12 sous la fiche, 28 sous le
+   bandeau — et c'est cette irregularite qui se voyait, pas la valeur. Le
+   bandeau d'actions se rattachait a la fiche par un ecart plus court ; le
+   rythme regulier le dit aussi bien, et sans faire hesiter l'oeil. */
+.next-client-top{margin-bottom:var(--sp-4)}
+.next-bar{margin-bottom:var(--sp-4)}
+.next-bar:empty{display:none;margin:0}
+/* Le bandeau vise parfois un autre client que la carte (celui qui vient de
+   sortir du fauteuil) : on le nomme au-dessus des deux boutons. */
+.next-bar-who{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--marble-1);margin-bottom:var(--sp-2);padding:0 2px}
+.next-bar-who strong{color:var(--gold-0)}
+@keyframes rainbowGlow{
+  0%{box-shadow:0 0 0 1px rgba(255,0,0,.18), 0 16px 48px rgba(255,0,0,.18)}
+  16.6%{box-shadow:0 0 0 1px rgba(255,127,0,.18), 0 16px 48px rgba(255,127,0,.18)}
+  33.2%{box-shadow:0 0 0 1px rgba(255,255,0,.18), 0 16px 48px rgba(255,255,0,.18)}
+  49.8%{box-shadow:0 0 0 1px rgba(0,255,0,.18), 0 16px 48px rgba(0,255,0,.18)}
+  66.4%{box-shadow:0 0 0 1px rgba(0,0,255,.18), 0 16px 48px rgba(0,0,255,.18)}
+  83%{box-shadow:0 0 0 1px rgba(75,0,130,.18), 0 16px 48px rgba(75,0,130,.18)}
+  100%{box-shadow:0 0 0 1px rgba(255,0,0,.18), 0 16px 48px rgba(255,0,0,.18)}
+}
+@keyframes rainbowBg{
+  0%{filter:hue-rotate(0deg)}
+  16.6%{filter:hue-rotate(60deg)}
+  33.2%{filter:hue-rotate(120deg)}
+  50%{filter:hue-rotate(180deg)}
+  66.6%{filter:hue-rotate(240deg)}
+  83.2%{filter:hue-rotate(300deg)}
+  100%{filter:hue-rotate(360deg)}
+}
+@keyframes goldGlow{0%{box-shadow:0 0 0 1px rgba(var(--accent-rgb),.22), 0 12px 36px rgba(var(--accent-rgb),.20)}50%{box-shadow:0 0 0 1px rgba(var(--accent-rgb),.22), 0 18px 48px rgba(var(--accent-rgb),.20)}100%{box-shadow:0 0 0 1px rgba(var(--accent-rgb),.22), 0 12px 36px rgba(var(--accent-rgb),.20)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* C'est le client qu'on lit en premier, pas l'heure. Le nom prend le corps
+   (28 px), l'heure redescend dans la ligne de faits juste dessous, ou elle
+   voisine avec ce qu'elle qualifie : la fin, la prestation, le prix. Ca fait
+   une ligne de moins et un ordre de lecture qui ne peut plus s'inverser. Le
+   compte a rebours utile (« depuis 12 min ») est de toute facon dans
+   l'etiquette du haut. */
+.next-name{font-family:'Bricolage Grotesque',sans-serif;font-size:31px;font-weight:800;color:var(--gold-1);letter-spacing:-.7px;line-height:1.15}
+/* La case de donnees a gauche, la colonne de contact a droite, et elle la
+   longe sur toute sa hauteur : nom, faits, chiffres. Elle ne se raccroche plus
+   a la seule ligne d'identite, ou elle etait soit trop haute soit trop courte
+   selon le contenu — align-items:stretch et elle fait, par construction, la
+   hauteur de ce qu'elle accompagne.
+   96 px de large, et de la place en hauteur : les glyphes gagnent leur
+   intitule. « Appeler » et « SMS » ecrits, on ne devine plus. Rayon 22 px a
+   l'exterieur, filet droit a la jonction : la grammaire des tuiles du haut.
+   Meme fond que ces tuiles — un creux plus sombre que la carte se lirait comme
+   un trou. Glyphes marbre, l'accent seulement au contact du doigt, pour rester
+   derriere Carte et Termine.
+   Pas de numero, pas de colonne : la case de donnees reprend toute la largeur
+   plutot que de faire face a deux boutons grises. */
+.next-id{display:flex;align-items:stretch;gap:var(--sp-4)}
+/* Une seule grille de deux colonnes sur deux rangees, pour que le trait sous
+   le nom et celui qui separe Appeler de SMS soient la MEME frontiere de
+   rangee. Avant, c'etaient deux blocs cote a cote coupes chacun en deux
+   moities egales : ca ne tenait que tant que la colonne de gauche ne portait
+   rien d'autre. Des qu'une note de client s'y ajoutait, le trait de gauche
+   descendait et celui de droite restait au milieu.
+   Rangee 1 : le nom, et Appeler en face. Rangee 2 : l'heure et les alertes, et
+   SMS en face. La colonne de contact fait donc toute la hauteur du bloc, notes
+   comprises, et le trait traverse d'un seul tenant par construction.
+   Les deux boutons ne sont plus dans un conteneur commun : ils portent
+   eux-memes le fond, la bordure et les angles de la capsule — 22 px a
+   l'exterieur, droits a la jonction, la grammaire des tuiles du haut. */
+/* Les deux rangees sont egales (1fr chacune, 80 px au minimum) : sans ca, la
+   rangee du nom valait la hauteur d'une ligne et celle de l'heure portait en
+   plus les alertes, si bien qu'Appeler etait deux fois plus court que SMS. A
+   rangees egales, les deux boutons le sont aussi, et le trait tombe toujours
+   au meme endroit des deux cotes.
+   Le minimum de 80 px donne du meme coup a la carte la presence qui lui
+   manquait — c'est l'element qu'on regarde en premier en ouvrant l'appli. */
+.next-id{
+  display:grid;grid-template-columns:minmax(0,1fr) 96px;
+  grid-template-rows:minmax(80px,1fr) minmax(80px,1fr);
+  gap:0 var(--sp-4);align-items:stretch;
+}
+.next-id-solo{grid-template-columns:minmax(0,1fr)}
+.next-name{display:flex;align-items:center;padding-bottom:var(--sp-3);min-width:0}
+.next-name>span,.next-nom{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Client relié à son Instagram : sa photo devant le nom, son @ dessous (lien
+   vers son profil), et un troisième bouton « Insta » sous Appeler et SMS. */
+.next-name-txt{display:flex;flex-direction:column;justify-content:center;min-width:0;flex:1}
+.next-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;flex:0 0 auto;margin-right:10px;background:var(--ink-3);border:2px solid rgba(var(--accent-rgb),.35)}
+.next-avatar.ig-avatar-init{font-family:'Figtree',sans-serif;font-size:16px;letter-spacing:0}
+.next-insta{display:inline-flex;align-items:center;gap:4px;margin-top:2px;font-family:'Figtree',sans-serif;font-size:13px;font-weight:600;letter-spacing:0;line-height:1.3;color:var(--marble-2);text-decoration:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.next-insta .ti{font-size:15px}
+.next-insta:hover,.next-insta:focus-visible{color:var(--gold-0)}
+.next-contact-btn[type=button]{font:inherit;cursor:pointer}
+/* Trois boutons : la colonne de contact passe à trois rangées, l'heure et les
+   alertes occupent les deux du bas à gauche — le trait sous le nom reste la
+   frontière entre Appeler et SMS. */
+.next-id-3{grid-template-rows:minmax(72px,auto) minmax(60px,1fr) minmax(60px,1fr)}
+.next-id-3 .next-when{grid-row:span 2}
+.next-id-3 .next-btn-bas{border-radius:0;border-bottom:0}
+.next-btn-insta{border-radius:0 0 22px 22px}
+.next-btn-seul{grid-row:1 / span 2;border-radius:22px}
+.next-when{padding-top:var(--sp-3);border-top:1px solid rgba(var(--accent-rgb),.12);min-width:0}
+.next-contact-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+  color:var(--marble-0);text-decoration:none;
+  background:linear-gradient(135deg,rgba(245,240,230,.025),rgba(var(--accent-rgb),.08)),var(--voile);
+  border:1px solid rgba(var(--accent-rgb),.12);
+  transition:background-color 160ms var(--ease-smooth),color 160ms var(--ease-smooth);
+}
+.next-btn-haut{border-radius:22px 22px 0 0;border-bottom:0}
+.next-btn-bas{border-radius:0 0 22px 22px}
+.next-contact-btn i{font-size:26px;line-height:1}
+.next-contact-btn span{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--marble-2)}
+.next-contact-btn:focus-visible{background:rgba(var(--accent-rgb),.12);color:var(--gold-0);outline:none}
+.next-contact-btn:focus-visible span{color:var(--gold-0)}
+.next-contact-btn:active{background:rgba(var(--accent-rgb),.20);color:var(--gold-0)}
+.next-contact-btn:active span{color:var(--gold-0)}
+/* Sous le nom, l'heure et rien d'autre. Il y avait la une ligne de faits
+   enchaines par des points mediums — debut, fin, prestation, prix — qui se
+   lisait comme une legende de bas de page sous un nom de 28 px. Deux corps,
+   deux informations : qui, puis quand. Le reste du RDV est ailleurs sur la
+   carte, et le montant sur le bouton d'encaissement. */
+.next-hour{font-family:'Bricolage Grotesque',sans-serif;font-size:23px;font-weight:700;color:var(--marble-0);letter-spacing:-.5px;line-height:1.2;min-width:0}
+.next-hour>span{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+
+/* Ce sur quoi il faut agir : une ligne par item, icone + texte. Les pastilles
+   d'avant coloriaient sept choses de sept facons sans hierarchie ; ici la
+   couleur ne porte jamais l'information seule, l'icone et le texte la disent
+   deja. Rien a signaler, rien ne s'affiche. */
+/* Dans la case de donnees, pas sous elle : c'est ce qui donne a la colonne
+   Appeler / SMS toute la hauteur de ce qu'elle accompagne. Elles s'enroulent
+   au lieu de se tronquer — sur 206 px, une note de client ne tient pas sur
+   une ligne, et une phrase coupee au milieu ne se lit pas. */
+.next-alerts{display:flex;flex-direction:column;gap:7px;margin-top:var(--sp-3)}
+.next-alert{display:flex;align-items:flex-start;gap:8px;font-size:11.5px;line-height:1.45;color:var(--marble-1);min-width:0}
+.next-alert i{font-size:15px;flex-shrink:0;color:var(--marble-2);margin-top:1px}
+.next-alert span{min-width:0}
+.next-alert strong{color:var(--gold-0);font-weight:700}
+.next-alert-gold i{color:var(--gold-0)}
+.next-alert-warn i,.next-alert-warn strong{color:var(--danger)}
+
+/* Qui vient apres, et le temps entre les deux : la question se pose ici, on
+   allait la resoudre dans l'agenda. En pied de carte, au ton le plus bas
+   possible — c'est un renseignement, pas une action. */
+.next-then{
+  display:flex;align-items:center;gap:8px;
+  margin-top:var(--sp-4);padding-top:var(--sp-3);
+  border-top:1px solid rgba(var(--accent-rgb),.12);
+  font-size:11.5px;color:var(--marble-2);min-width:0;
+}
+.next-then i{font-size:15px;flex-shrink:0}
+.next-then span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.next-then strong{color:var(--marble-1);font-weight:700}
+.next-actions{display:flex;gap:var(--sp-2);margin-top:var(--sp-3);flex-wrap:wrap}
+.next-actions .btn{flex:1;min-width:80px}
+/* Un seul bouton d'encaissement, en pleine largeur. Il y en avait deux :
+   Carte et Liquide. Or autoCashPastAppointments() encaisse deja en especes,
+   a chaque synchro, tout RDV dont le creneau est passe et qui n'a pas de
+   paiement lie — le bouton Liquide ne faisait qu'anticiper ce qui arrive tout
+   seul. Reste le seul geste qui, lui, ne peut pas etre devine : la carte.
+   « Termine » disparait aussi : il servait a debloquer la fiche, l'encaissement
+   le fait desormais (voir le filtre sur enCours dans renderNextClient).
+   Le no-show garde sa place, plus bas et plus discret : c'est le seul geste
+   destructeur du lot, il ne doit pas se toucher par erreur.
+   Les deux prennent le rayon de la carte (--r-lg) et non celui des boutons
+   (--r-sm) : poses a meme le fond de page, ce sont des surfaces au meme titre
+   qu'elle, et 10 px les faisaient paraitre plus carres que tout le reste. */
+.next-encaisser{width:100%;min-height:60px;font-size:14px;letter-spacing:.5px;border-radius:var(--r-lg)}
+.next-noshow{display:flex;margin:var(--sp-3) auto 0;min-height:42px;font-size:11.5px;padding:9px 26px;border-radius:var(--r-lg)}
+.next-encaisser i,.next-noshow i{flex-shrink:0}
+
+/* â”€â”€â”€ TAGS â”€â”€â”€ */
+.tag{font-size:10px;padding:3px 10px;border-radius:14px;font-weight:600;letter-spacing:.3px;display:inline-flex;align-items:center;gap:4px}
+/* Les rangs portent la meme matiere que sur le site — memes images que le recap
+   du client (NETLIFY/img/rang-*.jpg) : c'est le meme rang, il doit se
+   reconnaitre des deux cotes. Sur une pastille de 18 px on ne voit qu'un eclat
+   de metal, et c'est suffisant : le diamant est froid, l'or et le bronze
+   chauds, l'argent gris. Le voile garde le mot lisible. */
+/* Le diamant est au-dessus de l'or : il lui faut une teinte qui ne soit pas
+   une nuance de dore, sinon les deux badges se confondent d'un coup d'oeil.
+   La matiere, elle, est portee par la ligne entiere (.client-row) : sur une
+   pastille de 18 px elle ne donnait qu'une bouillie. */
+.tag.diamant{background:rgba(143,216,232,.16);color:#8FD8E8;border:1px solid rgba(143,216,232,.34)}
+.tag.bronze{background:rgba(192,160,96,.16);color:#c0a060;border:1px solid rgba(192,160,96,.34)}
+.tag.argent{background:rgba(176,184,192,.14);color:#b0b8c0;border:1px solid rgba(176,184,192,.3)}
+.tag.or{background:rgba(232,200,122,.18);color:var(--gold-1);border:1px solid rgba(232,200,122,.35)}
+
+/* La ligne d'un client, et sa fiche, portent la matiere de son rang. Memes
+   images que le recap cote site : c'est le meme rang, il se reconnait des deux
+   cotes. Le voile est pris au centre et s'efface sur les bords — le nom, le
+   numero et le montant restent lisibles sans eteindre les reflets.
+   Pas de trait autour : la matiere fait le bord toute seule, et l'ecart entre
+   deux lignes suffit a dire ou l'une finit. Le trait de separation du bas doit
+   partir avec, sinon il barre la plaque. */
+.client-row[class*="rang-"]{background-position:center;background-size:cover;background-repeat:no-repeat;
+  border:0;border-radius:12px;margin-bottom:8px;padding-left:var(--sp-3);padding-right:var(--sp-3)}
+.client-row[class*="rang-"] .client-nom{text-shadow:0 1px 4px rgba(0,0,0,.85)}
+.client-row[class*="rang-"] .client-meta{color:rgba(255,255,255,.66);text-shadow:0 1px 3px rgba(0,0,0,.85)}
+.client-row[class*="rang-"] .client-amount{text-shadow:0 1px 4px rgba(0,0,0,.85)}
+.client-row.rang-diamant,#cd-header.rang-diamant{background-image:linear-gradient(90deg,rgba(6,16,24,.40) 0%,rgba(6,16,24,.80) 24%,rgba(6,16,24,.82) 76%,rgba(6,16,24,.40) 100%),url('../img/rang-diamant.jpg')}
+.client-row.rang-or,#cd-header.rang-or{background-image:linear-gradient(90deg,rgba(10,7,2,.36) 0%,rgba(10,7,2,.76) 24%,rgba(10,7,2,.78) 76%,rgba(10,7,2,.36) 100%),url('../img/rang-or.jpg')}
+.client-row.rang-argent,#cd-header.rang-argent{background-image:linear-gradient(90deg,rgba(8,9,11,.38) 0%,rgba(8,9,11,.78) 24%,rgba(8,9,11,.80) 76%,rgba(8,9,11,.38) 100%),url('../img/rang-argent.jpg')}
+.client-row.rang-bronze,#cd-header.rang-bronze{background-image:linear-gradient(90deg,rgba(14,8,3,.36) 0%,rgba(14,8,3,.76) 24%,rgba(14,8,3,.78) 76%,rgba(14,8,3,.36) 100%),url('../img/rang-bronze.jpg')}
+
+/* La fiche du client porte la meme matiere. Le voile est pris au centre
+   et s'efface sur les bords, comme sur le recap du site : le nom reste lisible
+   sans eteindre les reflets. */
+#cd-header{border-radius:14px;padding:12px;transition:background-image .25s}
+#cd-header[class*="rang-"]{background-position:center;background-size:cover;background-repeat:no-repeat;border:0}
+#cd-header[class*="rang-"] .modal-title{text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.tag.or{background:rgba(232,200,122,.18);color:var(--gold-1);border:1px solid rgba(232,200,122,.35)}
+.tag.pote{background:rgba(74,186,106,.16);color:#7adba0;border:1px solid rgba(74,186,106,.35);font-weight:700}
+/* Motifs proposes en un tap. Le champ libre reste sous eux : ce sont des
+   raccourcis, pas une liste fermee. */
+.motifs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:var(--sp-2)}
+.motif{
+  display:inline-flex;align-items:center;gap:5px;padding:7px 11px;min-height:36px;
+  border-radius:10px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;
+  background:rgba(255,255,255,.03);color:var(--marble-1);
+  border:1px solid rgba(var(--accent-rgb),.14);
+  transition:background 150ms var(--ease-micro),color 150ms var(--ease-micro);
+}
+.motif i{font-size:13px}
+.motif.actif{background:rgba(var(--accent-rgb),.15);color:var(--gold-1);border-color:rgba(var(--accent-rgb),.35)}
+
+/* Trois onglets qui s'arretaient au tiers de la carte, le compteur pousse a
+   cote : ils se partagent maintenant toute la largeur, et le compteur passe
+   dessous ou il a la place de tenir sur une ligne. */
+.notif-filtre{margin-bottom:var(--sp-3)}
+.notif-filtre .tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}
+.notif-filtre .tab{padding:var(--sp-3) var(--sp-2);min-height:40px;gap:5px;font-size:11.5px}
+.notif-filtre .tab i{flex-shrink:0}
+.notif-compteur{font-size:11px;color:var(--marble-2);margin-top:7px;line-height:1.4}
+.notif-compteur:empty{display:none;margin:0}
+.notif-compteur b{color:var(--gold-1);font-weight:700}
+.client-edit-btn{background:rgba(var(--accent-rgb),.08);border:1px solid rgba(var(--accent-rgb),.18);color:var(--marble-1);width:34px;height:34px;border-radius:var(--r-xs);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 150ms;font-size:15px;flex-shrink:0;margin-left:8px}
+
+/* â”€â”€â”€ COMPACT AGENDA (dashboard) â”€â”€â”€ */
+.agenda-compact{display:grid;grid-template-columns:38px repeat(7,minmax(36px,1fr));gap:3px;overflow-x:auto}
+.ac-day-h{font-size:10px;color:var(--marble-2);text-align:center;font-weight:600;letter-spacing:.5px;padding-bottom:6px;cursor:pointer;transition:color 150ms}
+.ac-day-h.today span{display:inline-flex;width:24px;height:24px;border-radius:50%;background:var(--gold-0);color:var(--ink-0);align-items:center;justify-content:center;font-weight:800}
+.ac-day-num{display:block;font-size:13px;color:var(--marble-1);margin-top:2px;font-weight:600}
+.ac-grid{display:contents}
+.ac-time{font-size:9.5px;color:var(--marble-3);text-align:right;padding-right:6px;height:34px;display:flex;align-items:flex-start;justify-content:flex-end}
+.ac-slot{height:34px;border-top:1px solid rgba(var(--accent-rgb),.12);position:relative;border-radius:3px}
+/* La demi-heure se lit à l'oeil : un trait discret au milieu de chaque case */
+.ac-slot::after{content:'';position:absolute;left:0;right:0;top:50%;border-top:1px dashed rgba(var(--accent-rgb),.07);pointer-events:none}
+.ac-appt{
+  position:absolute;left:1px;right:1px;border-radius:6px;padding:3px 6px;
+  font-size:10px;font-weight:600;cursor:pointer;overflow:hidden;
+  border-left:3px solid;transition:transform 150ms var(--ease-micro);z-index:2;
+}
+/* 30 min ou moins : la case fait 17px, il n'y a de place que pour une ligne */
+.ac-appt-court{padding:1px 4px;font-size:9px;border-radius:4px}
+.ac-appt-court .ac-appt-name{line-height:1.15}
+.ac-appt-h{opacity:.75;font-weight:700;font-variant-numeric:tabular-nums}
+.ac-appt-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac-appt-svc{font-size:9px;opacity:.7;margin-top:1px}
+
+/* Service color mapping */
+.svc-coupe{background:rgba(74,154,200,.18);border-left-color:var(--svc-coupe);color:#A8D4F0}
+.svc-premium{background:rgba(138,74,200,.18);border-left-color:var(--svc-premium);color:#C8A8F0}
+.svc-transfo{background:rgba(155,89,182,.18);border-left-color:var(--svc-transfo);color:#D4A8F0}
+.svc-dm{background:rgba(200,74,74,.18);border-left-color:var(--svc-dm);color:#F0A8A8}
+.svc-barbe{background:rgba(200,137,42,.18);border-left-color:var(--svc-barbe);color:#F0C878}
+.svc-design{background:rgba(74,200,200,.18);border-left-color:var(--svc-design);color:#A8F0F0}
+.svc-default{background:rgba(245,240,230,.06);border-left-color:#666;color:var(--marble-1)}
+.svc-parrainage{background:rgba(200,168,90,.18);border-left-color:var(--svc-parrainage);color:#F0DCA8}
+
+/* â”€â”€â”€ ACCUEIL : AGENDA SCINDE JOUR / SEMAINE â”€â”€â”€ */
+/* La carte se mesure elle-meme (container query) plutot que de suivre la largeur
+   de la fenetre : elle passe de 2fr a pleine largeur selon la grille .g-2-3, donc
+   deux fenetres de meme taille peuvent lui laisser des places tres differentes.
+   Par defaut (et pour un navigateur sans container query) les deux volets sont
+   empiles, la journee en tete — c'est la disposition qui marche partout. */
+.dash-ag-card{container-type:inline-size;cursor:pointer}
+.dash-ag-split{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--sp-4);align-items:start}
+.dash-ag-pane{min-width:0}
+.dash-ag-pane-jour{border-bottom:1px solid rgba(var(--accent-rgb),.12);padding-bottom:var(--sp-4)}
+.dash-ag-pane-semaine{container-type:inline-size}
+.dash-ag-pane-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:var(--sp-4);min-height:18px}
+.dash-ag-pane-t{font-size:10px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--gold-1)}
+.dash-ag-pane-s{font-size:10.5px;color:var(--marble-3);display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.dj-sep{opacity:.45}
+.dj-ca{color:var(--gold-1);font-weight:700}
+
+.dj-list{display:flex;flex-wrap:wrap;align-content:flex-start;gap:5px;padding-right:3px}
+/* Regle des rangees : flex-wrap + flex:1 1 base, jamais de colonnes fixes. Avec
+   auto-fill, une derniere ligne incomplete — le cas courant — laissait un trou
+   a droite ; ici les dernieres cartes s'etirent pour finir la ligne. */
+.dj-list > .dj-row{flex:1 1 210px;min-width:0}
+.dj-row{display:flex;gap:8px;align-items:flex-start;padding:7px 9px;border-radius:8px;border-left:3px solid;cursor:pointer;transition:transform 150ms var(--ease-micro),box-shadow 150ms var(--ease-micro)}
+.dj-h{font-size:11.5px;font-weight:800;font-variant-numeric:tabular-nums;min-width:33px;padding-top:1px}
+.dj-body{flex:1;min-width:0}
+.dj-nom{display:flex;align-items:center;gap:6px;min-width:0;font-size:12px;font-weight:600;color:var(--marble-0)}
+.dj-n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dj-svc{font-size:10px;color:var(--marble-2);opacity:.75;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dj-chip{flex-shrink:0;font-size:8.5px;font-weight:700;letter-spacing:.3px;padding:1px 6px;border-radius:20px;display:inline-flex;align-items:center;gap:3px}
+.dj-chip i{font-size:9px}
+.dj-chip.paid{background:rgba(74,186,106,.18);color:#8EE4C6}
+.dj-chip.unpaid{background:rgba(var(--accent-rgb),.16);color:var(--marble-2)}
+.dj-chip.noshow{background:rgba(224,80,80,.16);color:#F0A8A8}
+/* Deja passe : estompe, mais toujours lisible et cliquable */
+.dj-row.dj-passe{opacity:.45}
+.dj-row.dj-noshow .dj-n{text-decoration:line-through}
+/* Le RDV en cours ou le prochain : c'est le seul qu'on cherche vraiment */
+.dj-row.dj-now{background:rgba(var(--accent-rgb),.14);box-shadow:inset 0 0 0 1px rgba(var(--accent-rgb),.30)}
+.dj-vide{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:26px 10px;font-size:11.5px;color:var(--marble-3);text-align:center}
+.dj-vide i{font-size:22px;opacity:.5}
+/* Jour sans coupe : la semaine reprend toute la carte. Deux classes (0,2,0)
+   pour passer devant la @container qui pose les deux colonnes plus bas. */
+.dash-ag-split.sans-jour{grid-template-columns:minmax(0,1fr)}
+.dash-ag-split.sans-jour .dash-ag-pane-jour{display:none}
+/* L'etiquette « SEMAINE » et la plage de dates feraient doublon avec le titre
+   de la carte, qui redevient « Agenda de la semaine » suivi de la plage. */
+.dash-ag-split.sans-jour .dash-ag-pane-semaine > .dash-ag-pane-h{display:none}
+/* Assez large pour les deux de front : la journee a gauche, fixe et etroite, la
+   grille de la semaine a droite qui encaisse le reste de la place. Pose apres
+   les regles de base : a specificite egale, c'est l'ordre du fichier qui
+   tranche — plus haut, la liste du jour reprendrait sa disposition empilee. */
+@container (min-width:620px){
+  .dash-ag-split{grid-template-columns:minmax(180px,230px) minmax(0,1fr);gap:var(--sp-5)}
+  .dash-ag-pane-jour{border-bottom:0;padding-bottom:0;border-right:1px solid rgba(var(--accent-rgb),.12);padding-right:var(--sp-5)}
+  .dj-list{flex-direction:column;flex-wrap:nowrap;max-height:350px;overflow-y:auto}
+}
+/* Volet semaine serre : l'heure prefixee dans chaque bloc mange la place du nom,
+   or le nom est ce qu'on lit. Le quadrillage horaire reste a gauche de la grille. */
+@container (max-width:470px){
+  .dash-ag-pane-semaine .ac-appt-h{display:none}
+}
+/* Payé en ligne : prime sur la couleur de prestation (déclaré après les .svc-*) */
+.ag-appt.is-paid{background:rgba(74,186,106,.20);border-left-color:var(--svc-paid);color:#8EE4C6}
+
+/* â”€â”€â”€ CLIENT ROW â”€â”€â”€ */
+.client-row{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-4) var(--sp-2);border-bottom:1px solid rgba(var(--accent-rgb),.12);cursor:pointer;transition:all 150ms var(--ease-micro);min-height:48px;border-radius:var(--r-xs)}
+.client-row:last-child{border-bottom:none}
+/* Pastille « notifications » posee sur l'avatar, et pas sur la ligne du nom :
+   celle-ci porte deja jusqu'a quatre etiquettes et tronque a l'ellipse: une
+   cinquieme faisait disparaitre le badge « pote » et le compteur de no-shows.
+   Sur l'avatar, elle ne coute aucune largeur ET toutes les cloches s'alignent
+   en colonne — on lit la liste d'un coup d'oeil au lieu de chercher apres
+   chaque nom. */
+.av-notif{
+  position:absolute;right:-2px;bottom:-2px;width:17px;height:17px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--ink-3);border:1.5px solid var(--ink-0);
+  /* La cloche barree doit se LIRE : c'est la moitie de l'information. En
+     --marble-3 elle se confondait avec le fond et la liste n'avait plus l'air
+     que d'un semis de points verts. */
+  color:var(--marble-1);
+}
+.av-notif.on{color:#7adba0;background:#1c3325;border-color:var(--ink-0)}
+.av-notif i{font-size:10px;line-height:1}
+.client-av{
+  position:relative;
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  background:rgba(var(--accent-rgb),.06);color:var(--gold-1);
+  font-family:'Bricolage Grotesque',sans-serif;font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;letter-spacing:.5px;
+}
+.client-info{flex:1;min-width:0}
+/* Le nom et ses etiquettes s'enroulent au lieu de se tronquer : sur les 144 px
+   laisses par le montant et le bouton, « Julien Mahe » suivi d'un badge Argent
+   se coupait au milieu du nom. Un nom coupe ne se devine pas, une etiquette
+   passee a la ligne se lit. Le nom lui-meme garde l'ellipse en dernier
+   recours. */
+.client-name{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--marble-0);min-width:0}
+/* Les jetons d'une ligne client. Tous ronds et tous de la meme taille : une
+   etiquette de texte pousse le nom, et la ligne s'allonge selon ce que le
+   client a sur le dos. Ce qu'ils valent exactement — combien de no-shows, quel
+   tarif — se lit sur sa fiche, qui a la place de l'ecrire.
+   Le jeton dore est celui de la case cadeau de la carte de fidelite cote site
+   (.fid-slot.reward dans index.html) : le client le voit sur son ecran, le
+   barbier doit reconnaitre le meme. */
+.jeton{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  width:22px;height:22px;border-radius:50%;border:1.5px solid transparent}
+.jeton i{font-size:13px}
+.jeton-offerte{border-color:var(--gold-1);background:linear-gradient(135deg,#AF842C,#E8C87A);
+  color:#080808;box-shadow:0 1px 7px rgba(232,200,122,.4)}
+.jeton-noshow{border-color:rgba(224,80,80,.55);background:rgba(224,80,80,.18);color:#F0A8A8}
+.jeton-pote{border-color:rgba(var(--accent-rgb),.45);background:rgba(var(--accent-rgb),.14);color:var(--gold-1)}
+.client-nom{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.client-meta{font-size:10.5px;color:var(--marble-2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.client-amount{font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:700;color:var(--gold-0);white-space:nowrap}
+
+/* â”€â”€â”€ PAYMENT ROW â”€â”€â”€ */
+.pay-row{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-4) var(--sp-2);border-bottom:1px solid rgba(var(--accent-rgb),.12);min-height:44px;border-radius:var(--r-xs);transition:all 150ms var(--ease-micro);min-width:0;width:100%}
+.pay-row:last-child{border-bottom:none}
+/* Une ligne d'historique qui se corrige au tap : le doigt doit savoir
+   qu'elle repond, sans que ca fasse un bouton de plus dans la liste. */
+.pay-row-clic{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pay-row-clic:active{background:rgba(var(--accent-rgb),.10)}
+.pay-icon{width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.pay-info{flex:1;min-width:0}
+.pay-name{font-size:12.5px;font-weight:600;color:var(--marble-0);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pay-time{font-size:10.5px;color:var(--marble-2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pay-amount{font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:700;white-space:nowrap}
+.pay-amount.pos{color:var(--success)}
+.pay-amount.neg{color:var(--danger)}
+/* ─── HISTORIQUE DES ENCAISSEMENTS (page Caisse) ─── */
+/* Le total de la periode en premier, en gros : c'est le chiffre qu'on vient
+   chercher, tout le reste en decoule. */
+.pay-entete{display:flex;align-items:baseline;gap:var(--sp-3);margin-bottom:var(--sp-3)}
+.pay-total{
+  font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(22px,7vw,30px);font-weight:900;
+  color:var(--gold-0);letter-spacing:-1.2px;line-height:1;
+}
+.pay-total-lab{font-size:11px;color:var(--marble-2);letter-spacing:.3px}
+.pay-ventil{margin-bottom:var(--sp-4)}
+/* En-tete de journee. Colle au bord haut quand on fait defiler : sur « Tout »,
+   la liste depasse l'ecran et on ne sait plus quel jour on lit. */
+.pay-jour{
+  position:sticky;top:0;z-index:2;
+  display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3);
+  padding:var(--sp-3) var(--sp-2) 6px;
+  background:var(--voile);backdrop-filter:blur(8px);
+}
+.pay-jour-nom{
+  font-size:9.5px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:var(--marble-2);
+}
+.pay-jour-tot{font-family:'Bricolage Grotesque',sans-serif;font-size:11px;font-weight:700;color:var(--gold-0);white-space:nowrap}
+/* La pastille de moyen de paiement. Meme carre pour les deux, pour que l'oeil
+   compare des formes et pas des tailles : la marque SumUp EST le carre (son
+   « S » est evide), le billet est pose sur le sien. */
+.pay-badge{
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+.pay-badge-sumup{color:var(--gold-0)}
+/* La marque SumUp porte ses propres angles, a peine arrondis (4,4 sur 63) : a
+   30 px ils font 2 px et la pastille avait l'air taillee au couteau a cote du
+   billet. On la rogne au rayon de la pastille — le carre de la marque en
+   remplit exactement le cadre, le clip ne mange donc que les coins. */
+.pay-marque{width:30px;height:30px;fill:currentColor;display:block;clip-path:inset(0 round 8px)}
+.pay-badge-cash{background:rgba(74,186,106,.16);color:var(--success)}
+.pay-badge-lien{background:rgba(var(--accent-rgb),.16);color:var(--gold-0)}
+.pay-meth-carte{color:var(--gold-0);font-weight:700}
+.pay-meth-cash{color:var(--success);font-weight:700}
+/* Le montant reste neutre : c'est la pastille qui porte la couleur du moyen de
+   paiement, et deux verts cote a cote (billet + montant) ne disaient plus rien. */
+.pay-amount-neutre{color:var(--marble-0)}
+/* Les deux actions de la carte : elles etaient reduites a deux pastilles de
+   40 px coincees derriere les onglets, sur une troisieme ligne. Elles portent
+   leur nom et se partagent la largeur restante. */
+/* Trois actions : elles passent a la ligne plutot que de deborder, et chacune
+   prend la largeur qui reste sur sa rangee. Serrees de force sur une seule
+   ligne, leurs libelles sortaient de la carte. */
+.pay-actions{display:flex;gap:var(--sp-2);flex-wrap:wrap;justify-content:flex-end}
+.pay-actions .btn{white-space:nowrap;flex:0 1 auto;min-width:0}
+/* Les quatre periodes occupent toute la largeur, a parts strictement egales.
+   `min-width:0` est ce qui empeche la barre de sortir de la carte : sans lui un
+   element de flex refuse de descendre sous la largeur de son texte, et quatre
+   libelles trop longs poussent la barre hors de l'ecran — c'est exactement ce
+   qui arrivait avec « Aujourd'hui ». Les libelles sont courts pour la meme
+   raison, la date exacte etant juste en dessous. */
+.pay-tabs{display:flex;width:100%;max-width:100%;margin-bottom:var(--sp-2);gap:2px}
+.pay-tabs .tab{
+  flex:1 1 0;min-width:0;padding:10px 4px;min-height:38px;font-size:11.5px;
+  overflow:hidden;text-overflow:ellipsis;display:block;line-height:18px;text-align:center;
+}
+/* Navigation dans le temps : deux fleches, et entre elles le nom de la periode
+   qui est lui-meme un bouton — le pas a pas pour la veille, la liste pour mars. */
+.pay-nav{
+  display:flex;align-items:center;gap:3px;
+  margin-bottom:var(--sp-3);padding:3px;
+  background:var(--voile);border:1px solid rgba(var(--accent-rgb),.12);border-radius:var(--r-sm);
+}
+.pay-nav[hidden]{display:none}
+.pay-nav-lab{
+  flex:1;min-width:0;height:38px;display:flex;align-items:center;justify-content:center;gap:6px;
+  background:transparent;border:0;border-radius:var(--r-xs);cursor:pointer;
+  font-family:'Bricolage Grotesque',sans-serif;font-size:12px;font-weight:700;color:var(--gold-1);
+  letter-spacing:-.2px;white-space:nowrap;overflow:hidden;
+}
+.pay-nav-lab i{font-size:13px;opacity:.55;flex-shrink:0}
+.pay-nav-lab:active{background:rgba(var(--accent-rgb),.12)}
+.pay-nav-fleche{
+  width:38px;height:38px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(var(--accent-rgb),.10);border:1px solid rgba(var(--accent-rgb),.14);
+  border-radius:var(--r-xs);color:var(--gold-0);font-size:17px;cursor:pointer;
+  transition:background 150ms var(--ease-micro);
+}
+.pay-nav-fleche:active{background:rgba(var(--accent-rgb),.20)}
+/* La fleche de droite s'eteint sur la periode en cours : il n'y a pas de
+   caisse dans le futur, une page vide serait une fausse promesse. */
+.pay-nav-fleche:disabled{opacity:.25;cursor:default;background:transparent}
+/* La liste des periodes : chacune porte son total, on choisit en voyant. */
+.periode-liste{max-height:58vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.periode-ligne{
+  display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3);
+  width:100%;padding:13px 12px;min-height:48px;text-align:left;cursor:pointer;
+  background:transparent;border:0;border-bottom:1px solid rgba(var(--accent-rgb),.10);
+  border-radius:var(--r-xs);
+}
+.periode-ligne:last-child{border-bottom:0}
+.periode-ligne.active{background:rgba(var(--accent-rgb),.14)}
+.periode-ligne:active{background:rgba(var(--accent-rgb),.20)}
+.periode-nom{font-size:13.5px;font-weight:600;color:var(--marble-0);font-family:'Figtree',sans-serif}
+.periode-tot{font-family:'Bricolage Grotesque',sans-serif;font-size:12px;font-weight:700;color:var(--gold-0);white-space:nowrap}
+.periode-tot.periode-vide{color:var(--marble-3);font-weight:600}
+/* Rapprochement SumUp : une ligne par encaissement de la journee. Celles qui
+   sont deja dans la caisse s'effacent, celles qui manquent demandent un geste. */
+.rappro-ligne{
+  padding:var(--sp-3) 0;border-bottom:1px solid rgba(var(--accent-rgb),.10);
+}
+.rappro-ligne:last-child{border-bottom:0}
+.rappro-haut{display:flex;align-items:baseline;gap:var(--sp-3);flex-wrap:wrap}
+.rappro-somme{font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:800;color:var(--marble-0)}
+.rappro-heure{font-size:11px;color:var(--marble-2)}
+.rappro-etat{margin-left:auto;font-size:11px;font-weight:700;color:var(--success);display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.rappro-etat.rappro-manque{color:var(--warning)}
+.rappro-ok{display:flex;align-items:baseline;gap:var(--sp-3);opacity:.55}
+.rappro-ok .rappro-somme{font-size:13px}
+.rappro-bas{display:flex;gap:var(--sp-2);margin-top:var(--sp-2)}
+.rappro-bas .input{flex:1;min-width:0}
+.rappro-bas .btn{flex-shrink:0}
+/* Intertitre de journee dans le rapprochement : sur une semaine de
+   transactions, sans lui on ne sait plus de quel jour on parle. */
+.rappro-jour{
+  margin-top:var(--sp-3);padding-bottom:4px;
+  font-size:9.5px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:var(--marble-2);
+}
+.rappro-jour:first-child{margin-top:0}
+@media(max-width:400px){
+  /* Le titre ne laisse plus la place aux deux boutons : ils passent a la ligne
+     et s'y partagent toute la largeur, plutot que de rester orphelins a
+     gauche. */
+  .pay-actions{width:100%;justify-content:stretch}
+  .pay-actions .btn{flex:1 1 auto;padding:9px 11px}
+  .pay-tabs .tab{font-size:11px;padding:10px 2px}
+  .pay-nav-lab{font-size:11px}
+}
+/* RDV du jour, dans la caisse : une ligne cliquable qui charge le panier */
+.cash-appt{cursor:pointer;user-select:none}
+.cash-appt .pay-amount{color:var(--gold-0)}
+.cash-appt.sel{background:linear-gradient(90deg,rgba(var(--accent-rgb),.14),transparent);border-left:2px solid var(--gold-0)}
+
+/* â”€â”€â”€ STAT BAR â”€â”€â”€ */
+.stat-row{display:flex;align-items:center;gap:var(--sp-3);padding:9px 0;border-bottom:1px solid rgba(var(--accent-rgb),.12)}
+.stat-row:last-child{border-bottom:none}
+.stat-label{font-size:12.5px;color:var(--marble-1);min-width:90px;display:flex;align-items:center;gap:6px}
+.stat-bar-wrap{flex:1;height:5px;background:rgba(var(--accent-rgb),.06);border-radius:3px;overflow:hidden}
+.stat-bar{height:100%;background:linear-gradient(90deg,var(--gold-0),var(--gold-1));border-radius:3px;transition:width 1s var(--ease-liquid);width:0}
+.stat-val{font-size:11.5px;font-weight:700;color:var(--gold-0);min-width:40px;text-align:right}
+
+/* â”€â”€â”€ PROGRESS BAR â”€â”€â”€ */
+.prog{height:6px;background:rgba(var(--accent-rgb),.06);border-radius:3px;overflow:hidden;margin-top:8px}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--gold-0),var(--gold-1));border-radius:3px;transition:width 1s var(--ease-liquid)}
+.objective-block{margin-top:var(--sp-4);padding-top:var(--sp-4);border-top:1px solid rgba(var(--accent-rgb),.12)}
+.obj-label{font-size:10px;color:var(--marble-2);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+.obj-row{display:flex;justify-content:space-between;align-items:center;font-size:12.5px}
+.obj-row .val{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;color:var(--gold-0)}
+.obj-projection{font-size:10.5px;color:var(--marble-2);margin-top:6px}
+
+/* â”€â”€â”€ HEATMAP â”€â”€â”€ */
+.heatmap{display:grid;grid-template-columns:32px repeat(6,1fr);gap:3px}
+.heat-day{font-size:10px;color:var(--marble-2);text-align:center;font-weight:600;padding-bottom:4px}
+.heat-time{font-size:9px;color:var(--marble-3);padding-top:3px}
+.heat-cell{height:20px;border-radius:4px;cursor:default;transition:transform 150ms}
+.heat-legend{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--marble-2);margin-top:var(--sp-3);flex-wrap:wrap}
+.heat-swatch{width:12px;height:12px;border-radius:3px}
+
+/* â”€â”€â”€ DOTS â”€â”€â”€ */
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot.green{background:var(--success);box-shadow:0 0 6px var(--success)}
+.dot.gold{background:var(--gold-0)}
+.dot.red{background:var(--danger)}
+.dot.gray{background:var(--marble-3)}
+
+/* â”€â”€â”€ BADGES â”€â”€â”€ */
+
+/* â”€â”€â”€ INPUTS (16px to prevent iOS zoom) â”€â”€â”€ */
+.input,select.input,textarea.input{
+  width:100%;background:rgba(0,0,0,.3);border:2px solid rgba(var(--accent-rgb),.08);
+  border-radius:var(--r-sm);padding:11px 14px;color:var(--marble-0);
+  font-family:'Figtree',sans-serif;font-size:16px;font-weight:500;
+  transition:border-color 180ms,background 180ms,box-shadow 180ms;min-width:0;
+}
+@media(min-width:768px){.input,select.input,textarea.input{font-size:13px}}
+.input:focus{border-color:var(--gold-0);background:rgba(0,0,0,.4);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.30)}
+.input::placeholder{color:var(--marble-3)}
+select.input{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23C9C3B8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.label{display:block;font-size:10px;letter-spacing:1.5px;color:var(--marble-2);text-transform:uppercase;font-weight:700;margin-bottom:6px}
+.f-group{margin-bottom:var(--sp-4);min-width:0}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)}
+.search-wrap{position:relative}
+.search-wrap i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--marble-2);font-size:15px;pointer-events:none}
+.search-wrap .input{padding-left:40px}
+
+/* Checkbox switch */
+.switch{position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch .slider{position:absolute;cursor:pointer;inset:0;background:rgba(0,0,0,.4);border:1px solid rgba(var(--accent-rgb),.12);transition:.25s;border-radius:24px}
+.switch .slider::before{position:absolute;content:'';height:16px;width:16px;left:3px;top:50%;margin-top:-8px;background:var(--marble-2);transition:.25s;border-radius:50%}
+.switch input:checked + .slider{background:rgba(var(--accent-rgb),.06);border-color:var(--gold-0)}
+.switch input:checked + .slider::before{transform:translateX(18px);background:var(--gold-0)}
+
+/* Day row (opening hours) */
+.day-row{display:grid;grid-template-columns:1fr 1fr;row-gap:8px;column-gap:8px;padding:10px 0;border-bottom:1px dashed rgba(var(--accent-rgb),.08);overflow:hidden;min-width:0;box-sizing:border-box;-webkit-box-sizing:border-box}
+.day-row:last-child{border-bottom:none}
+.day-row .dlabel{grid-column:1;grid-row:1;font-size:12.5px;font-weight:600;color:var(--marble-0)}
+.day-row .switch{grid-column:2;grid-row:1;justify-self:end;align-self:center}
+.day-row.off .dlabel{color:var(--marble-2)}
+.day-row.off input[type="time"]{opacity:.35;pointer-events:none}
+.day-row input[type="time"]{font-size:16px;padding:11px 14px;width:100%;box-sizing:border-box;-webkit-box-sizing:border-box;min-width:0;-webkit-appearance:none}
+.day-row input[type="time"]:nth-of-type(1){grid-column:1;grid-row:2;width:100% !important}
+.day-row input[type="time"]:nth-of-type(2){grid-column:2;grid-row:2;width:100% !important}
+
+/* ─── MODALES ─── */
+/* ─── Choix de la teinte de l'interface ──────────────────── */
+/* La piste porte le spectre complet : on choisit sa couleur en la voyant,
+   pas en devinant ce que vaut « 210 ». */
+.accent-range{
+  -webkit-appearance:none;appearance:none;width:100%;height:14px;border-radius:8px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.10);margin:var(--sp-2) 0 var(--sp-4);
+  background:linear-gradient(90deg,
+    hsl(0,92%,76%),hsl(45,92%,76%),hsl(90,92%,76%),hsl(135,92%,76%),hsl(180,92%,76%),
+    hsl(225,92%,76%),hsl(270,92%,76%),hsl(315,92%,76%),hsl(360,92%,76%));
+}
+.accent-range::-webkit-slider-thumb{
+  -webkit-appearance:none;width:26px;height:26px;border-radius:50%;cursor:grab;
+  background:var(--gold-0);border:3px solid var(--ink-1);
+  box-shadow:0 0 0 1px rgba(255,255,255,.25),0 4px 12px rgba(0,0,0,.5);
+}
+.accent-range::-moz-range-thumb{
+  width:26px;height:26px;border-radius:50%;cursor:grab;
+  background:var(--gold-0);border:3px solid var(--ink-1);
+  box-shadow:0 0 0 1px rgba(255,255,255,.25),0 4px 12px rgba(0,0,0,.5);
+}
+.accent-presets{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-bottom:var(--sp-4)}
+.accent-preset{
+  width:34px;height:34px;border-radius:50%;cursor:pointer;flex-shrink:0;
+  border:2px solid transparent;transition:transform 150ms var(--ease-micro),border-color 150ms;
+}
+.accent-preset.sel{border-color:var(--marble-0)}
+.accent-foot{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap}
+.accent-chip{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--marble-1)}
+.accent-dot{width:18px;height:18px;border-radius:50%;background:var(--gold-0);border:1px solid rgba(255,255,255,.2)}
+
+/* ─── Tuile KPI cliquable + détail du CA ─────────────────── */
+.kpi-clickable{cursor:pointer}
+.kpi-clickable:active{transform:translateY(0)}
+.kpi-more{
+  position:absolute;right:9px;bottom:7px;font-size:13px;color:var(--gold-0);
+  opacity:.3;transition:opacity 200ms var(--ease-smooth);pointer-events:none;
+}
+
+.ca-detail-now{display:flex;align-items:baseline;gap:10px;margin:-4px 0 var(--sp-4)}
+.ca-detail-now>span:first-child{font-size:30px;font-weight:800;color:var(--gold-0);line-height:1}
+.ca-detail-sub{font-size:12px;color:var(--marble-2)}
+.ca-detail-list{display:flex;flex-direction:column;gap:var(--sp-3);max-height:46vh;overflow-y:auto;padding-right:2px}
+.ca-row{padding:var(--sp-3);border-radius:10px;background:rgba(245,240,230,.03);border:1px solid rgba(var(--accent-rgb),.08)}
+.ca-row-now{background:rgba(var(--accent-rgb),.10);border-color:rgba(var(--accent-rgb),.24)}
+.ca-row-head{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3)}
+.ca-row-label{font-size:13px;font-weight:600;color:var(--marble-0);min-width:0}
+.ca-row-sub{display:block;font-size:10.5px;font-weight:500;color:var(--marble-3);margin-top:1px}
+.ca-row-amount{font-size:14px;font-weight:800;color:var(--marble-0);white-space:nowrap;font-variant-numeric:tabular-nums}
+.ca-row-now .ca-row-amount{color:var(--gold-0)}
+.ca-bar{height:4px;border-radius:3px;background:rgba(245,240,230,.06);margin:7px 0 5px;overflow:hidden}
+.ca-bar-fill{height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,rgba(var(--accent-rgb),.55),var(--gold-0));transition:width 500ms var(--ease-smooth)}
+.ca-row-meta{font-size:10.5px;color:var(--marble-3)}
+.ca-detail-foot{margin-top:var(--sp-4);padding-top:var(--sp-3);border-top:1px solid rgba(var(--accent-rgb),.12)}
+.ca-detail-total{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-3);font-size:12.5px;color:var(--marble-2)}
+.ca-detail-total strong{font-size:16px;color:var(--marble-0);font-variant-numeric:tabular-nums}
+.ca-detail-avg{font-size:11px;color:var(--marble-3);margin-top:3px}
+
+.modal-bg{
+  position:fixed;inset:0;
+  background:rgba(4,4,8,.88);
+  z-index:300;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  padding:var(--sp-4);
+}
+.modal-bg.open{
+  display:flex;
+  animation:modalBgIn 220ms ease both;
+}
+@keyframes modalBgIn{from{opacity:0}to{opacity:1}}
+
+.modal{
+  background:radial-gradient(120% 110% at 40% 0%,rgba(var(--accent-rgb),.14) 0%,rgba(14,14,20,.98) 48%,rgba(8,8,12,1) 100%);
+  /* Bordure sur la teinte de l'interface, pas sur du blanc a 10 % : c'est la
+     seule surface du dashboard qui n'etait pas montee sur l'accent. */
+  border:1px solid rgba(var(--accent-rgb),.14);
+  border-radius:22px;
+  padding:var(--sp-6);
+  width:100%;max-width:480px;
+  max-height:90vh;overflow-y:auto;
+  position:relative;
+  box-shadow:
+    0 0 0 1px rgba(var(--accent-rgb),.22),
+    0 24px 64px rgba(0,0,0,.75),
+    0 12px 48px rgba(var(--accent-rgb),.18),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  animation:modalIn 300ms cubic-bezier(.32,.72,0,1) both;
+}
+@keyframes modalIn{
+  from{opacity:0;transform:scale(.96) translateY(6px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
+
+.modal-title{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:18px;font-weight:900;
+  color:var(--marble-0);
+  margin-bottom:var(--sp-2);
+  letter-spacing:-.4px;
+  padding-right:36px;
+}
+.modal-sub{
+  font-size:12px;color:var(--marble-2);
+  margin-top:0;margin-bottom:var(--sp-5);
+  line-height:1.6;
+}
+.modal-close{
+  position:absolute;top:var(--sp-4);right:var(--sp-4);
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.10);
+  color:rgba(255,255,255,.55);
+  width:32px;height:32px;min-height:32px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:15px;
+  transition:background 150ms,color 150ms;
+  z-index:2;
+}
+.modal-close:active{
+  background:rgba(224,80,80,.18);
+  color:var(--danger);
+  border-color:rgba(224,80,80,.25);
+}
+/* Actions */
+.modal-actions{
+  display:flex;gap:10px;
+  justify-content:stretch;
+  margin-top:var(--sp-5);
+  width:100%;box-sizing:border-box;
+}
+.modal-actions .btn{
+  flex:1;
+  min-height:48px;min-width:0;
+  border-radius:12px;
+  font-size:14px;font-weight:600;
+  padding-left:10px;padding-right:10px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+/* Supprimer et Enregistrer, a egalite. « Fermer » est parti : la croix en haut
+   a droite fait deja sortir de la modale, et il volait un tiers de la barre a
+   deux actions qui, elles, engagent quelque chose. */
+#modal-rdv-edit .modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);box-sizing:border-box}
+#modal-rdv-edit .modal-actions .btn{flex:0 1 auto;width:100%;min-width:0}
+#modal-rdv-edit .modal-actions .btn i{flex-shrink:0}
+/* « C'est un evenement » : une conversion, pas une des deux issues du
+   formulaire. Toute la largeur, au-dessus du couple Supprimer / Enregistrer. */
+#modal-rdv-edit .modal-actions .rdv-evt{grid-column:1 / -1;order:-1;min-height:40px;font-size:13px}
+/* Client / Evenement divers en tete des deux modales : une rangee de deux
+   pastilles qui se partagent la largeur. */
+.rdv-type{margin:0 0 var(--sp-3)}
+.rdv-type .motif{flex:1 1 120px;justify-content:center}
+/* Info box */
+.modal-info{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px;
+  background:rgba(var(--accent-rgb),.06);
+  border:1px solid rgba(var(--accent-rgb),.14);
+  border-radius:14px;
+  font-size:12px;color:var(--marble-1);
+  margin-bottom:var(--sp-4);
+  width:100%;box-sizing:border-box;
+  line-height:1.5;
+}
+.modal-info i{color:var(--gold-0);font-size:18px;flex-shrink:0}
+/* ─── ROULETTE D'HEURES ─── */
+/* Une piste qui defile, un cadre fixe au centre, un cran par quart d'heure :
+   le geste de la roulette d'iOS, avec les crans qu'elle refuse de respecter.
+   Le rembourrage haut et bas vaut une demi-roue moins un demi-cran, sans quoi
+   le premier et le dernier creneau ne pourraient jamais venir au centre. */
+.heure-champ{position:relative}
+.heure-btn{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  width:100%;text-align:left;cursor:pointer;font-family:'Figtree',sans-serif;
+}
+.heure-btn i{font-size:17px;color:var(--marble-2);flex-shrink:0}
+.heure-btn[aria-expanded="true"]{border-color:rgba(var(--accent-rgb),.45)}
+.roue-wrap{position:relative;margin-top:var(--sp-2)}
+.roue-wrap[hidden]{display:none}
+.roue{
+  height:152px;overflow-y:auto;scroll-snap-type:y mandatory;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  border:1px solid rgba(var(--accent-rgb),.12);border-radius:var(--r-md);
+  background:linear-gradient(135deg,rgba(245,240,230,.02),rgba(var(--accent-rgb),.06)),var(--voile);
+}
+.roue::-webkit-scrollbar{display:none}
+.roue-piste{padding:57px 0}
+.roue-cran{
+  height:38px;display:flex;align-items:center;justify-content:center;
+  scroll-snap-align:center;
+  font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:700;
+  color:var(--marble-3);letter-spacing:-.3px;
+  transition:color 160ms var(--ease-smooth),font-size 160ms var(--ease-smooth);
+}
+/* Le cran retenu est le seul en pleine lumiere : c'est ce contraste qui fait
+   le relief, un mask-image sur un conteneur qui defile laissant des zones non
+   repeintes des le premier geste. */
+.roue-cran.sel{color:var(--marble-0);font-size:19px}
+/* Le cadre ne doit pas intercepter le geste : c'est la piste qu'on fait
+   defiler, lui n'est qu'un reperage. */
+.roue-cadre{
+  position:absolute;left:0;right:0;top:50%;height:38px;transform:translateY(-50%);
+  pointer-events:none;border-top:1px solid rgba(var(--accent-rgb),.22);
+  border-bottom:1px solid rgba(var(--accent-rgb),.22);
+  background:rgba(var(--accent-rgb),.06);
+}
+
+/* ─── MODALES DE RENDEZ-VOUS ─── */
+/* Six champs identiques empiles en pleine largeur, chacun coiffe d'un libelle
+   en capitales espacees plus criard que le champ lui-meme — celui du
+   telephone tenait sur deux lignes et etait plus long que sa case. Un RDV pose
+   trois questions : qui, quand, quoi. Trois sections, donc, separees par un
+   filet, avec un intitule qui remplace les libelles individuels partout ou le
+   champ dit deja ce qu'il est : « DATE » au-dessus d'une case affichant
+   08/09/2026 n'allongeait que la modale.
+   Date et heure passent cote a cote : elles se lisent ensemble et tiennent a
+   deux sur une ligne. */
+.modal-rdv{--modal-pad:var(--sp-6)}
+.modal-rdv .modal-title{margin-bottom:var(--sp-5)}
+/* La modale d'edition depasse la hauteur d'ecran et defile : ses trois boutons
+   se retrouvaient hors de vue, alors qu'ils sont ce pour quoi on l'a ouverte.
+   Ils se collent au bas de la zone qui defile, en debordant dans le padding de
+   la modale, avec un degrade qui evite l'arete nette sur le contenu qui passe
+   dessous. */
+/* Annuler prend la largeur de son mot, l'action prend le reste : deux boutons
+   a egalite donnaient autant de poids a se retirer qu'a creer le RDV. Hauteur
+   et rayon de ceux de la fiche client (54 px, --r-lg), la modale etait le
+   dernier endroit ou un bouton principal faisait 48 px a 12 px de rayon. */
+#modal-rdv-new .modal-actions{display:grid;grid-template-columns:auto 1fr;gap:var(--sp-2)}
+.modal-rdv .modal-actions .btn{min-height:54px;border-radius:var(--r-lg);font-size:13.5px}
+#modal-rdv-new .modal-actions .btn-ghost{padding:0 var(--sp-5)}
+.modal-rdv .modal-actions{
+  position:sticky;bottom:calc(-1 * var(--modal-pad));
+  /* width:auto, sinon le 100 % herite de .modal-actions se mesure sur la boite
+     de contenu et les marges negatives ne debordent qu'a gauche : il restait la
+     largeur d'un padding a droite ou le contenu se voyait passer dessous. */
+  width:auto;
+  margin:var(--sp-5) calc(-1 * var(--modal-pad)) calc(-1 * var(--modal-pad));
+  padding:var(--sp-4) var(--modal-pad) var(--modal-pad);
+  /* Fond plein et filet, pas un degrade : le contenu qui defile dessous se
+     lisait au travers, et quand un message de conflit rallongeait la modale,
+     la rangee Carte / Liquide venait se confondre avec les boutons. Une arete
+     franche dit ou s'arrete ce qui defile. */
+  background:rgb(8,8,12);
+  border-top:1px solid rgba(var(--accent-rgb),.12);
+}
+/* Les champs prennent le fond et la bordure des tuiles du dashboard : meme
+   voile, meme degrade, meme bordure a 12 %, meme rayon. Ils portaient une
+   bordure double sur un noir a 30 %, une grammaire qui n'existait nulle part
+   ailleurs. */
+.modal-rdv .input,.modal-rdv select.input{
+  background:linear-gradient(135deg,rgba(245,240,230,.025),rgba(var(--accent-rgb),.08)),var(--voile);
+  border:1px solid rgba(var(--accent-rgb),.12);
+  border-radius:var(--r-md);
+  min-height:50px;padding:13px 15px;
+}
+/* Le fond en degre efface le background-image de select.input, chevron
+   compris : on le rempile devant, sinon une liste ne se distingue plus d'un
+   champ de saisie. */
+.modal-rdv select.input{
+  padding-right:36px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23C9C3B8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") right 14px center / 12px no-repeat,
+    linear-gradient(135deg,rgba(245,240,230,.025),rgba(var(--accent-rgb),.08)),
+    var(--voile);
+}
+.modal-rdv select.input:focus{
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23C9C3B8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") right 14px center / 12px no-repeat,
+    linear-gradient(135deg,rgba(245,240,230,.04),rgba(var(--accent-rgb),.14)),
+    var(--voile);
+}
+.modal-rdv .input:focus{
+  border-color:rgba(var(--accent-rgb),.45);
+  background:linear-gradient(135deg,rgba(245,240,230,.04),rgba(var(--accent-rgb),.14)),var(--voile);
+  box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14);outline:none;
+}
+.rdv-sec{margin-bottom:var(--sp-4)}
+.rdv-sec+.rdv-sec{padding-top:var(--sp-4);border-top:1px solid rgba(var(--accent-rgb),.12)}
+.rdv-sec-t{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;color:var(--gold-0);margin-bottom:var(--sp-3)}
+.rdv-sec .f-group{margin-bottom:var(--sp-2)}
+.rdv-sec .f-group:last-child,.rdv-sec .f-row .f-group{margin-bottom:0}
+/* .f-row retombe a une colonne sous 768 px pour les formulaires longs du
+   dashboard. Ici les deux champs sont courts et se lisent ensemble : on garde
+   les deux colonnes jusqu'en bas. */
+.rdv-sec .f-row{grid-template-columns:1fr 1fr;gap:var(--sp-2)}
+.rdv-sec .f-row+.f-group{margin-top:var(--sp-2)}
+/* L'encadre « notification push » pesait 130 px, icone centree au-dessus d'un
+   texte, pour un renseignement qu'on lit une fois. Une ligne suffit. */
+.rdv-hint{display:flex;align-items:center;gap:8px;margin-top:var(--sp-4);font-size:11px;line-height:1.4;color:var(--marble-2)}
+.rdv-hint i{font-size:15px;flex-shrink:0}
+/* Badges de la modale d'edition, sortis de leurs 400 caracteres de style en
+   ligne. */
+.rdv-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:var(--sp-4)}
+.rdv-badges:empty,.rdv-badge.hidden{display:none}
+.rdv-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.4px}
+.rdv-badge i{font-size:14px}
+.rdv-badge-ok{background:rgba(74,186,106,.12);border:1px solid rgba(74,186,106,.3);color:#8EE4C6}
+.rdv-badge-ok i{color:var(--success)}
+.rdv-badge-fid{background:linear-gradient(135deg,rgba(200,168,90,.25),rgba(200,168,90,.12));border:1px solid var(--svc-parrainage,#C8A85A);color:#F0DCA8;font-weight:800}
+.rdv-badge-fid i{color:#C8A85A}
+/* Encaissement et contact : deux colonnes propres. Ils empruntaient
+   .next-encaisser, devenue depuis un bouton unique pleine largeur sur la fiche
+   client — les deux boutons s'y empilaient de travers. */
+.rdv-pay{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);margin-top:var(--sp-3)}
+.rdv-pay .btn{min-height:46px;font-size:12px;padding:11px 8px;min-width:0}
+.rdv-contact{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);margin-top:var(--sp-2)}
+.rdv-contact .btn{min-height:44px;font-size:12px;text-decoration:none}
+.rdv-contact.hidden,.rdv-pay.hidden{display:none}
+/* Conflit de creneau : meme encadre, ton d'alerte. */
+.modal-info-danger{background:rgba(224,80,80,.1);border-color:rgba(224,80,80,.3);color:#F0A0A0;margin-bottom:0}
+.modal-info-danger i{color:var(--danger)}
+
+/* Modal large */
+.modal.modal-lg{max-width:760px}
+
+/* Liste de prestations editables */
+.svc-row{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;padding:10px;background:rgba(var(--accent-rgb),.04);border:1px solid rgba(var(--accent-rgb),.12);border-radius:var(--r-md);margin-bottom:8px}
+.svc-row-img{width:64px;height:64px;border-radius:var(--r-sm);background:rgba(var(--accent-rgb),.06);border:1px dashed rgba(var(--accent-rgb),.2);overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:all 180ms}
+.svc-row-img img{width:100%;height:100%;object-fit:cover}
+.svc-row-img .svc-img-placeholder{color:var(--marble-2);font-size:22px}
+.svc-row-img input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.svc-row-fields{display:grid;grid-template-columns:1.4fr 80px 80px;gap:6px;min-width:0}
+.svc-row-fields .input{font-size:13px;padding:8px 10px;min-height:38px}
+.svc-row-fields .input.svc-price,.svc-row-fields .input.svc-duration{text-align:right}
+.svc-row-del{background:rgba(224,80,80,.08);border:1px solid rgba(224,80,80,.2);color:var(--danger);width:40px;height:40px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 160ms}
+.svc-row-meta{grid-column:1 / -1;display:flex;gap:10px;align-items:center;font-size:11px;color:var(--marble-2);margin-top:4px;flex-wrap:wrap}
+.svc-row-meta label{display:inline-flex;align-items:center;gap:5px;cursor:pointer}
+.svc-list-empty{padding:var(--sp-5);text-align:center;color:var(--marble-2);font-size:13px;border:1px dashed rgba(var(--accent-rgb),.18);border-radius:var(--r-md)}
+
+@media (max-width:640px){
+  .svc-row{grid-template-columns:56px 1fr auto}
+  .svc-row-img{width:56px;height:56px}
+  .svc-row-fields{grid-template-columns:1fr;gap:5px}
+  .svc-row-fields .input{font-size:14px}
+}
+
+/* â”€â”€â”€ MODAL FORM ALIGNMENT (Nouveau RDV, etc) â”€â”€â”€ */
+#modal-rdv-new .f-group,#modal-rdv-edit .f-group{display:flex;flex-direction:column;width:100%;box-sizing:border-box;-webkit-box-sizing:border-box;min-width:0;margin-bottom:var(--sp-4)}
+/* .modal-info etait pris dans la regle ci-dessus : le flex-direction:column
+   empilait l'icone au-dessus du texte et centrait le tout, si bien que le
+   message de conflit tenait sur deux lignes et rallongeait la modale. Une
+   alerte se lit d'un trait : le triangle a gauche, la phrase a cote. */
+#modal-rdv-new .modal-info,#modal-rdv-edit .modal-info{display:flex;flex-direction:row;align-items:center;text-align:left;width:100%;box-sizing:border-box;min-width:0;margin-bottom:0}
+#modal-rdv-new .input,#modal-rdv-new select.input,#modal-rdv-edit .input,#modal-rdv-edit select.input{width:100%;box-sizing:border-box;-webkit-box-sizing:border-box;min-width:0}
+#modal-rdv-new input[type="date"],#modal-rdv-new input[type="time"],#modal-rdv-edit input[type="date"],#modal-rdv-edit input[type="time"]{-webkit-appearance:none;width:100% !important;box-sizing:border-box !important;-webkit-box-sizing:border-box !important;min-width:0}
+
+/* Tous les inputs dans toute modale : pas de dÃ©bordement (notamment Fermeture / Date fermÃ©e) */
+.modal .f-group,.modal .modal-info{width:100%;max-width:100%;box-sizing:border-box;-webkit-box-sizing:border-box;min-width:0}
+.modal .input,.modal select.input,.modal textarea.input{width:100%;max-width:100%;box-sizing:border-box;-webkit-box-sizing:border-box;min-width:0}
+.modal input[type="date"],.modal input[type="time"]{-webkit-appearance:none;width:100% !important;max-width:100% !important;box-sizing:border-box !important;min-width:0 !important}
+
+
+/* â”€â”€â”€ NOTIF PANEL â”€â”€â”€ */
+/* Panneau de notifications. Il portait un fond uni --ink-2, quand toute
+   surface du dashboard est montee sur le voile et la teinte d'accent, et il
+   glissait sur une interface restee visible et cliquable. Il prend le fond,
+   la bordure et le halo des cartes, et un voile l'isole de ce qu'il recouvre.
+   Les elements avaient deux grammaires : ceux lies a un RDV etaient des cartes
+   encadrees d'un liseré gauche de 3 px, les autres des lignes nues. Un liseré
+   epais n'est jamais un choix — ici il etait en plus gris, hors palette. Une
+   seule grammaire desormais : une ligne, un point de couleur, un filet entre
+   deux. Ce qui s'ouvre se signale par son chevron, pas par un cadre. */
+.notif-voile{
+  position:fixed;inset:0;z-index:199;background:rgba(4,4,8,.72);
+  opacity:0;pointer-events:none;transition:opacity 280ms var(--ease-smooth);
+}
+.notif-voile.on{opacity:1;pointer-events:auto}
+.notif-panel{
+  position:fixed;top:0;right:0;bottom:0;width:380px;max-width:92vw;
+  background:linear-gradient(160deg,rgba(var(--accent-rgb),.10),rgba(var(--accent-rgb),.02) 40%),var(--voile);
+  backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);
+  border-left:1px solid rgba(var(--accent-rgb),.14);
+  box-shadow:-24px 0 64px rgba(0,0,0,.6),-1px 0 0 rgba(var(--accent-rgb),.10);
+  z-index:200;transform:translateX(100%);transition:transform 320ms var(--ease-smooth);
+  padding:max(var(--sp-5),env(safe-area-inset-top)) var(--sp-4) var(--sp-5);overflow-y:auto;
+}
+.notif-panel.open{transform:translateX(0) !important;transition:transform 320ms var(--ease-smooth) !important}
+/* L'en-tete reste en vue quand la liste defile : c'est la seule sortie. */
+.notif-h{
+  position:sticky;top:calc(-1 * var(--sp-2));z-index:2;
+  display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
+  margin:0 calc(-1 * var(--sp-4)) var(--sp-3);padding:var(--sp-2) var(--sp-4) var(--sp-3);
+  border-bottom:1px solid rgba(var(--accent-rgb),.12);
+  background:linear-gradient(to bottom,rgba(20,22,27,.98) 78%,rgba(20,22,27,0));
+}
+.notif-h h3{font-family:'Bricolage Grotesque',sans-serif;font-size:18px;color:var(--marble-0);font-weight:800;letter-spacing:-.4px}
+.notif-h-actions{display:flex;gap:6px;flex-shrink:0}
+.notif-h-btn{width:36px;height:36px;min-height:36px;font-size:15px}
+.notif-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:var(--sp-3) var(--sp-2);
+  border-bottom:1px solid rgba(var(--accent-rgb),.10);
+  transition:background 150ms var(--ease-micro);
+}
+.notif-item:last-child{border-bottom:none}
+.notif-item.notif-clic{cursor:pointer}
+/* Non lue : un fond tres leger, pas un cadre. */
+.notif-item.unread{background:rgba(var(--accent-rgb),.07)}
+@media(hover:hover){
+  .notif-item.notif-clic:hover{background:rgba(var(--accent-rgb),.12)}
+}
+.notif-item.notif-clic:active{background:rgba(var(--accent-rgb),.16)}
+.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.notif-content{flex:1;min-width:0}
+.notif-ligne{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:4px}
+.notif-type{font-size:9px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notif-arrow{color:var(--gold-0);opacity:.5;flex-shrink:0;margin-top:3px;font-size:15px}
+.notif-text{font-size:12.5px;color:var(--marble-1);line-height:1.45}
+.notif-time{font-size:10.5px;color:var(--marble-3);flex-shrink:0;white-space:nowrap}
+
+/* â”€â”€â”€ TOAST â”€â”€â”€ */
+.toast-wrap{position:fixed;top:max(var(--sp-5),env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:500;display:flex;flex-direction:column;gap:var(--sp-2);pointer-events:none;width:90%;max-width:420px;align-items:center}
+.toast{
+  background:var(--ink-3);border:1px solid rgba(var(--accent-rgb),.12);border-left:3px solid var(--gold-0);
+  padding:12px 18px;border-radius:var(--r-sm);font-size:12.5px;font-weight:600;color:var(--marble-0);
+  min-width:240px;max-width:100%;box-shadow:var(--sh-md);
+  animation:toastIn 320ms var(--ease-bounce);pointer-events:auto;
+}
+.toast.success{border-left-color:var(--success)}
+.toast.danger{border-left-color:var(--danger)}
+.toast.warning{border-left-color:var(--warning)}
+@keyframes toastIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+.toast.dismiss{animation:toastOut 220ms var(--ease-micro) forwards}
+@keyframes toastOut{to{opacity:0;transform:translateY(-12px)}}
+
+/* â”€â”€â”€ FULL AGENDA PAGE â”€â”€â”€ */
+/* Barre de l'agenda. Elle etait faite de trois rangees flottantes — la
+   navigation de date, le bouton Aujourd'hui, les onglets Jour/Semaine — chacune
+   avec ses propres bordures, ses propres rayons et son propre survol, plus une
+   legende de six pastilles sur deux rangees. Cinq bandes avant d'atteindre la
+   grille, pour un ecran dont la grille EST le contenu.
+   Une seule surface maintenant, en deux zones separees par un filet : ou l'on
+   est, puis comment on regarde. Les elements a l'interieur n'ont plus de
+   bordure ni de fond propres, c'est le bloc qui les porte. */
+.ag-barre{
+  background:linear-gradient(135deg,rgba(245,240,230,.025),rgba(var(--accent-rgb),.08)),var(--voile);
+  border:1px solid rgba(var(--accent-rgb),.12);
+  border-radius:var(--r-lg);overflow:hidden;
+  margin-bottom:var(--sp-4);
+}
+.ag-barre-nav{display:grid;grid-template-columns:48px minmax(0,1fr) 48px 48px;align-items:stretch}
+.ag-nav-btn{
+  display:flex;align-items:center;justify-content:center;
+  min-height:54px;background:none;border:0;padding:0;cursor:pointer;
+  color:var(--marble-0);font-size:19px;
+  transition:background 160ms var(--ease-smooth),color 160ms var(--ease-smooth);
+}
+.ag-nav-btn:active{background:rgba(var(--accent-rgb),.18)}
+/* Revenir a aujourd'hui n'est pas naviguer d'un cran : un filet l'en separe. */
+.ag-nav-today{border-left:1px solid rgba(var(--accent-rgb),.12);color:var(--gold-0);font-size:17px}
+.ag-barre-vue{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid rgba(var(--accent-rgb),.12)}
+.ag-barre-vue .tab{
+  min-height:46px;border-radius:0;border:0;background:none;
+  font-size:12.5px;font-weight:700;letter-spacing:.3px;color:var(--marble-2);
+}
+.ag-barre-vue .tab+.tab{border-left:1px solid rgba(var(--accent-rgb),.12)}
+.ag-barre-vue .tab.active{background:rgba(var(--accent-rgb),.14);color:var(--gold-1)}
+/* Legende : une note de bas de page, pas un en-tete. */
+.ag-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:var(--sp-4);padding-top:var(--sp-3);border-top:1px solid rgba(var(--accent-rgb),.10)}
+.ag-leg-item{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;color:var(--marble-2)}
+.ag-leg-swatch{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+.ag-cur-label{font-family:'Bricolage Grotesque',sans-serif;font-size:14.5px;font-weight:700;color:var(--marble-0);letter-spacing:-.3px;text-align:center;padding:0 var(--sp-2);display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ag-btn-rdv{display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto}
+.ag-leg-item{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--marble-1);padding:4px 10px;background:rgba(var(--accent-rgb),.06);border:1px solid rgba(var(--accent-rgb),.12);border-radius:var(--r-xs)}
+.ag-leg-swatch{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+.ag-grid{--ag-header-h:50px;--ag-pied-h:30px;display:flex;border:1px solid rgba(var(--accent-rgb),.12);border-radius:var(--r-md);overflow:hidden;background:var(--voile)}
+.ag-time-col{width:48px;flex-shrink:0;border-right:1px solid rgba(var(--accent-rgb),.12)}
+.ag-time-h{height:var(--ag-header-h);border-bottom:1px solid rgba(var(--accent-rgb),.12)}
+.ag-time-cell{height:60px;display:flex;align-items:flex-start;justify-content:flex-end;padding:4px 8px 0 0;font-size:10px;color:var(--marble-2);font-weight:600;border-top:1px solid rgba(var(--accent-rgb),.07)}
+.ag-days-wrap{display:flex;flex:1;overflow-x:auto;min-width:0}
+.ag-day-col{flex:1;min-width:90px;border-right:1px solid rgba(var(--accent-rgb),.2);position:relative}
+.ag-day-col:last-child{border-right:none}
+.ag-day-h{
+  height:var(--ag-header-h);text-align:center;padding:8px 6px;
+  font-size:10px;font-weight:700;color:var(--marble-2);
+  text-transform:uppercase;letter-spacing:.5px;
+  border-bottom:1px solid rgba(var(--accent-rgb),.12);
+  background:rgba(20,22,27,.6);position:sticky;top:0;z-index:3;
+  cursor:pointer;transition:background 150ms;
+  /* Un seul axe horizontal : repartition a gauche, chiffres a droite, et la
+     date au centre — posee en absolu pour tomber au milieu exact de la colonne
+     quoi qu'il y ait de chaque cote. Une grille laissait les colonnes laterales
+     prendre la largeur de leur contenu, et le centre glissait avec elles. */
+  display:flex;align-items:center;gap:6px;
+  overflow:hidden;
+}
+.ag-day-h.today{color:var(--gold-0)}
+.ag-day-h .num{font-family:'Bricolage Grotesque',sans-serif;font-size:17px;font-weight:900;color:var(--marble-1);letter-spacing:-.5px;line-height:1}
+.ag-day-h.today .num{color:var(--gold-0)}
+/* La date occupe tout l'espace laisse par les deux blocs et s'y centre : elle
+   tombe donc a egale distance du dernier libelle de gauche et de la premiere
+   pastille de droite. Posee en absolu au milieu de la colonne, elle etait a la
+   bonne abscisse geometrique mais pas au milieu de ce qui l'entoure. */
+.ag-day-label{
+  flex:1 1 auto;min-width:0;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+.ag-day-date{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+/* « Gerer ce jour » : une bande en pied de colonne plutot qu'un engrenage dans
+   l'en-tete, ou il disputait l'axe aux chiffres et forcait la date hors du
+   centre. En bas, elle est a portee de pouce et ne gene plus rien. */
+.ag-day-pied{
+  height:var(--ag-pied-h);
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  border-top:1px solid rgba(var(--accent-rgb),.12);
+  background:rgba(20,22,27,.5);
+  color:var(--marble-2);font-size:9.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.6px;
+  cursor:pointer;transition:background 140ms,color 140ms;
+}
+.ag-day-pied i{font-size:12px;opacity:.8}
+.ag-day-pied:active{background:rgba(var(--accent-rgb),.16);color:var(--gold-0)}
+@media(hover:hover){
+  .ag-day-pied:hover{background:rgba(var(--accent-rgb),.12);color:var(--gold-1)}
+}
+.ag-time-pied{height:var(--ag-pied-h);border-top:1px solid rgba(var(--accent-rgb),.12)}
+.ag-day-col.ag-day-closed>.ag-day-h{background:rgba(255,255,255,.02);color:var(--marble-3)}
+.ag-day-col.ag-day-closed>.ag-day-h .num{color:var(--marble-3)}
+.ag-day-col.ag-day-exception>.ag-day-h{background:rgba(74,186,106,.06)}
+.ag-day-col.ag-day-exception>.ag-day-h .num{color:#4ABA6A}
+.ag-day-exception-badge{font-size:10px;color:#4ABA6A;line-height:1}
+/* Resume de la journee en tete de colonne : combien de clients passent a gauche,
+   ce que la journee rapporte a droite, la date entre les deux. Sans ca, savoir
+   si un samedi valait le coup demandait d'ouvrir le jour et d'additionner les
+   blocs. Meme calcul que la tuile « CA aujourd'hui » — annulations et no-shows
+   exclus. Les deux pastilles ont des largeurs voisines : la date se retrouve
+   entouree de deux masses comparables, ce que la barre de repartition, fine a
+   gauche face aux pastilles pleines a droite, ne donnait pas. */
+.ag-day-ca,.ag-day-nb{
+  flex:0 0 auto;
+  display:inline-flex;align-items:center;justify-content:center;gap:3px;
+  padding:2px 7px;border-radius:999px;
+  background:rgba(var(--accent-rgb),.14);
+  border:1px solid rgba(var(--accent-rgb),.3);
+  font-family:'Bricolage Grotesque',sans-serif;font-size:9.5px;font-weight:800;
+  color:var(--gold-1);letter-spacing:-.3px;line-height:1.5;
+  white-space:nowrap;text-transform:none;
+}
+/* Le compte de clients se tient en retrait : le CA est l'info forte. */
+.ag-day-nb{background:transparent;border-color:rgba(var(--accent-rgb),.18);color:var(--marble-2);font-weight:700}
+.ag-day-nb i{font-size:9px;opacity:.7}
+.ag-day-nb.vide{color:var(--marble-3);border-color:rgba(var(--accent-rgb),.1)}
+.ag-day-nb.vide i{display:none}
+.ag-day-ca.vide{background:transparent;border-color:rgba(var(--accent-rgb),.14);color:var(--marble-3);font-weight:600}
+.ag-day-h.today .ag-day-ca{background:rgba(var(--accent-rgb),.26);border-color:rgba(var(--accent-rgb),.5);color:var(--gold-0)}
+.ag-day-col.ag-day-closed>.ag-day-h .ag-day-ca{opacity:.55}
+/* En vue jour, la place ne manque pas : les deux pastilles reprennent du corps. */
+.ag-view-day .ag-day-ca,.ag-view-day .ag-day-nb{font-size:11px;padding:3px 10px}
+.ag-view-week .ag-day-h{font-size:9px;letter-spacing:.3px}
+.ag-view-week .ag-day-h .num{font-size:15px}
+/* Deux filets encadrent la date : sans eux, elle se noyait entre les deux
+   pastilles et l'oeil ne la lisait plus comme le milieu de l'en-tete. */
+.ag-view-day .ag-day-date{
+  flex-direction:row;align-items:center;gap:7px;
+  height:26px;padding:0 22px;
+  border-left:1px solid rgba(var(--accent-rgb),.25);
+  border-right:1px solid rgba(var(--accent-rgb),.25);
+}
+/* La vue semaine ne prend ni filets ni date d'un seul tenant, quelle que soit
+   la fenetre : essayes a 1600 px, ils mangeaient les 20 px gagnes sur la
+   largeur de colonne et la date se retrouvait a un pixel de ses pastilles. Elle
+   reste empilee, sans bordures, et le bonhomme s'efface — ce qui laisse une
+   quinzaine de pixels de chaque cote. */
+.ag-view-week .ag-day-nb i{display:none}
+.ag-view-week .ag-day-ca,.ag-view-week .ag-day-nb{padding:2px 5px}
+/* Overlay colonne fermée */
+.ag-closed-overlay{
+  position:absolute;top:var(--ag-header-h);left:0;right:0;bottom:var(--ag-pied-h);
+  background:repeating-linear-gradient(
+    -45deg,
+    rgba(0,0,0,.18) 0px, rgba(0,0,0,.18) 1px,
+    rgba(0,0,0,.06) 1px, rgba(0,0,0,.06) 8px
+  );
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;cursor:pointer;z-index:2;
+}
+.ag-closed-label{font-size:9px;font-weight:700;color:var(--marble-3);text-transform:uppercase;letter-spacing:.1em}
+.ag-closed-add{
+  width:36px;height:36px;border-radius:50%;
+  border:1.5px solid rgba(var(--accent-rgb),.3);
+  background:rgba(var(--accent-rgb),.1);
+  color:var(--marble-2);font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;line-height:1;padding:0;
+  transition:background 150ms,color 150ms;
+}
+/* Badges état jour dans modal-day-manage */
+.mdm-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px}
+.mdm-badge.mdm-open{background:rgba(74,186,106,.12);color:#4ABA6A;border:1px solid rgba(74,186,106,.2)}
+.mdm-badge.mdm-closed{background:rgba(224,121,121,.12);color:#e07979;border:1px solid rgba(224,121,121,.2)}
+.ag-hour{height:60px;border-bottom:1px solid rgba(var(--accent-rgb),.12);position:relative;cursor:pointer;transition:background 120ms}
+.ag-hour.ag-half{height:15px;border-bottom:none}
+.ag-hour.ag-half-30{border-top:1px dashed rgba(var(--accent-rgb),.05)}
+/* Lignes de la grille : heure pleine bien marquée, demi-heure en pointillés */
+.ag-hour.ag-half[data-min="0"]{background:rgba(0,0,0,.12);border-top:1px solid rgba(var(--accent-rgb),.22)}
+.ag-hour.ag-half[data-min="15"]{background:rgba(0,0,0,.06)}
+.ag-hour.ag-half[data-min="30"]{background:rgba(0,0,0,.12);border-top:1px dashed rgba(var(--accent-rgb),.14)}
+.ag-hour.ag-half[data-min="45"]{background:rgba(0,0,0,.06)}
+/* Créneaux hors horaires d'ouverture : grisés (hachures), mais toujours cliquables */
+/* Les rayures etaient du noir sur du noir : .34 contre .16 sur un fond deja
+   sombre, autant dire rien. Celles des heures de conduite (.ag-block) se
+   voient parce qu'elles sont CLAIRES sur fond sombre — meme principe ici, en
+   plus discret de couleur pour qu'une fermeture d'horaire ne se confonde pas
+   avec une indisponibilite posee a la main.
+   La periode perpendiculaire vaut 15/racine(2) = 10,6066 px : a -45 degres,
+   cela fait une periode VERTICALE de 15 px, soit exactement la hauteur d'un
+   creneau. Sans ce calcul, le motif redemarrerait au coin de chaque quart
+   d'heure et les diagonales se briseraient tous les 15 px. */
+.ag-hour.ag-half.ag-off{
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(210,216,232,.17) 0 2px,
+      rgba(210,216,232,0) 2px 10.6066px
+    ),
+    rgba(0,0,0,.46);
+}
+.ag-appt{
+  position:absolute;left:3px;right:3px;border-radius:var(--r-xs);padding:5px 8px;
+  border-left:3px solid;cursor:pointer;overflow:hidden;
+  transition:transform 150ms,box-shadow 150ms;z-index:2;
+  /* Force GPU compositing dès le render → évite le bug iOS repaint
+     où la couleur du service apparaît noire jusqu'au prochain scroll. */
+  transform:translateZ(0);
+  -webkit-transform:translateZ(0);
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+}
+/* Indispo (heure de conduite) : hachures sous les RDV, non déplaçable */
+/* Un blocage se dessine en DEUX couches, et c'est le point : la marge de trajet
+   n'est pas le rendez-vous. Une seule bande faisait paraitre une heure de
+   conduite deux fois plus longue qu'elle ne l'est.
+     .ag-block      — la marge, hachuree et pale, sans texte
+     .ag-block-reel — la vraie duree, pleine et libellee, posee par-dessus */
+.ag-block{
+  position:absolute;left:3px;right:3px;border-radius:var(--r-xs);z-index:1;cursor:pointer;
+  overflow:hidden;
+  border:1px dashed rgba(160,170,190,.28);
+  background:repeating-linear-gradient(135deg,rgba(120,130,150,.10) 0 6px,rgba(120,130,150,.03) 6px 12px);
+}
+.ag-block-reel{
+  position:absolute;left:3px;right:3px;border-radius:var(--r-xs);z-index:2;cursor:pointer;
+  display:flex;align-items:center;gap:5px;padding:4px 7px;overflow:hidden;
+  font-size:10.5px;font-weight:700;letter-spacing:.2px;color:#DDE2EC;
+  border:1px solid rgba(160,170,190,.55);
+  background:rgba(120,130,150,.30);
+}
+.ag-block-reel i{font-size:12px;flex-shrink:0;opacity:.9}
+.ag-block-reel span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-block-reel .ag-block-h{font-size:9px;font-weight:700;opacity:.75;flex-shrink:0}
+.ag-appt-row{display:flex;align-items:center;gap:6px;min-width:0}
+.ag-appt-time{font-size:9px;font-weight:700;opacity:.85;flex-shrink:0}
+.ag-appt-name{font-size:11.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;text-align:left}
+.ag-appt-pay{flex-shrink:0;display:inline-flex;align-items:center;gap:3px;font-size:8.5px;font-weight:800;padding:2px 6px;border-radius:999px;line-height:1;letter-spacing:.2px}
+.ag-appt-pay i{font-size:10px;line-height:1}
+/* RDV de test : il occupe sa place dans l'agenda mais le site de résa l'ignore
+   (un vrai client peut réserver par-dessus) et son prix n'entre dans aucun
+   total. Contour pointillé + pastille pour qu'on ne le lise pas comme un vrai. */
+.ag-appt.is-test{border:1px dashed rgba(160,170,190,.55);border-left:3px dashed;opacity:.8}
+.ag-appt-test{flex-shrink:0;font-size:8.5px;font-weight:800;padding:2px 6px;border-radius:999px;line-height:1;letter-spacing:.4px;background:rgba(160,170,190,.28);color:#DDE2EC}
+.ag-appt-pay.paid{background:rgba(74,186,106,.28);color:#7EE2A8}
+.ag-appt-pay.unpaid{background:rgba(255,176,32,.2);color:#FFC46B}
+.ag-appt-compact{display:flex;align-items:center;padding-top:2px;padding-bottom:2px}
+.ag-appt-compact .ag-appt-row{width:100%}
+.ag-appt-compact .ag-appt-svc{display:none}
+.ag-view-week .ag-appt-pay{padding:2px 4px}
+.ag-view-week .ag-appt-pay .lbl{display:none}
+.ag-appt-svc{font-size:9.5px;opacity:.7;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
+.ag-day-col.today-col{background:rgba(var(--accent-rgb),.06)}
+.ag-now-line{position:absolute;left:0;right:0;height:2px;background:var(--gold-0);z-index:4;opacity:.85}
+.ag-now-line::before{content:'';position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--gold-0)}
+
+/* â”€â”€â”€ ENCAISSEMENT â”€â”€â”€ */
+.cash-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:var(--sp-5)}
+.cash-services{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-3)}
+.cash-svc{
+  background:linear-gradient(135deg,rgba(245,240,230,.02),rgba(var(--accent-rgb),.08)),var(--voile);border:1px solid rgba(var(--accent-rgb),.12);border-radius:var(--r-md);
+  cursor:pointer;overflow:hidden;transition:all 200ms var(--ease-smooth);text-align:left;
+  display:flex;flex-direction:column;position:relative;min-height:140px;
+}
+.cash-svc.sel{border-color:var(--gold-0);background:linear-gradient(135deg,rgba(var(--accent-rgb),.08),rgba(var(--accent-rgb),.08)),var(--voile);box-shadow:var(--sh-gold)}
+.cash-svc-img{width:100%;height:90px;object-fit:cover;}
+.cash-svc-body{padding:10px 12px}
+.cash-svc-name{font-size:12px;font-weight:700;color:var(--marble-0);margin-bottom:3px}
+.cash-svc-price{font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:800;color:var(--gold-0)}
+.cash-svc-dm{position:absolute;top:6px;left:6px;background:rgba(224,80,80,.85);color:#fff;font-size:9px;padding:2px 7px;border-radius:4px;font-weight:700;letter-spacing:.5px}
+.cash-addons{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-top:var(--sp-3)}
+.cash-addons-wrap{margin-top:var(--sp-4)}
+.cash-addons-title{font-size:13px;margin-bottom:8px}
+.cash-addon{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:9px 14px;min-height:40px;background:var(--ink-2);border:1px solid rgba(var(--accent-rgb),.12);border-radius:var(--r-sm);cursor:pointer;font-size:11.5px;font-weight:600;color:var(--marble-1);transition:all 180ms var(--ease-micro)}
+.cash-addon.sel{border-color:var(--gold-0);background:linear-gradient(90deg,rgba(var(--accent-rgb),.08),rgba(var(--accent-rgb),.08));color:var(--gold-1);box-shadow:0 0 0 1px rgba(var(--accent-rgb),.22), 0 6px 18px rgba(var(--accent-rgb),.20)}
+.cash-addon-img{width:22px;height:22px;border-radius:5px;object-fit:cover}
+.cash-cart{background:var(--ink-2);border:1px solid rgba(var(--accent-rgb),.12);border-radius:var(--r-lg);padding:var(--sp-5);position:sticky;top:var(--sp-4)}
+.cart-line{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(var(--accent-rgb),.08);font-size:12.5px;gap:8px}
+.cart-line .name{color:var(--marble-1);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cart-line .price{color:var(--gold-0);font-weight:700;font-family:'Bricolage Grotesque',sans-serif;font-size:12px}
+.cart-total{display:flex;align-items:center;justify-content:space-between;padding-top:var(--sp-3);margin-top:var(--sp-2);border-top:1px solid rgba(var(--accent-rgb),.12);font-size:13px;font-weight:700;color:var(--marble-0)}
+.cart-total .amount{font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:900;color:var(--gold-0);letter-spacing:-.5px}
+.pay-methods{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-2);margin-top:var(--sp-3)}
+.pay-m{padding:12px 8px;min-height:52px;background:var(--ink-3);border:1px solid rgba(var(--accent-rgb),.12);border-radius:var(--r-sm);text-align:center;font-size:11px;font-weight:600;color:var(--marble-1);cursor:pointer;transition:all 180ms;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.pay-m i{font-size:20px}
+.pay-m.sel{border-color:var(--gold-0);color:var(--gold-0);background:rgba(var(--accent-rgb),.06)}
+
+/* Barre d'encaissement collante (telephone). Sur un ecran de 390 px, le panier
+   et son bouton sont a plus de 1 000 px sous le catalogue : on choisissait une
+   prestation, puis on descendait chercher le bouton, puis on remontait. La
+   barre porte le total, le nombre de lignes, la methode retenue et le bouton,
+   et n'apparait que quand le panier n'est pas vide.
+   Elle se pose au-dessus de la barre de navigation (58 px + 12 px de marge) et
+   suit le meme decalage clavier (--vv-bas). z-index 108 : au-dessus du voile du
+   bas (105) qui estompe le contenu, sous la navigation (110). */
+.cash-bar{display:none}
+.cash-bar[hidden]{display:none}
+.cash-svc-name{overflow-wrap:break-word}
+
+/* Le casino replie par defaut : 660 px derriere un en-tete, deplies en un tap.
+   Ce n'est pas ce qu'on vient faire dans la caisse, et il se tenait entre le
+   panier et l'historique des paiements. */
+.rd-head{cursor:pointer;user-select:none}
+.rd-chev{margin-left:auto;color:var(--gold-0);opacity:.6;font-size:18px;transition:transform 200ms var(--ease-smooth)}
+.rd-card:not(.rd-collapsed) .rd-chev{transform:rotate(180deg)}
+.rd-card.rd-collapsed .rd-body{display:none}
+.rd-card.rd-collapsed .card-h{margin-bottom:0}
+
+/* â”€â”€â”€ STOCK â”€â”€â”€ */
+.stock-grid{display:flex;flex-wrap:wrap;gap:var(--sp-4)}
+.stock-grid > .stock-card{flex:1 1 220px;min-width:0}
+.stock-card{background:var(--ink-2);border:1px solid rgba(var(--accent-rgb),.12);border-radius:var(--r-md);padding:var(--sp-4);position:relative;transition:all 200ms var(--ease-smooth)}
+.stock-name{font-size:13px;font-weight:700;color:var(--marble-0);margin-bottom:6px}
+.stock-qty{font-family:'Bricolage Grotesque',sans-serif;font-size:24px;font-weight:900;color:var(--gold-0);letter-spacing:-.5px}
+.stock-qty.low{color:var(--warning)}
+.stock-qty.crit{color:var(--danger)}
+.stock-meta{font-size:11px;color:var(--marble-2);margin-top:4px}
+.stock-actions{display:flex;gap:6px;margin-top:var(--sp-3)}
+
+/* â”€â”€â”€ EMPTY STATE â”€â”€â”€ */
+.empty{text-align:center;padding:var(--sp-7) var(--sp-5);color:var(--marble-2);font-size:12.5px}
+.empty i{font-size:40px;display:block;margin-bottom:var(--sp-3);opacity:.35;color:var(--gold-0)}
+
+/* â”€â”€â”€ MOBILE BOTTOM NAV â”€â”€â”€ */
+/* Position alignee sur MyLife (src/styles.css, regle .nav), que l'utilisateur
+   donne comme reference : left/right 12px, bottom = 12px + la marge du trait
+   tactile. Cette marge s'AJOUTE. Le 'max(6px, marge - 20px)' pose hier soir
+   venait d'un faux diagnostic de double addition et collait la barre trop bas.
+   --vv-bas : ecart entre le bas du viewport visuel et celui de la fenetre,
+   mesure en JS (suivreClavier). En PWA iOS, ouvrir un champ retrecit le
+   viewport visuel et tout le calque fixe le suit : la barre remontait de la
+   hauteur du clavier (~300 px) et restait plantee au milieu de l'ecran, les
+   cartes defilant en dessous, meme apres la fermeture du clavier. On lui rend
+   cet ecart, ainsi qu'au voile du bas et au bandeau de synchro, pour qu'ils
+   restent colles au bas de l'ecran. Hors de ce cas la variable vaut 0. */
+.mnav{display:none;position:fixed;z-index:110;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom) - var(--vv-bas,0px));justify-content:space-around;gap:2px;max-width:660px;margin:0 auto;background:rgba(18,18,22,.82);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(var(--accent-rgb),.14);border-radius:19px;padding:7px 6px;box-shadow:0 16px 44px rgba(0,0,0,.55);transition:opacity 260ms cubic-bezier(.22,.61,.36,1),transform 260ms cubic-bezier(.22,.61,.36,1)}
+/* Menu lateral ouvert : la barre du bas s'efface, les deux se chevauchaient.
+   Selecteur de voisinage possible car .mnav est ajoutee en fin de body,
+   donc apres .sidebar dans le DOM. */
+.sidebar.open ~ .mnav{opacity:0;transform:translateY(14px);pointer-events:none}
+.mnav-item{flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;cursor:pointer;font-family:inherit;font-size:.63rem;font-weight:500;letter-spacing:.02em;color:var(--marble-2);border-radius:13px;transition:color .22s var(--ease-smooth),background .22s var(--ease-smooth)}
+.mnav-item i{font-size:20px;line-height:1;transition:color 180ms}
+.mnav-item.active{color:var(--gold-1);background:rgba(var(--accent-rgb),.14)}
+.mnav-item.active i{color:var(--gold-1)}
+.mnav-burger{display:none;position:fixed;top:calc(8px + env(safe-area-inset-top));left:8px;z-index:120;width:48px;height:48px;min-height:48px;border-radius:var(--r-sm);background:none;backdrop-filter:none;border:none;color:var(--gold-0);align-items:center;justify-content:center;font-size:20px}
+
+/* â”€â”€â”€ MARKETING â”€â”€â”€ */
+.mkt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--sp-4)}
+.mkt-card{background:linear-gradient(135deg,rgba(245,240,230,.02),rgba(var(--accent-rgb),.08));border:1px solid rgba(var(--accent-rgb),.12);border-radius:var(--r-md);padding:var(--sp-4);position:relative;overflow:hidden;transition:all 200ms var(--ease-smooth)}
+.mkt-card-title{font-family:'Bricolage Grotesque',sans-serif;font-size:14px;font-weight:700;color:var(--marble-0);margin-bottom:6px}
+.mkt-card-stat{font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:900;color:var(--gold-0);letter-spacing:-1px;line-height:1;margin:6px 0}
+.mkt-card-desc{font-size:11.5px;color:var(--marble-2);line-height:1.5;margin-bottom:var(--sp-3)}
+
+/* â”€â”€â”€ RESPONSIVE â”€â”€â”€ */
+@media (max-width:1280px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .kpi-grid.kpi-grid-6{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .kpi-grid-6 .kpi-card{border-radius:6px}
+  .kpi-grid-6 .kpi-card:nth-child(1){border-radius:22px 0 0 0}
+  .kpi-grid-6 .kpi-card:nth-child(3){border-radius:0 22px 0 0}
+  .kpi-grid-6 .kpi-card:nth-child(4){border-radius:0 0 0 22px}
+  .kpi-grid-6 .kpi-card:nth-child(6){border-radius:0 0 22px 0}
+  .g-2-3{grid-template-columns:minmax(0,1fr)}
+  .g-3{grid-template-columns:1fr 1fr}
+  .g-4{grid-template-columns:1fr 1fr}
+  .g-3 > :nth-child(3):last-child{grid-column:1 / -1}
+  .cash-services{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:1024px){
+  .sidebar{width:var(--sidebar-w-collapsed)}
+  .sidebar .logo-text,.sidebar .barber-meta,.sidebar .nav-section,.sidebar .nav-item span,.sidebar .backend-state{display:none}
+  .sidebar .nav-item{justify-content:center;padding:12px 0}
+  .sidebar-logo{justify-content:center;padding-left:0;padding-right:0}
+  .barber-profile{justify-content:center}
+  .main{margin-left:var(--sidebar-w-collapsed);max-width:calc(100vw - var(--sidebar-w-collapsed));padding:var(--sp-5)}
+}
+@media (max-width:768px){
+  /* Menu lateral en bulle — meme langage que la barre du bas : il ne colle plus
+     aux bords, il flotte. Memes valeurs que .mnav (fond rgba(18,18,22,.82),
+     flou 24px sature 160%, bordure violette a 14 %, ombre portee), memes 12 px
+     de marge, et il se cale entre les deux zones sures.
+     height:auto + top/bottom : la bulle se dimensionne toute seule d'un bord a
+     l'autre. min-height:0 annule le 100vh de la regle de bureau, et border:
+     (raccourci) remplace le border-right de cette meme regle.
+     overflow:hidden pour que le defilement de la nav respecte les coins ronds ;
+     c'est .sidebar-nav qui defile, pas la bulle.
+     Le retrait ajoute 16 px au translate : sans ca la bulle laisserait depasser
+     sa bordure et son ombre a gauche. */
+  .sidebar{
+    position:fixed;z-index:200;
+    left:12px;width:var(--sidebar-w);
+    top:calc(12px + env(safe-area-inset-top,0px));
+    bottom:calc(12px + env(safe-area-inset-bottom,0px));
+    height:auto;min-height:0;padding-bottom:0;
+    background:rgba(18,18,22,.82);
+    backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);
+    border:1px solid rgba(var(--accent-rgb),.14);
+    border-radius:22px;
+    box-shadow:0 16px 44px rgba(0,0,0,.55);
+    overflow:hidden;
+    transform:translateX(calc(-100% - 16px));
+    transition:transform 280ms var(--ease-smooth);
+  }
+  .sidebar.open{transform:translateX(0)}
+  /* Panneau de notifications : la meme bulle que le menu lateral, en miroir.
+     Memes valeurs exactement — 12 px de marge, fond rgba(18,18,22,.82), flou
+     24 px sature 160 %, bordure a 14 %, rayon 22, meme ombre — et le meme
+     retrait de 16 px sur le translate, sans quoi la bordure et l'ombre
+     depasseraient du bord pendant qu'elle est fermee.
+     La bulle ne defile pas, c'est la liste dedans qui defile : l'en-tete n'a
+     donc plus besoin d'etre collant, il est simplement hors de la zone qui
+     bouge. */
+  .notif-panel{
+    left:auto;right:12px;
+    top:calc(12px + env(safe-area-inset-top,0px));
+    bottom:calc(12px + env(safe-area-inset-bottom,0px));
+    width:min(380px,calc(100vw - 24px));max-width:none;
+    height:auto;min-height:0;padding:0;
+    display:flex;flex-direction:column;
+    background:rgba(18,18,22,.82);
+    backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);
+    border:1px solid rgba(var(--accent-rgb),.14);
+    border-radius:22px;
+    box-shadow:0 16px 44px rgba(0,0,0,.55);
+    overflow:hidden;
+    transform:translateX(calc(100% + 16px));
+    transition:transform 280ms var(--ease-smooth);
+  }
+  .notif-h{
+    position:static;flex-shrink:0;
+    margin:0;padding:var(--sp-4) var(--sp-4) var(--sp-3);
+    background:none;
+  }
+  #notif-list{flex:1;min-height:0;overflow-y:auto;padding:0 var(--sp-4) var(--sp-4)}
+  .sidebar .logo-text,.sidebar .barber-meta,.sidebar .nav-section,.sidebar .nav-item span,.sidebar .backend-state{display:initial}
+  .sidebar .nav-item{justify-content:flex-start;padding:12px var(--sp-5);min-height:48px}
+  /* La bulle commence deja sous la zone sure : le padding du logo redevient un
+     padding normal, sinon on ajoutait une seconde fois la hauteur de l'encoche. */
+  .sidebar-logo{justify-content:flex-start;padding:var(--sp-4) var(--sp-5)}
+  .barber-profile{justify-content:flex-start}
+  /* Burger zone : padding-left du contenu pour ne pas chevaucher logo/title */
+  /* Reserve du bas alignee sur MyLife (.page : calc(112px + safe-b)). FCUTZ
+     n'en gardait que 86 : la barre fait 70 px hauteur comprise, il ne restait
+     donc que 16 px de garde et la derniere carte passait sous la barre — d'ou
+     l'impression qu'elle flotte au-dessus du contenu. 112 px laissent les
+     memes 42 px de degagement que MyLife. */
+  /* Le +26 en haut (au lieu de +8) fait commencer le contenu a la toute fin du
+     fondu de html::before : le titre n'est plus lave par le voile au repos. */
+  .main{margin-left:0;max-width:100vw;padding:calc(env(safe-area-inset-top) + 26px) max(var(--sp-4),env(safe-area-inset-right)) calc(112px + env(safe-area-inset-bottom)) max(var(--sp-4),env(safe-area-inset-left))}
+  .topbar{flex-direction:row;align-items:center;gap:10px;margin-bottom:5px;padding-top:0;padding-bottom:10px;min-height:48px}
+  .burger-btn{display:flex !important}
+  .burger-line{width:18px;height:2px}
+  .topbar-left{flex:1;flex-direction:column;gap:1px;padding-left:0}
+  .page-title{font-size:18px;letter-spacing:-.6px;margin:0}
+  .page-subtitle{font-size:10px;margin:0;line-height:1.1}
+  .action-buttons{gap:4px;margin-bottom:var(--sp-4)}
+  .action-btn{padding:var(--sp-3) var(--sp-2);min-height:64px;font-size:10px;gap:4px;flex-direction:column}
+  .action-btn i{font-size:22px}
+  .mnav-burger{display:none !important}
+  /* Une seule definition de la barre, comme MyLife : pas de reduction du
+     texte ni des paddings sur petit ecran. */
+  .mnav{display:flex}
+  /* Voile du bas — on ne doit jamais voir le contenu passer derriere la barre.
+     La barre est translucide (fond a 82 % + flou) : sans voile, les cartes se
+     lisent au travers, et surtout dans les 12 px entre la barre et le bord de
+     l'ecran, ainsi que de chaque cote (la barre ne fait pas toute la largeur).
+     Le voile est un degrade pose AU-DESSUS du contenu — z-index 105, dans
+     l'intervalle libre entre .layout (101) et .mnav (110) — donc sous la barre
+     mais sur les cartes. Il est pleinement opaque a partir du haut de la barre
+     et s'efface sur les ~80 px au-dessus : le contenu s'estompe en approchant
+     au lieu de disparaitre derriere une arete.
+     C'est un ajout, MyLife n'a pas d'equivalent.
+     pointer-events:none : le voile ne doit rien intercepter. */
+  body::before{
+    display:block;content:'';position:fixed;left:0;right:0;
+    bottom:calc(0px - var(--vv-bas,0px));
+    height:calc(150px + env(safe-area-inset-bottom,0px));
+    z-index:105;pointer-events:none;
+    transition:opacity 260ms cubic-bezier(.22,.61,.36,1);
+    background:linear-gradient(to bottom,
+      rgba(14,15,19,0) 0%,
+      rgba(14,15,19,.22) 16%,
+      rgba(14,15,19,.58) 30%,
+      rgba(14,15,19,.88) 39%,
+      rgb(14,15,19) 46%);
+  }
+  /* Menu lateral ouvert : le voile s'efface avec la barre. Pas de selecteur de
+     voisinage possible sur un pseudo-element de body, d'ou :has(). */
+  body:has(.sidebar.open)::before{opacity:0}
+  /* Meme sort pour le bandeau de synchro : il barrait la bulle en travers. */
+  body:has(.sidebar.open) #pending-writes-badge{opacity:0;pointer-events:none;transition:opacity 260ms cubic-bezier(.22,.61,.36,1)}
+  /* Voile du haut — meme principe, pour que rien ne vienne encombrer la zone de
+     la Dynamic Island. body::before et body::after sont deja pris (voile du bas
+     et raccord du fond) : celui-ci etait donc accroche a html::before, meme
+     calque 105. Sauf qu'avec `overflow-x:hidden` pose sur <html>, WebKit fait
+     du root un conteneur de defilement : un position:fixed accroche a ce
+     conteneur defile avec le document. Le voile partait donc en haut du
+     document des le premier scroll, et le contenu repassait a nu sous l'heure
+     et la Dynamic Island (bouton « Ajouter une fermeture » lu par-dessus
+     l'horloge). C'est desormais un element reel, enfant de <body> comme le
+     voile du bas qui, lui, a toujours tenu.
+     Il est pleinement opaque sur toute la zone sure puis s'efface sur ~25 px.
+     Il reste visible menu ouvert, contrairement a celui du bas : la bulle
+     commence sous la zone sure, la protection a donc toujours lieu d'etre. */
+  .voile-haut{
+    display:block;position:fixed;left:0;right:0;top:0;
+    height:calc(env(safe-area-inset-top,0px) + 28px);
+    z-index:105;pointer-events:none;
+    background:linear-gradient(to bottom,
+      rgb(14,15,19) 0%,
+      rgb(14,15,19) 70%,
+      rgba(14,15,19,.55) 85%,
+      rgba(14,15,19,0) 100%);
+  }
+  /* Le bandeau de synchro est pose en bottom:14px par son style inline : sur
+     mobile il tombait pile sur la barre. On le remonte au-dessus (la barre
+     occupe 12 a 82 px + zone sure). !important : on passe devant l'inline. */
+  #pending-writes-badge{bottom:calc(92px + env(safe-area-inset-bottom) - var(--vv-bas,0px)) !important;left:12px !important;right:12px !important;justify-content:center}
+  .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin-bottom:var(--sp-4);grid-auto-rows:1fr}
+  .kpi-grid.kpi-grid-6{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kpi-card{padding:var(--sp-4);border-radius:0;min-height:110px}
+  .kpi-card:nth-child(1){border-radius:22px 0 0 0}
+  .kpi-card:nth-child(2){border-radius:0 22px 0 0}
+  .kpi-card:nth-child(3){border-radius:0 0 0 22px}
+  .kpi-card:nth-child(4){border-radius:0 0 22px 0}
+  /* En 2 colonnes x 3 lignes pour 6 cartes : arrondir seulement haut (1,2) et bas (5,6) */
+  .kpi-grid-6 .kpi-card{border-radius:0}
+  .kpi-grid-6 .kpi-card:nth-child(1){border-radius:22px 0 0 0}
+  .kpi-grid-6 .kpi-card:nth-child(2){border-radius:0 22px 0 0}
+  .kpi-grid-6 .kpi-card:nth-child(3){border-radius:0}
+  .kpi-grid-6 .kpi-card:nth-child(4){border-radius:0}
+  .kpi-grid-6 .kpi-card:nth-child(5){border-radius:0 0 0 22px}
+  .kpi-grid-6 .kpi-card:nth-child(6){border-radius:0 0 22px 0}
+  .kpi-value{font-size:22px}
+  .kpi-icon{font-size:18px;top:10px;right:10px}
+  .kpi-label{font-size:8px;letter-spacing:0.8px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+  .kpi-value{font-size:20px;white-space:nowrap}
+  .kpi-value .unit{font-size:12px}
+  .g-3,.g-4,.g-2{grid-template-columns:minmax(0,1fr);gap:var(--sp-4);margin-bottom:var(--sp-4)}
+  .g-2-3{grid-template-columns:minmax(0,1fr);gap:var(--sp-4)}
+  .card{padding:var(--sp-4)}
+  .card-title{font-size:15px}
+  .cash-grid{grid-template-columns:1fr}
+  .cash-cart{position:static}
+  /* Le catalogue perd ses photos. Huit vignettes de 140 px faisaient 636 px
+     pour une information tenant en deux mots et un prix, et on choisit une
+     prestation en lisant son nom, pas en reconnaissant une nuque. Deux
+     colonnes de lignes de 46 px : 8 prestations en 200 px au lieu de 636, et
+     une cible plus large qu'avant. Le desktop garde ses vignettes. */
+  .cash-services{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .cash-svc{min-height:46px;flex-direction:row;align-items:center;border-radius:var(--r-sm)}
+  .cash-svc-img{display:none}
+  .cash-svc-body{flex:1;min-width:0;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .cash-svc-name{font-size:11px;margin:0;line-height:1.18;flex:1;min-width:0}
+  .cash-svc-price{font-size:11.5px;flex-shrink:0}
+  /* La pastille DM disparait : le nom porte deja « (Via DM) », et elle coutait
+     36 px sur les 94 laisses au libelle, ce qui le cassait en trois lignes. */
+  .cash-svc-dm{display:none}
+  /* Les options en grille, pas en ligne qui s'enroule : quatre pastilles de
+     largeurs differentes, dont une seule sur la seconde rangee, se lisaient
+     comme un reste. Meme grille et meme hauteur que les prestations juste
+     au-dessus, le nom a gauche, le prix a droite : la carte entiere devient
+     une seule liste a deux colonnes. */
+  .cash-addons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:var(--sp-2)}
+  .cash-addon{min-height:46px;padding:8px 9px;font-size:10.5px;gap:7px;justify-content:flex-start;border-radius:var(--r-sm)}
+  .cash-addon>span:first-of-type{flex:1;min-width:0;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cash-addon>span:last-of-type{flex-shrink:0}
+  .cash-addon-img{width:18px;height:18px;flex-shrink:0}
+  /* La carte « RDV du jour » ne s'affiche plus sur telephone. Encaisser un
+     client qui a reserve se fait depuis sa fiche, sur l'accueil, avec le
+     bouton « Encaisser par carte » : le paiement y reste rattache au RDV. La
+     caisse sert aux passages sans rendez-vous, et cette carte lui coutait
+     100 px en tete d'ecran. Elle reste sur grand ecran, ou elle ne prend la
+     place de rien. */
+  #cash-appts-card{display:none}
+  /* La methode de paiement et le bouton montent dans la barre du bas : les
+     garder aussi dans la carte donnerait deux selecteurs pour un seul reglage. */
+  .cart-pay{display:none}
+  /* La barre du bas : tout ce qu'il faut pour conclure, sans jamais defiler.
+     Deux rangees — la methode, puis le montant et le bouton — parce que quatre
+     choix, un total et une action sur une seule ligne de 334 px se seraient
+     tous retrouves sous la taille du pouce. */
+  .cash-bar{
+    display:flex;flex-direction:column;gap:8px;
+    position:fixed;z-index:108;left:12px;right:12px;max-width:660px;margin:0 auto;
+    bottom:calc(78px + env(safe-area-inset-bottom) - var(--vv-bas,0px));
+    padding:9px;
+    background:rgba(18,18,22,.90);
+    backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);
+    border:1px solid rgba(var(--accent-rgb),.20);border-radius:19px;
+    box-shadow:0 16px 44px rgba(0,0,0,.55);
+  }
+  .cash-bar[hidden]{display:none}
+  /* Selecteur double : la regle a trois colonnes du bloc 480 px passe apres
+     celle-ci dans le fichier et l'aurait emporte a specificite egale. */
+  .cash-bar .cash-bar-methods{grid-template-columns:repeat(4,1fr);gap:5px;margin-top:0}
+  .cash-bar-methods .pay-m{min-height:38px;padding:5px 2px;font-size:9px;gap:2px;border-radius:var(--r-xs)}
+  .cash-bar-methods .pay-m i{font-size:15px}
+  .cash-bar-row{display:flex;align-items:center;gap:var(--sp-3)}
+  .cash-bar-info{flex:1;min-width:0;padding-left:6px}
+  .cash-bar-total{font-family:'Bricolage Grotesque',sans-serif;font-size:21px;font-weight:900;color:var(--gold-0);letter-spacing:-.5px;line-height:1.1}
+  .cash-bar-meta{font-size:10px;color:var(--marble-2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cash-bar-btn{min-height:46px;padding:0 var(--sp-5);font-size:12.5px;flex-shrink:0}
+  #page-encaissement.cash-bar-on{padding-bottom:126px}
+  /* Les trois tuiles d'action disparaissent sur la caisse : 160 px en tete
+     d'ecran pour un « + » et une cloche deja a un tap dans le menu, et un
+     bouton « Encaisser » qui renvoie sur la page ou l'on se trouve. */
+  body.page-caisse .action-buttons{display:none}
+  /* Le panier n'a plus a porter le total ni le bouton — ils sont dans la barre
+     du bas. Il ne lui reste qu'a montrer ce qu'on a mis dedans et a le retirer,
+     plus le nom du client : le titre et « Vider » tiennent sur la meme ligne,
+     les lignes se resserrent, et la carte passe de 300 a 150 px. */
+  /* Chaque en-tete, chaque marge, chaque libelle redondant est un cran de
+     defilement en moins : tout ce qui sert a encaisser doit tenir au-dessus de
+     la barre du bas, soit 649 px sous le titre de page. */
+  .cash-grid{gap:var(--sp-2)}
+  .cash-grid .card{padding:var(--sp-3)}
+  #page-encaissement .card-h{margin-bottom:var(--sp-2)}
+  #page-encaissement .card-h .btn-sm{min-height:38px;padding:8px 10px}
+  .cash-addons-wrap{margin-top:var(--sp-3)}
+  .cash-addons-title{font-size:12px;margin-bottom:6px}
+  .cash-cart{padding:var(--sp-3) var(--sp-3) var(--sp-2)}
+  /* Le libelle du champ client ne dit rien de plus que son propre placeholder. */
+  .cart-client-wrap .label{display:none}
+  .cash-cart-h{margin-bottom:var(--sp-2)}
+  .cash-cart .cart-total{display:none}
+  .cart-line{padding:5px 0;font-size:12px}
+  .cart-client-wrap{margin-top:var(--sp-3)}
+  .cart-client-wrap .label{margin-bottom:4px}
+  .cart-client-wrap .input{min-height:40px}
+
+  .modal{padding:var(--sp-5)}
+  .modal-rdv{--modal-pad:var(--sp-5)}
+
+  .ag-cur-label{font-size:13px}
+  .ag-day-col{min-width:78px}
+  .ag-grid{--ag-header-h:48px}
+  /* Vue jour sur telephone : les filets se rapprochent de la date, 22 px de
+     chaque cote la faisaient mordre sur les puces et sur les pastilles. */
+  .ag-view-day .ag-day-date{padding:0 11px}
+  /* Colonne de 78 px : la date passe au-dessus, les deux pastilles se
+     partagent la ligne du dessous. « LUN 24 » d'un tenant n'y tiendrait pas,
+     et la silhouette du bonhomme volerait les pixels du nombre. */
+  .ag-grid.ag-view-week{--ag-header-h:64px}
+  .ag-view-week .ag-day-h{flex-wrap:wrap;justify-content:center;align-content:center;gap:3px 6px}
+  .ag-view-week .ag-day-label{order:-1;flex:0 0 100%;justify-content:center}
+  .ag-view-week .ag-day-date{flex-direction:column;align-items:center;gap:2px;padding:0;border:none}
+  .ag-view-week .ag-day-nb i{display:none}
+  .ag-view-week .ag-day-ca,.ag-view-week .ag-day-nb{padding:2px 5px;font-size:9px}
+  .ag-day-h{font-size:9px}
+  .ag-day-h .num{font-size:14px}
+  .ag-closed-add{width:32px;height:32px;font-size:14px}
+  .agenda-compact{grid-template-columns:32px repeat(7,minmax(38px,1fr));gap:2px}
+  .ac-day-h{font-size:9px}
+  .ac-day-num{font-size:11px}
+  .ac-time{font-size:8.5px;padding-right:4px;height:32px}
+  .ac-slot{height:32px}
+  .ac-appt{font-size:9px;padding:2px 4px}
+  .ac-appt-svc{display:none}
+  /* Colonne de 38px : l'heure écrite mangerait le nom. La position dans la
+     case (et le trait de demi-heure) la donne déjà. */
+  .ac-appt-h{display:none}
+  .ac-appt-court{padding:0 3px;font-size:8.5px}
+  .f-row{grid-template-columns:1fr;gap:var(--sp-2)}
+}
+@media (max-width:480px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .kpi-grid.kpi-grid-6{grid-template-columns:1fr 1fr}
+  .pay-methods{grid-template-columns:1fr 1fr 1fr}
+  .btn span.hide-xs{display:none}
+}
+@media (max-width:380px){
+  .kpi-value{font-size:20px}
+  .ag-day-col{min-width:68px}
+  .modal{padding:var(--sp-4)}
+  .input,select.input,textarea.input{font-size:14px}
+  input[type="date"],input[type="time"]{font-size:16px}
+}
+
+/* ─── PWA STANDALONE ─── */
+@media (display-mode: standalone) {
+  /* Pas de fond opaque ici non plus : meme cause, meme effet (cf. reset).
+     Et surtout pas de height:100% : c'est lui qui transformait le body en boite
+     de defilement et empechait la page d'aller jusqu'au bas de l'ecran. */
+  body { overscroll-behavior: none; min-height: 100dvh; }
+  .layout { min-height: 100dvh; }
+  .main { scrollbar-width: none; -ms-overflow-style: none; }
+  .main::-webkit-scrollbar { display: none; }
+}
+
+/* â”€â”€â”€ REDUCED MOTION â”€â”€â”€ */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+
+/* â”€â”€â”€ FOCUS â”€â”€â”€ */
+:focus-visible{outline:2px solid var(--gold-0);outline-offset:2px;border-radius:4px}
+button:focus-visible,a:focus-visible,.input:focus-visible,select:focus-visible{outline-offset:2px}
+
+/* â”€â”€â”€ UTILS â”€â”€â”€ */
+.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-2{gap:8px}.gap-3{gap:12px}.gap-4{gap:16px}
+.txt-gold{color:var(--gold-0)}.txt-muted{color:var(--marble-2)}.txt-success{color:var(--success)}.txt-danger{color:var(--danger)}
+.mt-1{margin-top:4px}.mt-2{margin-top:8px}.mt-3{margin-top:12px}.mt-4{margin-top:16px}.mt-5{margin-top:20px}
+.text-xs{font-size:10.5px}.text-sm{font-size:12px}.text-lg{font-size:16px}
+.font-bold{font-weight:700}.font-black{font-weight:900;font-family:'Bricolage Grotesque',sans-serif}
+.hidden{display:none!important}
+
+/* â”€â”€â”€ NAVIGATION ANIMATIONS â”€â”€â”€ */
+
+#sidebar-backdrop{
+  display:none;position:fixed;inset:0;z-index:190;pointer-events:none;
+  background:rgba(0,0,0,0);
+  transition:background 300ms ease;
+}
+#sidebar-backdrop.visible{
+  pointer-events:auto;
+  background:rgba(0,0,0,.15);
+}
+
+.mnav-burger{
+  flex-direction:column;gap:5px;cursor:pointer;
+  transition:background 200ms ease,transform 200ms cubic-bezier(.34,1.56,.64,1);
+}
+.mnav-burger:active{ transform:scale(.93); }
+.burger-line{
+  display:block;width:18px;height:2px;border-radius:2px;
+  background:var(--gold-0);
+  transform-origin:center;
+  transition:transform 320ms cubic-bezier(.34,1.56,.64,1),opacity 220ms ease,width 280ms ease;
+}
+.mnav-burger.is-open .burger-line:nth-child(1){ transform:translateY(7px) rotate(45deg); }
+.mnav-burger.is-open .burger-line:nth-child(2){ opacity:0;transform:scaleX(0); }
+.mnav-burger.is-open .burger-line:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
+
+.sidebar-close{
+  display:none;width:28px;height:28px;min-height:28px;padding:0;
+  border-radius:var(--r-xs);background:transparent;border:none;
+  color:var(--marble-1);font-size:16px;
+  transition:all 200ms var(--ease-smooth);cursor:pointer;flex-shrink:0;
+}
+
+.sidebar{ will-change:transform; }
+@media(max-width:768px){
+  .sidebar-close{
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .sidebar-close:active{transform:scale(.92)}
+  /* Le padding est defini plus haut, avec la bulle : la zone sure est deja
+     absorbee par le `top` de .sidebar, la remettre ici la comptait deux fois
+     (mesure : 59 px de vide au-dessus du logo). Ce bloc ne garde que le gap. */
+  .sidebar-logo{ gap:var(--sp-1); }
+  .sidebar .logo-mark{width:36px;height:36px}
+  .sidebar .logo-name{font-size:13px}
+  .sidebar .logo-sub{font-size:8px;margin-top:1px}
+  .mnav-burger.is-open{
+    display:none !important;
+  }
+  .sidebar{ transition:transform 360ms cubic-bezier(.34,1.2,.64,1); }
+}
+
+.nav-item{
+  transition:color 200ms ease,background 200ms ease,
+             transform 220ms cubic-bezier(.34,1.56,.64,1),border-color 200ms ease;
+}
+.nav-item i{
+  transition:transform 260ms cubic-bezier(.34,1.56,.64,1),color 200ms ease;
+}
+
+
+.logo-mark{
+  animation:logo-breathe 3.5s ease-in-out infinite;
+  transition:transform 300ms cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes logo-breathe{
+  0%,100%{ box-shadow:0 0 0 0 rgba(var(--accent-rgb),.08); }
+  50%    { box-shadow:0 0 18px rgba(var(--accent-rgb),.30),0 0 36px rgba(var(--accent-rgb),.30); }
+}
+
+@keyframes nav-slide-in{
+  from{ opacity:0;transform:translateX(-14px); }
+  to  { opacity:1;transform:translateX(0); }
+}
+@media(max-width:768px){
+  .sidebar.open .nav-item{ animation:nav-slide-in 320ms var(--ease-smooth) both; }
+  .sidebar.open .nav-item:nth-child(1){ animation-delay:40ms; }
+  .sidebar.open .nav-item:nth-child(2){ animation-delay:75ms; }
+  .sidebar.open .nav-item:nth-child(3){ animation-delay:110ms; }
+  .sidebar.open .nav-item:nth-child(4){ animation-delay:145ms; }
+  .sidebar.open .nav-item:nth-child(5){ animation-delay:180ms; }
+  .sidebar.open .nav-item:nth-child(6){ animation-delay:215ms; }
+  .sidebar.open .nav-item:nth-child(7){ animation-delay:250ms; }
+  .sidebar.open .nav-item:nth-child(8){ animation-delay:285ms; }
+  .sidebar.open .nav-item:nth-child(9){ animation-delay:320ms; }
+}
+
+.page.active{
+  animation:page-in 280ms cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes page-in{
+  from{ opacity:0;transform:translateY(10px); }
+  to  { opacity:1;transform:translateY(0); }
+}
+
+/* Drag & Drop agenda */
+.ag-appt[draggable]{ cursor:grab; }
+.ag-appt[draggable]:active{ cursor:grabbing; }
+.ag-appt.dragging{ opacity:.25;box-shadow:0 0 0 2px var(--gold-0); }
+.ag-hour.drag-over{
+  background:rgba(var(--accent-rgb),.06)!important;
+  outline:1.5px dashed var(--gold-0);
+  outline-offset:-1px;
+  z-index:1;
+}
+.ag-drag-ghost{
+  position:absolute;left:2px;right:2px;border-radius:var(--r-xs);
+  opacity:.7;outline:2px solid var(--gold-0);outline-offset:-1px;
+  z-index:10;animation:none;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .nav-item,.nav-item i,.mnav-burger,.burger-line,
+  .logo-mark,.sidebar,.page.active,#sidebar-backdrop{
+    animation:none!important;transition:none!important;
+  }
+}
+
+/* ─── ROULETTE PORTE ROUGE ─────────────────────────────────── */
+.rd-card{border:1px solid rgba(179,32,42,.35);background:linear-gradient(135deg,rgba(179,32,42,.10),rgba(0,0,0,.2))}
+.rd-price-tag{font-family:'Bricolage Grotesque',sans-serif;font-size:11px;font-weight:800;color:#FF8A93;background:rgba(179,32,42,.25);border:1px solid rgba(179,32,42,.5);padding:4px 10px;border-radius:999px}
+.rd-intro{font-size:12.5px;color:var(--marble-2,#9aa);margin-bottom:var(--sp-3)}
+.rd-form{display:flex;flex-direction:column;gap:10px}
+.rd-methods{margin:0}
+.rd-btns{display:flex;gap:10px;flex-wrap:wrap}
+.rd-btns .btn{flex:1;min-width:170px;justify-content:center}
+.rd-gain-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12.5px}
+.rd-gain-row .who{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rd-gain-row .what{font-weight:700;color:var(--gold-0,#C8A85A)}
+.rd-gain-row .when{color:var(--marble-3,#777);font-size:11px;flex-shrink:0}
+
+#rd-overlay{position:fixed;inset:0;z-index:100000;display:none;background:radial-gradient(ellipse at 50% 35%,#26060a 0%,#0a0203 65%,#000 100%);overflow:hidden}
+#rd-overlay.on{display:block}
+.rd-demo-badge{position:absolute;top:16px;left:16px;z-index:5;font-family:'Bricolage Grotesque',sans-serif;font-size:10px;font-weight:800;letter-spacing:2px;color:#0a0203;background:#C8A85A;padding:5px 12px;border-radius:999px;display:none}
+#rd-overlay.demo .rd-demo-badge{display:block}
+.rd-close{position:absolute;top:12px;right:12px;z-index:5;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);color:#ddd;font-size:18px;display:flex;align-items:center;justify-content:center}
+.rd-stage{position:relative;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.rd-title{position:absolute;top:34px;left:0;right:0;text-align:center;font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(18px,4.5vw,30px);font-weight:900;letter-spacing:8px;color:#B3202A;text-shadow:0 0 24px rgba(179,32,42,.6),0 0 60px rgba(179,32,42,.3)}
+
+/* Scène porte */
+.rd-scene-door{position:relative;display:flex;flex-direction:column;align-items:center}
+.rd-key{font-size:52px;color:#E8C87A;filter:drop-shadow(0 0 14px rgba(232,200,122,.8));opacity:0;transform:translateY(-120px) rotate(-40deg)}
+.rd-key.drop{animation:rdKeyDrop 1.1s cubic-bezier(.3,1.4,.4,1) both}
+@keyframes rdKeyDrop{0%{opacity:0;transform:translateY(-120px) rotate(-40deg)}55%{opacity:1;transform:translateY(0) rotate(8deg)}75%{transform:translateY(0) rotate(-6deg)}100%{opacity:1;transform:translateY(0) rotate(0)}}
+.rd-key.turn{animation:rdKeyTurn .5s ease-in both}
+@keyframes rdKeyTurn{to{transform:rotate(90deg) scale(.85);opacity:0}}
+.rd-door-wrap{position:relative;margin-top:14px;perspective:900px}
+.rd-door-glow{position:absolute;inset:-30px;border-radius:20px;background:radial-gradient(ellipse,rgba(255,214,140,.0) 40%,transparent 70%);transition:background 1s}
+.rd-door-wrap.open .rd-door-glow{background:radial-gradient(ellipse,rgba(255,214,140,.55) 0%,rgba(255,180,80,.15) 55%,transparent 75%)}
+.rd-door{position:relative;width:min(220px,56vw);aspect-ratio:11/16;display:flex;border:6px solid #6b5323;border-radius:14px 14px 4px 4px;background:#120405;box-shadow:0 20px 60px rgba(0,0,0,.8)}
+.rd-door-panel{flex:1;position:relative;background:linear-gradient(160deg,#C22833 0%,#8e1620 55%,#5c0d14 100%);border:1px solid rgba(0,0,0,.35);transition:transform 1.2s cubic-bezier(.6,0,.2,1)}
+.rd-door-panel.left{border-radius:8px 0 0 2px;transform-origin:left center}
+.rd-door-panel.right{border-radius:0 8px 2px 0;transform-origin:right center}
+.rd-door-panel::before{content:'';position:absolute;inset:12% 18%;border:2px solid rgba(0,0,0,.25);border-radius:6px}
+.rd-handle{position:absolute;top:50%;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFE9A8,#8A6E36);box-shadow:0 0 8px rgba(232,200,122,.7)}
+.rd-door-panel.left .rd-handle{right:7%}
+.rd-door-panel.right .rd-handle{left:7%}
+.rd-door-wrap.shake .rd-door{animation:rdShake .55s ease-in-out 2}
+@keyframes rdShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px) rotate(-.6deg)}40%{transform:translateX(5px) rotate(.6deg)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.rd-door-wrap.open .rd-door-panel.left{transform:rotateY(-108deg)}
+.rd-door-wrap.open .rd-door-panel.right{transform:rotateY(108deg)}
+.rd-scene-door.gone{animation:rdFadeOut .5s ease both}
+@keyframes rdFadeOut{to{opacity:0;transform:scale(1.15);visibility:hidden}}
+
+/* Scène roue */
+.rd-scene-wheel{position:absolute;display:none;flex-direction:column;align-items:center;opacity:0;transform:scale(.5)}
+.rd-scene-wheel.on{display:flex;animation:rdWheelIn .7s cubic-bezier(.2,1.3,.4,1) both}
+@keyframes rdWheelIn{to{opacity:1;transform:scale(1)}}
+.rd-pointer{width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-top:26px solid #E8C87A;filter:drop-shadow(0 3px 6px rgba(0,0,0,.6));z-index:3;margin-bottom:-8px}
+.rd-wheel{width:min(340px,84vw);aspect-ratio:1;border-radius:50%;box-shadow:0 0 0 10px #6b5323,0 0 0 13px #2a2008,0 24px 80px rgba(0,0,0,.85),0 0 90px rgba(179,32,42,.25);transition:transform 4.6s cubic-bezier(.12,.65,.05,1)}
+.rd-wheel svg{display:block;width:100%;height:100%}
+
+/* Scène gain */
+.rd-prize{position:absolute;display:none;flex-direction:column;align-items:center;text-align:center;opacity:0;z-index:4}
+.rd-prize.on{display:flex;animation:rdPrizeIn .6s cubic-bezier(.2,1.5,.4,1) both .1s}
+@keyframes rdPrizeIn{from{opacity:0;transform:scale(.6) translateY(30px)}to{opacity:1;transform:none}}
+.rd-prize-emoji{font-size:72px;filter:drop-shadow(0 6px 24px rgba(232,200,122,.5))}
+.rd-prize-label{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(18px,5vw,28px);font-weight:900;color:#FFE9A8;margin-top:10px;text-shadow:0 2px 30px rgba(232,200,122,.5)}
+.rd-prize-sub{font-size:13px;color:#B8B2A7;margin-top:6px}
+.rd-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.rd-confetti span{position:absolute;top:-12px;width:9px;height:14px;opacity:0;animation:rdConf 2.4s ease-in forwards}
+@keyframes rdConf{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(105vh) rotate(720deg)}}
+#rd-overlay .btn{background:linear-gradient(135deg,#8A6E36,#C8A85A 50%,#E8C87A);color:#120405;font-weight:800;border:none;padding:13px 28px;border-radius:12px;font-size:14px}
+/* ─── CONCOURS (roue de la fortune) ─── */
+.concours-wheel-wrap{
+  position:relative;width:100%;max-width:340px;margin:var(--sp-2) auto var(--sp-5);aspect-ratio:1/1;
+}
+.concours-wheel-disc{
+  width:100%;height:100%;border-radius:50%;
+  box-shadow:0 0 0 6px var(--ink-2),0 0 0 8px rgba(var(--accent-rgb),.25),0 12px 36px rgba(var(--accent-rgb),.20);
+  will-change:transform;
+}
+.concours-wheel-disc.spinning{ animation:goldGlow 1.1s ease-in-out infinite; }
+.concours-wheel-disc svg{ display:block;border-radius:50%; }
+.concours-wheel-pointer{
+  position:absolute;top:-16px;left:50%;transform:translateX(-50%);
+  font-size:30px;line-height:1;color:var(--gold-0);z-index:5;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.55));
+}
+@media(max-width:640px){
+  .concours-wheel-wrap{ max-width:260px; }
+}
+
+/* ─── PORTE ROUGE v2 : grille de numéros + roulette 37 ─────── */
+.rd-scene{display:none}
+.rd-scene.on{display:flex;flex-direction:column;align-items:center}
+.rd-scene-grid{width:100%;max-width:440px;margin-top:26px}
+.rd-grid-head{display:flex;align-items:center;justify-content:space-between;width:100%;font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:800;color:#F5F0E6;margin-bottom:12px}
+.rd-pick-count{font-size:11px;color:#0a0203;background:linear-gradient(135deg,#C8A85A,#E8C87A);padding:4px 12px;border-radius:999px}
+.rd-numgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;width:100%}
+.rd-numgrid.locked{pointer-events:none}
+.rd-num{position:relative;aspect-ratio:1;border-radius:10px;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:13px;color:#fff;border:2px solid rgba(255,255,255,.10);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .12s,box-shadow .12s,transform .1s;padding:0}
+.rd-num:active{transform:scale(.92)}
+.rd-num.red{background:linear-gradient(160deg,#a51b26,#7a1119)}
+.rd-num.black{background:linear-gradient(160deg,#1c1c24,#101014)}
+.rd-num.green{background:linear-gradient(160deg,#12734a,#0a4a2e);grid-column:1/-1;aspect-ratio:auto;min-height:40px}
+.rd-num.sel{border-color:#E8C87A;box-shadow:0 0 0 2px rgba(232,200,122,.45),0 0 16px rgba(232,200,122,.30);z-index:1}
+.rd-num .kb{position:absolute;top:-8px;right:-6px;font-size:16px;opacity:0;transform:scale(0) rotate(-50deg);pointer-events:none;filter:drop-shadow(0 0 7px rgba(255,220,130,.95));z-index:2}
+.rd-num.keyed .kb{animation:rdKeyPop .55s cubic-bezier(.2,1.7,.4,1) both}
+@keyframes rdKeyPop{to{opacity:1;transform:scale(1) rotate(0)}}
+.rd-grid-actions{display:flex;gap:8px;margin-top:16px;width:100%}
+.rd-launch-btn{flex:1;justify-content:center;background:linear-gradient(135deg,#8e1620,#C22833)!important;color:#fff!important;font-weight:800;border-radius:12px;padding:12px 18px!important;border:none}
+.rd-launch-btn:disabled{opacity:.35;cursor:not-allowed}
+.rd-scene-roulette.on{animation:rdWheelIn .5s cubic-bezier(.2,1.3,.4,1) both}
+.rd-roulette{width:min(360px,88vw);aspect-ratio:1;border-radius:50%;box-shadow:0 0 0 10px #6b5323,0 0 0 13px #2a2008,0 24px 80px rgba(0,0,0,.85),0 0 90px rgba(179,32,42,.25);transition:transform 5.4s cubic-bezier(.1,.7,.06,1)}
+.rd-roulette svg{display:block;width:100%;height:100%}
+.rd-roulette-result{margin-top:18px;font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:800;color:#FFE9A8;min-height:24px;opacity:0;transition:opacity .35s;text-shadow:0 2px 16px rgba(0,0,0,.8)}
+.rd-roulette-result.show{opacity:1}
+.rd-prize.lose .rd-prize-label{color:#cfc9be;text-shadow:none}
+.rd-prize.lose .rd-prize-emoji{filter:grayscale(.6) drop-shadow(0 4px 16px rgba(0,0,0,.6))}
+
+/* ─── PORTE ROUGE : correctifs mobile ──────────────────────── */
+/* Les 3 boutons d'action débordaient à droite sur téléphone : ils ne
+   rétrécissaient pas (min-width:auto en flex) et leurs paddings cumulés
+   dépassaient la largeur de l'écran. */
+.rd-stage{overflow-y:auto;padding:74px 14px 24px}
+.rd-scene.on{margin:auto}
+.rd-scene-grid{margin-top:0;max-width:min(440px,100%)}
+.rd-grid-actions{flex-wrap:nowrap}
+.rd-grid-actions .btn{flex:1 1 0;min-width:0;padding:12px 6px;justify-content:center;font-size:12px;white-space:nowrap;overflow:hidden}
+.rd-grid-actions .btn i{font-size:14px;flex-shrink:0}
+@media(max-width:360px){.rd-grid-actions .btn{font-size:11px;padding:11px 4px}.rd-grid-actions .btn i{display:none}}
+
+/* ─── PORTE ROUGE v3 : roulette 3D + grille format table européenne ── */
+.rd-r3d-scene{perspective:950px;width:min(400px,92vw);aspect-ratio:1;display:flex;align-items:center;justify-content:center}
+.rd-r3d-tilt{position:relative;width:88%;aspect-ratio:1;transform:rotateX(48deg);transform-style:preserve-3d}
+.rd-r3d-rim{position:absolute;inset:-16px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#9a7a3d,#5d4520 55%,#31240e);box-shadow:0 0 0 5px #241b08,0 34px 70px rgba(0,0,0,.75),inset 0 0 34px rgba(0,0,0,.6),0 0 90px rgba(179,32,42,.18)}
+.rd-r3d-wheel{position:absolute;inset:0;border-radius:50%;will-change:transform}
+.rd-r3d-wheel svg{display:block;width:100%;height:100%}
+.rd-r3d-ball{position:absolute;left:50%;top:50%;width:15px;height:15px;margin:-7.5px 0 0 -7.5px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#ffffff,#d8d8de 55%,#8d8d98);box-shadow:0 3px 7px rgba(0,0,0,.6),inset -2px -3px 5px rgba(0,0,0,.25);z-index:3;will-change:transform}
+.rd-scene-roulette .rd-roulette-result{margin-top:-4px}
+
+/* Grille au format table de roulette européenne : 0 en tête, 3 colonnes × 12 rangées */
+.rd-numgrid{grid-template-columns:repeat(3,1fr);gap:5px}
+.rd-scene-grid{max-width:360px}
+.rd-num{aspect-ratio:auto;height:38px;border-radius:8px}
+.rd-num.green{height:46px;border-radius:23px 23px 8px 8px}
+
+/* ─── PORTE ROUGE v3.1 : tourelle dorée en billboard + bille ── */
+/* La tourelle est un sprite vertical contre-incliné (rotateX inverse du plan)
+   posé au centre : avec preserve-3d le navigateur gère l'occlusion réelle
+   (la bille passe derrière quand elle est sur la moitié haute de la roue). */
+.rd-r3d-turret{position:absolute;left:50%;top:50%;width:46%;aspect-ratio:200/230;transform-origin:50% 91%;transform:translate(-50%,-91%) rotateX(-48deg);pointer-events:none}
+.rd-r3d-turret svg{display:block;width:100%;height:100%;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55))}
+.rd-r3d-ball{width:17px;height:17px;margin:-8.5px 0 0 -8.5px}
+
+/* ─── PORTE ROUGE v4 : crédit + jetons + WebGL ─────────────── */
+.rd-buyins{display:flex;gap:8px;margin-bottom:10px}
+.rd-buyin{flex:1;padding:10px;border-radius:10px;background:var(--ink-2,#16161c);border:2px solid rgba(255,255,255,.08);color:#ddd;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:13px;cursor:pointer;transition:border-color .12s}
+.rd-buyin.sel{border-color:#C8A85A;color:#E8C87A;background:rgba(200,168,90,.08)}
+.rd-wallet{display:flex;gap:8px;width:100%;margin-bottom:10px}
+.rd-wallet-item{flex:1;background:rgba(0,0,0,.35);border:1px solid rgba(200,168,90,.25);border-radius:12px;padding:8px 12px;display:flex;flex-direction:column;gap:2px}
+.rd-wallet-item span{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#9a948a;font-weight:700}
+.rd-wallet-item strong{font-family:'Bricolage Grotesque',sans-serif;font-size:15px;color:#FFE9A8}
+.rd-chips{display:flex;gap:10px;justify-content:center;width:100%}
+.rd-chip{width:52px;height:52px;border-radius:50%;font-family:'Bricolage Grotesque',sans-serif;font-weight:900;font-size:12px;color:#fff;cursor:pointer;position:relative;border:4px dashed rgba(255,255,255,.55);box-shadow:0 4px 10px rgba(0,0,0,.5),inset 0 0 0 3px rgba(0,0,0,.25);transition:transform .12s,box-shadow .12s}
+.rd-chip.c20{background:radial-gradient(circle at 35% 30%,#3d8bfd,#1d4e9e)}
+.rd-chip.c50{background:radial-gradient(circle at 35% 30%,#4ec77a,#1e7a44)}
+.rd-chip.c100{background:radial-gradient(circle at 35% 30%,#e8c87a,#8a6e36);color:#1c1208}
+.rd-chip.sel{transform:translateY(-4px) scale(1.12);box-shadow:0 8px 18px rgba(0,0,0,.6),0 0 0 3px #FFE9A8}
+.rd-num .bet{position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);min-width:26px;padding:2px 5px;border-radius:999px;background:linear-gradient(135deg,#E8C87A,#C8A85A);color:#1c1208;font-size:9.5px;font-weight:900;font-family:'Bricolage Grotesque',sans-serif;display:none;box-shadow:0 2px 6px rgba(0,0,0,.5);z-index:2;line-height:1}
+.rd-num .bet.on{display:block}
+.rd-num{overflow:visible}
+.rd-three{width:min(430px,94vw);aspect-ratio:10/9;display:flex;align-items:center;justify-content:center}
+.rd-three canvas{max-width:100%;height:auto;display:block}
+.rd-prize-btns{display:flex;gap:10px;margin-top:18px}
+
+/* ─── PORTE ROUGE v4.1 : safe area + générateur de clés + jetons posés + grande roue ── */
+/* Safe area iPhone (PWA plein écran) : badge/croix/titre sous la barre système */
+.rd-demo-badge{top:calc(env(safe-area-inset-top,0px) + 14px)}
+.rd-close{top:calc(env(safe-area-inset-top,0px) + 10px)}
+.rd-title{top:calc(env(safe-area-inset-top,0px) + 16px)}
+.rd-stage{padding-top:calc(env(safe-area-inset-top,0px) + 68px);padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+
+/* Générateur de clés (roulement façon machine) */
+.rd-keygen{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(.6);z-index:6;display:none;align-items:center;gap:12px;background:radial-gradient(circle at 40% 30%,#2a0e12,#12050a);border:2px solid #C8A85A;border-radius:20px;padding:18px 28px;box-shadow:0 20px 60px rgba(0,0,0,.8),0 0 50px rgba(200,168,90,.25);opacity:0;transition:opacity .25s,transform .25s cubic-bezier(.2,1.4,.4,1)}
+.rd-keygen.on{display:flex;opacity:1;transform:translate(-50%,-50%) scale(1)}
+.rd-keygen .k{font-size:34px;filter:drop-shadow(0 0 10px rgba(255,220,130,.8))}
+.rd-keygen .n{font-family:'Bricolage Grotesque',sans-serif;font-size:44px;font-weight:900;color:#FFE9A8;min-width:64px;text-align:center;text-shadow:0 0 24px rgba(232,200,122,.6)}
+.rd-keygen .l{font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:800;letter-spacing:2px;color:#B8B2A7;text-transform:uppercase}
+.rd-keygen.settled .n{animation:rdKgPop .4s cubic-bezier(.2,1.8,.4,1) both;color:#fff}
+@keyframes rdKgPop{0%{transform:scale(1)}50%{transform:scale(1.45)}100%{transform:scale(1.15)}}
+
+/* Jetons posés sur les numéros (vrai visuel jeton, couleur selon le total) */
+.rd-num .bet{min-width:30px;width:30px;height:30px;padding:0;border-radius:50%;display:none;align-items:center;justify-content:center;bottom:auto;top:50%;left:auto;right:-8px;transform:translateY(-50%);font-size:9px;font-weight:900;font-family:'Bricolage Grotesque',sans-serif;border:3px dashed rgba(255,255,255,.65);box-shadow:0 3px 6px rgba(0,0,0,.6),0 -2px 0 rgba(0,0,0,.35),0 -4px 0 rgba(0,0,0,.22),inset 0 0 0 2px rgba(0,0,0,.25);color:#fff;line-height:1;z-index:3}
+.rd-num .bet.on{display:flex}
+.rd-num .bet.b20{background:radial-gradient(circle at 35% 30%,#3d8bfd,#1d4e9e)}
+.rd-num .bet.b50{background:radial-gradient(circle at 35% 30%,#4ec77a,#1e7a44)}
+.rd-num .bet.b100{background:radial-gradient(circle at 35% 30%,#e8c87a,#8a6e36);color:#1c1208}
+
+/* Grande roue bonus : bezel lumineux fixe + roue élargie */
+.rd-bigwheel-wrap{position:relative;display:flex;flex-direction:column;align-items:center}
+.rd-wheel{width:min(420px,92vw)}
+.rd-wheel-bezel{position:absolute;left:50%;top:50%;width:calc(min(420px,92vw) + 34px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:
+  repeating-conic-gradient(from 0deg,#ffe9a8 0deg 3.5deg,rgba(255,233,168,.12) 3.5deg 22.5deg);
+  -webkit-mask:radial-gradient(circle,transparent 62%,#000 63%,#000 69%,transparent 70%);
+  mask:radial-gradient(circle,transparent 62%,#000 63%,#000 69%,transparent 70%);
+  animation:rdBezel 1.2s steps(2) infinite;pointer-events:none;z-index:2}
+@keyframes rdBezel{50%{filter:brightness(1.6) drop-shadow(0 0 8px rgba(255,233,168,.8))}}
+.rd-bigwheel-wrap .rd-pointer{position:relative;z-index:4;border-top-width:30px;border-left-width:19px;border-right-width:19px;margin-bottom:-10px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.7))}
+
+/* ─── PORTE ROUGE v4.2 : style Red Door Roulette (Evolution) ── */
+/* La porte iconique : panneau unique rouge, moulures or, heurtoir, ampoules */
+.rd-door{border-color:#caa54e;background:#40080d;box-shadow:0 20px 60px rgba(0,0,0,.8),0 0 70px rgba(211,39,62,.25)}
+.rd-door::before{content:'';position:absolute;inset:-26px;border-radius:20px;padding:12px;
+  background:radial-gradient(circle 3.5px,#ffd9a0 0 2.6px,transparent 3.5px) 0 0/19px 19px round;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;
+  animation:rdBezel 1.2s steps(2) infinite;pointer-events:none}
+.rd-door-panel{transform-origin:left center;background:linear-gradient(160deg,#C22833 0%,#a01722 45%,#6e0f18 100%)}
+.rd-door-panel::before{display:none}
+.rd-door-wrap.open .rd-door-panel{transform:rotateY(-106deg)}
+.rd-molding{position:absolute;left:14%;right:14%;border:2.5px solid rgba(232,200,122,.75);border-radius:4px;box-shadow:inset 0 0 8px rgba(0,0,0,.35)}
+.rd-molding.m1{top:6%;height:14%}
+.rd-molding.m2{top:26%;height:26%}
+.rd-molding.m3{top:58%;height:34%}
+.rd-knocker{position:absolute;left:50%;top:38%;width:16px;height:16px;margin-left:-8px;border:3px solid #e8c87a;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,.5)}
+.rd-knocker::before{content:'';position:absolute;left:50%;top:-7px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff0b8,#8a6e36)}
+.rd-door-panel .rd-handle{left:auto;right:10%;top:66%;width:12px;height:12px}
+
+/* Générateur de clés : machine à sous (cadre rouge/or, rouleau vertical) */
+.rd-keygen{flex-direction:column;gap:10px;padding:16px 22px;background:linear-gradient(160deg,#8e1620,#5c0d14);border:3px solid #caa54e;box-shadow:0 24px 70px rgba(0,0,0,.85),0 0 60px rgba(211,39,62,.35)}
+.rd-keygen::before{content:'';position:absolute;inset:-16px;border-radius:26px;padding:7px;
+  background:radial-gradient(circle 3px,#ffd9a0 0 2.2px,transparent 3px) 0 0/16px 16px round;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;
+  animation:rdBezel 1.1s steps(2) infinite;pointer-events:none}
+.rd-keygen-title{font-family:'Bricolage Grotesque',sans-serif;font-size:12px;font-weight:900;letter-spacing:3px;color:#e8c87a}
+.rd-keygen-window{display:flex;flex-direction:column;align-items:center;width:120px;background:linear-gradient(180deg,#cfd8e3,#eef2f6 50%,#b9c4d2);border-radius:10px;border:3px solid #4a3208;overflow:hidden}
+.rd-keygen-window .r{font-family:'Bricolage Grotesque',sans-serif;font-weight:900;font-size:26px;line-height:1.35;color:#b8933f;opacity:.45;text-shadow:0 1px 0 #fff}
+.rd-keygen-window .r.cur{font-size:40px;color:#8a5c10;opacity:1;text-shadow:0 2px 0 #fff,0 0 18px rgba(200,140,20,.45)}
+.rd-keygen.settled .r.cur{animation:rdKgPop .4s cubic-bezier(.2,1.8,.4,1) both}
+.rd-keygen .n{min-width:0}
+
+/* Badge DOUBLE de la grande roue */
+.rd-double-badge{position:absolute;top:-8px;left:50%;transform:translateX(-50%) scale(.7);z-index:6;display:none;font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:900;letter-spacing:1px;color:#5c3a08;background:linear-gradient(135deg,#fff0b8,#e8c87a 55%,#c8a85a);padding:10px 22px;border-radius:999px;box-shadow:0 8px 30px rgba(232,200,122,.55);opacity:0;transition:opacity .25s,transform .25s cubic-bezier(.2,1.5,.4,1)}
+.rd-double-badge.on{display:block;opacity:1;transform:translateX(-50%) scale(1)}
+.rd-double-badge.pop{animation:rdKgPop .5s cubic-bezier(.2,1.8,.4,1) both}
+
+/* ─── PORTE ROUGE v4.3 : jeton retrait + flash « les jeux sont faits » ── */
+.rd-chip.erase{background:radial-gradient(circle at 35% 30%,#4a4a55,#22222a);font-size:17px;border-style:solid}
+.rd-flash{position:absolute;inset:0;z-index:8;display:none;align-items:center;justify-content:center;text-align:center;background:radial-gradient(ellipse at center,rgba(211,39,62,.92),rgba(64,8,13,.97) 70%);opacity:0;pointer-events:none}
+.rd-flash.on{display:flex;animation:rdFlash 1.5s ease both}
+@keyframes rdFlash{0%{opacity:0}10%{opacity:1}78%{opacity:1}100%{opacity:0}}
+.rd-flash span{display:flex;flex-direction:column;gap:8px;font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(20px,6vw,34px);font-weight:900;letter-spacing:2px;color:#FFE9A8;text-shadow:0 0 40px rgba(255,233,168,.6),0 4px 18px rgba(0,0,0,.6);animation:rdFlashTxt 1.5s cubic-bezier(.2,1.2,.4,1) both}
+.rd-flash span small{font-size:13px;font-weight:700;letter-spacing:6px;color:#f5c9ce;text-transform:uppercase}
+@keyframes rdFlashTxt{0%{transform:scale(.6);opacity:0}18%{transform:scale(1.06);opacity:1}30%{transform:scale(1)}80%{transform:scale(1.02);opacity:1}100%{transform:scale(1.3);opacity:0}}
+
+/* ─── PORTE ROUGE v5 : titre en flux, couleurs, roue 3D, flash pyro ── */
+/* Le titre absolu chevauchait le solde selon les tailles d'écran → il entre
+   dans le flux flex du stage : plus AUCUNE superposition possible. */
+.rd-title{position:static;top:auto;margin:0 0 14px;flex-shrink:0}
+.rd-stage{padding-top:calc(env(safe-area-inset-top,0px) + 54px)}
+
+.rd-scene-color{text-align:center;gap:6px}
+.rd-color-title{font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:900;color:#F5F0E6}
+.rd-color-sub{font-size:12.5px;color:#B8B2A7;margin-bottom:16px}
+.rd-color-btns{display:flex;gap:14px}
+.rd-color-btn{width:96px;height:120px;border-radius:16px;font-family:'Bricolage Grotesque',sans-serif;font-weight:900;font-size:14px;color:#fff;cursor:pointer;position:relative;border:3px solid rgba(255,255,255,.25);box-shadow:0 10px 30px rgba(0,0,0,.6);transition:transform .15s cubic-bezier(.2,1.4,.4,1),box-shadow .15s}
+.rd-color-btn::before{content:'';position:absolute;left:50%;top:18px;transform:translateX(-50%);width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-top:30px solid rgba(255,255,255,.9);filter:drop-shadow(0 3px 5px rgba(0,0,0,.4))}
+.rd-color-btn:active{transform:scale(.94)}
+.rd-color-btn.green{background:linear-gradient(160deg,#4ec77a,#1e7a44)}
+.rd-color-btn.blue{background:linear-gradient(160deg,#5aa4f0,#1d4e9e)}
+.rd-color-btn.yellow{background:linear-gradient(160deg,#f7dd6a,#c79a1e);color:#3a2a08}
+
+.rd-wheel3d{width:min(440px,94vw);aspect-ratio:1;display:flex;align-items:center;justify-content:center}
+.rd-wheel3d canvas{max-width:100%;height:auto;display:block}
+
+/* Flash pyrotechnique */
+.rd-flash{overflow:hidden}
+.rd-flash-rays{position:absolute;left:50%;top:50%;width:200vmax;height:200vmax;transform:translate(-50%,-50%);background:repeating-conic-gradient(from 0deg,rgba(255,233,168,.14) 0deg 7deg,transparent 7deg 24deg);opacity:0}
+.rd-flash.on .rd-flash-rays{animation:rdRays 1.6s ease both}
+@keyframes rdRays{0%{opacity:0;transform:translate(-50%,-50%) rotate(0) scale(.4)}20%{opacity:1}85%{opacity:.9}100%{opacity:0;transform:translate(-50%,-50%) rotate(40deg) scale(1.1)}}
+.rd-flash-ring{position:absolute;left:50%;top:50%;width:40px;height:40px;margin:-20px;border-radius:50%;border:4px solid rgba(255,233,168,.95);opacity:0}
+.rd-flash.on .rd-flash-ring{animation:rdRing 1s cubic-bezier(.1,.7,.3,1) both .1s}
+.rd-flash.on .rd-flash-ring.r2{animation-delay:.32s;border-color:rgba(211,39,62,.9);border-width:6px}
+@keyframes rdRing{0%{opacity:1;transform:scale(.2)}100%{opacity:0;transform:scale(26)}}
+.rd-flash-sparks span{position:absolute;left:50%;top:50%;width:7px;height:7px;border-radius:50%;opacity:0;animation:rdSpark 1.15s cubic-bezier(.15,.8,.3,1) both}
+@keyframes rdSpark{0%{opacity:1;transform:translate(0,0) scale(1.4)}80%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2)}}
+.rd-flash.on span{animation-name:rdFlashTxt2}
+.rd-flash span{animation:none}
+.rd-flash.on > span{animation:rdFlashTxt2 1.6s cubic-bezier(.2,1.2,.4,1) both}
+@keyframes rdFlashTxt2{0%{transform:scale(.3) rotate(-6deg);opacity:0;filter:blur(14px)}16%{transform:scale(1.18) rotate(1.5deg);opacity:1;filter:blur(0)}26%{transform:scale(.98) rotate(0)}78%{transform:scale(1.04);opacity:1}100%{transform:scale(1.6);opacity:0;filter:blur(8px)}}
+.rd-flash.on{animation:rdFlash 1.6s ease both,rdShakeS .5s linear .12s}
+@keyframes rdShakeS{0%,100%{margin-left:0}20%{margin-left:-6px}40%{margin-left:6px}60%{margin-left:-4px}80%{margin-left:4px}}
+
+/* ─── SURVOL ─── */
+/* Tous les etats de survol vivent ici, et nulle part ailleurs.
+   Sur un ecran tactile il n'y a pas de pointeur : iOS simule un :hover sur le
+   dernier element touche et le laisse colle jusqu'au tap suivant. En faisant
+   defiler une liste de clients, chaque ligne effleuree gardait donc son fond
+   clair, son liseré et parfois son translateY — un sillage de survols que
+   personne n'a demandes.
+   @media(hover:hover) ne s'applique qu'aux vrais pointeurs. Les etats :active
+   et :focus-visible restent en dehors : le premier est le retour au doigt, le
+   second celui du clavier, et tous deux doivent exister sur telephone. */
+@media(hover:hover){
+::-webkit-scrollbar-thumb:hover{background:rgba(var(--accent-rgb),.35)}
+.nav-item:hover{color:var(--marble-0);background:rgba(var(--accent-rgb),.06)}
+.action-btn:hover{background:linear-gradient(135deg,rgba(245,240,230,.04),rgba(var(--accent-rgb),.14));border-color:rgba(200,168,90,.35);box-shadow:0 0 0 1px rgba(200,168,90,.08),0 4px 24px rgba(200,168,90,.18);transform:translateY(-2px)}
+.action-btn:hover i{color:var(--gold-2)}
+.btn-gold:hover{background:rgba(var(--accent-rgb),.24);border-color:rgba(var(--accent-rgb),.48);box-shadow:0 0 0 1px rgba(var(--accent-rgb),.12),0 4px 20px rgba(var(--accent-rgb),.18);transform:translateY(-1px)}
+.btn-out:hover{background:linear-gradient(135deg,rgba(245,240,230,.04),rgba(var(--accent-rgb),.14));border-color:rgba(200,168,90,.4);box-shadow:0 0 0 1px rgba(200,168,90,.08),0 4px 20px rgba(200,168,90,.15);transform:translateY(-1px)}
+.btn-ghost:hover{color:var(--marble-0);border-color:rgba(var(--accent-rgb),.12)}
+.btn-danger:hover{background:rgba(224,80,80,.2)}
+.btn-icon:hover{color:var(--gold-0);border-color:rgba(var(--accent-rgb),.12);background:rgba(var(--accent-rgb),.06)}
+/* hover:hover — sur tactile (iPhone),le :hover reste « collé » à la dernière
+   tuile touchée en scrollant : certaines tuiles gardaient un liseré plus clair
+   que les autres. L'effet ne s'applique plus qu'aux vrais pointeurs (souris). */
+@media(hover:hover){
+.topbar-notif:hover{color:var(--gold-0)}
+.kpi-card:hover{border-color:rgba(var(--accent-rgb),.12);transform:translateY(-3px);box-shadow:0 0 0 1px rgba(var(--accent-rgb),.22), 0 16px 48px rgba(var(--accent-rgb),.20)}
+}
+.card:hover::before{opacity:1;}
+.card:hover::after{opacity:1;}
+.card:hover{border-color:rgba(var(--accent-rgb),.12);box-shadow:0 0 0 1px rgba(var(--accent-rgb),.22), 0 12px 36px rgba(var(--accent-rgb),.20);transform:translateY(-2px)}
+.card-action:hover{color:var(--gold-1)}
+.tab:hover:not(.active){color:var(--marble-0);border-color:rgba(var(--accent-rgb),.12)}
+#page-clients .card:nth-of-type(1) .btn:hover{border-color:rgba(var(--accent-rgb),.12);box-shadow:0 0 0 1px rgba(var(--accent-rgb),.22), 0 12px 36px rgba(var(--accent-rgb),.20)}
+.next-contact-btn:hover{background:rgba(var(--accent-rgb),.12);color:var(--gold-0);outline:none}
+.next-contact-btn:hover span{color:var(--gold-0)}
+.motif:hover{color:var(--marble-0);border-color:rgba(var(--accent-rgb),.3)}
+.client-edit-btn:hover{background:rgba(var(--accent-rgb),.18);color:var(--gold-0);border-color:rgba(var(--accent-rgb),.35)}
+.ac-day-h:hover{color:var(--gold-0)}
+.ac-appt:hover{transform:scale(1.02);z-index:5;box-shadow:var(--sh-sm)}
+.dj-row:hover{transform:translateX(2px);box-shadow:var(--sh-sm)}
+.client-row:hover{padding-left:12px;background:linear-gradient(90deg,rgba(var(--accent-rgb),.08),transparent);border-left:2px solid rgba(var(--accent-rgb),.08)}
+.pay-row:hover{background:linear-gradient(90deg,rgba(var(--accent-rgb),.08),transparent);padding-left:var(--sp-4);border-left:2px solid rgba(var(--accent-rgb),.08)}
+.heat-cell:hover{transform:scale(1.1);outline:1px solid var(--gold-1)}
+.accent-preset:hover{transform:scale(1.12)}
+.kpi-clickable:hover{border-color:rgba(var(--accent-rgb),.32);transform:translateY(-2px)}
+.kpi-clickable:hover .kpi-more{opacity:.85}
+.modal-close:hover{
+  background:rgba(224,80,80,.18);
+  color:var(--danger);
+  border-color:rgba(224,80,80,.25);
+}
+.svc-row-img:hover{border-color:var(--gold-0);background:rgba(200,168,90,.08)}
+.svc-row-del:hover{background:rgba(224,80,80,.2)}
+.ag-nav-btn:hover{background:rgba(var(--accent-rgb),.10)}
+.ag-day-h:hover{background:rgba(var(--accent-rgb),.06);color:var(--gold-1)}
+.ag-hour:hover,.ag-hour.ag-half:hover{background:rgba(var(--accent-rgb),.06)}
+.ag-hour.ag-half.ag-off:hover{background:rgba(var(--accent-rgb),.08)}
+.ag-appt:hover{transform:translateZ(0) scale(1.02);z-index:5;box-shadow:var(--sh-md)}
+.cash-svc:hover{border-color:rgba(var(--accent-rgb),.12);transform:translateY(-3px);box-shadow:0 0 0 1px rgba(var(--accent-rgb),.22), 0 12px 36px rgba(var(--accent-rgb),.20)}
+.cash-addon:hover{border-color:rgba(var(--accent-rgb),.12);background:linear-gradient(90deg,rgba(var(--accent-rgb),.08),var(--ink-2))}
+.stock-card:hover{border-color:rgba(var(--accent-rgb),.12);box-shadow:0 0 0 1px rgba(var(--accent-rgb),.22), 0 12px 32px rgba(var(--accent-rgb),.20);transform:translateY(-2px)}
+.mkt-card:hover{border-color:rgba(var(--accent-rgb),.12);box-shadow:0 0 0 1px rgba(var(--accent-rgb),.22), 0 12px 36px rgba(var(--accent-rgb),.20);transform:translateY(-2px)}
+.mnav-burger:hover{ background:rgba(var(--accent-rgb),.06)!important;transform:scale(1.07); }
+.nav-item:hover{ transform:translateX(5px); }
+.nav-item:hover i{ transform:scale(1.18);color:var(--gold-0); }
+.sidebar-logo:hover .logo-mark{ transform:scale(1.08); }
+.rd-color-btn:hover{transform:translateY(-6px) scale(1.05)}
+}
+/* Celle-ci vivait dans le bloc mobile : les deux conditions se combinent. */
+@media(max-width:768px) and (hover:hover){
+  .sidebar-close:hover{color:var(--gold-0);background:rgba(var(--accent-rgb),.06)}
+}

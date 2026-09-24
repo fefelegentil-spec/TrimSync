@@ -1,0 +1,99 @@
+/* ── TrimSync : ce qui change par rapport au dashboard FCUTZ ──
+   base.css est une copie du dashboard FCUTZ (polices déjà remplacées). On ne
+   la retouche pas : tout ce qui est propre à TrimSync vit ici, pour pouvoir
+   reprendre une version plus récente de base.css sans rien perdre. */
+
+:root {
+  /* Teal de la marque (oklch(0.76 0.13 193) ≈ #60C4C8). Toute l'interface
+     suit ces deux valeurs : --accent-h pour les nuances, --accent-rgb pour les
+     rgba() de base.css. */
+  --accent-h: 183;
+  --accent-rgb: 96, 196, 200;
+  --gold-0: #60C4C8;
+  --gold-deep: #2A9EA3;
+}
+
+body { font-family: 'Figtree', sans-serif; }
+
+/* Rien ne s'affiche avant la session : la coquille reste cachée tant que
+   l'écran de connexion est là. */
+body.hors-session .layout,
+body.hors-session .sidebar,
+body.hors-session .mnav-burger,
+body.hors-session #sidebar-backdrop { display: none !important; }
+body:not(.hors-session) #ecran-connexion { display: none; }
+
+/* ── Écran de connexion / inscription ── */
+#ecran-connexion {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+.cx-carte {
+  width: 100%;
+  max-width: 420px;
+  background: var(--ink-2);
+  border: 1px solid rgba(var(--accent-rgb), .16);
+  border-radius: var(--r-lg);
+  padding: 28px 24px;
+  box-shadow: var(--sh-lg);
+}
+.cx-logo {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  letter-spacing: -.02em;
+  margin-bottom: 4px;
+}
+.cx-logo span { color: var(--gold-0); }
+.cx-accroche { color: var(--marble-2); margin: 0 0 20px; }
+.cx-onglets { display: flex; gap: 6px; margin-bottom: 18px; }
+.cx-onglets .tab { flex: 1; text-align: center; }
+.cx-form { display: flex; flex-direction: column; gap: 10px; }
+.cx-form[hidden] { display: none; }
+.cx-form .btn { width: 100%; justify-content: center; margin-top: 6px; }
+.cx-consent {
+  display: flex; gap: 10px; align-items: flex-start;
+  font-size: 13px; color: var(--marble-1); line-height: 1.45;
+}
+.cx-consent input { margin-top: 3px; accent-color: var(--gold-0); }
+.cx-consent a { color: var(--gold-0); }
+.cx-lien {
+  background: none; border: 0; padding: 4px 0; color: var(--marble-2);
+  font-size: 13px; cursor: pointer; text-decoration: underline;
+}
+.cx-erreur { color: var(--danger); font-size: 13px; min-height: 18px; }
+.cx-note { color: var(--marble-2); font-size: 12px; text-align: center; margin-top: 14px; }
+
+/* ── Sidebar : logo TrimSync et pages à venir ── */
+.logo-mark { font-family: 'Bricolage Grotesque', sans-serif; }
+.nav-item.bientot { opacity: .45; pointer-events: none; }
+.nav-item.bientot::after {
+  content: 'bientôt'; margin-left: auto; font-size: 10px;
+  text-transform: uppercase; letter-spacing: .06em; color: var(--marble-2);
+}
+.essai-pastille {
+  display: block; margin: 0 0 10px; padding: 8px 10px; border-radius: var(--r-sm);
+  background: rgba(var(--accent-rgb), .10); color: var(--gold-0); font-size: 12px; font-weight: 600;
+}
+.essai-pastille.alerte { background: rgba(224, 80, 80, .12); color: var(--danger); }
+.btn-deconnexion {
+  width: 100%; margin-top: 10px; background: none; border: 1px solid rgba(var(--accent-rgb), .16);
+  color: var(--marble-1); border-radius: var(--r-sm); padding: 8px 10px; cursor: pointer; font-size: 13px;
+}
+
+/* ── Suggestions de clients (styles en ligne dans FCUTZ, regroupés ici) ── */
+.autocomplete-suggestions {
+  position: absolute; left: 0; right: 0; margin-top: 4px; z-index: 1000;
+  max-height: 200px; overflow-y: auto;
+  background: var(--ink-2); border: 1px solid rgba(var(--accent-rgb), .18);
+  border-radius: 10px; box-shadow: 0 8px 24px rgba(0, 0, 0, .3);
+}
+.autocomplete-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; cursor: pointer; border-bottom: 1px solid rgba(var(--accent-rgb), .08);
+}
+.autocomplete-item:hover { background: rgba(var(--accent-rgb), .08); }
+.ac-nom { font-size: 13px; font-weight: 600; color: var(--marble-0); }
+.ac-visites { font-size: 11px; color: var(--marble-2); }

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E0F13">
+<meta name="robots" content="noindex">
+<title>TrimSync — Mon salon</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="css/app/base.css?v=1">
+<link rel="stylesheet" href="css/app/trimsync.css?v=1">
+<script src="js/app/noyau.js?v=1" defer></script>
+<script src="js/app/agenda.js?v=1" defer></script>
+</head>
+<body class="hors-session">
+
+<!-- ═══════════ CONNEXION / INSCRIPTION ═══════════ -->
+<div id="ecran-connexion">
+  <div class="cx-carte">
+    <div class="cx-logo">Trim<span>Sync</span></div>
+    <p class="cx-accroche">Ton agenda, ta page de réservation, tes clients.</p>
+    <div class="cx-onglets">
+      <div class="tab" data-onglet="connexion" onclick="cxOnglet('connexion')">Se connecter</div>
+      <div class="tab" data-onglet="inscription" onclick="cxOnglet('inscription')">Créer mon salon</div>
+    </div>
+
+    <form class="cx-form" data-onglet="connexion" onsubmit="cxConnexion(event)">
+      <input class="input" id="cx-email" type="email" autocomplete="email" placeholder="Email" required>
+      <input class="input" id="cx-mdp" type="password" autocomplete="current-password" placeholder="Mot de passe" required>
+      <div class="cx-erreur" id="cx-erreur-connexion" role="alert"></div>
+      <button class="btn btn-gold" type="submit"><i class="ti ti-login"></i>Se connecter</button>
+      <button class="cx-lien" type="button" onclick="cxOubli()">Mot de passe oublié ?</button>
+    </form>
+
+    <form class="cx-form" data-onglet="inscription" onsubmit="cxInscription(event)" hidden>
+      <input class="input" id="cx-i-salon" type="text" autocomplete="organization" placeholder="Nom du salon" required>
+      <input class="input" id="cx-i-ville" type="text" autocomplete="address-level2" placeholder="Ville">
+      <input class="input" id="cx-i-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="Téléphone du salon">
+      <input class="input" id="cx-i-email" type="email" autocomplete="email" placeholder="Email" required>
+      <input class="input" id="cx-i-mdp" type="password" autocomplete="new-password" minlength="8" placeholder="Mot de passe (8 caractères minimum)" required>
+      <label class="cx-consent">
+        <input type="checkbox" id="cx-i-consent">
+        <span>J'accepte les <a href="/terms" target="_blank" rel="noopener">conditions d'utilisation</a> et la <a href="/privacy" target="_blank" rel="noopener">politique de confidentialité</a>.</span>
+      </label>
+      <div class="cx-erreur" id="cx-erreur-inscription" role="alert"></div>
+      <button class="btn btn-gold" type="submit"><i class="ti ti-sparkles"></i>Créer mon salon, 30 jours offerts</button>
+      <p class="cx-note">Sans carte bancaire. Ta page de réservation est en ligne dès l'inscription.</p>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════ APP ═══════════ -->
+<button class="mnav-burger" id="burger" aria-label="Menu" onclick="toggleSidebar()">
+  <span class="burger-line"></span><span class="burger-line"></span><span class="burger-line"></span>
+</button>
+<div id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+<nav class="sidebar" id="sidebar" aria-label="Navigation principale">
+  <div class="sidebar-logo">
+    <button class="sidebar-close" onclick="toggleSidebar()" aria-label="Fermer le menu"><i class="ti ti-chevron-left"></i></button>
+    <div class="logo-mark">T</div>
+    <div class="logo-text">
+      <div class="logo-name">TrimSync</div>
+      <div class="logo-sub">Mon salon</div>
+    </div>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item bientot" data-page="dashboard"><i class="ti ti-layout-dashboard"></i><span>Accueil</span></a>
+    <a class="nav-item active" data-page="agenda" onclick="nav('agenda')" tabindex="0"><i class="ti ti-calendar"></i><span>Agenda</span></a>
+    <a class="nav-item bientot" data-page="clients"><i class="ti ti-users"></i><span>Clients</span></a>
+    <div class="nav-section">Gestion</div>
+    <a class="nav-item bientot" data-page="disponibilites"><i class="ti ti-calendar-time"></i><span>Disponibilités</span></a>
+    <a class="nav-item bientot" data-page="parametres"><i class="ti ti-settings"></i><span>Paramètres</span></a>
+  </div>
+
+  <div class="sidebar-footer">
+    <span class="essai-pastille" id="essai-pastille" hidden></span>
+    <div class="barber-profile">
+      <div class="barber-avatar" id="barber-initials">TS</div>
+      <div class="barber-meta">
+        <div class="barber-name" id="barber-name">—</div>
+        <div class="barber-role">Gérant</div>
+      </div>
+    </div>
+    <button class="btn-deconnexion" onclick="deconnecter()"><i class="ti ti-logout"></i> Se déconnecter</button>
+  </div>
+</nav>
+
+<div class="layout">
+<main class="main">
+  <div class="topbar">
+    <button class="burger-btn" aria-label="Menu" onclick="toggleSidebar()">
+      <span class="burger-line"></span><span class="burger-line"></span><span class="burger-line"></span>
+    </button>
+    <div class="topbar-left">
+      <div class="page-title" id="topbar-title">Agenda</div>
+      <div class="page-subtitle" id="topbar-sub">—</div>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <button class="action-btn action-btn-solo" onclick="resetRdvModal(); openModal('modal-rdv-new')" aria-label="Nouveau rendez-vous"><i class="ti ti-plus"></i></button>
+  </div>
+
+  <!-- ═══════════ PAGE AGENDA ═══════════ -->
+  <section class="page active" id="page-agenda">
+    <div class="ag-barre">
+      <div class="ag-barre-nav">
+        <button class="ag-nav-btn" onclick="agPrev()" aria-label="Précédent"><i class="ti ti-chevron-left"></i></button>
+        <div class="ag-cur-label" id="ag-cur-label">—</div>
+        <button class="ag-nav-btn" onclick="agNext()" aria-label="Suivant"><i class="ti ti-chevron-right"></i></button>
+        <button class="ag-nav-btn ag-nav-today" onclick="agToday()" aria-label="Revenir à aujourd'hui" title="Aujourd'hui"><i class="ti ti-calendar-event"></i></button>
+      </div>
+      <div class="ag-barre-vue">
+        <div class="tab" id="ag-tab-day" onclick="agSetView('day')">Jour</div>
+        <div class="tab" id="ag-tab-week" onclick="agSetView('week')">Semaine</div>
+      </div>
+    </div>
+    <div id="ag-container"></div>
+    <div class="ag-legend" id="ag-legend"></div>
+  </section>
+</main>
+</div>
+
+<!-- ═══════════ FENÊTRE : NOUVEAU RDV ═══════════ -->
+<div class="modal-bg" id="modal-rdv-new">
+  <div class="modal modal-rdv">
+    <button class="modal-close" onclick="closeModal('modal-rdv-new')" aria-label="Fermer"><i class="ti ti-x"></i></button>
+    <div class="modal-title">Nouveau rendez-vous</div>
+
+    <div class="rdv-sec">
+      <div class="rdv-sec-t">Client</div>
+      <div class="f-group" style="position:relative">
+        <input class="input" id="rdv-client" type="text" autocomplete="off" placeholder="Rechercher ou saisir un nom…" oninput="filterClientsForRdv()">
+        <input type="hidden" id="rdv-client-id">
+        <div id="rdv-client-suggestions" class="autocomplete-suggestions" style="display:none"></div>
+      </div>
+      <div class="f-group"><input class="input" id="rdv-phone" type="tel" inputmode="tel" placeholder="Téléphone — évite les doublons"></div>
+    </div>
+
+    <div class="rdv-sec">
+      <div class="rdv-sec-t">Créneau</div>
+      <div class="f-row">
+        <div class="f-group"><input class="input" id="rdv-date" type="date" onchange="rdvAutoFillTime()"></div>
+        <div class="f-group heure-champ"><button type="button" class="input heure-btn" id="rdv-time-btn" onclick="basculerRoue('rdv-time')" aria-haspopup="listbox" aria-expanded="false"><span id="rdv-time-txt">—</span><i class="ti ti-clock"></i></button><input type="hidden" id="rdv-time"><div class="roue-wrap" id="rdv-time-wrap" hidden><div class="roue" id="rdv-time-roue"><div class="roue-piste" id="rdv-time-piste"></div></div><div class="roue-cadre" aria-hidden="true"></div></div></div>
+      </div>
+      <div class="f-group hidden" id="rdv-conflict">
+        <div class="modal-info modal-info-danger"><i class="ti ti-alert-triangle"></i><span id="rdv-conflict-txt"></span></div>
+      </div>
+    </div>
+
+    <div class="rdv-sec">
+      <div class="rdv-sec-t">Prestation</div>
+      <div class="f-group"><select class="input" id="rdv-service" onchange="rdvCheckConflict()"></select></div>
+      <div class="f-group"><input class="input" id="rdv-note" type="text" maxlength="300" placeholder="Note — fade court, ligne nette…"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-rdv-new')">Annuler</button>
+      <button class="btn btn-gold" onclick="saveNewRdv()"><i class="ti ti-check"></i>Créer le RDV</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ FENÊTRE : MODIFIER LE RDV ═══════════ -->
+<div class="modal-bg" id="modal-rdv-edit">
+  <div class="modal modal-rdv">
+    <button class="modal-close" onclick="closeModal('modal-rdv-edit')" aria-label="Fermer"><i class="ti ti-x"></i></button>
+    <div class="modal-title">Modifier le rendez-vous</div>
+    <div class="rdv-badges"><span class="rdv-badge rdv-badge-ok" id="rdv-edit-source"></span></div>
+    <input type="hidden" id="rdv-edit-id">
+
+    <div class="rdv-sec">
+      <div class="rdv-sec-t">Client</div>
+      <div class="f-group"><input class="input" id="rdv-edit-client" type="text"></div>
+      <div id="rdv-edit-contact" class="rdv-contact hidden">
+        <a id="rdv-edit-call" href="#" class="btn btn-out"><i class="ti ti-phone"></i>Appeler</a>
+        <a id="rdv-edit-sms" href="#" class="btn btn-out"><i class="ti ti-message"></i>Message</a>
+      </div>
+    </div>
+
+    <div class="rdv-sec">
+      <div class="rdv-sec-t">Créneau</div>
+      <div class="f-row">
+        <div class="f-group"><input class="input" id="rdv-edit-date" type="date" onchange="rdvEditCheckConflict()"></div>
+        <div class="f-group heure-champ"><button type="button" class="input heure-btn" id="rdv-edit-time-btn" onclick="basculerRoue('rdv-edit-time')" aria-haspopup="listbox" aria-expanded="false"><span id="rdv-edit-time-txt">—</span><i class="ti ti-clock"></i></button><input type="hidden" id="rdv-edit-time"><div class="roue-wrap" id="rdv-edit-time-wrap" hidden><div class="roue" id="rdv-edit-time-roue"><div class="roue-piste" id="rdv-edit-time-piste"></div></div><div class="roue-cadre" aria-hidden="true"></div></div></div>
+      </div>
+      <div class="f-group hidden" id="rdv-edit-conflict">
+        <div class="modal-info modal-info-danger"><i class="ti ti-alert-triangle"></i><span id="rdv-edit-conflict-txt"></span></div>
+      </div>
+    </div>
+
+    <div class="rdv-sec">
+      <div class="rdv-sec-t">Prestation</div>
+      <div class="f-group"><select class="input" id="rdv-edit-service" onchange="rdvEditCheckConflict()"></select></div>
+      <div class="f-group"><input class="input" id="rdv-edit-note" type="text" maxlength="300" placeholder="Note — fade court, ligne nette…"></div>
+    </div>
+
+    <div class="rdv-sec">
+      <div class="rdv-sec-t">Statut</div>
+      <div class="f-group">
+        <select class="input" id="rdv-edit-status">
+          <option value="confirmed">Confirmé</option>
+          <option value="noshow">Absent (no-show)</option>
+          <option value="cancelled">Annulé</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="annulerRdv()"><i class="ti ti-calendar-x"></i>Annuler le RDV</button>
+      <button class="btn btn-gold" onclick="saveEditRdv()"><i class="ti ti-check"></i>Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+</body>
+</html>

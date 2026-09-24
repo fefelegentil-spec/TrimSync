@@ -1,20 +1,41 @@
-/* ── TrimSync Backend — Express + Resend ── */
+/* ── TrimSync Backend ──
+   Devis et chat de la landing, et l'API multi-salons (comptes, agenda, page
+   de réservation publique, back-office). Sans DATABASE_URL, seules les routes
+   de la landing tournent : un Postgres pas encore branché ne doit pas couper
+   le formulaire de devis. */
 require('dotenv').config();
 
 const express = require('express');
 const cors    = require('cors');
-const { Resend } = require('resend');
+const { pool, initDB } = require('./lib/db');
+const { escHtml } = require('./lib/texte');
+const emails  = require('./lib/emails');
 
-const app    = express();
-const resend = new Resend(process.env.RESEND_API_KEY);
-const PORT   = process.env.PORT || 3001;
-const ADMIN  = process.env.ADMIN_EMAIL || 'felix@trimsync.tech';
+const app   = express();
+const PORT  = process.env.PORT || 3001;
+const ADMIN = process.env.ADMIN_EMAIL || 'felix@trimsync.tech';
 
-app.use(cors());
-app.use(express.json());
+const ORIGINES = (process.env.CORS_ORIGINES || 'https://trimsync.tech,https://www.trimsync.tech')
+  .split(',').map(s => s.trim()).filter(Boolean);
+const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
+app.set('trust proxy', 1);
+app.use(cors({
+  origin(origine, cb) {
+    if (!origine || ORIGINES.includes(origine)) return cb(null, true);
+    if (process.env.NODE_ENV !== 'production' && LOCAL.test(origine)) return cb(null, true);
+    cb(null, false);
+  },
+}));
+app.use(express.json({ limit: '100kb' }));
 
 /* ── Santé ── */
 app.get('/', (_req, res) => res.json({ ok: true, service: 'trimsync-backend' }));
+app.get('/api/ping', (_req, res) => res.json({
+  ok: true,
+  version: (process.env.RAILWAY_GIT_COMMIT_SHA || 'local').slice(0, 7),
+  base: !!pool,
+}));
 
 /* ── POST /api/devis ──
    Corps attendu :
@@ -28,6 +49,8 @@ app.get('/', (_req, res) => res.json({ ok: true, service: 'trimsync-backend' }))
    }
 */
 app.post('/api/devis', async (req, res) => {
+  const resend = emails.client();
+  if (!resend) return res.status(503).json({ ok: false, error: 'Email non configuré.' });
   const { nom, email, barbershop, ville, plan, message } = req.body;
 
   /* Validation minimale */
@@ -134,13 +157,24 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-/* ── Échappement HTML (anti-XSS dans les emails) ── */
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+/* ── API multi-salons ── */
+const ROUTEURS = ['comptes', 'salon', 'push', 'prestations', 'horaires', 'rdv', 'clients', 'attente', 'public', 'admin'];
+if (pool) {
+  for (const nom of ROUTEURS) app.use(require('./routes/' + nom));
+  if (process.env.TRIMSYNC_TEST === '1') app.use(require('./routes/test'));
+} else {
+  app.use(['/api/comptes', '/api/moi', '/api/salon', '/api/push', '/api/prestations', '/api/horaires',
+    '/api/fermetures', '/api/rdv', '/api/clients', '/api/attente', '/api/public', '/api/admin'],
+    (_req, res) => res.status(503).json({ error: 'Base de données non configurée' }));
 }
 
-app.listen(PORT, () => console.log(`TrimSync backend — port ${PORT}`));
+async function demarrer() {
+  if (pool) {
+    await initDB();
+    require('./lib/taches').demarrerTaches();
+  } else {
+    console.warn('⚠️  DATABASE_URL absent : seules les routes de la landing sont actives');
+  }
+  app.listen(PORT, () => console.log(`TrimSync backend — port ${PORT}`));
+}
+demarrer().catch(e => { console.error('Démarrage impossible :', e); process.exit(1); });

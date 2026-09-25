@@ -1,0 +1,31 @@
+/* ── Page de réservation TrimSync : ce qui diffère de la page FCUTZ ──
+   fcutz.css est la feuille de la vraie page FCUTZ, recopiée sans retouche ;
+   tout ajustement vit ici pour pouvoir la remplacer par une version plus
+   récente sans rien perdre. */
+
+[hidden] { display: none !important; }
+
+/* Les prestations d'un salon TrimSync n'ont pas (encore) de photo : un fond
+   dans la teinte de la page et une icône, à la place de l'image. */
+.svc-img-wrap.ts-sans-image {
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(218, 177, 73, .18), transparent 60%),
+    linear-gradient(160deg, #15130E, #0A0A0A);
+}
+.svc-img-wrap.ts-sans-image i {
+  position: relative;
+  z-index: 1;
+  font-size: 44px;
+  color: var(--gold);
+  opacity: .85;
+}
+
+/* Le nom du salon remplace le mot-logo FCUTZ : il peut être long. */
+.splash-name { white-space: nowrap; }
+.h-name { max-width: 60vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Même encombrement que « FCUTZ » (5 lettres à 17,5vw) quelle que soit la
+   longueur du nom : --lettres est posé par habillerSalon(). */
+.splash-name { font-size: calc(17.5vw * 5 / var(--lettres, 5)); letter-spacing: calc(-.27vw * 5 / var(--lettres, 5)); }

@@ -1,0 +1,1249 @@
+/* ════════════════════════════════════════════════════════
+   FCUTZ BOOKING — Premium Gold/Black UI · UX Pro Max
+   ════════════════════════════════════════════════════════ */
+:root{
+  color-scheme:dark;
+  --bg:#060606; --bg2:#0C0C0C; --bg3:#141414; --bg4:#1C1C1C; --bg5:#262626;
+  --border:#1F1F1F; --border-gold:rgba(218,177,73,.28);
+  /* --gold-deep sert deux fois : depart des degrades dores, et couleur de
+     texte dans le pave legal. A #8A6E36 il echouait des deux cotes — le noir
+     pose dessus tombait a 4,2:1, et lui-meme a 3,9:1 sur fond noir. Eclairci
+     juste ce qu'il faut, les deux passent le seuil AA sans que l'or change
+     d'humeur. */
+  /* Saturation remontee de 50 a 66 % a luminosite egale : l'or reste noble,
+     il cesse d'etre beige. Les contrastes y gagnent au passage — noir pose
+     dessus 9,9:1, en texte sur fond sombre 9,1:1. --gold-deep suit, sature
+     mais toujours au-dessus du seuil dans les deux sens (5,9 et 5,4). */
+  --gold:#DAB149; --gold-2:#F1CC6F; --gold-3:#FFE9A8; --gold-deep:#AF842C;
+  /* --text-3 portait les mentions secondaires a 4,1:1, sous le seuil ;
+     --text-4 les mentions legales a 2,0:1, c'est-a-dire a la limite du
+     visible. Les deux remontent, --text-4 restant le plus efface des deux
+     puisqu'il ne sert plus qu'aux textes de remplacement des champs. */
+  --text:#F5F0E6; --text-2:#B8B2A7; --text-3:#8F8880; --text-4:#6E665C;
+  --success:#4ABA6A; --danger:#E05050; --warning:#E8A84A;
+  --sh-gold:0 0 0 1px rgba(218,177,73,.18), 0 12px 36px rgba(218,177,73,.15);
+  --ease:cubic-bezier(.4,0,.2,1);
+  --ease-pop:cubic-bezier(.16,1,.3,1);
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+html{touch-action:manipulation;background:#060606}
+html,body{overscroll-behavior:none}
+body{
+  background:transparent;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;line-height:1.5;
+  min-height:100vh;min-height:100dvh;overflow-x:hidden;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.35;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    radial-gradient(ellipse at 20% 0%,rgba(218,177,73,.06),transparent 55%),
+    radial-gradient(ellipse at 80% 100%,rgba(175,132,44,.04),transparent 55%);
+}
+a{color:inherit;text-decoration:none}
+button{background:none;border:none;cursor:pointer;font-family:inherit;color:inherit}
+input,select,textarea{font-family:inherit;font-size:16px;color:inherit;outline:none}
+img{display:block;max-width:100%}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(218,177,73,.18);border-radius:2px}
+
+/* ── SPLASH ── */
+/* Composition IDENTIQUE a l'ecran de lancement iOS (/img/splash-b-*.png,
+   genere par outils/icones/splash.sh) : memes proportions, exprimees en vw
+   comme la-bas — mot a 17,5 % de la largeur, sous-titre a 2,6 %. C'est ce qui
+   evite le saut visuel entre l'image que montre iOS et la page qui prend le
+   relais : les deux se superposent exactement. Toute retouche ici doit etre
+   reportee dans splash.sh, et inversement. */
+#splash{
+  position:fixed;inset:0;z-index:9999;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+  transition:opacity .55s var(--ease), transform .7s var(--ease-pop);
+  will-change:opacity, transform;
+}
+/* Le splash est TRANSPARENT : derriere le nom, c'est le vrai fond du site (les
+   courbes dorees de js/background.js) qui tourne deja. Seul le contenu de la
+   page est tenu cache le temps du splash — la classe est posee par le script
+   sous le markup et retiree par retirerSplash(). */
+html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events:none!important}
+
+/* Sortie : le nom s'ecarte vers le spectateur et se dissout pendant que la page
+   monte a sa place. */
+#splash.out{opacity:0;transform:scale(1.06)}
+#splash.out .splash-scene{filter:blur(.8vw);transition:filter .55s var(--ease)}
+
+/* Pont entre l'ecran de lancement iOS et le fond anime : tant que le canvas
+   WebGL n'a pas peint sa premiere image, c'est ce voile qui tient l'ecran. Il
+   s'efface des que le fond est pret (.fond-pret), le motif apparait alors
+   derriere le nom sans coupure. */
+.splash-fond{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 45%, #10100D 0%, #07080A 55%, #050506 100%) center/cover no-repeat;
+  transition:opacity .9s var(--ease);
+}
+#splash.fond-pret .splash-fond{opacity:0}
+/* Le rendu du shader (231 Ko) n'est charge QUE dans l'app installee, ou il
+   prolonge exactement l'ecran de lancement iOS. Une regle de media query qui ne
+   correspond pas n'entraine AUCUN telechargement. */
+@media (display-mode: standalone){
+  .splash-fond{
+    background-image:url(/img/splash-fond-b.png),
+                     radial-gradient(ellipse at 50% 45%, #10100D 0%, #07080A 55%, #050506 100%);
+    background-size:cover, cover;
+    background-position:center, center;
+    background-repeat:no-repeat, no-repeat;
+  }
+}
+
+/* La scene fait exactement la largeur du mot : lueur, reflet et filet se
+   reglent en pourcentage de cette largeur et restent a l'echelle partout. */
+.splash-scene{position:relative;display:inline-flex;align-items:center;justify-content:center}
+
+/* Les lettres montent une a une depuis un flou, avec une courbe qui part vite
+   et se pose longuement — l'entree d'un titre de generique, pas un rebond.
+   Chaque lettre est une boite a elle (inline-block, sinon pas de
+   transformation) ; la police n'a pas de crenage entre ces glyphes, le mot
+   garde donc au pixel pres la largeur de l'ecran de lancement iOS. */
+.splash-name{
+  position:relative;
+  font-family:'FcutzLogo','Unbounded',sans-serif;font-weight:900;color:var(--text);
+  font-size:17.5vw;letter-spacing:-.27vw;line-height:.92;white-space:nowrap;
+  text-shadow:0 .8vw 3vw rgba(0,0,0,.6);
+}
+.splash-name span{
+  display:inline-block;will-change:transform, opacity, filter;
+  animation:splash-lettre 1.1s cubic-bezier(.16,1,.3,1) calc(.08s + var(--i) * .06s) both;
+}
+@keyframes splash-lettre{
+  from{opacity:0;transform:translateY(32%) scale(.94);filter:blur(1.4vw)}
+  to{opacity:1;transform:none;filter:blur(0)}
+}
+
+/* Un reflet dore traverse le mot une fois pose : c'est ce qui lui donne de la
+   matiere. Copie exacte du nom, en texte transparent, dont le seul fond visible
+   — un degrade — est decoupe par les lettres (background-clip:text) : la
+   lumiere ne touche donc que les glyphes, jamais le vide entre eux. */
+.splash-reflet{
+  position:absolute;inset:0;pointer-events:none;
+  font:inherit;letter-spacing:inherit;line-height:inherit;white-space:nowrap;
+  color:transparent;-webkit-text-fill-color:transparent;text-shadow:none;
+  background:linear-gradient(105deg, transparent 38%, rgba(241,204,111,.55) 45%, rgba(255,246,220,.95) 50%, rgba(241,204,111,.55) 55%, transparent 62%) no-repeat;
+  background-size:250% 100%;background-position:100% 0;
+  -webkit-background-clip:text;background-clip:text;
+  animation:splash-reflet .85s cubic-bezier(.65,0,.35,1) .62s both;
+}
+@keyframes splash-reflet{from{background-position:100% 0}to{background-position:0% 0}}
+
+/* Un filet d'or se tire depuis le centre sous le nom, comme un trait de
+   tondeuse. */
+.splash-filet{
+  position:absolute;left:14%;right:14%;top:100%;margin-top:3.2vw;height:1px;
+  background:linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold-2) 50%, var(--gold) 70%, transparent);
+  transform:scaleX(0);opacity:0;
+  animation:splash-filet .9s cubic-bezier(.16,1,.3,1) .5s both;
+}
+@keyframes splash-filet{
+  from{transform:scaleX(0);opacity:0}
+  to{transform:scaleX(1);opacity:.85}
+}
+
+/* Une chaleur monte derriere le nom a mesure qu'il se forme. */
+.splash-scene::after{
+  content:'';position:absolute;inset:-120% -25%;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse at center, rgba(218,177,73,.22), transparent 66%);
+  animation:splash-halo 1.6s var(--ease) .25s both;
+}
+@keyframes splash-halo{
+  0%{opacity:0;transform:scale(.85)}
+  45%{opacity:1}
+  100%{opacity:.6;transform:scale(1)}
+}
+
+/* Tant que la police n'est pas prete, rien n'est montre — voir le script sous
+   le markup. Sans ca le mot s'afficherait dans la police de secours, puis
+   changerait. */
+#splash.police-attendue .splash-name span,
+#splash.police-attendue .splash-reflet,
+#splash.police-attendue .splash-filet,
+#splash.police-attendue .splash-scene::after{animation:none;opacity:0}
+
+/* Certains preferent moins de mouvement : le nom apparait en fondu, sans
+   bouger ni se flouter, et le reflet ne passe pas. */
+@media (prefers-reduced-motion:reduce){
+  .splash-name span{animation:splash-fondu .5s var(--ease) both}
+  .splash-reflet{display:none}
+  .splash-filet{animation:splash-fondu .5s var(--ease) .2s both;transform:none;opacity:.85}
+  .splash-scene::after{animation:none}
+  #splash.out{transform:none}
+  #splash.out .splash-scene{filter:none}
+}
+@keyframes splash-fondu{from{opacity:0}}
+
+/* ── MOT-LOGO ──
+   Unbounded 900 dessine les trois barres hautes du mot a des epaisseurs
+   differentes : 215 unites pour le F, 230 pour le T, 198 pour le Z. Les trois
+   partent du meme sommet, mais leur dessous ne tombe pas au meme endroit — a la
+   taille du splash, l'ecart entre le T et le Z fait deux pixels pleins.
+   Cette police ne contient que F, C, U, T et Z, avec le dessous du T et celui du
+   Z ramenes sur celui du F (535). Rien d'autre ne l'utilise : le reste de la
+   page reste sur Unbounded. Elle sert aussi aux icones et aux ecrans de
+   lancement, via outils/icones/fcutz-logo.ttf — meme dessin partout. */
+/* Police du mot-logo FCUTZ retirée : elle ne contient que F, C, U, T, Z. */
+/* ── HEADER ── */
+/* Un vrai bandeau, pas un simple haut de page : il a son propre fond, il reste
+   en haut quand on defile, et il porte la meme matiere de verre que la barre
+   d'etapes — les deux se repondent d'un bord a l'autre de l'ecran. */
+/* Le contenu defile sous la Dynamic Island : l'en-tete part avec la page, donc
+   plus rien n'occupe le haut de l'ecran. Ce voile ancre eteint la zone sure —
+   plein jusqu'a l'ile, puis un fondu de 34 px pour que le contenu n'y entre pas
+   au couteau. Il porte le meme z-index que l'en-tete mais le precede dans le
+   balisage : la bulle passe donc devant et le fondu ne l'assombrit pas. Hauteur
+   du fondu seul la ou il n'y a pas d'encoche. */
+.voile-haut{
+  position:fixed;z-index:2;left:0;right:0;top:0;
+  height:calc(env(safe-area-inset-top,0px) + 34px);
+  background:linear-gradient(180deg,
+    #060606 0,
+    #060606 env(safe-area-inset-top,0px),
+    rgba(6,6,6,.86) calc(env(safe-area-inset-top,0px) + 11px),
+    rgba(6,6,6,.45) calc(env(safe-area-inset-top,0px) + 21px),
+    rgba(6,6,6,0) 100%);
+  pointer-events:none;
+}
+
+/* En-tete sobre, refait le 24/09/2026 : l'ancienne bulle doree (bordure
+   or, cases dorees autour de chaque icone, ombre portee, pastille en degrade)
+   faisait gadget. Ici, un bandeau noir plein avec un filet en bas, le mot-logo
+   a gauche comme une vraie enseigne, les icones nues a droite et, pour un
+   client reconnu, sa photo Instagram (ou son initiale) dans un rond. Sticky :
+   il reste en haut quand on defile, sans padding a compenser plus bas. */
+.header{
+  position:sticky;top:0;z-index:20;
+  background:var(--bg);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  padding:calc(env(safe-area-inset-top,0px) + 6px)
+          calc(14px + env(safe-area-inset-right,0px))
+          6px
+          calc(16px + env(safe-area-inset-left,0px));
+}
+.h-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  max-width:536px;margin:0 auto;min-height:46px}
+.h-name{
+  font-family:'FcutzLogo','Unbounded',sans-serif;font-size:21px;font-weight:900;
+  color:var(--text);letter-spacing:-.3px;line-height:1;white-space:nowrap;text-decoration:none;
+}
+.h-side{display:flex;align-items:center;gap:2px;min-width:0}
+.h-ico{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  color:var(--text-2);transition:color .2s,background .2s;
+}
+.h-ico i{font-size:20px}
+.h-ico:active{background:rgba(255,255,255,.06);color:var(--text)}
+/* Inconnu : un simple lien texte. Reconnu : un rond de 34 px, la photo
+   Instagram du client si sa fiche est reliee a une conversation, sinon son
+   initiale sur fond neutre. */
+.h-account{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  height:38px;margin-left:6px;padding:0 2px 0 8px;background:none;border:0;
+  color:var(--text);font-family:inherit;font-size:13px;font-weight:600;
+  cursor:pointer;white-space:nowrap}
+.h-account.avatar{width:34px;height:34px;padding:0;border-radius:50%;overflow:hidden;
+  background:var(--bg4);border:1px solid rgba(255,255,255,.14);
+  font-family:'Unbounded',sans-serif;font-size:13px;font-weight:800;color:var(--text)}
+.h-account.avatar img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+/* Le rang du client autour de sa photo : un anneau taille dans la MEME matiere
+   que la plaque de « Mon recap » (img/rang-*.jpg), pour qu'on reconnaisse le
+   rang d'un coup d'oeil sans ouvrir l'espace. L'anneau est la bordure elle-meme,
+   remplie par la photo de matiere (background en border-box) — le rond garde
+   donc sa place, sans element en plus. Un reflet en fait le tour, comme celui
+   qui traverse la plaque. Le rang vient de /api/loyalty, jamais d'un calcul ici. */
+.h-account.avatar[data-rang]{position:relative;overflow:visible;width:38px;height:38px;
+  border:3px solid transparent;
+  background:linear-gradient(var(--bg4),var(--bg4)) padding-box, var(--rang-matiere) center/cover no-repeat border-box;
+  box-shadow:0 0 0 1px rgba(0,0,0,.55), 0 0 12px color-mix(in srgb, var(--rang) 45%, transparent)}
+.h-account.avatar[data-rang]::after{content:'';position:absolute;inset:-3px;border-radius:50%;padding:3px;pointer-events:none;
+  background:conic-gradient(from 0deg, transparent 0 60%, rgba(255,255,255,.75) 74%, transparent 88%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  animation:rangTour 4.5s linear infinite}
+@keyframes rangTour{to{transform:rotate(1turn)}}
+.h-account.avatar[data-rang="diamant"]{--rang:#8FD8E8;--rang-matiere:url('img/rang-diamant.jpg')}
+.h-account.avatar[data-rang="or"]{--rang:#DAB149;--rang-matiere:url('img/rang-or.jpg')}
+.h-account.avatar[data-rang="argent"]{--rang:#B0B8C0;--rang-matiere:url('img/rang-argent.jpg')}
+.h-account.avatar[data-rang="bronze"]{--rang:#C0A060;--rang-matiere:url('img/rang-bronze.jpg')}
+@media (prefers-reduced-motion:reduce){.h-account.avatar[data-rang]::after{animation:none}}
+
+/* ── ROULETTE ──
+   Un ticket toutes les 5 coupes, sur la roue du rang : cuivre (Bronze),
+   acier (Argent), or (Or), cristal taille en facettes (Diamant). Chaque rang
+   a sa couleur de metal (--m1/--m2/--m3), posee sur la carte et sur la scene.
+   C'est le serveur qui tire ; la roue ne fait que tourner jusqu'a la case
+   qu'il indique. */
+.rl-bronze {--m1:#F6C9A0;--m2:#C07A45;--m3:#6E3616;--lueur:rgba(192,110,55,.38);--lampe:#FFB77E}
+.rl-argent {--m1:#FFFFFF;--m2:#B9C0CA;--m3:#5D646E;--lueur:rgba(190,205,225,.30);--lampe:#EAF3FF}
+.rl-or     {--m1:#FFF1B8;--m2:#DAB149;--m3:#86611A;--lueur:rgba(218,177,73,.38);--lampe:#FFE08A}
+.rl-diamant{--m1:#FFFFFF;--m2:#9FE0EE;--m3:#3F8FA5;--lueur:rgba(143,216,232,.38);--lampe:#D8FAFF}
+.rl-btn{flex-shrink:0;border:0;border-radius:10px;padding:10px 16px;font:600 14px/1 inherit;font-family:inherit;color:#0A0A0A;cursor:pointer;
+  background:var(--m2);box-shadow:0 3px 0 var(--m3);transition:transform .08s,box-shadow .08s}
+.rl-btn:active{transform:translateY(3px);box-shadow:0 0 0 var(--m3)}
+.rl-btn:focus-visible{outline:2px solid var(--m1);outline-offset:3px}
+.rl-btn:disabled{opacity:.45;cursor:default}
+.rl-gain{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;border-radius:12px;
+  background:rgba(255,255,255,.03);border:1px solid color-mix(in srgb,var(--m2) 25%,transparent);font-size:13px;color:var(--text)}
+.rl-gain i{color:var(--m2);font-size:18px}
+.rl-gain small{display:block;color:var(--text-3);font-size:11px;margin-top:2px}
+#rl-scene{position:fixed;inset:0;z-index:450;background:rgba(6,6,6,.97);display:none;overflow-y:auto;
+  flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:calc(env(safe-area-inset-top,0px) + 56px) 16px calc(24px + env(safe-area-inset-bottom,0px))}
+#rl-scene.ouvert{display:flex}
+.rl-fermer{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;width:40px;height:40px;border-radius:50%;
+  border:0;background:rgba(255,255,255,.06);color:var(--text-2);font-size:20px;cursor:pointer;z-index:2}
+.rl-entete{position:relative;text-align:center}
+.rl-entete b{display:block;font-family:'Unbounded',sans-serif;font-weight:800;font-size:22px;color:var(--m2)}
+.rl-entete small{display:block;margin-top:4px;font-size:13px;color:var(--text-3)}
+.rl-roue{position:relative;width:min(86vw,360px);aspect-ratio:1;max-width:100%}
+.rl-roue > svg.rl-disque{width:100%;height:100%;display:block;transition:transform 5.4s cubic-bezier(.1,.7,.07,1);filter:drop-shadow(0 18px 30px rgba(0,0,0,.7))}
+.rl-pointe{position:absolute;left:50%;top:-14px;width:44px;height:58px;transform:translateX(-50%);transform-origin:50% 18px;z-index:3;filter:drop-shadow(0 4px 6px rgba(0,0,0,.7))}
+#rl-scene.tourne .rl-pointe{animation:rl-tic .11s ease-in-out infinite alternate}
+@keyframes rl-tic{from{transform:translateX(-50%) rotate(-9deg)}to{transform:translateX(-50%) rotate(4deg)}}
+.rl-lampe{fill:var(--lampe);opacity:.35}
+#rl-scene.tourne .rl-lampe.a{animation:rl-chasse .36s steps(1) infinite}
+#rl-scene.tourne .rl-lampe.b{animation:rl-chasse .36s steps(1) .18s infinite}
+#rl-scene.fin .rl-lampe{animation:rl-vainqueur .5s ease-in-out 6 alternate;opacity:1}
+@keyframes rl-chasse{0%{opacity:1}50%{opacity:.25}}
+@keyframes rl-vainqueur{from{opacity:.3}to{opacity:1}}
+.rl-gagnante{animation:rl-brille 1s ease-in-out 3 alternate}
+@keyframes rl-brille{to{filter:brightness(1.7)}}
+.rl-resultat{position:relative;min-height:54px;text-align:center;font-size:15px;color:var(--text)}
+.rl-resultat b{color:var(--m1);font-weight:700}
+.rl-resultat small{display:block;margin-top:4px;color:var(--text-3);font-size:12px}
+#rl-scene .rl-btn{position:relative;min-width:180px;padding:14px 22px;font-size:15px}
+.rl-eclat{position:absolute;z-index:4;width:7px;height:7px;border-radius:2px;pointer-events:none;animation:rl-eclat 1.1s ease-out forwards}
+@keyframes rl-eclat{to{transform:translate(var(--dx),var(--dy)) rotate(260deg);opacity:0}}
+@media (prefers-reduced-motion:reduce){.rl-roue > svg.rl-disque{transition-duration:.01s}#rl-scene .rl-pointe,#rl-scene .rl-lampe,.rl-gagnante,.rl-eclat{animation:none!important}}
+
+/* ── ÉTAPES (barre du bas) ──
+   Même langage que la barre de navigation du dashboard (.mnav) : une bulle
+   flottante en verre qui ne colle pas aux bords, pas un bandeau. Les étapes y
+   sont cliquables — goStep() refuse déjà les sauts en avant tant que la
+   prestation, le créneau ou les coordonnées manquent, la barre n'a donc rien à
+   verrouiller de son côté. */
+.steps{
+  display:flex;align-items:stretch;justify-content:space-around;gap:2px;
+  position:fixed;z-index:110;
+  left:calc(12px + env(safe-area-inset-left,0px));
+  right:calc(12px + env(safe-area-inset-right,0px));
+  bottom:calc(12px + env(safe-area-inset-bottom,0px) - var(--vv-bas,0px));
+  max-width:536px;margin:0 auto;
+  transition:bottom .3s var(--ease);
+  padding:7px 6px;
+  background:rgba(16,16,18,.94);
+  backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);
+  border:1px solid rgba(218,177,73,.16);
+  border-radius:19px;
+  box-shadow:0 16px 44px rgba(0,0,0,.55);
+}
+.step{
+  flex:1;min-width:0;min-height:46px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  border:0;background:none;cursor:pointer;font-family:inherit;color:var(--text-3);
+  border-radius:13px;transition:color .22s var(--ease),background .22s var(--ease);
+}
+.step i{font-size:19px;line-height:1}
+.step-l{font-size:11px;letter-spacing:.5px;text-transform:uppercase;font-weight:700;color:inherit}
+.step.done{color:var(--text-2)}
+.step.active{color:var(--gold);background:rgba(218,177,73,.14)}
+/* Le verre seul ne suffit pas : une photo claire qui defile dessous reste
+   lisible au travers. Le voile eteint le bas de la page avant la barre. */
+.steps-voile{
+  position:fixed;z-index:109;left:0;right:0;
+  bottom:calc(0px - var(--vv-bas,0px));
+  /* 74 px pour la barre (12 de marge + 62 de haut) en noir plein, et un fondu
+     court juste au-dessus : plus long, il eteignait le bouton Continuer, qui
+     s'arrete a une dizaine de pixels de la barre. */
+  height:calc(134px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(to top,
+    #060606 calc(74px + env(safe-area-inset-bottom,0px)),
+    rgba(6,6,6,.55) calc(96px + env(safe-area-inset-bottom,0px)),
+    rgba(6,6,6,0) 100%);
+  pointer-events:none;
+}
+
+/* ── MAIN ── */
+.wrap{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:16px calc(18px + env(safe-area-inset-right,0px)) calc(32px + env(safe-area-inset-bottom,0px)) calc(18px + env(safe-area-inset-left,0px))}
+.wrap.at-success{padding-bottom:calc(env(safe-area-inset-bottom) + 24px)}
+.section{display:none;animation:secIn .35s var(--ease)}
+.section.active{display:block}
+/* Les etapes defilent lateralement, dans le sens de la marche : la suivante
+   entre par la droite, celle qu'on retrouve en revenant entre par la gauche.
+   goStep() pose .retour avant d'activer la section. */
+@keyframes secIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+@keyframes secInRetour{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:none}}
+.section.retour{animation-name:secInRetour}
+.s-title{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.5px;margin-bottom:16px}
+
+/* ── SERVICE CARDS ── */
+.svc-list{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.svc-list>.svc:last-child:nth-child(odd){grid-column:1}
+.svc{
+  position:relative;background:var(--bg2);border:1px solid var(--border);border-radius:16px;
+  text-align:left;
+  overflow:hidden;cursor:pointer;
+  transition:border-color .2s var(--ease), background .2s var(--ease), box-shadow .2s var(--ease), transform .1s var(--ease);
+  display:flex;flex-direction:column;
+}
+.svc:active{transform:scale(.98)}
+.svc.sel{border-color:var(--gold);background:linear-gradient(180deg,rgba(218,177,73,.06),var(--bg2))}
+.svc.sel{box-shadow:var(--sh-gold)}
+.svc-img-wrap{position:relative;width:100%;aspect-ratio:1.4/1;background:#0A0A0A;overflow:hidden}
+.svc-img{width:100%;height:100%;object-fit:cover;transition:transform .4s var(--ease)}
+.svc-img-wrap::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(6,6,6,.85))}
+.svc-tag{position:absolute;top:8px;left:8px;background:rgba(200,74,74,.9);color:#fff;font-size:9px;padding:3px 8px;border-radius:5px;font-weight:700;letter-spacing:.5px;z-index:1}
+.svc-body{padding:14px;display:flex;flex-direction:column;gap:4px}
+.svc-name{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+/* La description vit en base depuis le debut et n'etait jamais rendue : un
+   visiteur devait deviner ce qu'est une « Transformation » a 20 euros. */
+.svc-desc{font-size:11.5px;color:var(--text-3);line-height:1.4}
+.svc.sel .svc-name{color:var(--gold)}
+.svc-meta{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.svc-price{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:900;color:var(--gold);letter-spacing:-.5px}
+.svc-dur{font-size:11px;color:var(--text-3);display:inline-flex;align-items:center;gap:3px}
+.svc-check{
+  position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.34);background:rgba(0,0,0,.32);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;color:transparent;
+  transition:background .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease), transform .15s var(--ease-pop);
+  z-index:1;
+}
+.svc.sel .svc-check{background:var(--gold);border-color:var(--gold);color:#080808;transform:scale(1.15)}
+
+/* ── ADDONS ── */
+.section-h{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;letter-spacing:-.3px;margin:18px 0 10px;color:var(--text)}
+.addons{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.addon{
+  background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;
+  text-align:left;
+  cursor:pointer;transition:.2s var(--ease);display:flex;align-items:center;gap:12px;
+}
+.addon:active{transform:scale(.99)}
+.addon.sel{border-color:var(--gold);background:linear-gradient(90deg,rgba(218,177,73,.06),var(--bg2))}
+.addon-img{width:42px;height:42px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#0A0A0A}
+.addon-name{flex:1;min-width:0;font-size:15.5px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.addon-dur{font-size:11px;font-weight:400;color:var(--text-3);margin-left:6px}
+.addon-price{flex-shrink:0;font-family:'Unbounded',sans-serif;font-size:14px;font-weight:800;color:var(--gold)}
+.addon-price + .addon-check{margin-left:-4px}
+.addon-check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;color:transparent;flex-shrink:0;transition:.2s var(--ease)}
+.addon.sel .addon-check{background:var(--gold);border-color:var(--gold);color:#080808}
+
+/* ── CALENDAR ── */
+.cal-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 14px rgba(0,0,0,.3)}
+.cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-month{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:700;letter-spacing:-.3px;text-transform:capitalize}
+.cal-nav{
+  width:34px;height:34px;border-radius:10px;
+  background:var(--bg3);border:1px solid var(--border);color:var(--text);
+  display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:.2s var(--ease);
+}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+@media(max-width:500px){.cal-grid{gap:3px}}
+.cal-dn{font-size:10.5px;color:var(--text-3);text-align:center;padding:4px 0;letter-spacing:1.5px;text-transform:uppercase;font-weight:700}
+.cal-d{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;
+  transition:background .15s var(--ease), box-shadow .15s var(--ease), border-color .15s var(--ease), color .15s var(--ease), transform .1s var(--ease);
+  border:1px solid transparent;background:transparent;min-height:42px;
+}
+.cal-d:active:not(.past):not(.closed):not(.empty){transform:scale(.88);transition-duration:.06s}
+@media(max-width:500px){.cal-d{font-size:12px;min-height:36px;border-radius:6px}}
+.cal-d.today{color:var(--gold);font-weight:500}
+/* Un jour ferme n'est pas un jour annule : plus de rature, une simple mise en
+   retrait. Et l'etat efface est rendu par une couleur, pas par une opacite —
+   a .25 le chiffre tombait a 2:1 de contraste, c'est-a-dire illisible. */
+.cal-d.past,.cal-d.closed{opacity:1;color:var(--text-4);pointer-events:none;text-decoration:none}
+/* Le point sous le chiffre dit « il reste de la place ici », sans rien ecrire.
+   Une journee ouverte mais pleine garde son chiffre, en retrait, et reste
+   cliquable : on peut vouloir s'inscrire sur la liste d'attente. */
+.cal-d.libre{position:relative}
+.cal-d.libre::after{content:'';position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--gold)}
+.cal-d.sel.libre::after{background:#080808}
+.cal-d.complet{color:var(--text-3)}
+.cal-d.empty{pointer-events:none;opacity:0}
+.cal-d.sel{background:linear-gradient(135deg,var(--gold-deep),var(--gold) 45%,var(--gold-2));color:#080808;font-weight:800;box-shadow:0 0 0 2px var(--gold),0 4px 14px rgba(218,177,73,.35);border-color:var(--gold-2)!important;color:#080808!important}
+.cal-d.sel.today{background:linear-gradient(135deg,var(--gold-deep),var(--gold) 45%,var(--gold-2));color:#080808;font-weight:800;box-shadow:0 0 0 2px var(--gold),0 4px 14px rgba(218,177,73,.35);border-color:var(--gold-2)}
+.cal-panne{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:26px 18px;font-size:12.5px;line-height:1.6;color:var(--text-2)}
+.cal-panne i{font-size:30px;color:var(--gold)}
+.cal-panne b{color:var(--text)}
+.cal-loading{grid-column:1/-1;text-align:center;padding:24px;color:var(--text-3);font-size:12.5px;display:flex;align-items:center;justify-content:center;gap:8px}
+.cal-loading::before{content:'';width:16px;height:16px;border:2px solid rgba(218,177,73,.18);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── SLOTS ── */
+.slots-h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+.slots-h-t{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;color:var(--text)}
+.slots-h-d{font-size:11px;color:var(--text-3)}
+.slots{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;animation:fadeSlots .22s var(--ease) both}
+@keyframes fadeSlots{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.slot{
+  background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  padding:14px 6px;text-align:center;font-size:13px;cursor:pointer;
+  font-family:'Unbounded',sans-serif;font-weight:700;color:var(--text);
+  transition:border-color .15s var(--ease), color .15s var(--ease), background .15s var(--ease), box-shadow .15s var(--ease), transform .1s var(--ease);
+  min-height:48px;display:flex;align-items:center;justify-content:center;
+}
+.slot:active{transform:scale(.93);transition-duration:.06s}
+.slot.sel{background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-2));color:#080808;border:2px solid var(--gold);box-shadow:0 6px 18px rgba(218,177,73,.32);font-weight:900;animation:selPop .22s var(--ease-pop) both}
+@keyframes selPop{from{transform:scale(.88)}to{transform:scale(1)}}
+/* Les heures se posent l'une apres l'autre plutot que d'apparaitre en bloc.
+   Le decalage est porte par --i, ecrit sur chaque bouton au rendu ; le retard
+   commun vient de --retard, que l'etape 2 rallonge le temps que le calendrier
+   finisse de glisser. */
+.slot{animation:slotArrive .34s cubic-bezier(.16,1,.3,1) both;
+      animation-delay:calc(var(--retard,0ms) + var(--i,0) * 30ms)}
+@keyframes slotArrive{
+  from{opacity:0;transform:translateY(9px) scale(.95)}
+  to{opacity:1;transform:none}
+}
+@media(min-width:480px){.slots{grid-template-columns:repeat(3,1fr);gap:10px}}
+@media(min-width:768px){.slots{grid-template-columns:repeat(4,1fr);gap:8px}.slot{padding:11px 4px;min-height:auto}}
+
+/* ── JOUR COMPLET ── */
+.slots-zone{position:relative}
+/* Le panneau ne se pose plus PAR-DESSUS les heures : il les remplace.
+   Superpose, il heritait de la hauteur de la grille qu'il couvrait — un pave
+   au texte colle en haut, aux bords, jamais centre — et les heures barrees se
+   devinaient dessous. En bloc ordinaire il a sa propre hauteur et son propre
+   air. Le titre « Creneaux libres » s'efface avec elles : il n'y en a aucune. */
+.slots-zone.full .slots,.slots-zone.partial .slots{display:none}
+#slots-wrap:has(.slots-zone.full) .slots-h,
+#slots-wrap:has(.slots-zone.partial) .slots-h{display:none}
+.slots-full{display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:34px 24px;margin-bottom:16px;animation:fadeSlots .25s var(--ease) both;background:var(--bg2);border:1px solid var(--border);border-radius:16px}
+.slots-zone.full .slots-full{display:flex}
+.slots-full-title{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:900;letter-spacing:-.5px;line-height:1.25;color:var(--text);text-shadow:0 2px 24px rgba(0,0,0,.95),0 0 8px rgba(0,0,0,.8)}
+.slots-full-link{
+  display:inline-flex;align-items:center;gap:9px;
+  background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-2));
+  color:#080808;font-family:'Unbounded',sans-serif;font-size:12px;font-weight:800;
+  padding:14px 20px;border-radius:14px;text-decoration:none;
+  box-shadow:0 6px 22px rgba(218,177,73,.4);
+  transition:transform .12s var(--ease), box-shadow .15s var(--ease);
+}
+/* Le second choix garde la forme du premier mais pas son or : un aplat
+   sombre, pas un bouton transparent. Pose sur les heures barrees qu'il
+   recouvre, le fond translucide les laissait lire au travers. */
+.slots-full-link.second{
+  background:#131313;border:1px solid rgba(218,177,73,.45);color:var(--gold);
+  box-shadow:0 6px 20px rgba(0,0,0,.5);
+}
+.slots-full-link i{font-size:19px}
+.slots-full-link:active{transform:scale(.95)}
+
+/* ── PLEIN POUR CETTE PRESTA SEULEMENT (il reste des trous plus courts) ── */
+.slots-partial{display:none;flex-direction:column;align-items:center;justify-content:center;gap:13px;text-align:center;padding:34px 24px;margin-bottom:16px;animation:fadeSlots .25s var(--ease) both;background:var(--bg2);border:1px solid var(--border);border-radius:16px}
+.slots-zone.partial .slots-partial{display:flex}
+.slots-partial-sub{font-size:12.5px;line-height:1.55;color:var(--text-2);max-width:290px;text-shadow:0 2px 14px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.85)}
+.slots-partial-sub b{color:var(--gold-2);font-weight:700}
+
+/* ── INPUTS ── */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;letter-spacing:1.5px;color:var(--text-3);text-transform:uppercase;font-weight:700;margin-bottom:7px}
+.field .input,.field input,.field select,.field textarea{
+  width:100%;background:var(--bg2);border:2px solid var(--border);border-radius:12px;
+  color:var(--text);font-family:'Syne',sans-serif;font-size:16px;font-weight:500;
+  padding:14px 16px;transition:.2s var(--ease);min-height:48px;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);border-width:2px;background:var(--bg3)}
+.field input::placeholder{color:var(--text-4)}
+#b-phone{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;letter-spacing:.5px}
+.fields-row{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:480px){.fields-row{grid-template-columns:1fr 1fr}}
+
+/* ── RECAP ── */
+.recap{
+  background:linear-gradient(135deg,rgba(218,177,73,.06),rgba(218,177,73,.02));
+  border:1px solid var(--border-gold);border-radius:16px;padding:16px;margin-bottom:16px;
+  box-shadow:0 2px 14px rgba(0,0,0,.3);
+}
+.recap-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed rgba(218,177,73,.12);font-size:13px;gap:10px}
+.recap-row:first-child{padding-top:0}
+.recap-row:last-child{border-bottom:none;padding-bottom:0;padding-top:12px;margin-top:4px;border-top:1px solid rgba(218,177,73,.2)}
+.recap-label{color:var(--text-3);font-size:11.5px;font-weight:600;letter-spacing:.3px}
+.recap-val{color:var(--text);font-weight:600;text-align:right;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recap-row:last-child .recap-label{color:var(--gold);font-size:13px;text-transform:uppercase;letter-spacing:1.5px}
+.recap-row:last-child .recap-val{font-family:'Unbounded',sans-serif;font-size:22px;font-weight:900;color:var(--gold);letter-spacing:-.5px}
+
+/* ── PAY OPTIONS ── */
+.pay-opts{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:16px}
+.pay-opt{
+  text-align:left;width:100%;
+  background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;cursor:pointer;transition:.2s var(--ease);
+  display:flex;align-items:center;gap:14px;
+}
+.pay-opt.sel{border-color:var(--gold);background:linear-gradient(90deg,rgba(218,177,73,.05),var(--bg2))}
+.pay-opt-icon{width:42px;height:42px;border-radius:11px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gold);flex-shrink:0}
+.pay-opt.sel .pay-opt-icon{background:rgba(218,177,73,.18)}
+.pay-opt-body{flex:1;min-width:0}
+.pay-opt-title{font-size:13.5px;font-weight:700;color:var(--text)}
+.pay-opt-sub{font-size:11px;color:var(--text-3);margin-top:2px}
+.pay-opt-radio{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s var(--ease)}
+.pay-opt.sel .pay-opt-radio{border-color:var(--gold)}
+.pay-opt.sel .pay-opt-radio::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--gold)}
+
+/* ── BUTTONS ── */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:16px 24px;border-radius:14px;
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;cursor:pointer;
+  transition:.25s var(--ease);min-height:52px;
+}
+@media(max-width:500px){.btn{min-height:48px;font-size:12px}}
+.btn-gold{background:linear-gradient(135deg,var(--gold-deep),var(--gold) 45%,var(--gold-2));color:#080808;box-shadow:0 8px 24px rgba(218,177,73,.32)}
+.btn-gold:active:not(:disabled){transform:translateY(0)}
+.btn-out{background:transparent;color:var(--text-2);border:1px solid var(--border);margin-top:10px}
+/* L'opacite eteint le texte, la bordure et le fond ensemble : le libelle du
+   bouton en attente tombait a 2,2:1. L'etat se dit maintenant en couleurs. */
+.btn:disabled{pointer-events:none;background:var(--bg3);color:var(--text-3);border:1px solid var(--border);box-shadow:none;background-image:none}
+.btn-ghost{background:transparent;color:var(--gold);border:1.5px solid rgba(218,177,73,.35)}
+.btn-danger{background:transparent;color:#E05050;border:1.5px solid rgba(224,80,80,.25)}
+.rdv-actions{display:flex;flex-direction:column;gap:var(--ecart,12px);width:100%;max-width:400px;margin:0 auto}
+.rdv-actions .btn-out,.rdv-actions .btn-ghost,.rdv-actions .btn-danger{margin-top:0}
+.rdv-actions-sep{height:1px;background:var(--border);margin:2px 0}
+.cancel-dialog{padding:14px;background:rgba(224,80,80,.05);border:1px solid rgba(224,80,80,.18);border-radius:14px}
+.cancel-dialog-msg{font-size:13px;font-weight:600;color:#F0A8A8;margin-bottom:12px;text-align:center}
+.cancel-dialog-row{display:flex;gap:8px}
+.cancel-dialog-row .btn{flex:1;min-height:44px;font-size:12px;padding:10px 6px;margin-top:0}
+
+/* ── SUCCESS ── */
+/* Meme discipline que « mon rendez-vous » : tous les blocs a la meme largeur,
+   separes du meme ecart, decide ici et pas carte par carte. L'entete — la
+   pastille, le titre, la phrase — garde son air. */
+.success{display:flex;flex-direction:column;align-items:center;text-align:center;padding:32px 16px;
+  --bloc:400px;--ecart:12px}
+.success > *:not(.success-icon):not(h2):not(p){
+  width:100%;max-width:var(--bloc);margin-top:var(--ecart)}
+.success > div:empty{display:none}
+.success-icon{
+  width:96px;height:96px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-2));
+  display:flex;align-items:center;justify-content:center;margin:0 auto 22px;
+  font-size:48px;color:#080808;
+  box-shadow:0 20px 60px rgba(218,177,73,.4), 0 0 0 8px rgba(218,177,73,.08);
+  animation:successPop .6s var(--ease-pop) both;
+}
+@keyframes successPop{from{transform:scale(.3);opacity:0}50%{transform:scale(1.1)}to{transform:scale(1);opacity:1}}
+/* A la confirmation d'un RDV, la pastille suit la vibration (Ressenti, dans le
+   script) : un point de lumiere qui grossit et s'embrase de plus en plus vite
+   jusqu'a 77 %, se contracte pendant le souffle (77-80 %), puis eclot sur le
+   coup final et le ting (80 %). La duree est posee par le script. */
+.success-icon.montee{animation-name:successMontee;animation-timing-function:linear}
+.success-icon.montee i{animation-name:successCoche;animation-duration:inherit;animation-fill-mode:both;animation-timing-function:linear}
+@keyframes successMontee{
+  0%{transform:scale(.1);opacity:0;box-shadow:0 0 0 0 rgba(241,204,111,0);
+     animation-timing-function:cubic-bezier(.55,0,.85,.4)}
+  6%{opacity:.8}
+  77%{transform:scale(.46);opacity:1;
+      box-shadow:0 0 50px 18px rgba(241,204,111,.55), 0 0 0 0 rgba(218,177,73,.08);
+      animation-timing-function:cubic-bezier(.3,0,.7,1)}
+  80%{transform:scale(.4);
+      box-shadow:0 0 30px 8px rgba(241,204,111,.4), 0 0 0 0 rgba(218,177,73,.08);
+      animation-timing-function:cubic-bezier(.16,1,.3,1)}
+  88%{transform:scale(1.1)}
+  100%{transform:scale(1);opacity:1;box-shadow:0 20px 60px rgba(218,177,73,.4), 0 0 0 8px rgba(218,177,73,.08)}
+}
+@keyframes successCoche{
+  0%,80%{opacity:0;transform:scale(.4) rotate(-12deg)}
+  90%{opacity:1;transform:scale(1.15) rotate(0)}
+  100%{opacity:1;transform:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .success-icon.montee{animation-name:successPop;animation-duration:.3s!important;animation-delay:0s}
+  .success-icon.montee i{animation:none}
+}
+.success h2{font-family:'Unbounded',sans-serif;font-size:24px;font-weight:800;letter-spacing:-.6px;margin-bottom:8px}
+.success p{color:var(--text-2);font-size:13px;line-height:1.7}
+.success-recap{background:var(--bg2);border:1px solid var(--border-gold);border-radius:16px;padding:16px;text-align:left;display:flex;flex-direction:column;gap:10px;box-shadow:0 2px 14px rgba(0,0,0,.3)}
+.success-recap-item{display:flex;align-items:center;gap:12px;font-size:13.5px}
+.success-recap-item i{font-size:18px;color:var(--gold);flex-shrink:0}
+/* Ligne adresse cliquable → ouvre Google Maps */
+/* Qui reserve, rappele sur la validation : c'est la contrepartie du saut de
+   l'etape Infos — le client reconnu ne repasse plus par les champs, il faut donc
+   qu'il voie sous quel nom et quel numero part la reservation, et qu'il puisse y
+   revenir d'un geste. */
+.qui{display:flex;align-items:center;gap:9px;margin:-4px 0 14px;padding:10px 13px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;font-size:12.5px;font-weight:600;color:var(--text-2)}
+.qui i{font-size:16px;color:var(--gold);flex-shrink:0}
+.qui-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qui-mod{flex-shrink:0;background:none;border:0;padding:0;font-family:inherit;font-size:12px;font-weight:700;color:var(--gold);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+
+/* Version d'une ligne, pour l'etape Infos : le detail complet est repris juste
+   apres, a la validation. Le tableau de quatre lignes y coutait 180 px, soit
+   exactement ce qui faisait deborder l'ecran. */
+.recap.mini{padding:11px 14px;margin-bottom:14px}
+.recap-mini{display:flex;align-items:center;gap:9px;min-width:0;font-size:12.5px;font-weight:600;color:var(--text-2)}
+.recap-mini i{font-size:16px;color:var(--gold);flex-shrink:0}
+.rm-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rm-prix{flex-shrink:0;font-family:'Unbounded',sans-serif;font-size:15px;font-weight:900;color:var(--gold);letter-spacing:-.3px}
+.recap-map{cursor:pointer;border-radius:10px;margin:-4px -6px;padding:4px 6px;transition:background .2s}
+.recap-map:focus-visible{background:rgba(218,177,73,.09);outline:none}
+.recap-map .rm-go{display:block;font-size:11px;color:var(--gold);font-weight:700;margin-top:2px}
+
+/* ── CARTE FIDÉLITÉ ── */
+.fid-card{background:var(--bg2);border:1px solid var(--border-gold);border-radius:16px;padding:18px 16px;text-align:center;box-shadow:0 2px 14px rgba(0,0,0,.3);opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s cubic-bezier(.22,1.2,.36,1)}
+.fid-card.show{opacity:1;transform:translateY(0)}
+.fid-card.gold{border-color:var(--gold);background:linear-gradient(135deg,rgba(218,177,73,.14),rgba(218,177,73,.05) 60%);position:relative;overflow:hidden}
+.fid-card.gold::before{content:'';position:absolute;top:0;left:-80%;width:60%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,238,178,.16),transparent);animation:fidShimmer 2.2s ease-in-out infinite}
+@keyframes fidShimmer{0%{left:-80%}60%,100%{left:120%}}
+.fid-title{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;font-weight:700;color:var(--gold);margin-bottom:12px}
+.fid-slots{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;max-width:250px;margin:0 auto 12px}
+.fid-slot{width:38px;height:38px;border-radius:50%;border:1.5px dashed rgba(218,177,73,.35);display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(218,177,73,.25);position:relative}
+.fid-slot i{transition:none}
+.fid-slot.filled{border-style:solid;border-color:var(--gold);background:rgba(218,177,73,.15);color:var(--gold)}
+.fid-slot.filled.pop i{animation:fidStamp .45s cubic-bezier(.22,1.6,.36,1) both}
+@keyframes fidStamp{0%{transform:scale(2.2) rotate(-14deg);opacity:0}55%{transform:scale(.92) rotate(2deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+.fid-slot.next{border-color:var(--gold);animation:fidPulse 1.6s ease-in-out infinite}
+@keyframes fidPulse{0%,100%{box-shadow:0 0 0 0 rgba(218,177,73,.35)}50%{box-shadow:0 0 0 7px rgba(218,177,73,0)}}
+/* Nouveau tampon (gagné depuis la dernière visite) : gros coup de tampon + onde + pastille +1 */
+.fid-slot.stamp-new i{animation:fidStampBig .75s cubic-bezier(.22,1.5,.36,1) both}
+@keyframes fidStampBig{0%{transform:scale(3.4) rotate(-32deg);opacity:0}45%{transform:scale(.82) rotate(5deg);opacity:1}68%{transform:scale(1.14) rotate(-3deg)}100%{transform:scale(1) rotate(0)}}
+.fid-slot.stamp-new::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:2px solid var(--gold);animation:fidRing .8s ease-out .18s both;pointer-events:none}
+@keyframes fidRing{0%{transform:scale(.55);opacity:.9}100%{transform:scale(1.8);opacity:0}}
+.fid-plus1{position:absolute;top:-13px;right:-8px;background:linear-gradient(135deg,var(--gold),#F1CC6F);color:#080808;font-size:9px;font-weight:800;font-family:'Unbounded',sans-serif;padding:2px 6px;border-radius:10px;box-shadow:0 2px 8px rgba(218,177,73,.5);animation:fidPlus1 .5s cubic-bezier(.22,1.6,.36,1) .4s both;z-index:2}
+@keyframes fidPlus1{0%{transform:translateY(8px) scale(.3);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+.fid-slot.roulette{border-style:dashed;border-color:var(--m2)}
+.fid-slot.roulette.filled{border-style:solid;background:color-mix(in srgb,var(--m2) 18%,transparent)}
+.fid-slot.roulette svg{width:24px;height:24px;flex:none;display:block;margin:auto}
+/* Ticket gagné : la 5e case s'anime et s'ouvre au toucher, et la carte porte
+   le bouton. Pas de carte « roulette » à part : elle n'existe qu'à ce moment. */
+.fid-slot.roulette.pret{cursor:pointer;animation:rl-appel 1.6s ease-in-out infinite}
+@keyframes rl-appel{50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--m2) 30%,transparent)}}
+.fid-roulette:not([class*="rl-"]){--m1:#FFF1B8;--m2:#DAB149;--m3:#86611A}
+.fid-roulette{margin-top:12px;display:flex;flex-direction:column;gap:8px;align-items:center}
+.fid-roulette .rl-btn{min-width:190px;padding:12px 18px}
+.fid-roulette .rl-gain{width:100%;margin-top:0;text-align:left}
+@media (prefers-reduced-motion:reduce){.fid-slot.roulette.pret{animation:none}}
+.fid-slot.roulette:not(.filled) svg{opacity:.85}
+.fid-slot.reward{border:1.5px solid var(--gold);background:linear-gradient(135deg,var(--gold-deep,#AF842C),var(--gold));color:#080808;font-size:16px}
+.fid-msg{font-size:14.5px;font-weight:500;color:var(--text);line-height:1.5;letter-spacing:.1px}
+.fid-msg b{color:var(--gold);font-weight:700;white-space:nowrap}
+.fid-sub{font-size:11.5px;color:var(--text-3);margin-top:6px;line-height:1.4}
+.fid-card.gold .fid-msg{font-size:15.5px;font-weight:700}
+
+/* ── RÉCAP CLIENT ──
+   Ce que le client a laissé ici : ses venues, son total, sa distance à la coupe
+   offerte. Même largeur que la carte de fidélité qu'il suit, sinon les deux
+   blocs de « Mon espace » ne s'alignent pas. */
+.ps-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px 14px;box-shadow:0 2px 14px rgba(0,0,0,.3);opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s cubic-bezier(.22,1.2,.36,1)}
+.ps-card.show{opacity:1;transform:translateY(0)}
+.ps-title{display:flex;align-items:center;justify-content:center;gap:7px;font-size:11px;letter-spacing:1.8px;text-transform:uppercase;font-weight:700;color:var(--gold);margin-bottom:14px}
+.ps-title i{font-size:15px}
+.ps-grid{display:flex;flex-wrap:wrap;gap:8px}
+/* Trois par rangee, et ce qui reste s'etire : quatre tuiles font 3 + 1 pleine
+   largeur, cinq font 3 + 2. Une grille fixe laissait une case vide, qui se lit
+   comme un chiffre manquant. */
+.ps-tile{flex:1 1 calc(33.333% - 6px);min-width:88px;background:rgba(218,177,73,.05);border:1px solid var(--border-gold);border-radius:12px;padding:12px 6px;text-align:center}
+/* Les lapins ne sont pas une performance : ni or, ni mis en avant. */
+.ps-tile.alerte{background:rgba(224,80,80,.06);border-color:rgba(224,80,80,.22)}
+.ps-tile.alerte .ps-v{color:#F0A8A8}
+.ps-v{font-family:'Unbounded',sans-serif;font-size:19px;font-weight:900;color:var(--gold);letter-spacing:-.6px;line-height:1.15}
+.ps-v.mot{font-size:13px;letter-spacing:-.2px}
+.ps-l{font-size:11px;font-weight:600;color:var(--text-3);margin-top:6px;line-height:1.3}
+.ps-foot{margin-top:12px;font-size:11.5px;color:var(--text-3);line-height:1.45;text-align:center}
+
+/* ── MON SAMEDI ──
+   La proposition de garder son creneau, et le rappel de la serie en cours. */
+.sam-card{padding:16px 15px;border-radius:16px;
+  background:linear-gradient(145deg,rgba(218,177,73,.09),rgba(218,177,73,.02));
+  border:1px solid var(--border-gold);box-shadow:0 2px 14px rgba(0,0,0,.3);text-align:left}
+.sam-titre{display:flex;align-items:center;gap:8px;font-family:'Unbounded',sans-serif;font-size:13.5px;font-weight:800;
+  color:var(--text);letter-spacing:-.2px;margin-bottom:5px}
+.sam-titre i{font-size:18px;color:var(--gold);flex-shrink:0}
+/* Cartes dépliables de l'espace client : repliées, on ne voit que le titre
+   et une ligne de résumé ; le choix ouvert/fermé est retenu par carte. */
+.depliable > [role=button]{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.depliable > [role=button]:focus-visible{outline:2px solid var(--gold);outline-offset:4px;border-radius:6px}
+.dp-chevron{font-size:14px;margin-left:6px;transition:transform .2s;display:inline-block}
+.depliable:not(.replie) .dp-chevron{transform:rotate(180deg)}
+.sam-titre .dp-chevron{margin-left:auto;color:var(--text-3)}
+.fid-card.replie > :not(.fid-title):not(.fid-msg):not(.fid-roulette),
+.ps-card.replie > :not(.ps-title):not(.ps-rang),
+.sam-card.replie > :not(.sam-titre):not(.sam-sous){display:none}
+.ps-card.replie .ps-rang{margin-bottom:0}
+.sam-card.replie .sam-sous{margin-bottom:0}
+.sam-sous{font-size:12.5px;color:var(--text-3);line-height:1.5;margin-bottom:13px}
+.sam-sous b{color:var(--gold);font-weight:700}
+/* Trois rythmes sur une rangee, et le dernier s'etire s'il reste seul. */
+/* Les heures du samedi, format des creneaux de reservation en plus compact :
+   c'est le meme geste, il doit se reconnaitre. */
+.sam-heures{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:4px}
+.sam-h{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:11px 4px;
+  font-family:'Unbounded',sans-serif;font-size:12.5px;font-weight:700;color:var(--text);
+  cursor:pointer;min-height:44px;transition:border-color .15s,background .15s,transform .1s}
+.sam-h:active{transform:scale(.93)}
+.sam-h[disabled]{opacity:.32;cursor:default;text-decoration:line-through}
+.sam-retour{margin-top:10px;background:none;border:0;padding:0;font-family:inherit;font-size:11.5px;
+  font-weight:700;color:var(--text-3);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.sam-choix{display:flex;flex-direction:column;gap:7px}
+.sam-choix .btn{margin-top:0;font-size:12.5px;padding:12px 10px}
+.sam-dates{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.sam-date{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600;color:var(--text-2)}
+.sam-date i{font-size:15px;color:var(--gold);flex-shrink:0}
+.sam-stop{margin-top:12px;background:none;border:0;padding:0;font-family:inherit;font-size:11.5px;font-weight:700;
+  color:var(--text-3);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.sam-stop:hover{color:#F0A8A8}
+/* Le rang, en tete du recap : c'est la seule ligne qui dit quelque chose de la
+   personne plutot que de ses chiffres, elle passe donc devant eux. La couleur
+   vient du rang lui-meme (--rang), pour que la carte change d'allure et pas
+   seulement de mot. */
+/* Chaque rang porte sa matiere : taille de diamant, or coule, metal brosse.
+   Tout est calcule en CSS — une photo de texture pese, se pixellise sur un
+   ecran dense, et il en faudrait quatre dont les droits tiennent. Les plaques
+   restent sombres et les reflets plafonnes : c'est un fond, le mot doit rester
+   lisible par-dessus. */
+.ps-rang{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+  margin:0 0 14px;padding:11px 14px;border-radius:12px;
+  border:1px solid color-mix(in srgb, var(--rang) 34%, transparent);
+  background:#0D0D11;
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--rang) 20%, transparent),0 2px 10px rgba(0,0,0,.35)}
+/* La matiere. */
+.ps-rang::before{content:'';position:absolute;inset:0;pointer-events:none}
+/* Le reflet qui traverse la plaque, comme la lumiere sur du metal qu'on tourne. */
+.ps-rang::after{content:'';position:absolute;top:0;left:-60%;width:42%;height:100%;pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.13),transparent);
+  animation:rangReflet 5s ease-in-out infinite}
+@keyframes rangReflet{0%{left:-60%}55%,100%{left:135%}}
+/* Le texte repasse devant : les deux pseudo-elements sont positionnes, ils
+   couvriraient un contenu qui ne l'est pas. */
+.ps-rang > *{position:relative;z-index:1}
+.ps-rang i{font-size:17px;color:var(--rang);text-shadow:0 0 12px color-mix(in srgb, var(--rang) 45%, transparent)}
+.ps-rang-n{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:900;letter-spacing:-.2px;color:var(--rang);text-shadow:0 1px 3px rgba(0,0,0,.65)}
+.ps-rang-s{font-size:11px;font-weight:600;color:rgba(255,255,255,.62);text-shadow:0 1px 3px rgba(0,0,0,.7)}
+
+/* Les quatre matieres sont de vraies photos, recadrees en bande et reduites a
+   640x160 (11 a 28 Ko chacune, chargees seulement quand le recap s'affiche).
+   Le voile sombre est pris au centre et s'efface sur les bords : le mot reste
+   lisible sans eteindre les reflets, qui sont tout l'interet. */
+.ps-rang.diamant::before,.ps-rang.or::before,.ps-rang.argent::before,.ps-rang.bronze::before{
+  background-position:center;background-size:cover;background-repeat:no-repeat}
+.ps-rang.or::before{background-image:
+  linear-gradient(90deg,rgba(8,8,10,.26) 0%,rgba(8,8,10,.62) 28%,rgba(8,8,10,.66) 72%,rgba(8,8,10,.26) 100%),
+  url('img/rang-or.jpg')}
+.ps-rang.argent::before{background-image:
+  linear-gradient(90deg,rgba(8,8,10,.30) 0%,rgba(8,8,10,.66) 28%,rgba(8,8,10,.70) 72%,rgba(8,8,10,.30) 100%),
+  url('img/rang-argent.jpg')}
+.ps-rang.bronze::before{background-image:
+  linear-gradient(90deg,rgba(8,8,10,.26) 0%,rgba(8,8,10,.62) 28%,rgba(8,8,10,.66) 72%,rgba(8,8,10,.26) 100%),
+  url('img/rang-bronze.jpg')}
+
+/* Diamant — une vraie pierre taillee, recadree dans une zone sans filigrane.
+   Elle est bien plus claire que les metaux : son voile est donc plus appuye,
+   sinon le mot se perd dans les facettes blanches. */
+.ps-rang.diamant::before{background-image:
+  linear-gradient(90deg,rgba(8,26,38,.20) 0%,rgba(8,24,36,.60) 26%,rgba(8,24,36,.62) 74%,rgba(8,26,38,.20) 100%),
+  linear-gradient(0deg,rgba(96,196,232,.13),rgba(96,196,232,.13)),
+  url('img/rang-diamant.jpg')}
+
+/* ── MON RDV (écran récap post-booking) ── */
+/* Tous les blocs de cet ecran font la MEME largeur et sont separes du MEME
+   ecart. C'est pose ici, sur la colonne, et pas bloc par bloc : chaque carte
+   qui reglait sa propre largeur et sa propre marge finissait par en avoir une
+   differente des autres, et un bloc ajoute plus tard repartait de travers —
+   c'est comme ca que « Ton samedi » est sorti plus large que le recap, et colle
+   au bouton d'en dessous. Les enfants ne portent donc ni largeur ni marge
+   verticale : ils remplissent.
+   `:empty` compte comme un enfant : sans cette regle, un conteneur vide (pas de
+   carte de fidelite, pas de serie) laisserait un trou dans la pile. */
+.my-rdv{display:flex;flex-direction:column;align-items:center;padding:4px 0 8px;text-align:center;
+  --bloc:400px;--ecart:12px}
+.my-rdv > *:not(.my-rdv-badge):not(.my-rdv-tag):not(.my-rdv-name){
+  width:100%;max-width:var(--bloc);margin-top:var(--ecart)}
+.my-rdv > div:empty{display:none}
+.my-rdv-actions{gap:var(--ecart)}
+.my-rdv-badge{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-2));display:flex;align-items:center;justify-content:center;margin:0 auto 22px;font-size:48px;color:#080808;box-shadow:0 20px 60px rgba(218,177,73,.4), 0 0 0 8px rgba(218,177,73,.08);animation:successPop .6s var(--ease-pop) both}
+.my-rdv-tag{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;font-weight:700;color:var(--gold);margin-bottom:6px;background:rgba(218,177,73,.08);border:1px solid rgba(218,177,73,.2);padding:4px 14px;border-radius:20px}
+.my-rdv-name{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:800;color:var(--text);margin:6px 0 0;letter-spacing:-.4px}
+.my-rdv-card{
+  width:100%;
+  background:linear-gradient(145deg,rgba(218,177,73,.08) 0%,rgba(218,177,73,.02) 100%);
+  border:1px solid var(--border-gold);border-radius:16px;padding:16px;
+  box-shadow:0 2px 14px rgba(0,0,0,.3);
+}
+/* Plusieurs RDV listes : le meme ecart que partout ailleurs. */
+#mr-list{display:flex;flex-direction:column;gap:var(--ecart)}
+.my-rdv-row{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px dashed rgba(218,177,73,.1);font-size:14px;font-weight:600;color:var(--text);text-align:left}
+.my-rdv-row:last-of-type{border-bottom:none}
+.my-rdv-row i{font-size:19px;color:var(--gold);flex-shrink:0;width:22px}
+.my-rdv-total{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:16px;border-top:1px solid rgba(218,177,73,.2)}
+.my-rdv-total-l{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;font-weight:700;color:var(--gold)}
+.my-rdv-total-v{font-family:'Unbounded',sans-serif;font-size:26px;font-weight:900;color:var(--gold);letter-spacing:-.5px}
+.my-rdv-actions{display:flex;flex-direction:column}
+/* Les deux boutons d'une carte de la liste. La classe existe pour que la
+   carte, une fois passee en grille sur deux colonnes, puisse leur rendre la
+   ligne entiere — sans elle ils tombaient dans la colonne de gauche. */
+/* Un rendez-vous pose par la serie le dit : sans ca, le client ne sait pas
+   pourquoi il a un rendez-vous qu'il ne se souvient pas d'avoir pris. */
+.mr-recurrent{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:12px;
+  padding:7px 10px;border-radius:10px;background:rgba(218,177,73,.08);border:1px solid var(--border-gold);
+  font-size:11.5px;font-weight:700;letter-spacing:.3px;color:var(--gold)}
+.mr-recurrent i{font-size:15px}
+.mr-card-actions{display:flex;gap:8px;margin-top:14px}
+/* .btn-out porte une marge haute pour s empiler sous un bouton principal :
+   dans une rangee elle desaligne les deux boutons de quelques pixels. */
+.mr-card-actions>.btn{margin-top:0}
+/* Les blocs de l'ecran « mon rendez-vous » partagent la largeur de la carte.
+   C'etait ecrit en style en ligne sur chacun : impossible a elargir ensuite
+   pour une tablette, un attribut style battant n'importe quelle regle. */
+/* La largeur des blocs vit dans --bloc, sur .my-rdv. Les regles par id qui
+   etaient ici redisaient la meme chose bloc par bloc, et un bloc ajoute plus
+   tard etait oublie — c'est comme ca que « Ton samedi » est sorti plus large
+   que les autres. */
+.mr-annule{text-align:center;padding:16px;background:rgba(224,80,80,.08);border:1px solid rgba(224,80,80,.2);border-radius:12px;color:#F0A8A8;font-size:13px;font-weight:600}
+
+/* ── RETROUVER MON RDV ── */
+.fb-box{margin-top:16px;padding:18px 16px 16px;background:linear-gradient(180deg,rgba(218,177,73,.06),rgba(255,255,255,.02));border:1px solid var(--border-gold);border-radius:16px;text-align:left}
+.fb-title{display:flex;align-items:center;gap:8px;font-family:'Unbounded',sans-serif;font-size:13px;font-weight:800;color:var(--text);margin-bottom:5px;letter-spacing:-.2px}
+.fb-title i{font-size:18px;color:var(--gold)}
+.fb-sub{font-size:12px;color:var(--text-3);margin-bottom:14px;line-height:1.45}
+.fb-msg{font-size:12.5px;font-weight:600;margin-top:12px;text-align:center;padding:10px 12px;border-radius:10px;line-height:1.4}
+.fb-msg.ko{color:#F0A8A8;background:rgba(224,80,80,.09);border:1px solid rgba(224,80,80,.22)}
+.fb-msg.ok{color:var(--gold);background:rgba(218,177,73,.08);border:1px solid var(--border-gold)}
+.fb-cta{margin-top:10px}
+
+/* ── TOAST ── */
+#toast{position:fixed;top:calc(env(safe-area-inset-top) + 16px);left:50%;transform:translateX(-50%) translateY(-20px);background:var(--bg3);border:1px solid var(--border-gold);border-radius:12px;padding:12px 20px;font-size:13px;font-weight:600;line-height:1.45;z-index:9000;opacity:0;transition:all .35s var(--ease);pointer-events:none;max-width:min(92vw,420px);text-align:center;box-shadow:0 12px 28px rgba(0,0,0,.5)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* Les fonds teintes etaient poses en rgba : ils REMPLACAIENT le fond opaque du
+   toast au lieu de s'y ajouter, et le message se lisait par-dessus le mot-logo.
+   Les memes teintes, mais deja fondues dans le noir du toast. */
+#toast.t-g{border-color:rgba(74,186,106,.35);background:#16231C;color:#8EE4C6}
+#toast.t-r{border-color:rgba(224,80,80,.35);background:#251719;color:#F0A8A8}
+#toast.t-gold{border-color:var(--border-gold);color:var(--gold)}
+
+/* ── RESPONSIVE ── */
+@media(min-width:520px){
+  .svc-list{grid-template-columns:repeat(2,1fr)}
+  .pay-opts{grid-template-columns:1fr 1fr}
+}
+@media(max-width:420px){
+  /* .svc-list reste en 2 colonnes même sur petit mobile : Coupe Simple et
+     Transformation sont affichées côte à côte, pas empilées. */
+  .slots{grid-template-columns:repeat(3,1fr)}
+  .fields-row{grid-template-columns:1fr}
+  .h-name{font-size:19px}
+  .h-ico{width:34px;height:34px}
+  .h-ico i{font-size:19px}
+  .step-l{font-size:11px;letter-spacing:.2px}
+  .wrap{padding:18px calc(14px + env(safe-area-inset-right,0px)) calc(32px + env(safe-area-inset-bottom,0px)) calc(14px + env(safe-area-inset-left,0px))}
+  .wrap.at-success{padding-bottom:calc(env(safe-area-inset-bottom) + 24px)}
+  .s-title{font-size:16px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+
+/* ── FOCUS STATES ── */
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4px}
+.svc:focus-visible{outline-offset:0;border-radius:16px}
+.addon:focus-visible{outline-offset:0;border-radius:12px}
+.slot:focus-visible{outline-offset:0;border-radius:12px}
+.cal-d:focus-visible{outline-offset:0;border-radius:8px}
+.cal-nav:focus-visible{outline-offset:0;border-radius:10px}
+.btn:focus-visible{outline-offset:0;border-radius:14px}
+.pay-opt:focus-visible{outline-offset:0;border-radius:12px}
+
+/* ── PIED LEGAL ── */
+#pied-legal{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin-top:22px;padding:4px 0;
+  font-size:11px;letter-spacing:.3px;color:var(--text-4);
+}
+#pied-legal a{color:var(--text-3);text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(218,177,73,.28)}
+
+/* La regle d'annulation, a l'endroit ou elle engage : juste avant le bouton
+   qui valide, et non repliee au fond de la page. */
+.note-annulation{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:12px;color:var(--text-3)}
+.note-annulation i{font-size:15px;color:var(--gold);flex-shrink:0}
+
+/* ── CONSENT CHECKBOX ── */
+.consent-label{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;cursor:pointer;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px}
+.consent-label input[type="checkbox"]{margin-top:3px;flex-shrink:0;accent-color:var(--gold);width:16px;height:16px;cursor:pointer}
+.consent-label span{font-size:12px;color:var(--text-2);line-height:1.6}
+.consent-label a{color:var(--gold);text-decoration:underline}
+
+/* ── SURVOL ──
+   Un telephone n'a pas de curseur : apres un appui, l'element garde l'etat de
+   survol jusqu'au prochain appui ailleurs — une carte reste doree, un bouton
+   reste souleve. Le survol est donc reserve aux appareils qui pointent vraiment.
+   Les etats de selection (.sel) et le focus clavier, eux, restent dehors. */
+@media (hover:hover) and (pointer:fine){
+  .h-ico:hover{background:rgba(218,177,73,.13);border-color:rgba(218,177,73,.38)}
+  .h-account:hover{background:rgba(218,177,73,.13);border-color:rgba(218,177,73,.38)}
+  .svc:hover .svc-img{transform:scale(1.04)}
+  .cal-nav:hover{border-color:var(--gold);color:var(--gold);background:rgba(218,177,73,.05)}
+  .slot:hover{border-color:var(--gold);color:var(--gold);background:linear-gradient(180deg,rgba(218,177,73,.05),var(--bg2))}
+  .slots-full-link:hover{box-shadow:0 8px 28px rgba(218,177,73,.55)}
+  .btn-gold:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 12px 32px rgba(218,177,73,.42)}
+  .btn-out:hover{border-color:var(--gold);color:var(--gold)}
+  .btn-ghost:hover{background:rgba(218,177,73,.06);border-color:var(--gold)}
+  .btn-danger:hover{background:rgba(224,80,80,.08);border-color:rgba(224,80,80,.45)}
+  .svc:hover{border-color:var(--gold);background:linear-gradient(180deg,rgba(218,177,73,.06),var(--bg2))}
+  .addon:hover{border-color:var(--gold);background:linear-gradient(90deg,rgba(218,177,73,.06),var(--bg2))}
+  .pay-opt:hover{border-color:var(--gold);background:linear-gradient(90deg,rgba(218,177,73,.05),var(--bg2))}
+  .recap-map:hover{background:rgba(218,177,73,.09);outline:none}
+}
+
+/* ════════════════════════════════════════════════════════
+   TABLETTE, ORDINATEUR, TELEPHONE COUCHE
+   ════════════════════════════════════════════════════════
+   La page est dessinee pour un telephone tenu a la main : une colonne de
+   560 px, un bouton pleine largeur, une barre d'etapes flottante en bas.
+   Telle quelle sur un iPad ou un 27 pouces, elle reste ce meme ruban etroit
+   au milieu du vide — le fond anime y occupe plus de place que le contenu.
+
+   Ces regles n'ajoutent aucun element : elles redistribuent ceux qui
+   existent des qu'il y a de la place, et toutes sont en min-width — le
+   telephone n'en lit aucune.
+
+     >= 768   tablette portrait — colonne a 720, options sur deux colonnes
+     >= 1024  iPad paysage et ordinateur — colonne a 1000, calendrier et
+              creneaux cote a cote, formulaires ramenes a 600
+     >= 1440  la colonne cesse de grandir
+
+   Puis un cas a part : le telephone couche, ou c'est la hauteur qui manque
+   et pas la largeur. */
+
+/* ── VIGNETTE LARGE ──
+   Des que la carte depasse la largeur d'une main, la photo carree prend les
+   trois quarts de sa hauteur et le prix se retrouve relegue tout en bas. Ce
+   palier arrive avant celui de la tablette : une fenetre de navigateur a
+   demi ouverte tombe entre les deux. */
+@media(min-width:600px){
+  .svc-img-wrap{aspect-ratio:1.9/1}
+  .svc-body{padding:15px 16px}
+  .svc-name{font-size:15px}
+  .svc-price{font-size:20px}
+}
+
+/* ── UNE SEULE LARGEUR ──
+   L'en-tete, la colonne de contenu et la barre d'etapes partagent la meme
+   largeur, et les cartes qu'elles encadrent aussi. La version precedente
+   plafonnait les deux bulles a 640 pendant que le contenu montait a 1000 et
+   qu'une carte de rendez-vous restait a 440 : trois largeurs empilees sur le
+   meme ecran, et la page paraissait mal montee. Ici une seule valeur, et
+   24 px de marge de chaque cote — sur une tablette elle prend donc tout
+   l'ecran, sur un ordinateur elle s'arrete avant de rendre les lignes
+   illisibles. */
+@media(min-width:768px){
+  body>canvas{opacity:.72}
+
+  .header{padding:calc(env(safe-area-inset-top,0px) + 8px) calc(24px + env(safe-area-inset-right,0px)) 8px calc(24px + env(safe-area-inset-left,0px))}
+  .h-bar{max-width:920px}
+  .steps{
+    left:calc(24px + env(safe-area-inset-left,0px));
+    right:calc(24px + env(safe-area-inset-right,0px));
+    max-width:920px;
+  }
+  /* 968 = 920 de contenu + les 24 px de marge interne de chaque cote : le bord
+     du texte tombe exactement sous le bord de la bulle. */
+  .wrap{max-width:968px;padding:20px calc(24px + env(safe-area-inset-right,0px)) calc(40px + env(safe-area-inset-bottom,0px)) calc(24px + env(safe-area-inset-left,0px))}
+
+  .h-name{font-size:24px}
+
+  .s-title{font-size:22px;margin-bottom:18px}
+  .section-h{font-size:14.5px;margin:22px 0 12px}
+
+  /* ── REGLE DES RANGEES ──
+     Tout ce qui se range en rangee — prestations, options, boutons — est en
+     flex avec retour a la ligne et une base commune, jamais en grille a
+     nombre de colonnes fixe. C'est la seule facon d'etre juste quel que soit
+     le nombre d'elements : le navigateur en met autant qu'il en tient par
+     ligne, et ceux de la derniere ligne s'etirent pour la remplir. A quatre
+     ils font quatre colonnes, a trois ils en font trois, a cinq il y en a
+     trois puis deux moities — jamais un element seul a gauche avec un trou a
+     sa droite.
+     Ne pas revenir a grid-template-columns + :nth-child ici : la regle de
+     l'orpheline suppose un nombre de colonnes connu, et elle compte des
+     enfants que display:none a deja retires de la mise en page. */
+  .svc-list,.addons,.rdv-actions,.my-rdv-actions{
+    display:flex;flex-direction:row;flex-wrap:wrap;gap:12px;
+  }
+  .svc-list>*,.addons>*,.rdv-actions>.btn,.my-rdv-actions>.btn{flex:1 1 240px;min-width:0}
+  /* Ce qui n'est pas un bouton coupe la rangee : un trait de separation ou une
+     demande de confirmation n'a rien a faire a cote d'une action. */
+  .rdv-actions>.rdv-actions-sep,.rdv-actions>.cancel-dialog,
+  .my-rdv-actions>.rdv-actions-sep,.my-rdv-actions>.cancel-dialog{flex:1 1 100%}
+
+  .svc-list>.svc:last-child:nth-child(odd){grid-column:auto}
+  .addon{padding:13px 15px}
+
+  /* La photo pesait les trois quarts de la vignette : sur une carte large
+     elle ecrasait le nom et le prix, qui tombaient tout en bas d'une image
+     de 250 px. Elle s'aplatit, et le pied de carte prend du corps — c'est
+     lui qui porte l'information. */
+  /* Le ratio seul ne suffit pas : plus la carte s'elargit, plus la photo
+     grandit avec elle. Un plafond en dur la retient, et le pied de carte
+     garde son poids quelle que soit la largeur. */
+  .svc-img-wrap{aspect-ratio:2.3/1;max-height:185px}
+  .svc-body{padding:17px 18px;gap:6px}
+  .svc-name{font-size:16.5px}
+  .svc-price{font-size:22px}
+  .svc-dur{font-size:12px}
+
+  /* Sans cela, sept colonnes sur 900 px donnent des cases de 120 px de haut :
+     un calendrier qui remplit l'ecran pour trente chiffres. */
+  .cal-card{padding:20px}
+  .cal-month{font-size:17px}
+  .cal-nav{width:38px;height:38px}
+  .cal-dn{font-size:10.5px}
+  .cal-d{aspect-ratio:auto;height:52px;min-height:0;font-size:14px;border-radius:10px}
+
+  .recap{padding:18px}
+  .recap-row{font-size:14px}
+
+  /* Les cartes cessent d'etre plus etroites que la barre qui les surplombe.
+     Pour que la largeur gagnee serve a quelque chose, leurs lignes se rangent
+     sur deux colonnes plutot que de s'etirer avec un vide a droite. */
+  .success-recap,.my-rdv-card,.rdv-actions{max-width:none;width:100%}
+  .my-rdv{--bloc:none}
+  .fid-slots{max-width:340px}
+
+  /* Le padding lateral de la confirmation rentrait ses cartes de 16 px : elles
+     ne tombaient plus sous le bord de la bulle comme tout le reste. */
+  .success{padding:32px 0}
+  .my-rdv-card{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;padding:18px 20px}
+  .my-rdv-row:nth-last-of-type(-n+2){border-bottom:none}
+  .my-rdv-total,.mr-card-actions{grid-column:1/-1}
+  .success-recap{display:grid;grid-template-columns:1fr 1fr;gap:12px 26px;padding:18px 20px}
+  .rdv-actions .btn,.my-rdv-actions .btn{margin-top:0}
+
+  /* Etape 3 — deux champs par ligne : un « Telephone » de 900 px de large ne
+     se remplit pas mieux qu'un de 400, il se lit juste moins bien. */
+  #s3.active{display:grid;grid-template-columns:1fr 1fr;column-gap:18px}
+  #s3>.s-title,#s3>.recap,#s3>.fields-row,#s3>.qui,
+  #s3>.field:last-of-type,#s3>.btn{grid-column:1/-1}
+
+}
+
+/* ── ORDINATEUR ET iPAD PAYSAGE ── */
+@media(min-width:1024px){
+  /* Sur un ecran d'ordinateur le fond occupe les deux tiers de la surface :
+     il est attenue une seconde fois, et la lueur ramenee au centre, derriere
+     la colonne, plutot que dans deux coins opposes. */
+  body>canvas{opacity:.55}
+  body::after{
+    background-image:radial-gradient(ellipse 55% 60% at 50% 0%,rgba(218,177,73,.1),transparent 65%);
+  }
+  .wrap{padding-top:24px}
+  .s-title{font-size:23px}
+
+
+  /* ETAPE 2 — le calendrier glisse pour laisser entrer les heures.
+     Les deux colonnes existent des l'arrivee sur l'etape, mais la seconde est
+     a 0fr : le calendrier occupe toute la largeur et s'y tient centre. Quand
+     un jour est choisi, selectDay() pose .slots-on, la seconde colonne s'ouvre
+     a 1fr et la transition fait glisser le calendrier vers la gauche pendant
+     que les heures se decouvrent. Sans elle, les deux sautaient d'un coup a
+     leur place : on croyait a un defaut d'affichage.
+     Les grandeurs en fr s'interpolent — c'est ce qui rend grid-template-columns
+     animable ; le gap est anime avec, sinon 24 px de vide restent a droite du
+     calendrier avant meme qu'il y ait quoi que ce soit a leur droite. */
+  #s2.active{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,0fr);
+    column-gap:0;
+    align-items:start;
+    /* Une courbe qui depasse legerement puis revient : la colonne s'ouvre
+       comme on ecarte un rideau, au lieu de glisser a vitesse constante. */
+    transition:grid-template-columns .6s cubic-bezier(.34,1.18,.42,1),
+               column-gap .6s cubic-bezier(.34,1.18,.42,1);
+  }
+  #s2.slots-on{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:24px}
+
+  /* .vient-d-ouvrir n'est posee QUE lorsque la colonne s'ouvre pour la
+     premiere fois (selectDay). Changer de jour ensuite ne doit pas rejouer le
+     glissement ni faire attendre une demi-seconde avant de voir les heures. */
+  #s2.vient-d-ouvrir>.cal-card{animation:calSeTasse .6s cubic-bezier(.34,1.18,.42,1) both}
+  @keyframes calSeTasse{
+    0%{transform:scale(1)}
+    38%{transform:scale(.972)}
+    100%{transform:scale(1)}
+  }
+  /* Les heures n'entrent qu'une fois le calendrier arrive : avant, elles se
+     dessinaient dans une colonne encore en train de s'ouvrir et la mise en
+     page paraissait coincee. */
+  #s2>#slots-wrap,#s2>#btn-step2{transition:opacity .28s ease}
+  #s2.vient-d-ouvrir>#btn-step2{transition-delay:.42s}
+  /* Le bloc des heures passe de display:none a display:block dans la meme
+     image que le changement d opacite : une transition ne demarre pas dans ce
+     cas, l element apparait d un coup. Une animation, si. Sans elle, le titre
+     « Creneaux libres » se posait dans une colonne encore en train de s ouvrir. */
+  #s2.vient-d-ouvrir>#slots-wrap{animation:heuresEntrent .34s var(--ease) .38s both}
+  @keyframes heuresEntrent{from{opacity:0}to{opacity:1}}
+  /* Le retard commun des heures ne vaut que la ou le calendrier glisse : sur
+     un telephone la colonne ne bouge pas, rien ne justifierait d attendre. */
+  #s2.vient-d-ouvrir .slot{--retard:440ms}
+
+  #s2>.s-title{grid-column:1/-1;grid-row:1}
+  /* Le calendrier garde la meme largeur maximale dans les deux etats : seule
+     la colonne qui le porte retrecit, donc il n'a rien a rattraper une fois
+     l'animation finie. */
+  #s2>.cal-card{grid-column:1;grid-row:2;width:100%;max-width:560px;margin:0 auto}
+  #s2>#slots-wrap{grid-column:2;grid-row:2;overflow:hidden}
+  /* Chaque bouton fait la largeur de ce qu'il commande : Retour sous le
+     calendrier, Continuer sous les heures, tous deux decolles de la colonne
+     qu'ils terminent. Ils gardent leur ordre dans le balisage — l'action
+     principale reste la premiere au clavier. */
+  #s2>.btn-out{grid-column:1;grid-row:3;width:100%;max-width:560px;margin:18px auto 0}
+  #s2>#btn-step2{grid-column:2;grid-row:3;width:100%;margin-top:18px;overflow:hidden}
+  /* Tant qu'aucun jour n'est choisi, la colonne de droite est fermee : ce qui
+     s'y trouve n'a pas a transparaitre dans un filet de quelques pixels. Le
+     bouton y est de toute facon desactive, il ne peut pas etre atteint au
+     clavier pendant ce temps. */
+  #s2:not(.slots-on)>#slots-wrap,
+  #s2:not(.slots-on)>#btn-step2{opacity:0}
+  #s2.slots-on .slots{grid-template-columns:repeat(auto-fit,minmax(104px,1fr))}
+}
+
+/* ── GRAND ECRAN ──
+   La colonne grandit encore un peu, d'un seul tenant : les bulles, le contenu
+   et les cartes ensemble. Passe cette valeur une ligne se lit moins bien, pas
+   mieux, et ce qui reste est de la marge. */
+@media(min-width:1440px){
+  .h-bar,.steps{max-width:1040px}
+  .wrap{max-width:1088px}
+}
+
+/* ── TELEPHONE COUCHE ──
+   Ici la largeur ne manque pas, c'est la hauteur : entre la bulle du haut, la
+   barre d'etapes du bas et une vignette carree de prestation, il ne restait
+   rien. Le seuil de 520 px de haut ne peut pas attraper un iPad couche, qui
+   fait 768 px au minimum. */
+@media(orientation:landscape) and (max-height:520px){
+  .header{padding-top:calc(env(safe-area-inset-top,0px) + 6px);padding-bottom:6px}
+  .h-bar{min-height:40px}
+  .h-name{font-size:19px}
+
+  .wrap{padding-top:8px;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+  .s-title{font-size:17px;margin-bottom:10px}
+  .section-h{margin:12px 0 8px}
+  /* Une vignette carree de prestation prendrait toute la hauteur utile. */
+  .svc-img-wrap{aspect-ratio:3.2/1}
+  .addons{grid-template-columns:1fr 1fr;gap:8px}
+  .cal-d{aspect-ratio:auto;height:36px;min-height:0}
+
+  .success{padding:12px}
+  .success-icon,.my-rdv-badge{width:62px;height:62px;font-size:30px;margin-bottom:12px}
+  .success h2{font-size:19px}
+  .my-rdv-badge{margin-bottom:12px}
+
+  .steps{padding:4px 6px}
+  .step{min-height:38px;gap:1px}
+  .step i{font-size:16px}
+  .steps-voile{height:calc(96px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,#060606 calc(58px + env(safe-area-inset-bottom,0px)),rgba(6,6,6,.5) calc(74px + env(safe-area-inset-bottom,0px)),rgba(6,6,6,0) 100%)}
+
+}

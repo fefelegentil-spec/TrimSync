@@ -1,0 +1,3 @@
+# Page de réservation publique de chaque salon : /r/<slug> sert reserver.html
+# (réécriture 200, l'adresse reste /r/<slug> dans le navigateur).
+/r/*  /reserver  200

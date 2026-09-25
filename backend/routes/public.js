@@ -69,7 +69,9 @@ router.get('/api/public/salons/:slug/jours', quotaLecture, async (req, res) => {
     const jours = [];
     for (let i = 0; i < HORIZON_JOURS; i++) {
       const date = decaleJours(maintenant.date, i);
-      jours.push({ date, libres: creneaux({ ...ctx, duree: presta.duree_min, date, maintenant }).length });
+      // « ouvert » : le jour a des horaires (hors fermeture) ; ouvert sans place libre = complet.
+      const ouvert = creneaux({ ...ctx, rdv: [], duree: presta.duree_min, date, maintenant }).length > 0;
+      jours.push({ date, ouvert, libres: ouvert ? creneaux({ ...ctx, duree: presta.duree_min, date, maintenant }).length : 0 });
     }
     res.json({ jours });
   } catch (e) { erreurServeur(res, e, 'public/jours'); }

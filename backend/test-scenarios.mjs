@@ -123,7 +123,8 @@ async function main() {
   ok(pub.s === 200 && pub.d.reservable === true && pub.d.prestations.length === 3 && pub.d.email === undefined, 'infos publiques (prestation désactivée masquée)', pub.d);
   ok((await appel('GET', '/api/public/salons/inexistant-zz')).s === 404, 'salon inconnu : 404');
   const jours = (await appel('GET', `/api/public/salons/${slugA2}/jours?prestation=${coupe.id}`)).d?.jours || [];
-  ok(jours.length === 30 && jours.find(x => x.date === J)?.libres === h.length, 'vue des 30 prochains jours', jours.slice(0, 4));
+  ok(jours.length === 30 && jours.find(x => x.date === J)?.libres === h.length && jours.find(x => x.date === J)?.ouvert === true, 'vue des 30 prochains jours', jours.slice(0, 4));
+  ok(jours.find(x => x.date === dansJours(4))?.ouvert === true, 'jour sans fermeture : ouvert');
 
   console.log('T4 — réservation publique et annulation');
   const reserver = (heure, nom = 'Karim Test', tel = '+33 6 22 33 44 55', date = J) => appel('POST', `/api/public/salons/${slugA2}/reserver`,

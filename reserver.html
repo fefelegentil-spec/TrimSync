@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E0F13">
+<title>Réserver</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+<style>
+/* Page de réservation d'un salon TrimSync. Même esprit que la page FCUTZ :
+   sombre, une question par écran, gros boutons au pouce. Le salon parle à ses
+   clients : « je », jamais « nous ». */
+:root {
+  --fond: #0B0C10; --carte: #14161B; --carte-2: #1B1E25; --bord: rgba(96,196,200,.16);
+  --texte: #F2F0EA; --texte-2: #A9A59E; --texte-3: #6E6B66;
+  --accent: #60C4C8; --accent-fonce: #2A9EA3; --danger: #E05050; --ok: #4ABA6A;
+  --r: 16px;
+}
+* { box-sizing: border-box; margin: 0; }
+[hidden] { display: none !important; }
+html, body { background: var(--fond); color: var(--texte); }
+body {
+  font-family: 'Figtree', system-ui, sans-serif; font-size: 16px; line-height: 1.5;
+  min-height: 100dvh; padding: env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing: antialiased;
+}
+button, input { font: inherit; color: inherit; }
+.page { max-width: 520px; margin: 0 auto; }
+header { padding: 28px 0 18px; }
+.salon-nom { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(26px, 7vw, 34px); letter-spacing: -.02em; line-height: 1.1; }
+.salon-infos { color: var(--texte-2); font-size: 14px; margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.salon-infos a { color: var(--texte-2); text-decoration: none; }
+.salon-infos i { color: var(--accent); }
+
+.etapes { display: flex; gap: 6px; margin: 4px 0 18px; }
+.etapes span { flex: 1; height: 3px; border-radius: 3px; background: var(--carte-2); transition: background .3s; }
+.etapes span.fait { background: var(--accent); }
+
+h2 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 12px; }
+.sous { color: var(--texte-2); font-size: 14px; margin: -6px 0 14px; }
+.ecran[hidden] { display: none; }
+.ecran { animation: entree .28s ease-out; }
+@keyframes entree { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .ecran { animation: none; } }
+
+.choix { display: flex; flex-direction: column; gap: 10px; }
+.presta {
+  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; cursor: pointer;
+  background: var(--carte); border: 1px solid var(--bord); border-radius: var(--r); padding: 16px 18px;
+  transition: border-color .15s, transform .1s;
+}
+.presta:hover { border-color: var(--accent); }
+.presta:active { transform: scale(.99); }
+.presta-nom { font-weight: 700; flex: 1; }
+.presta-duree { color: var(--texte-2); font-size: 13px; }
+.presta-prix { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; color: var(--accent); font-size: 18px; }
+
+.jours { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+@media (min-width: 440px) { .jours { grid-template-columns: repeat(5, 1fr); } }
+.jour {
+  display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 4px; cursor: pointer;
+  background: var(--carte); border: 1px solid var(--bord); border-radius: 12px;
+}
+.jour b { font-family: 'Bricolage Grotesque', sans-serif; font-size: 20px; }
+.jour small { color: var(--texte-2); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+.jour em { font-style: normal; font-size: 10.5px; color: var(--accent); }
+.jour.complet { opacity: .4; cursor: not-allowed; }
+.jour.complet em { color: var(--texte-3); }
+.jour.choisi, .heure.choisie { background: var(--accent); color: #071112; border-color: var(--accent); }
+.jour.choisi small, .jour.choisi em { color: #071112; }
+
+.heures { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.heure { padding: 12px 0; border-radius: 12px; cursor: pointer; background: var(--carte); border: 1px solid var(--bord); font-weight: 700; }
+
+.recap { background: var(--carte); border: 1px solid var(--bord); border-radius: var(--r); padding: 14px 16px; margin-bottom: 16px; display: flex; gap: 12px; align-items: center; }
+.recap i { color: var(--accent); font-size: 22px; }
+.recap div { display: flex; flex-direction: column; }
+.recap strong { font-size: 15px; }
+.recap span { color: var(--texte-2); font-size: 13px; }
+
+form { display: flex; flex-direction: column; gap: 10px; }
+.champ { width: 100%; background: var(--carte); border: 1px solid var(--bord); border-radius: 12px; padding: 14px 16px; outline: none; }
+.champ:focus { border-color: var(--accent); }
+.consent { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--texte-2); line-height: 1.45; margin: 4px 0; }
+.consent input { margin-top: 3px; accent-color: var(--accent); width: 18px; height: 18px; flex: 0 0 auto; }
+.consent a { color: var(--accent); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+  border: 0; border-radius: 14px; padding: 16px; font-weight: 700; cursor: pointer;
+  background: var(--accent); color: #071112; font-size: 16px; text-decoration: none;
+}
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-ligne { background: none; border: 1px solid var(--bord); color: var(--texte); }
+.btn-danger { background: none; border: 1px solid rgba(224,80,80,.4); color: var(--danger); }
+.retour { background: none; border: 0; color: var(--texte-2); cursor: pointer; padding: 0; margin-bottom: 14px; font-size: 14px; display: inline-flex; align-items: center; gap: 4px; }
+.erreur { color: var(--danger); font-size: 14px; min-height: 20px; }
+.vide { color: var(--texte-2); text-align: center; padding: 28px 12px; background: var(--carte); border-radius: var(--r); border: 1px dashed var(--bord); }
+.attente { margin-top: 16px; padding: 16px; border-radius: var(--r); background: var(--carte); border: 1px solid var(--bord); }
+.attente p { color: var(--texte-2); font-size: 14px; margin-bottom: 10px; }
+
+.succes { text-align: center; padding: 24px 0 8px; }
+.succes .coche { width: 64px; height: 64px; border-radius: 50%; background: rgba(96,196,200,.14); color: var(--accent); display: grid; place-items: center; font-size: 32px; margin: 0 auto 14px; }
+.succes h2 { font-size: 24px; }
+.pile { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+
+footer { text-align: center; color: var(--texte-3); font-size: 12px; margin-top: 40px; }
+footer a { color: var(--texte-2); text-decoration: none; }
+.chargement { text-align: center; color: var(--texte-2); padding: 60px 0; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header id="entete" hidden>
+    <div class="salon-nom" id="salon-nom"></div>
+    <div class="salon-infos" id="salon-infos"></div>
+  </header>
+
+  <div class="chargement" id="chargement">Chargement…</div>
+
+  <!-- Salon introuvable ou fermé à la réservation -->
+  <section class="ecran" id="ecran-indispo" hidden><div class="vide" id="indispo-txt"></div></section>
+
+  <div class="etapes" id="etapes" hidden><span></span><span></span><span></span><span></span></div>
+
+  <section class="ecran" id="ecran-presta" hidden>
+    <h2>Que veux-tu faire ?</h2>
+    <div class="choix" id="prestas"></div>
+  </section>
+
+  <section class="ecran" id="ecran-jour" hidden>
+    <button class="retour" onclick="aller('presta')"><i class="ti ti-chevron-left"></i>Prestation</button>
+    <h2>Quel jour ?</h2>
+    <p class="sous" id="jour-sous"></p>
+    <div class="jours" id="jours"></div>
+  </section>
+
+  <section class="ecran" id="ecran-heure" hidden>
+    <button class="retour" onclick="aller('jour')"><i class="ti ti-chevron-left"></i>Jour</button>
+    <h2 id="heure-titre">Quelle heure ?</h2>
+    <div class="heures" id="heures"></div>
+    <div class="attente" id="attente" hidden>
+      <p>Plus de place ce jour-là. Laisse ton nom et ton numéro : je te préviens si un créneau se libère.</p>
+      <form onsubmit="inscrireAttente(event)">
+        <input class="champ" id="att-nom" autocomplete="name" placeholder="Prénom et nom" required>
+        <input class="champ" id="att-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="Téléphone" required>
+        <label class="consent"><input type="checkbox" id="att-consent"><span>J'accepte que le salon garde mon nom et mon numéro pour me prévenir.</span></label>
+        <div class="erreur" id="att-erreur"></div>
+        <button class="btn btn-ligne" type="submit">Me prévenir</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="ecran" id="ecran-infos" hidden>
+    <button class="retour" onclick="aller('heure')"><i class="ti ti-chevron-left"></i>Heure</button>
+    <h2>Tes coordonnées</h2>
+    <div class="recap" id="recap"></div>
+    <form onsubmit="reserver(event)">
+      <input class="champ" id="nom" autocomplete="name" placeholder="Prénom et nom" required maxlength="80">
+      <input class="champ" id="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="Téléphone" required>
+      <input class="champ" id="email" type="email" autocomplete="email" placeholder="Email (facultatif)">
+      <label class="consent"><input type="checkbox" id="consent" onchange="document.getElementById('valider').disabled=!this.checked">
+        <span>J'accepte que le salon garde mes coordonnées pour gérer mon rendez-vous (<a href="/privacy" target="_blank" rel="noopener">confidentialité</a>).</span></label>
+      <div class="erreur" id="erreur"></div>
+      <button class="btn" id="valider" type="submit" disabled><i class="ti ti-check"></i>Confirmer le rendez-vous</button>
+    </form>
+  </section>
+
+  <section class="ecran" id="ecran-ok" hidden>
+    <div class="succes">
+      <div class="coche"><i class="ti ti-check"></i></div>
+      <h2>C'est réservé !</h2>
+      <p class="sous" id="ok-txt"></p>
+    </div>
+    <div class="pile">
+      <a class="btn btn-ligne" id="ok-agenda" download="rendez-vous.ics"><i class="ti ti-calendar-plus"></i>Ajouter à mon agenda</a>
+      <a class="btn btn-ligne" id="ok-annuler"><i class="ti ti-calendar-x"></i>Annuler ou garder le lien</a>
+    </div>
+  </section>
+
+  <!-- Lien d'annulation : /r/<slug>?annuler=<jeton> -->
+  <section class="ecran" id="ecran-annuler" hidden>
+    <h2>Ton rendez-vous</h2>
+    <div class="recap" id="an-recap"></div>
+    <div class="erreur" id="an-erreur"></div>
+    <div class="pile">
+      <button class="btn btn-danger" id="an-bouton" onclick="annuler()"><i class="ti ti-calendar-x"></i>Annuler ce rendez-vous</button>
+      <a class="btn btn-ligne" id="an-nouveau"><i class="ti ti-calendar-plus"></i>Prendre un autre rendez-vous</a>
+    </div>
+  </section>
+
+  <footer>Réservation par <a href="https://trimsync.tech" target="_blank" rel="noopener">TrimSync</a></footer>
+</div>
+
+<script>
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? (localStorage.getItem('ts_api') || 'http://localhost:3998')
+  : 'https://trimsync-production.up.railway.app';
+// Le slug vient de /r/<slug> ; en local, de ?salon=<slug>.
+const params = new URLSearchParams(location.search);
+const SLUG = (location.pathname.match(/^\/r\/([a-z0-9-]+)/) || [])[1] || params.get('salon') || '';
+const lienSalon = () => location.pathname.startsWith('/r/') ? `/r/${SLUG}` : `${location.pathname}?salon=${SLUG}`;
+
+let SALON = null, choix = {};
+const ORDRE = ['presta', 'jour', 'heure', 'infos'];
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const prix = n => (Math.round(n * 100) / 100).toLocaleString('fr-FR') + ' €';
+const dateLongue = d => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+async function api(methode, chemin, corps) {
+  let r;
+  try {
+    r = await fetch(API + chemin, { method: methode, headers: { 'content-type': 'application/json' }, body: corps ? JSON.stringify(corps) : undefined });
+  } catch (_) { throw Object.assign(new Error('Pas de connexion, réessaie dans un instant.'), { statut: 0 }); }
+  let d = null; try { d = await r.json(); } catch (_) {}
+  if (!r.ok) throw Object.assign(new Error((d && d.error) || 'Erreur inattendue'), { statut: r.status });
+  return d;
+}
+
+function aller(ecran) {
+  document.querySelectorAll('.ecran').forEach(e => { e.hidden = e.id !== 'ecran-' + ecran; });
+  const i = ORDRE.indexOf(ecran);
+  $('etapes').hidden = i < 0;
+  [...$('etapes').children].forEach((s, k) => s.classList.toggle('fait', k <= i));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function indispo(texte) {
+  $('chargement').hidden = true;
+  $('indispo-txt').innerHTML = texte;
+  aller('indispo');
+}
+
+async function demarrer() {
+  if (!SLUG) { indispo('Ce lien de réservation est incomplet.'); return; }
+  try { SALON = await api('GET', `/api/public/salons/${SLUG}`); }
+  catch (e) { indispo(e.statut === 404 ? 'Ce salon est introuvable. Vérifie le lien.' : esc(e.message)); return; }
+  document.title = `Réserver — ${SALON.nom}`;
+  $('salon-nom').textContent = SALON.nom;
+  $('salon-infos').innerHTML = [
+    SALON.adresse || SALON.ville ? `<span><i class="ti ti-map-pin"></i> ${esc([SALON.adresse, SALON.ville].filter(Boolean).join(', '))}</span>` : '',
+    SALON.telephone ? `<a href="tel:${esc(SALON.telephone)}"><i class="ti ti-phone"></i> ${esc(SALON.telephone)}</a>` : '',
+  ].join('');
+  $('entete').hidden = false;
+  $('chargement').hidden = true;
+  if (params.get('annuler')) { ouvrirAnnulation(params.get('annuler')); return; }
+  if (!SALON.reservable) {
+    indispo(`La réservation en ligne est fermée pour le moment.${SALON.telephone ? `<br><br><a class="btn" href="tel:${esc(SALON.telephone)}"><i class="ti ti-phone"></i>Appeler le salon</a>` : ''}`);
+    return;
+  }
+  if (!SALON.prestations.length) { indispo('Aucune prestation n\'est proposée en ligne pour le moment.'); return; }
+  $('prestas').innerHTML = SALON.prestations.map(p => `<button class="presta" onclick="choisirPresta('${esc(p.id)}')">
+      <span class="presta-nom">${esc(p.nom)}<br><span class="presta-duree">${p.duree_min} min</span></span>
+      <span class="presta-prix">${prix(p.prix)}</span></button>`).join('');
+  aller('presta');
+}
+
+async function choisirPresta(id) {
+  choix = { presta: SALON.prestations.find(p => p.id === id) };
+  $('jour-sous').textContent = `${choix.presta.nom} · ${choix.presta.duree_min} min`;
+  $('jours').innerHTML = '<div class="vide" style="grid-column:1/-1">Chargement…</div>';
+  aller('jour');
+  try {
+    const { jours } = await api('GET', `/api/public/salons/${SLUG}/jours?prestation=${id}`);
+    const semaine = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+    $('jours').innerHTML = jours.map(j => {
+      const d = new Date(j.date + 'T12:00:00');
+      // Fermé : non cliquable. Complet : cliquable, mène à la liste d'attente.
+      const ferme = j.ouvert === false;
+      return `<button class="jour${j.libres ? '' : ' complet'}"${ferme ? ' disabled' : ` onclick="choisirJour('${j.date}', ${j.libres})"`}>
+        <small>${semaine[d.getDay()]}</small><b>${d.getDate()}</b><em>${ferme ? 'fermé' : j.libres ? d.toLocaleDateString('fr-FR', { month: 'short' }) : 'complet'}</em></button>`;
+    }).join('');
+  } catch (e) { $('jours').innerHTML = `<div class="vide" style="grid-column:1/-1">${esc(e.message)}</div>`; }
+}
+
+async function choisirJour(date, libres) {
+  choix.date = date;
+  $('heure-titre').textContent = dateLongue(date).replace(/^./, c => c.toUpperCase());
+  $('heures').innerHTML = '';
+  $('attente').hidden = true;
+  aller('heure');
+  if (!libres) { $('attente').hidden = false; return; }
+  try {
+    const { heures } = await api('GET', `/api/public/salons/${SLUG}/dispo?prestation=${choix.presta.id}&date=${date}`);
+    if (!heures.length) { $('attente').hidden = false; return; }
+    $('heures').innerHTML = heures.map(h => `<button class="heure" onclick="choisirHeure('${h}')">${h}</button>`).join('');
+  } catch (e) { $('heures').innerHTML = `<div class="vide" style="grid-column:1/-1">${esc(e.message)}</div>`; }
+}
+
+function choisirHeure(h) {
+  choix.heure = h;
+  $('recap').innerHTML = `<i class="ti ti-calendar-event"></i><div><strong>${esc(dateLongue(choix.date))} à ${h}</strong><span>${esc(choix.presta.nom)} · ${prix(choix.presta.prix)}</span></div>`;
+  $('erreur').textContent = '';
+  aller('infos');
+}
+
+async function reserver(e) {
+  e.preventDefault();
+  const bouton = $('valider');
+  bouton.disabled = true;
+  $('erreur').textContent = '';
+  try {
+    const r = await api('POST', `/api/public/salons/${SLUG}/reserver`, {
+      prestation_id: choix.presta.id, date: choix.date, heure: choix.heure,
+      nom: $('nom').value.trim(), telephone: $('tel').value.trim(), email: $('email').value.trim(),
+      consentement: $('consent').checked,
+    });
+    confirmation(r);
+  } catch (x) {
+    $('erreur').textContent = x.message;
+    bouton.disabled = !$('consent').checked;
+    // Créneau pris entre-temps : on repropose la journée à jour.
+    if (x.statut === 409) setTimeout(() => choisirJour(choix.date, 1), 1400);
+  }
+}
+
+function confirmation(r) {
+  const lienAnnul = `${location.origin}${lienSalon()}${lienSalon().includes('?') ? '&' : '?'}annuler=${r.annulation}`;
+  $('ok-txt').innerHTML = `${esc(dateLongue(r.rdv.date))} à ${r.rdv.heure}<br>${esc(r.rdv.prestation)} · ${prix(r.rdv.prix)}<br><br>Garde ce lien pour annuler si besoin.`;
+  $('ok-annuler').href = lienAnnul;
+  const debut = r.rdv.date.replace(/-/g, '') + 'T' + r.rdv.heure.replace(':', '') + '00';
+  const fin = new Date(`${r.rdv.date}T${r.rdv.heure}:00`); fin.setMinutes(fin.getMinutes() + choix.presta.duree_min);
+  const f2 = n => String(n).padStart(2, '0');
+  const finIcs = `${fin.getFullYear()}${f2(fin.getMonth() + 1)}${f2(fin.getDate())}T${f2(fin.getHours())}${f2(fin.getMinutes())}00`;
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//TrimSync//FR', 'BEGIN:VEVENT',
+    `UID:${r.annulation}@trimsync.tech`, `DTSTART;TZID=Europe/Paris:${debut}`, `DTEND;TZID=Europe/Paris:${finIcs}`,
+    `SUMMARY:${r.rdv.prestation} — ${SALON.nom}`, `LOCATION:${[SALON.adresse, SALON.ville].filter(Boolean).join(', ')}`,
+    `DESCRIPTION:Annuler : ${lienAnnul}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+  $('ok-agenda').href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+  aller('ok');
+}
+
+async function inscrireAttente(e) {
+  e.preventDefault();
+  $('att-erreur').textContent = '';
+  try {
+    await api('POST', `/api/public/salons/${SLUG}/attente`, {
+      date: choix.date, nom: $('att-nom').value.trim(), telephone: $('att-tel').value.trim(), consentement: $('att-consent').checked,
+    });
+    $('attente').innerHTML = '<p><i class="ti ti-circle-check" style="color:var(--accent)"></i> C\'est noté : je te préviens si une place se libère.</p>';
+  } catch (x) { $('att-erreur').textContent = x.message; }
+}
+
+let jetonAnnulation = null;
+async function ouvrirAnnulation(jeton) {
+  jetonAnnulation = jeton;
+  $('an-nouveau').href = lienSalon();
+  aller('annuler');
+  try {
+    const { rdv } = await api('GET', `/api/public/rdv/${encodeURIComponent(jeton)}`);
+    const etat = rdv.statut === 'annule' ? ' · <em>annulé</em>' : '';
+    $('an-recap').innerHTML = `<i class="ti ti-calendar-event"></i><div><strong>${esc(dateLongue(rdv.date))} à ${rdv.heure}</strong><span>${esc(rdv.prestation)} · ${prix(rdv.prix)}${etat}</span></div>`;
+    $('an-bouton').hidden = !rdv.annulable;
+    if (!rdv.annulable && rdv.statut === 'confirme') $('an-erreur').textContent = "L'heure est passée : ce rendez-vous ne s'annule plus en ligne. Appelle le salon.";
+  } catch (x) { $('an-recap').hidden = true; $('an-bouton').hidden = true; $('an-erreur').textContent = x.message; }
+}
+
+async function annuler() {
+  if (!confirm('Annuler ce rendez-vous ?')) return;
+  try {
+    await api('POST', '/api/public/annuler', { jeton: jetonAnnulation });
+    $('an-bouton').hidden = true;
+    $('an-erreur').innerHTML = '<span style="color:var(--ok)">Rendez-vous annulé. Merci de m\'avoir prévenu !</span>';
+  } catch (x) { $('an-erreur').textContent = x.message; }
+}
+
+demarrer();
+</script>
+</body>
+</html>

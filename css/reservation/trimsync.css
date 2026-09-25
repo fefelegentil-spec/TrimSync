@@ -29,3 +29,9 @@
 /* Même encombrement que « FCUTZ » (5 lettres à 17,5vw) quelle que soit la
    longueur du nom : --lettres est posé par habillerSalon(). */
 .splash-name { font-size: calc(17.5vw * 5 / var(--lettres, 5)); letter-spacing: calc(-.27vw * 5 / var(--lettres, 5)); }
+
+/* body ne doit pas etre une boite de defilement : avec overflow-x:hidden il en devient une,
+   et overscroll-behavior:none empeche la molette de remonter au document. Resultat : la page
+   ne defilait qu'avec le curseur sur un element fixe (le menu). clip coupe sans defiler ;
+   hidden reste en repli pour les navigateurs qui ne connaissent pas clip. */
+body { overflow-x: hidden; overflow-x: clip; }

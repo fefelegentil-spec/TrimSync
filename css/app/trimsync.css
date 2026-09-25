@@ -198,3 +198,9 @@ textarea.input { resize: vertical; min-height: 60px; font-family: inherit; }
   .sidebar:not(.open) .btn-deconnexion span { display: none; }
   .sidebar:not(.open) .btn-deconnexion { padding: 8px 0; }
 }
+
+/* body ne doit pas etre une boite de defilement : avec overflow-x:hidden il en devient une,
+   et overscroll-behavior:none empeche la molette de remonter au document. Resultat : la page
+   ne defilait qu'avec le curseur sur un element fixe (le menu). clip coupe sans defiler ;
+   hidden reste en repli pour les navigateurs qui ne connaissent pas clip. */
+body { overflow-x: hidden; overflow-x: clip; }

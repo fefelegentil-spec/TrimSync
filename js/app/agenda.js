@@ -471,7 +471,8 @@ function resetRdvModal() {
   document.getElementById('rdv-client-suggestions').style.display = 'none';
   document.getElementById('rdv-conflict').classList.add('hidden');
 }
-A_L_OUVERTURE['modal-rdv-new'] = () => {
+A_L_OUVERTURE['modal-rdv-new'] = async () => {
+  if (!SERVICES.length) { try { await chargerReglages(); } catch (e) { toast(messageErreur(e), 'danger'); } }
   if (!SERVICES.length) { toast("Ajoute d'abord une prestation.", 'warning'); closeModal('modal-rdv-new'); return; }
   populateServiceSelect('rdv-service');
   if (!document.getElementById('rdv-date').value) proposeNextRdvSlot();

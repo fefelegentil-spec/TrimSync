@@ -12,9 +12,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
 <link rel="stylesheet" href="css/app/base.css?v=1">
-<link rel="stylesheet" href="css/app/trimsync.css?v=1">
-<script src="js/app/noyau.js?v=1" defer></script>
-<script src="js/app/agenda.js?v=1" defer></script>
+<link rel="stylesheet" href="css/app/trimsync.css?v=2">
+<script src="js/app/noyau.js?v=2" defer></script>
+<script src="js/app/agenda.js?v=2" defer></script>
+<script src="js/app/accueil.js?v=1" defer></script>
+<script src="js/app/clients.js?v=1" defer></script>
+<script src="js/app/reglages.js?v=1" defer></script>
 </head>
 <body class="hors-session">
 
@@ -71,12 +74,12 @@
 
   <div class="sidebar-nav">
     <div class="nav-section">Principal</div>
-    <a class="nav-item bientot" data-page="dashboard"><i class="ti ti-layout-dashboard"></i><span>Accueil</span></a>
-    <a class="nav-item active" data-page="agenda" onclick="nav('agenda')" tabindex="0"><i class="ti ti-calendar"></i><span>Agenda</span></a>
-    <a class="nav-item bientot" data-page="clients"><i class="ti ti-users"></i><span>Clients</span></a>
+    <a class="nav-item" data-page="dashboard" onclick="nav('dashboard')" tabindex="0"><i class="ti ti-layout-dashboard"></i><span>Accueil</span></a>
+    <a class="nav-item" data-page="agenda" onclick="nav('agenda')" tabindex="0"><i class="ti ti-calendar"></i><span>Agenda</span></a>
+    <a class="nav-item" data-page="clients" onclick="nav('clients')" tabindex="0"><i class="ti ti-users"></i><span>Clients</span></a>
     <div class="nav-section">Gestion</div>
-    <a class="nav-item bientot" data-page="disponibilites"><i class="ti ti-calendar-time"></i><span>Disponibilités</span></a>
-    <a class="nav-item bientot" data-page="parametres"><i class="ti ti-settings"></i><span>Paramètres</span></a>
+    <a class="nav-item" data-page="disponibilites" onclick="nav('disponibilites')" tabindex="0"><i class="ti ti-calendar-time"></i><span>Disponibilités</span></a>
+    <a class="nav-item" data-page="parametres" onclick="nav('parametres')" tabindex="0"><i class="ti ti-settings"></i><span>Paramètres</span></a>
   </div>
 
   <div class="sidebar-footer">
@@ -88,7 +91,7 @@
         <div class="barber-role">Gérant</div>
       </div>
     </div>
-    <button class="btn-deconnexion" onclick="deconnecter()"><i class="ti ti-logout"></i> Se déconnecter</button>
+    <button class="btn-deconnexion" onclick="deconnecter()" aria-label="Se déconnecter"><i class="ti ti-logout"></i><span> Se déconnecter</span></button>
   </div>
 </nav>
 
@@ -109,7 +112,9 @@
   </div>
 
   <!-- ═══════════ PAGE AGENDA ═══════════ -->
-  <section class="page active" id="page-agenda">
+  <section class="page" id="page-dashboard"></section>
+
+  <section class="page" id="page-agenda">
     <div class="ag-barre">
       <div class="ag-barre-nav">
         <button class="ag-nav-btn" onclick="agPrev()" aria-label="Précédent"><i class="ti ti-chevron-left"></i></button>
@@ -125,6 +130,10 @@
     <div id="ag-container"></div>
     <div class="ag-legend" id="ag-legend"></div>
   </section>
+
+  <section class="page" id="page-clients"></section>
+  <section class="page" id="page-disponibilites"></section>
+  <section class="page" id="page-parametres"></section>
 </main>
 </div>
 
@@ -216,6 +225,33 @@
     <div class="modal-actions">
       <button class="btn btn-danger" onclick="annulerRdv()"><i class="ti ti-calendar-x"></i>Annuler le RDV</button>
       <button class="btn btn-gold" onclick="saveEditRdv()"><i class="ti ti-check"></i>Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ FENÊTRE : FICHE CLIENT ═══════════ -->
+<div class="modal-bg" id="modal-client">
+  <div class="modal modal-rdv">
+    <button class="modal-close" onclick="closeModal('modal-client')" aria-label="Fermer"><i class="ti ti-x"></i></button>
+    <div class="modal-title" id="cli-titre">Client</div>
+    <div class="ts-stats" id="cli-stats"></div>
+    <div id="cli-contact" class="rdv-contact hidden">
+      <a id="cli-appel" href="#" class="btn btn-out"><i class="ti ti-phone"></i>Appeler</a>
+      <a id="cli-sms" href="#" class="btn btn-out"><i class="ti ti-message"></i>Message</a>
+    </div>
+    <div class="rdv-sec">
+      <div class="rdv-sec-t">Coordonnées</div>
+      <div class="f-group"><input class="input" id="cli-nom" type="text" maxlength="80" placeholder="Prénom et nom"></div>
+      <div class="f-row">
+        <div class="f-group"><input class="input" id="cli-tel" type="tel" inputmode="tel" placeholder="Téléphone"></div>
+        <div class="f-group"><input class="input" id="cli-email" type="email" placeholder="Email"></div>
+      </div>
+      <div class="f-group"><textarea class="input" id="cli-notes" rows="2" maxlength="1000" placeholder="Notes — dégradé bas, sabot 2 sur les côtés…"></textarea></div>
+    </div>
+    <div class="rdv-sec"><div class="rdv-sec-t">Historique</div><div id="cli-historique" class="ts-historique"></div></div>
+    <div class="modal-actions">
+      <button class="btn btn-out" onclick="rdvPourClient()"><i class="ti ti-calendar-plus"></i>Nouveau RDV</button>
+      <button class="btn btn-gold" onclick="enregistrerClient()"><i class="ti ti-check"></i>Enregistrer</button>
     </div>
   </div>
 </div>

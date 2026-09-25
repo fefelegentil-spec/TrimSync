@@ -97,3 +97,101 @@ body:not(.hors-session) #ecran-connexion { display: none; }
 .autocomplete-item:hover { background: rgba(var(--accent-rgb), .08); }
 .ac-nom { font-size: 13px; font-weight: 600; color: var(--marble-0); }
 .ac-visites { font-size: 11px; color: var(--marble-2); }
+
+/* ── Pages TrimSync (Accueil, Clients, Disponibilités, Paramètres) ──
+   Composées avec les briques de base.css (.card, .input, .btn, .switch) ;
+   seules les mises en page propres à TrimSync sont ici. */
+.page > .ts-carte + .ts-carte, .page > .ts-carte + .kpi-grid, .page > .kpi-grid + .ts-carte { margin-top: var(--sp-5); }
+.ts-texte { color: var(--marble-1); line-height: 1.55; margin: 0 0 var(--sp-3); }
+.ts-vide { color: var(--marble-2); font-size: 13px; padding: var(--sp-4) 0; text-align: center; }
+.ts-a { color: var(--marble-2); font-size: 12px; white-space: nowrap; }
+.ts-boutons { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-3); }
+.ts-form-ligne { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; margin-bottom: var(--sp-3); }
+.ts-form-ligne > .input { flex: 1 1 160px; min-width: 0; }
+.ts-form-ligne > .input[type=time], .ts-form-ligne > .input[type=date] { flex: 0 1 170px; }
+.ts-grille2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+@media (max-width: 560px) { .ts-grille2 { grid-template-columns: 1fr; } }
+.ts-coche { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--marble-1); }
+.ts-coche input { accent-color: var(--gold-0); }
+
+/* Lignes de liste (fermetures, historique, journée, attente) */
+.ts-liste, .ts-historique { display: flex; flex-direction: column; }
+.ts-ligne {
+  display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-1);
+  border-bottom: 1px solid rgba(var(--accent-rgb), .10);
+}
+.ts-ligne > i { color: var(--gold-0); font-size: 18px; flex: 0 0 auto; }
+.ts-ligne-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ts-ligne-txt strong { color: var(--marble-0); font-size: 13.5px; font-weight: 700; }
+.ts-ligne-txt span { color: var(--marble-2); font-size: 12px; }
+.ts-ligne.passe, .ts-ligne.barre { opacity: .5; }
+.ts-ligne.barre strong { text-decoration: line-through; }
+.ts-ligne[onclick] { cursor: pointer; }
+
+/* Horaires de la semaine */
+.ts-jours { display: flex; flex-direction: column; margin-bottom: var(--sp-4); }
+.ts-jour {
+  display: grid; grid-template-columns: 96px 48px auto 1fr; align-items: center; gap: var(--sp-2) var(--sp-3);
+  padding: var(--sp-3) 0; border-bottom: 1px dashed rgba(var(--accent-rgb), .10);
+}
+.ts-jour-nom { font-weight: 700; color: var(--marble-0); font-size: 13px; }
+.ts-jour-heures, .ts-jour-pause { display: flex; align-items: center; gap: 6px; }
+.ts-jour .input[type=time] { width: 104px; padding-left: 10px; padding-right: 6px; }
+.ts-jour-pause .input[type=time] { width: 96px; }
+.ts-jour.ferme .ts-jour-heures, .ts-jour.ferme .ts-jour-pause { opacity: .35; }
+@media (max-width: 720px) {
+  .ts-jour { grid-template-columns: 1fr auto; }
+  .ts-jour-heures, .ts-jour-pause { grid-column: 1 / -1; }
+}
+
+/* Prestations */
+.ts-prestas { display: flex; flex-direction: column; gap: var(--sp-2); margin-bottom: var(--sp-4); }
+.ts-presta { display: grid; grid-template-columns: auto 1fr 104px 96px auto; align-items: center; gap: var(--sp-2); }
+.ts-presta.inactive .input { opacity: .45; }
+.ts-presta-ordre { display: flex; flex-direction: column; }
+.ts-presta-ordre .btn { padding: 0 6px; min-height: 20px; }
+.ts-unite { position: relative; display: block; }
+.ts-unite .input { width: 100%; padding-right: 34px; }
+.ts-unite span { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--marble-2); font-size: 12px; pointer-events: none; }
+.ts-presta-ajout .ts-unite { flex: 0 0 100px; }
+@media (max-width: 560px) {
+  .ts-presta { grid-template-columns: auto 1fr auto; }
+  .ts-presta .ts-unite { grid-column: 2; }
+}
+
+/* Lien public */
+.ts-lien {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); flex-wrap: wrap;
+  padding: var(--sp-3) var(--sp-4); margin-bottom: var(--sp-3); border-radius: var(--r-md);
+  background: rgba(var(--accent-rgb), .08); border: 1px solid rgba(var(--accent-rgb), .22);
+}
+.ts-lien a { color: var(--gold-0); font-weight: 700; word-break: break-all; }
+.ts-danger { margin-top: var(--sp-4); }
+.ts-danger summary { cursor: pointer; color: var(--danger); font-size: 13px; }
+.ts-danger .ts-texte { margin-top: var(--sp-3); }
+
+/* Accueil */
+.ts-mise-en-route { border-color: rgba(var(--accent-rgb), .35); }
+.ts-etape { display: flex; align-items: center; gap: var(--sp-3); padding: 8px 0; color: var(--marble-0); font-size: 13.5px; }
+.ts-etape > i { color: var(--marble-3); font-size: 18px; }
+.ts-etape.faite > i { color: var(--success); }
+.ts-etape.faite span { color: var(--marble-2); text-decoration: line-through; }
+.ts-etape em, .ts-etape .btn { margin-left: auto; font-style: normal; color: var(--marble-2); font-size: 12px; }
+.ts-prochain-nom { font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 800; color: var(--marble-0); margin: 4px 0; }
+
+/* Fiche client */
+.ts-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: var(--sp-4); }
+.ts-stats:empty { display: none; }
+.ts-stats > div { background: rgba(var(--accent-rgb), .06); border-radius: var(--r-sm); padding: 10px 8px; text-align: center; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ts-stats strong { color: var(--marble-0); font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ts-stats span { color: var(--marble-2); font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; }
+@media (max-width: 480px) { .ts-stats { grid-template-columns: 1fr 1fr; } }
+.ts-historique { max-height: 240px; overflow-y: auto; }
+textarea.input { resize: vertical; min-height: 60px; font-family: inherit; }
+
+/* Menu replié en icônes (base.css, ≤ 1024 px) : même traitement que les libellés. */
+@media (max-width: 1024px) {
+  .sidebar:not(.open) .essai-pastille,
+  .sidebar:not(.open) .btn-deconnexion span { display: none; }
+  .sidebar:not(.open) .btn-deconnexion { padding: 8px 0; }
+}

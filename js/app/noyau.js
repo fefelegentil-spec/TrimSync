@@ -103,6 +103,7 @@ function closeModal(id) {
 }
 
 /* ── Navigation ── */
+// Chaque fichier de page s'y ajoute (PAGES.clients = …).
 const PAGES = {
   agenda: { titre: 'Agenda', sous: 'Visualise et organise tes créneaux', rendu: () => renderAgenda() },
 };
@@ -111,7 +112,8 @@ function nav(id) {
   document.querySelectorAll('.modal-bg').forEach(m => m.classList.remove('open'));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + id));
   document.querySelectorAll('.nav-item').forEach(t => t.classList.toggle('active', t.dataset.page === id));
-  document.getElementById('topbar-title').textContent = PAGES[id].titre;
+  const titre = id === 'dashboard' ? 'Bonjour, <span class="accent">' + esc(SESSION.salon.nom) + '</span>' : esc(PAGES[id].titre);
+  document.getElementById('topbar-title').innerHTML = titre;
   document.getElementById('topbar-sub').textContent = PAGES[id].sous;
   if (document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
   PAGES[id].rendu();
@@ -158,7 +160,7 @@ async function ouvrirSession() {
   document.body.classList.remove('hors-session');
   window.scrollTo(0, 0);
   afficherSalon();
-  nav('agenda');
+  nav('dashboard');
 }
 
 function deconnecter() {

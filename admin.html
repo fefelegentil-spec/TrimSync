@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>TrimSync — Back-office</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="css/app/base.css?v=1">
+<link rel="stylesheet" href="css/app/trimsync.css?v=3">
+<style>
+/* Back-office de Félix : les salons inscrits, leur essai, leur plan, leur
+   demande de bot. Accès par ADMIN_PASSWORD (jeton admin distinct des jetons
+   barbier), jamais gardé au-delà de la session du navigateur. */
+body { padding: 24px 16px 48px; }
+.bo { max-width: 1080px; margin: 0 auto; }
+.bo-tete { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.bo-tete h1 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; }
+.bo-tete h1 span { color: var(--gold-0); }
+.bo-filtres { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.bo-salon { display: grid; grid-template-columns: 1.6fr 1fr 1fr auto; gap: 12px; align-items: center; padding: 14px 4px; border-bottom: 1px solid rgba(var(--accent-rgb), .10); }
+.bo-salon strong { color: var(--marble-0); display: block; }
+.bo-salon small { color: var(--marble-2); display: block; font-size: 12px; }
+.bo-salon a { color: var(--gold-0); }
+.bo-etat { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 12px; display: inline-block; background: rgba(var(--accent-rgb), .1); color: var(--gold-0); }
+.bo-etat.expire, .bo-etat.suspendu { background: rgba(224, 80, 80, .12); color: var(--danger); }
+.bo-etat.actif { background: rgba(74, 186, 106, .12); color: var(--success); }
+.bo-bot { color: var(--warning); font-weight: 700; }
+.bo-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.bo-actions select { width: auto; padding: 6px 8px; min-height: 32px; }
+@media (max-width: 760px) { .bo-salon { grid-template-columns: 1fr 1fr; } .bo-actions { grid-column: 1 / -1; justify-content: flex-start; } }
+#bo-connexion { max-width: 380px; margin: 12vh auto 0; }
+</style>
+</head>
+<body>
+<div class="bo">
+  <div class="card" id="bo-connexion">
+    <div class="cx-logo">Trim<span>Sync</span> · back-office</div>
+    <form class="cx-form" onsubmit="connexion(event)">
+      <input class="input" id="bo-mdp" type="password" autocomplete="current-password" placeholder="Mot de passe admin" required>
+      <div class="cx-erreur" id="bo-erreur"></div>
+      <button class="btn btn-gold" type="submit"><i class="ti ti-lock-open"></i>Entrer</button>
+    </form>
+  </div>
+
+  <div id="bo-contenu" hidden>
+    <div class="bo-tete">
+      <h1>Trim<span>Sync</span> · back-office</h1>
+      <div class="ts-boutons" style="margin:0">
+        <button class="btn btn-out btn-sm" onclick="charger()"><i class="ti ti-refresh"></i>Actualiser</button>
+        <button class="btn btn-ghost btn-sm" onclick="sortir()"><i class="ti ti-logout"></i>Sortir</button>
+      </div>
+    </div>
+    <div class="kpi-grid" id="bo-kpi"></div>
+    <div class="card ts-carte">
+      <div class="card-h"><div><div class="card-title">Salons</div><div class="card-sub">Du plus récent au plus ancien. « Bot demandé » : à rappeler pour la mise en route.</div></div></div>
+      <div class="bo-filtres tabs" id="bo-filtres"></div>
+      <div id="bo-salons"></div>
+    </div>
+  </div>
+</div>
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? (localStorage.getItem('ts_api') || 'http://localhost:3998')
+  : 'https://trimsync-production.up.railway.app';
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const euros = n => (n || 0).toLocaleString('fr-FR') + ' €';
+const jour = d => d ? new Date(String(d).length === 10 ? d + 'T12:00:00' : d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+let SALONS = [], filtre = 'tous';
+
+function toast(msg, type) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.textContent = msg;
+  $('toast-wrap').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+async function api(methode, chemin, corps) {
+  const jeton = sessionStorage.getItem('ts_admin');
+  const r = await fetch(API + chemin, {
+    method: methode,
+    headers: { 'content-type': 'application/json', ...(jeton ? { authorization: 'Bearer ' + jeton } : {}) },
+    body: corps ? JSON.stringify(corps) : undefined,
+  });
+  let d = null; try { d = await r.json(); } catch (_) {}
+  if (r.status === 401 && jeton) { sortir(); throw new Error('Session expirée'); }
+  if (!r.ok) throw new Error((d && d.error) || 'Erreur ' + r.status);
+  return d;
+}
+
+async function connexion(e) {
+  e.preventDefault();
+  $('bo-erreur').textContent = '';
+  try {
+    const r = await api('POST', '/api/admin/connexion', { mdp: $('bo-mdp').value });
+    sessionStorage.setItem('ts_admin', r.jeton);
+    $('bo-mdp').value = '';
+    ouvrir();
+  } catch (x) { $('bo-erreur').textContent = x.message; }
+}
+
+function sortir() {
+  sessionStorage.removeItem('ts_admin');
+  $('bo-contenu').hidden = true;
+  $('bo-connexion').hidden = false;
+}
+
+function ouvrir() {
+  $('bo-connexion').hidden = true;
+  $('bo-contenu').hidden = false;
+  charger();
+}
+
+async function charger() {
+  try {
+    const [kpi, { salons }] = await Promise.all([api('GET', '/api/admin/kpi'), api('GET', '/api/admin/salons')]);
+    SALONS = salons;
+    const carte = (label, valeur, icone) => `<div class="kpi-card"><i class="ti ${icone} kpi-icon"></i><div class="kpi-label">${label}</div><div class="kpi-value">${valeur}</div></div>`;
+    $('bo-kpi').innerHTML = carte('En essai', kpi.essai, 'ti-hourglass') + carte('Clients payants', kpi.actifs, 'ti-circle-check')
+      + carte('Revenu mensuel', euros(kpi.mrr), 'ti-trending-up') + carte('Bots à brancher', kpi.demandes_bot, 'ti-brand-instagram');
+    afficher();
+  } catch (x) { toast(x.message, 'danger'); }
+}
+
+function afficher() {
+  const compte = f => SALONS.filter(s => f === 'tous' || (f === 'bot' ? s.bot_statut === 'demande' : s.statut === f)).length;
+  const filtres = [['tous', 'Tous'], ['essai', 'Essai'], ['actif', 'Payants'], ['expire', 'Expirés'], ['bot', 'Bot demandé']];
+  $('bo-filtres').innerHTML = filtres.map(([f, l]) => `<div class="tab${f === filtre ? ' active' : ''}" onclick="filtre='${f}';afficher()">${l} · ${compte(f)}</div>`).join('');
+  const liste = SALONS.filter(s => filtre === 'tous' || (filtre === 'bot' ? s.bot_statut === 'demande' : s.statut === filtre));
+  $('bo-salons').innerHTML = liste.length ? liste.map(s => `<div class="bo-salon">
+      <div><strong>${esc(s.nom)}</strong><small>${esc(s.ville || '—')} · <a href="${esc(s.lien_public)}" target="_blank" rel="noopener">page</a></small>
+        <small>${esc(s.email || '')}${s.email_verifie ? ' ✓' : ' (non vérifié)'} · ${esc(s.telephone || '')}</small></div>
+      <div><span class="bo-etat ${esc(s.statut)}">${{ essai: 'Essai', actif: 'Payant', expire: 'Expiré', suspendu: 'Suspendu' }[s.statut] || esc(s.statut)}${s.plan ? ' · ' + esc(s.plan) : ''}</span>
+        <small>${s.statut === 'essai' ? `fin le ${jour(s.essai_fin)} (${s.jours_essai_restants} j)` : `essai fini le ${jour(s.essai_fin)}`}</small>
+        ${s.bot_statut === 'demande' ? '<small class="bo-bot"><i class="ti ti-brand-instagram"></i> Bot demandé</small>' : s.bot_statut === 'actif' ? '<small>Bot actif</small>' : ''}</div>
+      <div><small>${s.rdv_30j} RDV sur 30 j</small><small>Vu le ${jour(s.derniere_connexion_le)}</small><small>Inscrit le ${jour(s.created_at)}</small></div>
+      <div class="bo-actions">
+        <select class="input" onchange="activer('${esc(s.id)}', this.value); this.value=''" aria-label="Activer un plan">
+          <option value="">Activer…</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="max">Max</option>
+        </select>
+        <button class="btn btn-out btn-sm" onclick="prolonger('${esc(s.id)}', '${esc(s.essai_fin)}')">+14 j d'essai</button>
+        ${s.bot_statut !== 'actif' ? `<button class="btn btn-out btn-sm" onclick="modifier('${esc(s.id)}', { bot_statut: 'actif' }, 'Bot marqué actif')">Bot branché</button>` : ''}
+        ${s.statut !== 'suspendu' ? `<button class="btn btn-ghost btn-sm" onclick="suspendre('${esc(s.id)}', '${esc(s.nom)}')">Suspendre</button>` : ''}
+      </div>
+    </div>`).join('') : '<div class="ts-vide">Aucun salon ici.</div>';
+}
+
+async function modifier(id, corps, message) {
+  try { await api('PATCH', '/api/admin/salons/' + id, corps); toast(message + ' ✓', 'success'); charger(); }
+  catch (x) { toast(x.message, 'danger'); }
+}
+function activer(id, plan) { if (plan) modifier(id, { statut: 'actif', plan }, 'Plan ' + plan + ' activé'); }
+function prolonger(id, fin) {
+  const aujourdhui = new Date().toISOString().slice(0, 10);
+  const depart = new Date((fin > aujourdhui ? fin : aujourdhui) + 'T12:00:00Z');
+  depart.setUTCDate(depart.getUTCDate() + 14);
+  modifier(id, { essai_fin: depart.toISOString().slice(0, 10) }, 'Essai prolongé');
+}
+function suspendre(id, nom) {
+  if (confirm(`Suspendre ${nom} ? Son agenda passe en lecture seule et sa page ne prend plus de réservations.`)) modifier(id, { statut: 'suspendu' }, 'Salon suspendu');
+}
+
+if (sessionStorage.getItem('ts_admin')) ouvrir();
+</script>
+</body>
+</html>

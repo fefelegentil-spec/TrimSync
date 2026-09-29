@@ -903,7 +903,16 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 }
 
 /* ─── SECTIONS — fonds statiques + bordures de délimitation ─── */
-#home,#solution,#cta{background:transparent}
+#home,#cta{background:transparent}
+/* #solution laisse deviner le fond animé sans jamais le montrer en pleine
+   intensité : la ligne topographique produit par moments un amas de
+   contours qui se chevauchent (accumulation normale du bruit procédural,
+   pas un défaut de position) et forme localement une plage nettement plus
+   claire ; en tombant dans une section transparente, longue et peu couverte
+   par des cartes, ce lavis pouvait ressembler à un bloc de fond mal calé,
+   posé et coupé net à la bordure de la section suivante. Un voile semi-
+   opaque amortit l'écart sans effacer l'ambiance. */
+#solution{background:oklch(0.10 0.007 222/.55)}
 
 /* Sections opaques : fond sombre + fine bordure teal haut/bas */
 #problem,#features,#faq{

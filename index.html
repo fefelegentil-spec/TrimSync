@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="theme-color" content="#040608"/>
 <title>TrimSync — AI Booking for Barbershops</title>
 <meta name="description" content="TrimSync automates Instagram DM bookings for barbershops with AI. Never miss a booking again."/>
 <meta property="og:title" content="TrimSync — AI Booking for Barbershops"/>
@@ -39,7 +40,8 @@
   --grain-uri:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-font-smoothing:antialiased}
+/* Page verticale uniquement : rien ne doit pouvoir la faire glisser de côté. */
+html{-webkit-font-smoothing:antialiased;overflow-x:clip;background:var(--bg)}
 body{background-color:var(--bg);color:var(--t);font-family:var(--fb);font-size:16px;line-height:1.65;overflow-x:clip}
 a{color:inherit;text-decoration:none}
 img,svg,canvas{display:block}
@@ -54,7 +56,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
 
 /* scroll progress */
-.scroll-prog{position:fixed;top:0;left:0;width:100%;height:2px;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--a),oklch(0.84 0.10 190));z-index:9997;pointer-events:none}
+.scroll-prog{position:fixed;top:calc(68px + env(safe-area-inset-top));left:0;width:100%;height:2px;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--a),oklch(0.84 0.10 190));z-index:9997;pointer-events:none}
 
 /* section nav dots */
 .sec-nav{position:fixed;right:1.5rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:.6rem;z-index:90}
@@ -89,11 +91,12 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .btn-nav:hover{background:oklch(0.82 0.11 190)}
 
 /* nav */
-.nav{position:fixed;top:0;left:0;right:0;z-index:9950;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:#1a1e24;background:oklch(0.12 0.008 222/.92);border-bottom:1px solid var(--bd);transition:background .3s,border-color .3s;padding-top:env(safe-area-inset-top);transform:translate3d(0,0,0)}
+.nav{position:fixed;top:0;left:0;right:0;z-index:9950;background:#040608;background:oklch(0.12 0.008 222);border-bottom:1px solid var(--bd);transition:background .3s,border-color .3s;padding-top:env(safe-area-inset-top);transform:translate3d(0,0,0)}
 /* iOS safe-area fix: backdrop-filter ne couvre pas la zone padding-top sur Safari Mobile */
-.nav::before{content:'';position:absolute;top:0;left:0;right:0;height:env(safe-area-inset-top);background:#1a1e24;background:oklch(0.12 0.008 222);pointer-events:none}
-.nav.scrolled{background:#1a1e24;background:oklch(0.12 0.008 222);border-bottom-color:var(--bd2)}
-@media(max-width:960px){.nav{background:#1a1e24;background:oklch(0.12 0.008 222)}}
+/* Bandeau opaque et prolongé vers le haut : rien du site ne doit apparaître sous
+   l'encoche / la Dynamic Island, ni quand iOS fait rebondir la page en haut. */
+.nav::before{content:'';position:absolute;left:0;right:0;bottom:100%;height:100vh;background:#040608;background:oklch(0.12 0.008 222);pointer-events:none}
+.nav.scrolled{background:#040608;background:oklch(0.12 0.008 222);border-bottom-color:var(--bd2)}
 .nav-inner{max-width:var(--max);margin:0 auto;padding:0 2.5rem;display:flex;align-items:center;justify-content:space-between;height:68px}
 .logo{font-family:var(--fd);font-size:1.35rem;font-weight:800;letter-spacing:-.04em}
 .logo em{color:var(--a);font-style:normal}
@@ -535,7 +538,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   height:0%;box-shadow:0 0 10px oklch(0.76 0.13 193/.5);
 }
 .sol-step{
-  display:grid;grid-template-columns:1fr 80px 1fr;
+  display:grid;grid-template-columns:minmax(0,1fr) 80px minmax(0,1fr);
   align-items:center;gap:0;padding:3.5rem 0;position:relative;
 }
 .sol-step-node{
@@ -570,7 +573,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 @media(max-width:760px){
   .sol-tline-track{left:27px}
   .sol-step{
-    grid-template-columns:54px 1fr;gap:0 1.5rem;
+    grid-template-columns:54px minmax(0,1fr);gap:0 1.5rem;
     padding:2rem 0;
   }
   .sol-step--right .sol-step-empty,.sol-step--left .sol-step-empty{display:none}
@@ -3284,11 +3287,15 @@ window.bConnectInstagram = function() {
 
   /* ── SOLUTION TIMELINE — slide alterné + ligne progress ── */
   if(!pref){
+    /* Sur téléphone, pas de glissé latéral : les blocs partaient 56px à droite
+       de l'écran avant d'apparaître, ce qui élargissait la page et la laissait
+       glisser de gauche à droite sur iPhone. */
+    const etroit=matchMedia('(max-width:760px)').matches;
     document.querySelectorAll('.sol-step').forEach(el=>{
       const c=el.querySelector('.step-content');
       const n=el.querySelector('.sol-step-num');
       const isL=el.classList.contains('sol-step--left');
-      if(c){c.style.opacity='0';c.style.transform=`translateX(${isL?-56:56}px)`;}
+      if(c){c.style.opacity='0';c.style.transform=etroit?'translateY(24px)':`translateX(${isL?-56:56}px)`;}
       if(n){n.style.opacity='0';n.style.transform='scale(0.55)';}
     });
     once('.sol-step',(t)=>{
@@ -3296,7 +3303,7 @@ window.bConnectInstagram = function() {
       const n=t.querySelector('.sol-step-num');
       const isL=t.classList.contains('sol-step--left');
       if(n) animate(n,{opacity:[0,1],scale:[0.55,1]},{duration:0.5,easing:EXB});
-      if(c) animate(c,{opacity:[0,1],x:[isL?-56:56,0]},{duration:0.7,delay:0.1,easing:EX});
+      if(c) animate(c,etroit?{opacity:[0,1],y:[24,0]}:{opacity:[0,1],x:[isL?-56:56,0]},{duration:0.7,delay:0.1,easing:EX});
     },{rootMargin:'-18% 0px',threshold:0.2});
 
     /* Ligne progress scrubée au scroll */

@@ -5,7 +5,9 @@ const { pool } = require('./db');
 const { nowParis, decaleJours } = require('./dates');
 const emails = require('./emails');
 
-const RAPPELS = [[7, 'rappel_j7_le'], [1, 'rappel_j1_le']];
+// L'essai dure 7 jours : premier rappel 3 jours avant la fin (la colonne garde
+// son nom d'origine, du temps où l'essai durait 30 jours et le rappel partait à J-7).
+const RAPPELS = [[3, 'rappel_j7_le'], [1, 'rappel_j1_le']];
 
 async function tachesDuJour() {
   const auj = nowParis().date;

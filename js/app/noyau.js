@@ -197,12 +197,12 @@ async function cxInscription(e) {
   try {
     const r = await api('POST', '/api/comptes/inscription', {
       email: valeur('cx-i-email'), mdp: document.getElementById('cx-i-mdp').value,
-      salon: valeur('cx-i-salon'), ville: valeur('cx-i-ville'), telephone: valeur('cx-i-tel'),
+      salon: valeur('cx-i-salon'), metier: valeur('cx-i-metier'), ville: valeur('cx-i-ville'), telephone: valeur('cx-i-tel'),
       consentement: document.getElementById('cx-i-consent').checked,
     });
     localStorage.setItem(CLE_JETON, r.jeton);
     await ouvrirSession();
-    toast('Bienvenue ! Ton salon est prêt, 30 jours offerts.', 'success');
+    toast('Bienvenue ! Ton salon est prêt, 7 jours offerts.', 'success');
   } catch (x) { err.textContent = messageErreur(x); }
 }
 

@@ -360,7 +360,7 @@ body::after{
 <div class="header">
   <div class="h-mark" id="headerMark">B</div>
   <div class="h-name" id="headerName">MON SALON</div>
-  <div class="h-sub">Barbershop · Réservation en ligne</div>
+  <div class="h-sub">Studio · Réservation en ligne</div>
   <div class="h-info">
     <div class="h-info-item"><i class="ti ti-map-pin"></i>Paris, France</div>
     <div class="h-info-item"><i class="ti ti-clock"></i>Lun–Sam 9h–19h</div>
@@ -554,12 +554,12 @@ body::after{
    APP
    ══════════════════════════════════════════════════════ */
 const SERVICES = [
-  {id:'coupe-classique', name:'Coupe classique',    price:25, duration:30, icon:'ti-scissors'},
-  {id:'coupe-premium',   name:'Coupe premium',       price:35, duration:45, icon:'ti-crown'},
-  {id:'barbe',           name:'Barbe',               price:20, duration:25, icon:'ti-razor-electric'},
-  {id:'coupe-barbe',     name:'Coupe + Barbe',       price:45, duration:60, icon:'ti-user-check'},
-  {id:'rasage',          name:'Rasage traditionnel', price:30, duration:35, icon:'ti-razor'},
-  {id:'kids',            name:'Coupe enfant',        price:20, duration:25, icon:'ti-mood-kid'},
+  {id:'pose-gel',        name:'Pose gel',            price:35, duration:60, icon:'ti-hand-finger'},
+  {id:'semi',            name:'Semi-permanent',      price:25, duration:45, icon:'ti-droplet'},
+  {id:'remplissage',     name:'Remplissage',         price:30, duration:60, icon:'ti-refresh'},
+  {id:'nail-art',        name:'Nail art',            price:10, duration:20, icon:'ti-brush'},
+  {id:'depose',          name:'Dépose',              price:15, duration:20, icon:'ti-eraser'},
+  {id:'manucure',        name:'Manucure',            price:20, duration:30, icon:'ti-sparkles'},
 ];
 
 let state = {step:1, svc:null, date:null, time:null, calDate:new Date()};

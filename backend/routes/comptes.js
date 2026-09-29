@@ -15,10 +15,17 @@ const router = express.Router();
 const quotaComptes = quota(10, 15 * 60 * 1000);
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const DUREE_ESSAI_JOURS = 30;
+const DUREE_ESSAI_JOURS = 7;
 const HEURE_MS = 3600 * 1000;
-// Pour ne pas partir d'une page vide : tout est modifiable ensuite.
-const PRESTATIONS_DEPART = [['Coupe', 30, 20], ['Barbe', 20, 10], ['Coupe + barbe', 45, 28]];
+// Pour ne pas partir d'une page vide : un catalogue de départ selon l'activité
+// choisie à l'inscription [nom, durée min, prix €]. Tout est modifiable ensuite.
+const PRESTATIONS_DEPART = {
+  ongles: [['Pose gel', 60, 35], ['Semi-permanent', 45, 25], ['Remplissage', 60, 30]],
+  coiffure: [['Coupe', 30, 20], ['Barbe', 20, 10], ['Coupe + barbe', 45, 28]],
+  cils: [['Extension de cils', 90, 60], ['Rehaussement de cils', 60, 45], ['Restructuration sourcils', 30, 20]],
+  esthetique: [['Soin visage', 60, 50], ['Épilation sourcils', 15, 10], ['Épilation jambes', 30, 25]],
+  autre: [['Rendez-vous', 30, 20]],
+};
 // Même durée de réponse, que l'email existe ou non.
 const MDP_LEURRE = hacherMdp('leurre-' + Math.random());
 
@@ -31,6 +38,7 @@ router.post('/api/comptes/inscription', quotaComptes, async (req, res) => {
   const nom = sanitizeText(b.salon, 80);
   const ville = sanitizeText(b.ville, 60);
   const telephone = telAStocker(sanitizeText(b.telephone, 30));
+  const depart = Object.hasOwn(PRESTATIONS_DEPART, b.metier) ? PRESTATIONS_DEPART[b.metier] : PRESTATIONS_DEPART.autre;
   if (!EMAIL.test(email)) return res.status(400).json({ error: 'Adresse email invalide' });
   if (mdp.length < 8) return res.status(400).json({ error: 'Le mot de passe doit faire au moins 8 caractères' });
   if (!nom) return res.status(400).json({ error: 'Le nom du salon est obligatoire' });
@@ -47,7 +55,7 @@ router.post('/api/comptes/inscription', quotaComptes, async (req, res) => {
       await q.query(
         `INSERT INTO comptes (id, salon_id, email, mdp_hash, derniere_connexion_le) VALUES ($1, $2, $3, $4, NOW())`,
         [compteId, salonId, email, hacherMdp(mdp)]);
-      for (const [ordre, [n, duree, prix]] of PRESTATIONS_DEPART.entries()) {
+      for (const [ordre, [n, duree, prix]] of depart.entries()) {
         await q.query(
           `INSERT INTO prestations (id, salon_id, nom, duree_min, prix, ordre) VALUES ($1, $2, $3, $4, $5, $6)`,
           [uid('p'), salonId, n, duree, prix, ordre]);

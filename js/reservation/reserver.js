@@ -125,8 +125,12 @@ function iconePresta(nom) {
   const n = (nom || '').toLowerCase();
   if (n.includes('barbe')) return 'ti-razor';
   if (n.includes('enfant')) return 'ti-mood-kid';
+  if (/ongle|gel|semi|remplissage|manucure|p[ée]dicure|nail/.test(n)) return 'ti-hand-finger';
+  if (/cil|sourcil/.test(n)) return 'ti-eye';
+  if (/soin|visage|[ée]pil|massage/.test(n)) return 'ti-sparkles';
   if (n.includes('design') || n.includes('trait')) return 'ti-brush';
-  return 'ti-scissors';
+  if (/coupe|coiff|brushing|couleur|m[èe]che/.test(n)) return 'ti-scissors';
+  return 'ti-calendar-event';
 }
 function selectSvc(id) {
   selSvc = SERVICES.find(s => s.id === id) || SERVICES[0];

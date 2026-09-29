@@ -47,12 +47,12 @@ const SEMAINE = [0, 1, 2, 3, 4, 5, 6].map(jour =>
 async function main() {
   console.log('T1 — inscription et connexion');
   const insA = await appel('POST', '/api/comptes/inscription',
-    { email: emailA, mdp: 'motdepasse1', salon: nomSalon, ville: 'Lyon', telephone: '06 12 34 56 78', consentement: true });
+    { email: emailA, mdp: 'motdepasse1', salon: nomSalon, ville: 'Lyon', telephone: '06 12 34 56 78', metier: 'coiffure', consentement: true });
   ok(insA.s === 201 && insA.d.jeton, 'inscription A', insA);
   if (insA.s !== 201) return;
   const A = insA.d.jeton;
   const slugA = insA.d.salon.slug;
-  ok(insA.d.salon.statut === 'essai' && insA.d.salon.jours_essai_restants === 30, 'essai de 30 jours', insA.d.salon);
+  ok(insA.d.salon.statut === 'essai' && insA.d.salon.jours_essai_restants === 7, 'essai de 7 jours', insA.d.salon);
   ok((await appel('POST', '/api/comptes/inscription',
     { email: emailA.toUpperCase(), mdp: 'motdepasse1', salon: 'X', ville: 'Y', consentement: true })).s === 409,
     'email déjà pris refusé, casse ignorée');
@@ -60,6 +60,14 @@ async function main() {
     { email: `c-${RUN}@test.fr`, mdp: 'motdepasse1', salon: 'X', ville: 'Y' })).s === 400, 'sans consentement refusé');
   ok((await appel('POST', '/api/comptes/inscription',
     { email: `d-${RUN}@test.fr`, mdp: 'court', salon: 'X', ville: 'Y', consentement: true })).s === 400, 'mot de passe trop court refusé');
+  const insN = await appel('POST', '/api/comptes/inscription',
+    { email: `n-${RUN}@test.fr`, mdp: 'motdepasse1', salon: 'Studio Ongles', metier: 'ongles', consentement: true });
+  const prestasN = (await appel('GET', '/api/prestations', undefined, insN.d?.jeton)).d?.prestations || [];
+  ok(prestasN.some(p => p.nom === 'Pose gel') && !prestasN.some(p => /barbe/i.test(p.nom)), "catalogue de départ selon l'activité", prestasN);
+  const insX = await appel('POST', '/api/comptes/inscription',
+    { email: `x-${RUN}@test.fr`, mdp: 'motdepasse1', salon: 'Studio X', metier: 'constructor', consentement: true });
+  const prestasX = (await appel('GET', '/api/prestations', undefined, insX.d?.jeton)).d?.prestations || [];
+  ok(prestasX.length === 1 && prestasX[0].nom === 'Rendez-vous', 'activité inconnue : catalogue neutre', prestasX);
   const insB = await appel('POST', '/api/comptes/inscription',
     { email: emailB, mdp: 'motdepasse2', salon: nomSalon, ville: 'Lyon', telephone: '0611111111', consentement: true });
   ok(insB.s === 201 && insB.d.salon.slug === slugA + '-2', 'slug dédupliqué', [slugA, insB.d?.salon?.slug]);

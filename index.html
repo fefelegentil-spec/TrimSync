@@ -4,10 +4,10 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <meta name="theme-color" content="#040608"/>
-<title>TrimSync — AI Booking for Barbershops</title>
-<meta name="description" content="TrimSync automates Instagram DM bookings for barbershops with AI. Never miss a booking again."/>
-<meta property="og:title" content="TrimSync — AI Booking for Barbershops"/>
-<meta property="og:description" content="Your chair fills itself. Connect Instagram, let AI handle DMs, appointments booked automatically."/>
+<title>TrimSync — AI Booking for Beauty Pros</title>
+<meta name="description" content="TrimSync answers your Instagram DMs and books your clients with AI. Nails, hair, lashes, beauty. Never miss a booking again."/>
+<meta property="og:title" content="TrimSync — AI Booking for Beauty Pros"/>
+<meta property="og:description" content="Your schedule fills itself. Connect Instagram, let AI handle DMs, appointments booked automatically."/>
 <meta property="og:type" content="website"/>
 <meta property="og:locale" content="en_US"/>
 <meta name="twitter:card" content="summary_large_image"/>
@@ -56,7 +56,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
 
 /* scroll progress */
-.scroll-prog{position:fixed;top:calc(68px + env(safe-area-inset-top));left:0;width:100%;height:2px;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--a),oklch(0.84 0.10 190));z-index:9997;pointer-events:none}
+.scroll-prog{position:fixed;top:calc(var(--nav-h) + env(safe-area-inset-top));left:0;width:100%;height:2px;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--a),oklch(0.84 0.10 190));z-index:9997;pointer-events:none}
 
 /* section nav dots */
 .sec-nav{position:fixed;right:1.5rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:.6rem;z-index:90}
@@ -97,7 +97,8 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
    l'encoche / la Dynamic Island, ni quand iOS fait rebondir la page en haut. */
 .nav::before{content:'';position:absolute;left:0;right:0;bottom:100%;height:100vh;background:#040608;background:oklch(0.12 0.008 222);pointer-events:none}
 .nav.scrolled{background:#040608;background:oklch(0.12 0.008 222);border-bottom-color:var(--bd2)}
-.nav-inner{max-width:var(--max);margin:0 auto;padding:0 2.5rem;display:flex;align-items:center;justify-content:space-between;height:68px}
+:root{--nav-h:68px}
+.nav-inner{max-width:var(--max);margin:0 auto;padding:0 2.5rem;display:flex;align-items:center;justify-content:space-between;height:var(--nav-h)}
 .logo{font-family:var(--fd);font-size:1.35rem;font-weight:800;letter-spacing:-.04em}
 .logo em{color:var(--a);font-style:normal}
 .nav-links{display:flex;align-items:center;gap:2.5rem;list-style:none}
@@ -111,11 +112,12 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .hbg[aria-expanded=true] span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
 .hbg[aria-expanded=true] span:nth-child(2){opacity:0}
 .hbg[aria-expanded=true] span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
-.nav-mob{display:none;position:fixed;top:calc(68px + env(safe-area-inset-top));left:0;right:0;bottom:0;background:oklch(0.12 0.008 222/.97);backdrop-filter:blur(24px);padding:2rem 2.5rem;flex-direction:column;gap:.3rem;z-index:99;overflow-y:auto;overscroll-behavior:contain}
+.nav-mob{display:none;position:fixed;top:calc(var(--nav-h) + env(safe-area-inset-top));left:0;right:0;bottom:0;background:oklch(0.12 0.008 222/.97);backdrop-filter:blur(24px);padding:2rem 2.5rem;flex-direction:column;gap:.3rem;z-index:99;overflow-y:auto;overscroll-behavior:contain}
 .nav-mob.open{display:flex}
 .nav-mob a{font-family:var(--fd);font-size:1.2rem;font-weight:700;letter-spacing:-.03em;padding:.85rem 0;border-bottom:1px solid var(--bd);color:var(--t);transition:color .2s}
 .nav-mob a:hover{color:var(--t)}
 .nav-mob .btn-a{text-align:center;justify-content:center;margin-top:.5rem;border-bottom:none}
+.nav-mob .nav-mob-lang{margin-top:1.2rem;align-self:center;font-size:.9rem;color:var(--t2);padding:.6rem 1rem;min-height:44px}
 
 /* hero */
 .hero{position:relative;z-index:1;min-height:100svh;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;padding:calc(7rem + env(safe-area-inset-top)) 0 4rem;overflow:hidden}
@@ -853,8 +855,14 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   .feat:nth-child(1),.feat:nth-child(2),.feat:nth-child(3),.feat:nth-child(4){grid-column:auto;grid-row:auto}
   /* prob-grid déjà flex-column, pas de reset nécessaire */
   .price-layout{grid-template-columns:1fr;gap:3rem}
-  .nav-links,.btn-nav{display:none}
-  .hbg{display:flex}
+  /* En-tête téléphone : logo à gauche, « Essai gratuit » + menu à droite.
+     La langue passe dans le menu (bouton seul dans un cadre, il flottait). */
+  :root{--nav-h:60px}
+  .nav-links,.nav-right .lang-btn{display:none}
+  .nav-right{gap:.25rem;margin-left:auto;margin-right:.35rem}
+  .btn-nav{padding:.5rem .95rem;font-size:.8rem;min-height:38px;display:inline-flex;align-items:center}
+  .hbg{display:flex;margin-right:-10px}
+  .hbg span{background:var(--t)}
 }
 
 /* Tablette portrait : 768px */
@@ -1439,7 +1447,8 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   <a href="#features" data-en="Features"           data-fr="Fonctionnalités">Features</a>
   <a href="#pricing"  data-en="Pricing"            data-fr="Tarifs">Pricing</a>
   <a href="#faq"      data-en="FAQ"                data-fr="FAQ">FAQ</a>
-  <a href="/app#inscription" class="btn btn-a" data-en="Start free — 30 days" data-fr="Essai gratuit 30 jours">Start free — 30 days</a>
+  <a href="/app#inscription" class="btn btn-a" data-en="Start free — 7 days" data-fr="Essai gratuit 7 jours">Start free — 7 days</a>
+  <button type="button" class="nav-mob-lang" onclick="document.getElementById('lt').click()" data-en="🇫🇷 Version française" data-fr="🇬🇧 English version">🇫🇷 Version française</button>
 </nav>
 
 <main>
@@ -1460,8 +1469,8 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   <!-- shadow-bg : effet déplacé vers #page-bg (fixed full-site) -->
   <div class="hero-head wrap">
     <h1 class="hero-title"
-      data-en="Your <em>chair</em> fills itself."
-      data-fr="Ton <em>agenda</em> se remplit tout seul.">Your <em>chair</em> fills itself.</h1>
+      data-en="Your <em>schedule</em> fills itself."
+      data-fr="Ton <em>agenda</em> se remplit tout seul.">Your <em>schedule</em> fills itself.</h1>
   </div>
   <div class="hero-inner wrap">
 
@@ -1483,9 +1492,9 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       <div class="hero-visual chat-wrap" aria-label="AI handles Instagram DMs">
         <div class="chat-phone">
           <div class="chat-bar">
-            <div class="chat-av" aria-hidden="true">BP</div>
+            <div class="chat-av" aria-hidden="true">SN</div>
             <div class="chat-info">
-              <span class="chat-name">BarberShop Pro</span>
+              <span class="chat-name">Studio Nova</span>
               <span class="chat-ai"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true"><circle cx="4" cy="4" r="3.5" fill="currentColor" opacity=".4"/><circle cx="4" cy="4" r="1.5" fill="currentColor"/></svg> AI Active</span>
             </div>
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-label="Instagram" role="img"><rect x="3" y="3" width="12" height="12" rx="3.5" stroke="oklch(0.50 0.007 58)" stroke-width="1.3"/><circle cx="9" cy="9" r="2.8" stroke="oklch(0.50 0.007 58)" stroke-width="1.3"/><circle cx="13" cy="5" r=".7" fill="oklch(0.50 0.007 58)"/></svg>
@@ -1678,7 +1687,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 <section class="section" id="features">
   <div class="wrap">
     <div class="sec-hd rv sec-hd--tight">
-      <span class="label" data-en="Built for barbers" data-fr="Conçu pour les barbiers">Built for barbers</span>
+      <span class="label" data-en="Built for beauty pros" data-fr="Conçu pour les pros de la beauté">Built for beauty pros</span>
       <h2 class="fd fd-lg sec-h2" style="max-width:480px"
         data-en="Everything you need. Nothing you don't."
         data-fr="Tout ce qu'il faut. Rien de plus."
@@ -1820,7 +1829,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
       </div><!-- /plans-grid -->
 
-      <p class="plans-reassure" data-en="No commitment. First month free." data-fr="Sans engagement. Premier mois offert.">No commitment. First month free.</p>
+      <p class="plans-reassure" data-en="No commitment. 7 days free." data-fr="Sans engagement. 7 jours offerts.">No commitment. 7 days free.</p>
 
     </div><!-- /plans-wrap -->
   </div>
@@ -1833,9 +1842,9 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     <div class="sec-hd rv sec-hd--center">
       <span class="label">FAQ</span>
       <h2 class="fd fd-lg sec-h2"
-        data-en="Questions barbers ask"
-        data-fr="Les questions des barbiers"
-      >Questions barbers ask</h2>
+        data-en="Questions pros ask"
+        data-fr="Les questions des pros"
+      >Questions pros ask</h2>
     </div>
     <div class="faq-list rv">
       <div class="faq-item">
@@ -1884,7 +1893,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       >Ready to stop answering<br><em>DMs at midnight?</em></h2>
       <div class="cta-acts rv d3">
         <a href="/app#inscription" class="btn btn-a btn-lg mag">
-          <span data-en="Start free — 30 days" data-fr="Essai gratuit 30 jours">Start free — 30 days</span>
+          <span data-en="Start free — 7 days" data-fr="Essai gratuit 7 jours">Start free — 7 days</span>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
       </div>
@@ -1912,7 +1921,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
               <div class="pn-body">
                 <div class="pn-meta"><span data-en="TrimSync · now" data-fr="TrimSync · maintenant">TrimSync · now</span></div>
                 <div class="pn-title" data-en="New booking · #47" data-fr="Nouveau RDV · #47">New booking · #47</div>
-                <div class="pn-msg" data-en="Mehdi P. · Thursday 6pm · Cut + beard" data-fr="Mehdi P. · Jeudi 18h · Coupe + barbe">Mehdi P. · Thursday 6pm · Cut + beard</div>
+                <div class="pn-msg" data-en="Inès M. · Thursday 6pm · Gel nails" data-fr="Inès M. · Jeudi 18h · Pose gel">Inès M. · Thursday 6pm · Gel nails</div>
               </div>
             </div>
             <div class="phone-notif" style="background:oklch(0.13 0.009 222/.85)">
@@ -1938,7 +1947,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     <div class="foot-in">
       <div class="foot-brand">
         <a href="/" class="foot-logo">Trim<em>Sync</em></a>
-        <p class="foot-baseline" data-en="Built for barbers, by people who respect them." data-fr="Fait pour les barbiers, par des gens qui les respectent.">Built for barbers, by people who respect them.</p>
+        <p class="foot-baseline" data-en="Built for independent beauty pros." data-fr="Fait pour les pros de la beauté indépendants.">Built for independent beauty pros.</p>
       </div>
       <nav class="foot-links" aria-label="Legal links">
         <a href="privacy.html"       data-en="Privacy"      data-fr="Confidentialité">Privacy</a>
@@ -2080,23 +2089,23 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <div class="bcard-sub" data-en="This personalizes your bot's replies. Your clients will notice." data-fr="Ces infos personnalisent les réponses de ton bot. Tes clients verront la différence.">This personalizes your bot's replies. Your clients will notice.</div>
         <div class="b2col">
           <div class="bf"><label data-en="Your first name" data-fr="Ton prénom">Your first name</label><input type="text" id="bf-name" placeholder="Karim"/></div>
-          <div class="bf"><label data-en="Salon name" data-fr="Nom du salon">Salon name</label><input type="text" id="bf-salon" placeholder="Barber Kingdom"/></div>
+          <div class="bf"><label data-en="Salon name" data-fr="Nom du salon">Salon name</label><input type="text" id="bf-salon" placeholder="Studio Nova"/></div>
         </div>
         <div class="b2col">
           <div class="bf"><label data-en="City" data-fr="Ville">City</label><input type="text" id="bf-ville" placeholder="Paris" autocomplete="off"/></div>
-          <div class="bf"><label data-en="Your @Instagram" data-fr="Ton @Instagram">Your @Instagram</label><input type="text" id="bf-ig" placeholder="@barberkingdom"/></div>
+          <div class="bf"><label data-en="Your @Instagram" data-fr="Ton @Instagram">Your @Instagram</label><input type="text" id="bf-ig" placeholder="@studionova"/></div>
         </div>
         <div class="bf">
           <label data-en="Services offered" data-fr="Services proposés">Services offered</label>
           <div class="bchip-group" id="bchips">
-            <div class="bchip on" data-en="Classic cut" data-fr="Coupe classique">Classic cut</div>
-            <div class="bchip on" data-en="Beard" data-fr="Barbe">Beard</div>
-            <div class="bchip" data-en="Premium cut" data-fr="Coupe premium">Premium cut</div>
-            <div class="bchip" data-en="Beard + cut combo" data-fr="Coupe + barbe">Beard + cut combo</div>
-            <div class="bchip" data-en="Traditional shave" data-fr="Rasage traditionnel">Traditional shave</div>
-            <div class="bchip" data-en="Kids cut" data-fr="Coupe enfant">Kids cut</div>
-            <div class="bchip" data-en="Hair coloring" data-fr="Coloration">Hair coloring</div>
-            <div class="bchip" data-en="Locs & twists" data-fr="Locks & twists">Locs & twists</div>
+            <div class="bchip on" data-en="Gel nails" data-fr="Pose gel">Gel nails</div>
+            <div class="bchip on" data-en="Semi-permanent" data-fr="Semi-permanent">Semi-permanent</div>
+            <div class="bchip" data-en="Nail art" data-fr="Nail art">Nail art</div>
+            <div class="bchip" data-en="Haircut" data-fr="Coupe">Haircut</div>
+            <div class="bchip" data-en="Blow-dry" data-fr="Brushing">Blow-dry</div>
+            <div class="bchip" data-en="Lash extensions" data-fr="Extension de cils">Lash extensions</div>
+            <div class="bchip" data-en="Brow shaping" data-fr="Restructuration sourcils">Brow shaping</div>
+            <div class="bchip" data-en="Facial" data-fr="Soin visage">Facial</div>
           </div>
         </div>
         <div class="b2col">
@@ -2126,7 +2135,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         </div>
         <div class="bf">
           <label data-en="Custom welcome message (optional)" data-fr="Message d'accueil personnalisé (optionnel)">Custom welcome message (optional)</label>
-          <textarea id="bf-accueil" placeholder="Hey! I'm the bot for Barber Kingdom. I can help you book an appointment."></textarea>
+          <textarea id="bf-accueil" placeholder="Hey! I'm the bot for Studio Nova. I can help you book an appointment."></textarea>
         </div>
         <div style="margin-top:1.4rem">
           <button class="bbtn bbtn-primary bbtn-full" onclick="bGoStep2()">
@@ -2142,14 +2151,14 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
         <div class="bchat-sidebar">
           <div class="bchat-sidebar-lbl" data-en="Bot configured" data-fr="Bot configuré">Bot configured</div>
           <div class="bcpill"><div class="lbl" data-en="Salon" data-fr="Salon">Salon</div><div class="val" id="bs-salon">—</div></div>
-          <div class="bcpill"><div class="lbl" data-en="Barber" data-fr="Barbier">Barber</div><div class="val" id="bs-name">—</div></div>
+          <div class="bcpill"><div class="lbl" data-en="Owner" data-fr="Gérant·e">Owner</div><div class="val" id="bs-name">—</div></div>
           <div class="bcpill"><div class="lbl" data-en="Services" data-fr="Services">Services</div><div class="val" id="bs-services">—</div></div>
           <div class="bcpill"><div class="lbl" data-en="Avg. price" data-fr="Prix moyen">Avg. price</div><div class="val" id="bs-prix">—</div></div>
           <div class="bcpill"><div class="lbl" data-en="Hours" data-fr="Horaires">Hours</div><div class="val" id="bs-horaires" style="font-size:.7rem;line-height:1.45">—</div></div>
           <div class="bsugg" style="margin-top:.8rem">
             <div class="bchat-sidebar-lbl" data-en="Try these messages" data-fr="Essaie ces messages">Try these messages</div>
             <button class="bsugg-btn" onclick="bSendSuggestion(this)" data-en="Available tomorrow morning?" data-fr="Dispo demain matin ?">Available tomorrow morning?</button>
-            <button class="bsugg-btn" onclick="bSendSuggestion(this)" data-en="How much for a cut + beard?" data-fr="C'est combien une coupe + barbe ?">How much for a cut + beard?</button>
+            <button class="bsugg-btn" onclick="bSendSuggestion(this)" data-en="How much for gel nails?" data-fr="C'est combien une pose gel ?">How much for gel nails?</button>
             <button class="bsugg-btn" onclick="bSendSuggestion(this)" data-en="Do you do kids?" data-fr="Vous faites les enfants ?">Do you do kids?</button>
             <button class="bsugg-btn" onclick="bSendSuggestion(this)" data-en="I need to cancel my appointment" data-fr="Je veux annuler mon RDV">I need to cancel my appointment</button>
             <button class="bsugg-btn" onclick="bSendSuggestion(this)" data-en="Where are you exactly?" data-fr="Vous êtes où exactement ?">Where are you exactly?</button>
@@ -2162,7 +2171,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
           <div class="bchat-hd">
             <div class="bchat-av" id="bchat-av">BK</div>
             <div>
-              <div class="bchat-hd-name" id="bchat-salon-name">Barber Kingdom</div>
+              <div class="bchat-hd-name" id="bchat-salon-name">Studio Nova</div>
               <div class="bchat-hd-sub">● <span data-en="Online" data-fr="En ligne">Online</span></div>
             </div>
           </div>
@@ -2281,7 +2290,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 
             </div><!-- /plans-grid -->
 
-            <p class="plans-reassure" data-en="No commitment. First month free." data-fr="Sans engagement. Premier mois offert.">No commitment. First month free.</p>
+            <p class="plans-reassure" data-en="No commitment. 7 days free." data-fr="Sans engagement. 7 jours offerts.">No commitment. 7 days free.</p>
 
           </div><!-- /plans-wrap -->
         </div><!-- /wrap -->
@@ -2419,17 +2428,17 @@ const CONV={
     {t:'user',txt:'Hey! Any spots open tomorrow around 2pm?'},
     {t:'type'},
     {t:'bot',txt:'14:00 is available! What service are you looking for?'},
-    {t:'user',txt:'Haircut + beard please'},
+    {t:'user',txt:'Gel nails please'},
     {t:'type'},
-    {t:'bot',txt:'Done — Tomorrow at 14:00, Haircut + Beard. See you then.',ok:true},
+    {t:'bot',txt:'Done — Tomorrow at 14:00, gel nails. See you then.',ok:true},
   ],
   fr:[
     {t:'user',txt:'Bonjour ! Vous avez de la dispo demain vers 14h ?'},
     {t:'type'},
     {t:'bot',txt:'14h est disponible ! Quelle prestation souhaitez-vous ?'},
-    {t:'user',txt:'Coupe + barbe stp'},
+    {t:'user',txt:'Une pose gel stp'},
     {t:'type'},
-    {t:'bot',txt:'Réservé — Demain à 14h, Coupe + Barbe. À bientôt.',ok:true},
+    {t:'bot',txt:'Réservé — Demain à 14h, pose gel. À bientôt.',ok:true},
   ]
 };
 const DELAYS=[600,900,700,700,900,700];
@@ -2797,14 +2806,14 @@ function bSetStep(n) {
 window.bGoStep1 = function() { bSetStep(1); };
 window.bGoStep2 = function() {
   bcfg.name    = document.getElementById('bf-name').value.trim()  || 'Alex';
-  bcfg.salon   = document.getElementById('bf-salon').value.trim() || 'Barber Kingdom';
+  bcfg.salon   = document.getElementById('bf-salon').value.trim() || 'Studio Nova';
   bcfg.ville   = (document.getElementById('bf-ville').value.trim() || 'Paris').replace(/\s*\(.*?\)\s*/g, '').trim();
   bcfg.ig      = document.getElementById('bf-ig').value.trim();
   bcfg.services= Array.from(document.querySelectorAll('#bchips .bchip.on')).map(c => c.textContent.trim());
   bcfg.prix    = document.getElementById('bf-prix').value  || '25';
   bcfg.duree   = document.getElementById('bf-duree').value || '30';
   bcfg.accueil = document.getElementById('bf-accueil').value.trim();
-  if (!bcfg.services.length) bcfg.services = lang==='fr' ? ['Coupe classique','Dégradé'] : ['Classic cut','Fade'];
+  if (!bcfg.services.length) bcfg.services = lang==='fr' ? ['Pose gel','Semi-permanent'] : ['Gel nails','Semi-permanent'];
 
   const hoursStr = BDAYS.filter(d => bcfg.hours[d.key]?.open)
     .map(d => `${lang==='fr'?d.fr:d.en} ${bcfg.hours[d.key].from}–${bcfg.hours[d.key].to}`)
@@ -3020,8 +3029,8 @@ window.bSendMsg = async function() {
   }
 
   const system = lang==='fr'
-    ? `Tu es le bot Instagram de "${bcfg.salon}", barbershop tenu par ${bcfg.name} à ${bcfg.ville}. Tu gères les réservations en posant les questions une à une. Services : ${bcfg.services.join(', ')}. Tarif moyen : ${bcfg.prix}€ (${bcfg.duree} min). Horaires : ${hoursDesc||'Lun–Sam 9h–19h'}. ${bookingContext} ${BTON_PROMPTS[bcfg.ton]?.fr || BTON_PROMPTS.chill.fr} Jamais de liste à puces, jamais d'astérisques, jamais de markdown. Ne mentionne jamais être un bot IA.`
-    : `You are the Instagram bot for "${bcfg.salon}", a barbershop run by ${bcfg.name} in ${bcfg.ville}. You handle bookings by asking questions one at a time. Services: ${bcfg.services.join(', ')}. Price: €${bcfg.prix} (~${bcfg.duree} min). Hours: ${hoursDesc||'Mon–Sat 9am–7pm'}. ${bookingContext} ${BTON_PROMPTS[bcfg.ton]?.en || BTON_PROMPTS.chill.en} No bullet points, no asterisks, no markdown. Never mention being an AI bot.`;
+    ? `Tu es le bot Instagram de "${bcfg.salon}", salon tenu par ${bcfg.name} à ${bcfg.ville}. Tu gères les réservations en posant les questions une à une. Services : ${bcfg.services.join(', ')}. Tarif moyen : ${bcfg.prix}€ (${bcfg.duree} min). Horaires : ${hoursDesc||'Lun–Sam 9h–19h'}. ${bookingContext} ${BTON_PROMPTS[bcfg.ton]?.fr || BTON_PROMPTS.chill.fr} Jamais de liste à puces, jamais d'astérisques, jamais de markdown. Ne mentionne jamais être un bot IA.`
+    : `You are the Instagram bot for "${bcfg.salon}", a salon run by ${bcfg.name} in ${bcfg.ville}. You handle bookings by asking questions one at a time. Services: ${bcfg.services.join(', ')}. Price: €${bcfg.prix} (~${bcfg.duree} min). Hours: ${hoursDesc||'Mon–Sat 9am–7pm'}. ${bookingContext} ${BTON_PROMPTS[bcfg.ton]?.en || BTON_PROMPTS.chill.en} No bullet points, no asterisks, no markdown. Never mention being an AI bot.`;
 
   try {
     const res = await fetch(`${BBACKEND}/api/chat`, {
@@ -3046,16 +3055,13 @@ window.bSendMsg = async function() {
 function bFallback(text) {
   const t = text.toLowerCase();
   const s = bcfg.salon, n = bcfg.name, p = bcfg.prix, d = bcfg.duree, v = bcfg.ville;
-  const hasBeard   = bcfg.services.some(sv => /beard|barbe/i.test(sv));
-  const hasKids    = bcfg.services.some(sv => /kid|enfant/i.test(sv));
   const openHours  = BDAYS.filter(dy => bcfg.hours[dy.key]?.open)
     .map(dy => `${lang==='fr'?dy.fr:dy.en} ${bcfg.hours[dy.key].from}–${bcfg.hours[dy.key].to}`).join(', ');
 
   if (lang === 'fr') {
     if (t.match(/prix|combien|tarif/))    return `Nos prestations débutent à ${p}€ (environ ${d} min). Tu veux qu'on te propose un créneau ?`;
     if (t.match(/dispo|rdv|réserver|rendez/)) return `Avec plaisir ! Dis-moi ta dispo et ${n} te confirmera le créneau à ${v}.`;
-    if (t.match(/enfant|gamin/))          return hasKids ? `Oui, on coupe les enfants. Même tarif de base ${p}€. Tu veux un RDV ?` : `On ne fait pas les coupes enfant pour l'instant.`;
-    if (t.match(/barbe|beard/))           return hasBeard ? `La barbe, c'est inclus dans nos services. Dis-moi quand passer !` : `On ne propose pas le soin barbe actuellement.`;
+    if (t.match(/prestation|service|faites|proposez/)) return `Je propose : ${bcfg.services.join(', ')}. Tu veux un créneau ?`;
     if (t.match(/horaire|heure|ouvert/))  return `Nos horaires : ${openHours||'Lun–Sam 9h–19h'}. On t'attend !`;
     if (t.match(/annuler|cancel/))        return `Pas de souci ! Envoie ton nom et l'heure du RDV, on s'en occupe.`;
     if (t.match(/où|adresse|localisation/)) return `On est à ${v}. Envoie-moi un message pour l'adresse exacte.`;
@@ -3063,8 +3069,7 @@ function bFallback(text) {
   } else {
     if (t.match(/price|how much|cost/))   return `Services start at €${p} (~${d} min). Want me to book a slot?`;
     if (t.match(/available|book|appointment|slot/)) return `Sure! Tell me your availability and ${n} will confirm your slot in ${v}.`;
-    if (t.match(/kid|child/))             return hasKids ? `Yes, we do kids' cuts. Same base price €${p}. Want to book?` : `We don't do kids' cuts at the moment.`;
-    if (t.match(/beard/))                 return hasBeard ? `Beard service is available. Let me know when you'd like to come in!` : `We don't offer beard services currently.`;
+    if (t.match(/service|offer|do you do/)) return `I offer: ${bcfg.services.join(', ')}. Want a slot?`;
     if (t.match(/hour|open|schedule/))    return `Our hours: ${openHours||'Mon–Sat 9am–7pm'}. See you soon!`;
     if (t.match(/cancel/))               return `No problem! Send your name and appointment time and we'll sort it.`;
     if (t.match(/where|address|location/)) return `We're in ${v}. Message me for the exact address.`;

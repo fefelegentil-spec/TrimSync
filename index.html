@@ -1421,15 +1421,23 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
     </button>
   </div>
-  <nav class="nav-mob" id="nm" aria-label="Mobile navigation">
-    <a href="#problem"  data-en="Problem"            data-fr="Problème">Problem</a>
-    <a href="#solution" data-en="How it works"       data-fr="Comment ça marche">How it works</a>
-    <a href="#features" data-en="Features"           data-fr="Fonctionnalités">Features</a>
-    <a href="#pricing"  data-en="Pricing"            data-fr="Tarifs">Pricing</a>
-    <a href="#faq"      data-en="FAQ"                data-fr="FAQ">FAQ</a>
-    <a href="/app#inscription" class="btn btn-a" data-en="Start free — 30 days" data-fr="Essai gratuit 30 jours">Start free — 30 days</a>
-  </nav>
 </header>
+<!-- Hors de <header> : .nav porte transform:translate3d(0,0,0) (accélération
+     GPU du bandeau fixe), ce qui en fait la containing block de tout
+     position:fixed placé à l'intérieur (règle CSS des transforms). Imbriqué
+     dans .nav (69px de haut), ce panneau — pourtant top/bottom/fixed — se
+     calait sur cette hauteur de 69px au lieu de l'écran entier : replié sur
+     une tranche de quelques dizaines de pixels sous le bandeau, débordant
+     dessus au lieu de s'étendre dessous. Frère de .nav, il redevient
+     positionné par rapport à l'écran, plein cadre, comme le veut son CSS. -->
+<nav class="nav-mob" id="nm" aria-label="Mobile navigation">
+  <a href="#problem"  data-en="Problem"            data-fr="Problème">Problem</a>
+  <a href="#solution" data-en="How it works"       data-fr="Comment ça marche">How it works</a>
+  <a href="#features" data-en="Features"           data-fr="Fonctionnalités">Features</a>
+  <a href="#pricing"  data-en="Pricing"            data-fr="Tarifs">Pricing</a>
+  <a href="#faq"      data-en="FAQ"                data-fr="FAQ">FAQ</a>
+  <a href="/app#inscription" class="btn btn-a" data-en="Start free — 30 days" data-fr="Essai gratuit 30 jours">Start free — 30 days</a>
+</nav>
 
 <main>
 

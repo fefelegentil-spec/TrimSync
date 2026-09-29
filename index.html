@@ -722,6 +722,11 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
     transform    .5s  cubic-bezier(0.16,1,0.3,1);
 }
 .feat:hover{border-color:oklch(0.76 0.13 193/.44);transform:translateY(-7px)}
+/* Au doigt, :hover reste « collé » après un tap : pas de carte soulevée ni de bord allumé. */
+@media(hover:none){
+  .feat:nth-child(1):hover,.feat:nth-child(2):hover,.feat:nth-child(3):hover,.feat:nth-child(4):hover{transform:none;border-color:oklch(0.76 0.13 193/.15);box-shadow:0 10px 34px -10px oklch(0 0 0/.45)}
+  .feat:hover .feat-ico svg{transform:none;filter:drop-shadow(0 0 16px oklch(0.76 0.13 193/.65)) drop-shadow(0 0 5px oklch(0.76 0.13 193/.90))}
+}
 
 /* ── Icons — double glow pour plus de présence ── */
 .feat-ico svg{
@@ -3146,8 +3151,12 @@ window.bConnectInstagram = function() {
      --x/--y = coordonnées viewport absolues (clientX/Y)
      --xp/--yp = fraction 0→1 de l'écran
      background-attachment:fixed = le gradient se positionne dans l'espace viewport
-     => le glow suit le curseur sur toutes les cards simultanément */
-  if(!pref){
+     => le glow suit le curseur sur toutes les cards simultanément
+     Souris uniquement : au doigt, le défilement déplaçait le point lumineux et
+     Safari mobile ignore background-attachment:fixed — le halo se retrouvait
+     décalé sur les côtés des cartes. */
+  const souris=matchMedia('(hover:hover) and (pointer:fine)').matches;
+  if(!pref&&souris){
     /* 1. Tracker pointeur → variables CSS root */
     document.addEventListener('pointermove',e=>{
       const r=document.documentElement;

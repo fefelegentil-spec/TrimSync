@@ -275,6 +275,25 @@ async function main() {
   ok(kpi.s === 200 && kpi.d.demandes_bot >= 1 && kpi.d.mrr >= 79 && kpi.d.essai >= 1, 'indicateurs', kpi.d);
   ok((await appel('PATCH', `/api/admin/salons/${salonB}`, { plan: 'gratuit' }, ADM)).s === 400, 'plan inconnu refusé');
 
+  console.log('T15 — personnalisation de la page');
+  const perso = await appel('PATCH', '/api/salon', { description: 'Ongles et cils à Lyon', instagram: 'https://www.instagram.com/studio_a/?hl=fr', couleur: '#E91E63' }, A);
+  ok(perso.s === 200 && perso.d.salon.instagram === 'studio_a' && perso.d.salon.couleur === '#e91e63' && perso.d.salon.description === 'Ongles et cils à Lyon', 'description, pseudo et couleur enregistrés', perso.d);
+  const slugPerso = perso.d?.salon?.slug;
+  ok((await appel('PATCH', '/api/salon', { couleur: 'rouge' }, A)).s === 400, 'couleur invalide refusée');
+  ok((await appel('PATCH', '/api/salon', { instagram: 'pas un pseudo !' }, A)).s === 400, 'pseudo invalide refusé');
+  const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  ok((await appel('PUT', '/api/salon/logo', { image: 'data:text/html;base64,PGgxPg==' }, A)).s === 400, 'logo non image refusé');
+  const logo = await appel('PUT', '/api/salon/logo', { image: PNG }, A);
+  ok(logo.s === 200 && typeof logo.d.salon.logo === 'number', 'logo enregistré', logo.d);
+  const pubPerso = await appel('GET', `/api/public/salons/${slugPerso}`);
+  ok(pubPerso.d?.logo && pubPerso.d.couleur === '#e91e63' && pubPerso.d.instagram === 'studio_a', 'personnalisation visible sur la page publique', pubPerso.d);
+  const img = await fetch(`${API}/api/public/salons/${slugPerso}/logo`);
+  ok(img.status === 200 && img.headers.get('content-type') === 'image/png', 'logo servi en image', img.status);
+  ok((await appel('PATCH', `/api/prestations/${coupe.id}`, { description: 'Shampoing compris' }, A)).s === 200, 'description de prestation');
+  ok((await appel('GET', `/api/public/salons/${slugPerso}`)).d?.prestations?.some(p => p.description === 'Shampoing compris'), 'description visible sur la page publique');
+  ok((await appel('DELETE', '/api/salon/logo', undefined, A)).d?.salon?.logo === null, 'logo retiré');
+  ok((await fetch(`${API}/api/public/salons/${slugPerso}/logo`)).status === 404, 'plus de logo servi');
+
   console.log('T14 — mise en route obligatoire');
   const X = insX.d?.jeton;
   ok((await appel('PUT', '/api/horaires', { semaine: [] }, X)).s === 200, 'semaine fermée');

@@ -130,7 +130,9 @@
       const p = v.split(',').map(n => parseFloat(n.trim()));
       return (p.length === 3 && p.every(n => Number.isFinite(n))) ? p.map(n => n / 255) : null;
     }
-    const accentDefaut = isBooking ? [0.855, 0.694, 0.286] : [0.655, 0.545, 0.980];
+    const accentDefaut = isBooking
+      ? (window._couleurSalon ? window._couleurSalon.map(n => n / 255) : [0.855, 0.694, 0.286])
+      : [0.655, 0.545, 0.980];
     gl.uniform3fv(uAcc, (!isBooking && accentDepuisCss()) || accentDefaut);
     window._bgSetAccent = function(r, g, b){
       gl.useProgram(prog);

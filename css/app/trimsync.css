@@ -250,3 +250,16 @@ body { overflow-x: hidden; overflow-x: clip; }
   .mer-jour { grid-template-columns: 44px minmax(0, 1fr) 90px 90px; }
   .mer-jour .ts-a { display: none; }
 }
+
+/* Personnalisation de la page de réservation */
+.ts-perso-logo { display: flex; align-items: center; gap: var(--sp-4); margin-bottom: var(--sp-4); }
+.ts-perso-logo .ts-boutons { margin-top: 0; }
+.ts-logo { width: 64px; height: 64px; flex: none; border-radius: 50%; object-fit: cover; border: 2px solid rgba(var(--accent-rgb), .45); }
+.ts-logo-vide { display: grid; place-items: center; font-size: 26px; font-weight: 800; background: rgba(var(--accent-rgb), .1); }
+.ts-sous-titre { font-size: 13px; font-weight: 700; margin: var(--sp-3) 0 var(--sp-2); }
+.ts-couleurs { display: flex; flex-wrap: wrap; gap: 10px; }
+.ts-couleur { width: 34px; height: 34px; border-radius: 50%; border: 2px solid transparent; outline: 2px solid transparent; cursor: pointer; }
+.ts-couleur.choisie { outline-color: #fff; outline-offset: 2px; }
+textarea#par-description { width: 100%; margin-bottom: var(--sp-2); }
+.ts-presta-desc { grid-column: 2 / 5; font-size: 13px; }
+@media (max-width: 560px) { .ts-presta-desc { grid-column: 2 / 3; } }

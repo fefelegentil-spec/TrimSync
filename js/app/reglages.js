@@ -137,6 +137,7 @@ async function renderParametres() {
       <label class="ts-unite"><input class="input" type="number" data-champ="duree_min" value="${p.duree_min}" min="5" max="480" step="5" aria-label="Durée" onchange="modifierPresta('${esc(p.id)}', this)"><span>min</span></label>
       <label class="ts-unite"><input class="input" type="number" data-champ="prix" value="${p.prix}" min="0" step="0.5" aria-label="Prix" onchange="modifierPresta('${esc(p.id)}', this)"><span>€</span></label>
       <label class="switch" title="${p.actif ? 'Proposée sur ta page' : 'Masquée'}"><input type="checkbox" data-champ="actif" ${p.actif ? 'checked' : ''} onchange="modifierPresta('${esc(p.id)}', this)"><span class="slider"></span></label>
+      <input class="input ts-presta-desc" data-champ="description" value="${esc(p.description || '')}" maxlength="200" placeholder="Description vue par tes clients (facultatif) — ex. dépose comprise" aria-label="Description" onchange="modifierPresta('${esc(p.id)}', this)">
     </div>`).join('');
   window._ordrePrestas = prestations.map(p => p.id);
   const bot = {
@@ -158,6 +159,7 @@ async function renderParametres() {
          <button class="btn btn-out btn-sm" onclick="copierLien()"><i class="ti ti-copy"></i>Copier</button></div>
        <div class="ts-form-ligne"><span class="ts-a">trimsync.tech/r/</span><input class="input" id="par-slug" value="${esc(s.slug)}" maxlength="50" aria-label="Adresse de ta page">
          <button class="btn btn-ghost btn-sm" onclick="enregistrerSalon(['slug'])">Changer</button></div>`)
+    + carte('Personnalise ta page', 'Ce que tes clients voient en arrivant sur ta page de réservation.', cartePersonnalisation(s))
     + carte('Ton salon', 'Affiché en haut de ta page de réservation.',
       `<div class="ts-grille2">
          <input class="input" id="par-nom" value="${esc(s.nom)}" maxlength="80" placeholder="Nom du salon" aria-label="Nom du salon">
@@ -214,7 +216,7 @@ async function copierLien() {
 
 async function modifierPresta(id, champ) {
   const nom = champ.dataset.champ;
-  const valeur = nom === 'actif' ? champ.checked : nom === 'nom' ? champ.value : Number(champ.value);
+  const valeur = nom === 'actif' ? champ.checked : (nom === 'nom' || nom === 'description') ? champ.value.trim() : Number(champ.value);
   try {
     await api('PATCH', '/api/prestations/' + id, { [nom]: valeur });
     SERVICES = [];                        // l'agenda relira le catalogue
@@ -271,3 +273,85 @@ async function supprimerCompte() {
 
 PAGES.disponibilites = { titre: 'Disponibilités', sous: 'Horaires et fermetures', rendu: renderDisponibilites };
 PAGES.parametres = { titre: 'Paramètres', sous: 'Ta page, tes prestations, ton compte', rendu: renderParametres };
+
+/* ── Personnalisation de la page de réservation ──
+   Couleurs claires ou moyennes seulement : la page écrit en noir sur la
+   couleur choisie (créneau sélectionné, boutons). */
+const COULEURS_PAGE = [
+  ['', 'Or (par défaut)', '#DAB149'], ['#3bbfcc', 'Turquoise'], ['#4dd4a0', 'Émeraude'], ['#64b5f6', 'Ciel'],
+  ['#b39ddb', 'Lavande'], ['#f48fb1', 'Rose'], ['#e75a8c', 'Framboise'], ['#ff8a65', 'Corail'], ['#c9d1d9', 'Argent'],
+];
+
+function cartePersonnalisation(s) {
+  const logo = s.logo
+    ? `<img class="ts-logo" src="${API}/api/public/salons/${encodeURIComponent(s.slug)}/logo?v=${s.logo}" alt="Logo">`
+    : `<div class="ts-logo ts-logo-vide">${esc((s.nom || '?').trim().charAt(0).toUpperCase())}</div>`;
+  return `<div class="ts-perso-logo">${logo}
+      <div class="ts-boutons">
+        <label class="btn btn-out btn-sm"><i class="ti ti-photo"></i>${s.logo ? 'Changer' : 'Ajouter'} ton logo ou ta photo
+          <input type="file" accept="image/*" hidden onchange="envoyerLogo(this)"></label>
+        ${s.logo ? '<button class="btn btn-ghost btn-sm" onclick="retirerLogo()">Retirer</button>' : ''}
+      </div></div>
+    <div class="ts-sous-titre">Couleur de ta page</div>
+    <div class="ts-couleurs">${COULEURS_PAGE.map(([val, nom, apercu]) => `<button type="button" class="ts-couleur${(s.couleur || '') === val ? ' choisie' : ''}"
+        style="background:${apercu || val}" title="${esc(nom)}" aria-label="${esc(nom)}" onclick="choisirCouleur('${val}')"></button>`).join('')}</div>
+    <div class="ts-sous-titre">Présentation</div>
+    <textarea class="input" id="par-description" maxlength="300" rows="3" placeholder="Ex. Prothésiste ongulaire à Lyon, pose gel et nail art sur rendez-vous.">${esc(s.description || '')}</textarea>
+    <div class="ts-form-ligne"><span class="ts-a"><i class="ti ti-brand-instagram"></i> @</span>
+      <input class="input" id="par-instagram" value="${esc(s.instagram || '')}" maxlength="60" placeholder="ton.pseudo.instagram" aria-label="Pseudo Instagram"></div>
+    <div class="ts-boutons">
+      <button class="btn btn-gold" onclick="enregistrerSalon(['description','instagram'])"><i class="ti ti-check"></i>Enregistrer</button>
+      <a class="btn btn-out" href="${esc(s.lien_public)}" target="_blank" rel="noopener"><i class="ti ti-external-link"></i>Voir ma page</a>
+    </div>`;
+}
+
+async function choisirCouleur(couleur) {
+  try {
+    const r = await api('PATCH', '/api/salon', { couleur });
+    SESSION.salon = r.salon;
+    toast('Couleur enregistrée ✓', 'success');
+    renderParametres();
+  } catch (e) { toast(messageErreur(e), 'danger'); }
+}
+
+// Carré de 320 px recadré au centre, en WebP (JPEG si le navigateur ne sait pas) :
+// quelques dizaines de Ko, sous la limite du serveur.
+function preparerLogo(fichier) {
+  return new Promise((ok, ko) => {
+    const img = new Image();
+    img.onload = () => {
+      const T = 320, c = document.createElement('canvas');
+      c.width = c.height = T;
+      const x = c.getContext('2d');
+      const cote = Math.min(img.width, img.height);
+      x.fillStyle = '#141414';
+      x.fillRect(0, 0, T, T);
+      x.drawImage(img, (img.width - cote) / 2, (img.height - cote) / 2, cote, cote, 0, 0, T, T);
+      URL.revokeObjectURL(img.src);
+      let donnees = c.toDataURL('image/webp', 0.85);
+      if (!donnees.startsWith('data:image/webp')) donnees = c.toDataURL('image/jpeg', 0.85);
+      ok(donnees);
+    };
+    img.onerror = () => ko(new Error('Image illisible'));
+    img.src = URL.createObjectURL(fichier);
+  });
+}
+
+async function envoyerLogo(champ) {
+  const fichier = champ.files && champ.files[0];
+  if (!fichier) return;
+  try {
+    const r = await api('PUT', '/api/salon/logo', { image: await preparerLogo(fichier) });
+    SESSION.salon = r.salon;
+    toast('Logo enregistré ✓', 'success');
+    renderParametres();
+  } catch (e) { toast(messageErreur(e), 'danger'); }
+}
+
+async function retirerLogo() {
+  try {
+    const r = await api('DELETE', '/api/salon/logo');
+    SESSION.salon = r.salon;
+    renderParametres();
+  } catch (e) { toast(messageErreur(e), 'danger'); }
+}

@@ -1,7 +1,7 @@
 /* ── Profil du salon, demande de bot, suppression du compte ── */
 const express = require('express');
 const { pool } = require('../lib/db');
-const { exigerCompte } = require('../lib/auth');
+const { exigerCompte, exigerEcriture } = require('../lib/auth');
 const { vueSalon } = require('../lib/salon');
 const { sanitizeText, slugifier } = require('../lib/texte');
 const { telAStocker } = require('../lib/telephone');
@@ -23,6 +23,18 @@ router.patch('/api/salon', exigerCompte, async (req, res) => {
   if (b.ville !== undefined) champs.ville = sanitizeText(b.ville, 60);
   if (b.adresse !== undefined) champs.adresse = sanitizeText(b.adresse, 160);
   if (b.telephone !== undefined) champs.telephone = telAStocker(sanitizeText(b.telephone, 30));
+  if (b.description !== undefined) champs.description = sanitizeText(b.description, 300);
+  if (b.instagram !== undefined) {
+    // « @nom », « nom » ou l'adresse du profil : on ne garde que le pseudo.
+    const pseudo = String(b.instagram || '').trim().replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/^@/, '').replace(/[/?#].*$/, '');
+    if (pseudo && !/^[A-Za-z0-9._]{1,30}$/.test(pseudo)) return res.status(400).json({ error: 'Pseudo Instagram invalide' });
+    champs.instagram = pseudo;
+  }
+  if (b.couleur !== undefined) {
+    const c = String(b.couleur || '').trim().toLowerCase();
+    if (c && !/^#[0-9a-f]{6}$/.test(c)) return res.status(400).json({ error: 'Couleur invalide' });
+    champs.couleur = c;
+  }
   try {
     if (b.slug !== undefined) {
       if (!String(b.slug).trim()) return res.status(400).json({ error: 'Adresse de page vide' });
@@ -42,6 +54,32 @@ router.patch('/api/salon', exigerCompte, async (req, res) => {
     if (e.constraint === 'salons_slug_key') return res.status(409).json({ error: 'Cette adresse est déjà prise' });
     erreurServeur(res, e, 'salon/modifier');
   }
+});
+
+/* ── Logo de la page de réservation ──
+   Redimensionné par le navigateur avant l'envoi (carré, ~320 px) : le corps
+   JSON reste sous la limite de 100 Ko du serveur. */
+const TYPES_LOGO = { 'image/png': 1, 'image/jpeg': 1, 'image/webp': 1 };
+router.put('/api/salon/logo', exigerCompte, exigerEcriture, async (req, res) => {
+  const m = /^data:(image\/[a-z]+);base64,([A-Za-z0-9+/=]+)$/.exec(String(req.body?.image || ''));
+  if (!m || !TYPES_LOGO[m[1]]) return res.status(400).json({ error: 'Image invalide (PNG, JPEG ou WebP)' });
+  const image = Buffer.from(m[2], 'base64');
+  if (image.length > 90 * 1024) return res.status(413).json({ error: 'Image trop lourde' });
+  try {
+    await pool.query(
+      `INSERT INTO salon_logos (salon_id, type, image) VALUES ($1, $2, $3)
+       ON CONFLICT (salon_id) DO UPDATE SET type = $2, image = $3`, [req.salonId, m[1], image]);
+    const r = await pool.query('UPDATE salons SET logo_maj = NOW() WHERE id = $1 RETURNING *', [req.salonId]);
+    res.json({ salon: vueSalon(r.rows[0]) });
+  } catch (e) { erreurServeur(res, e, 'salon/logo'); }
+});
+
+router.delete('/api/salon/logo', exigerCompte, exigerEcriture, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM salon_logos WHERE salon_id = $1', [req.salonId]);
+    const r = await pool.query('UPDATE salons SET logo_maj = NULL WHERE id = $1 RETURNING *', [req.salonId]);
+    res.json({ salon: vueSalon(r.rows[0]) });
+  } catch (e) { erreurServeur(res, e, 'salon/logo-suppr'); }
 });
 
 // Fin du parcours de mise en route : refusée tant que la page de réservation

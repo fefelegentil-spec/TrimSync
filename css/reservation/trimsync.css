@@ -1,7 +1,8 @@
 /* ── Page de réservation TrimSync : ce qui diffère de la page FCUTZ ──
-   fcutz.css est la feuille de la vraie page FCUTZ, recopiée sans retouche ;
-   tout ajustement vit ici pour pouvoir la remplacer par une version plus
-   récente sans rien perdre. */
+   fcutz.css est la feuille de la vraie page FCUTZ, recopiée avec une seule
+   retouche : l'or en dur rgba(218,177,73,…) y devient rgba(var(--gold-rgb),…),
+   pour que chaque salon ait sa couleur (posée par habillerSalon()). Tout autre
+   ajustement vit ici. */
 
 [hidden] { display: none !important; }
 
@@ -11,7 +12,7 @@
   display: grid;
   place-items: center;
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(218, 177, 73, .18), transparent 60%),
+    radial-gradient(ellipse at 30% 20%, rgba(var(--gold-rgb), .18), transparent 60%),
     linear-gradient(160deg, #15130E, #0A0A0A);
 }
 .svc-img-wrap.ts-sans-image i {
@@ -35,3 +36,12 @@
    ne defilait qu'avec le curseur sur un element fixe (le menu). clip coupe sans defiler ;
    hidden reste en repli pour les navigateurs qui ne connaissent pas clip. */
 body { overflow-x: hidden; overflow-x: clip; }
+
+/* ── Présentation du salon (logo, description, Instagram) en tête de page ── */
+.salon-intro { display: flex; gap: 16px; align-items: center; margin: 4px 0 22px; }
+.salon-logo { width: 64px; height: 64px; flex: none; border-radius: 50%; object-fit: cover; border: 2px solid rgba(var(--gold-rgb), .55); background: var(--bg3); }
+.salon-intro-txt { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.salon-desc { color: var(--text-2, #bbb); font-size: 14px; line-height: 1.5; }
+.salon-insta { display: inline-flex; align-items: center; gap: 6px; width: fit-content; font-size: 13px; font-weight: 600; color: var(--gold); text-decoration: none; }
+.salon-insta i { font-size: 16px; }
+.svc-desc { font-size: 12.5px; line-height: 1.45; color: var(--text-2, #bbb); opacity: .85; }

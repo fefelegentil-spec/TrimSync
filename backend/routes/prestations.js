@@ -24,6 +24,7 @@ function lireChamps(b, partiel) {
     if (!Number.isFinite(p) || p < 0 || p > 10000) return { erreur: 'Prix invalide' };
     c.prix = Math.round(p * 100) / 100;
   }
+  if (b.description !== undefined) c.description = sanitizeText(b.description, 200);
   if (partiel && b.actif !== undefined) c.actif = !!b.actif;
   return { c };
 }
@@ -40,9 +41,9 @@ router.post('/api/prestations', exigerCompte, exigerEcriture, async (req, res) =
   if (erreur) return res.status(400).json({ error: erreur });
   try {
     const r = await pool.query(
-      `INSERT INTO prestations (id, salon_id, nom, duree_min, prix, ordre)
-       VALUES ($1, $2, $3, $4, $5, (SELECT COALESCE(MAX(ordre) + 1, 0) FROM prestations WHERE salon_id = $2))
-       RETURNING *`, [uid('p'), req.salonId, c.nom, c.duree_min, c.prix]);
+      `INSERT INTO prestations (id, salon_id, nom, duree_min, prix, description, ordre)
+       VALUES ($1, $2, $3, $4, $5, $6, (SELECT COALESCE(MAX(ordre) + 1, 0) FROM prestations WHERE salon_id = $2))
+       RETURNING *`, [uid('p'), req.salonId, c.nom, c.duree_min, c.prix, c.description || '']);
     res.status(201).json({ prestation: r.rows[0] });
   } catch (e) { erreurServeur(res, e, 'prestations/creer'); }
 });

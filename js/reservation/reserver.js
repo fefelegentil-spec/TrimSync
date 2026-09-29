@@ -82,8 +82,38 @@ function openMaps() {
   if (!adresseSalon()) return;
   window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(adresseSalon()), '_blank', 'noopener');
 }
+/* Couleur du salon : quatre nuances dérivées d'une seule, comme l'or de FCUTZ
+   (--gold et ses variantes plus claires / plus sombres, --gold-rgb pour les halos). */
+function appliquerCouleur(hex) {
+  const m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex || '');
+  if (!m) return;
+  const rgb = m.slice(1).map(h => parseInt(h, 16));
+  const mele = (vers, t) => '#' + rgb.map((c, i) => Math.round(c + (vers[i] - c) * t).toString(16).padStart(2, '0')).join('');
+  const r = document.documentElement.style;
+  r.setProperty('--gold', hex);
+  r.setProperty('--gold-2', mele([255, 255, 255], .22));
+  r.setProperty('--gold-3', mele([255, 255, 255], .55));
+  r.setProperty('--gold-deep', mele([0, 0, 0], .2));
+  r.setProperty('--gold-rgb', rgb.join(','));
+  // Fond animé : repeint tout de suite s'il tourne déjà, sinon il lira _couleurSalon au démarrage.
+  window._couleurSalon = rgb;
+  if (window._bgSetAccent) window._bgSetAccent(...rgb);
+}
+
+function presenterSalon() {
+  const bloc = document.getElementById('salon-intro');
+  const logo = SALON.logo ? `<img class="salon-logo" src="${API}/api/public/salons/${encodeURIComponent(SALON.slug)}/logo?v=${SALON.logo}" alt="${escHtml(SALON.nom)}">` : '';
+  const desc = SALON.description ? `<div class="salon-desc">${escHtml(SALON.description)}</div>` : '';
+  const insta = SALON.instagram ? `<a class="salon-insta" href="https://instagram.com/${encodeURIComponent(SALON.instagram)}" target="_blank" rel="noopener"><i class="ti ti-brand-instagram"></i>@${escHtml(SALON.instagram)}</a>` : '';
+  if (!logo && !desc && !insta) return;
+  bloc.innerHTML = logo + `<div class="salon-intro-txt">${desc}${insta}</div>`;
+  bloc.hidden = false;
+}
+
 function habillerSalon() {
   document.title = `${SALON.nom} — Réservation en ligne`;
+  appliquerCouleur(SALON.couleur);
+  presenterSalon();
   const splash = document.getElementById('splash-name');
   splash.style.setProperty('--lettres', Math.max(5, SALON.nom.length));
   splash.innerHTML = [...SALON.nom.toUpperCase()]
@@ -112,6 +142,7 @@ function renderServices() {
         <div class="svc-img-wrap ts-sans-image"><i class="ti ${iconePresta(s.nom)}"></i></div>
         <div class="svc-body">
           <div class="svc-name">${escHtml(s.nom)}</div>
+          ${s.description ? `<div class="svc-desc">${escHtml(s.description)}</div>` : ''}
           <div class="svc-meta">
             <div class="svc-price">${prix(s.prix)}€</div>
             <div class="svc-dur"><i class="ti ti-clock" style="font-size:12px"></i>${s.duree_min}min</div>

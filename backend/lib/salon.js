@@ -35,6 +35,10 @@ function vueSalon(salon) {
     plan: salon.plan,
     bot_statut: salon.bot_statut,
     mise_en_route: !!salon.mise_en_route_le,
+    description: salon.description || '',
+    instagram: salon.instagram || '',
+    couleur: salon.couleur || '',
+    logo: salon.logo_maj ? new Date(salon.logo_maj).getTime() : null,
     lien_public: `${SITE()}/r/${salon.slug}`,
   };
 }

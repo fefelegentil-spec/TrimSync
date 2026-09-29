@@ -50,15 +50,29 @@ router.get('/api/public/salons/:slug', quotaLecture, async (req, res) => {
     const salon = await salonDuSlug(req.params.slug);
     if (!salon) return res.status(404).json({ error: 'Salon introuvable' });
     const p = await pool.query(
-      'SELECT id, nom, duree_min, prix FROM prestations WHERE salon_id = $1 AND actif ORDER BY ordre, nom', [salon.id]);
+      'SELECT id, nom, duree_min, prix, description FROM prestations WHERE salon_id = $1 AND actif ORDER BY ordre, nom', [salon.id]);
     res.json({
       nom: salon.nom, ville: salon.ville, adresse: salon.adresse, telephone: salon.telephone, slug: salon.slug,
+      description: salon.description || '', instagram: salon.instagram || '', couleur: salon.couleur || '',
+      logo: salon.logo_maj ? new Date(salon.logo_maj).getTime() : null,
       reservable: reservable(salon), horizon_jours: HORIZON_JOURS, prestations: p.rows,
     });
   } catch (e) { erreurServeur(res, e, 'public/salon'); }
 });
 
 // Nombre d'heures libres pour chacun des 30 prochains jours (jours complets grisés).
+// Logo du salon : adresse versionnée (?v=) par la page, donc mis en cache longtemps.
+router.get('/api/public/salons/:slug/logo', quotaLecture, async (req, res) => {
+  try {
+    const r = await pool.query(
+      'SELECT l.type, l.image FROM salon_logos l JOIN salons s ON s.id = l.salon_id WHERE s.slug = $1',
+      [String(req.params.slug || '').toLowerCase()]);
+    if (!r.rowCount) return res.status(404).end();
+    res.set({ 'Content-Type': r.rows[0].type, 'Cache-Control': 'public, max-age=604800', 'X-Content-Type-Options': 'nosniff' });
+    res.send(r.rows[0].image);
+  } catch (e) { erreurServeur(res, e, 'public/logo'); }
+});
+
 router.get('/api/public/salons/:slug/jours', quotaLecture, async (req, res) => {
   try {
     const salon = await salonDuSlug(req.params.slug);

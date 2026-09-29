@@ -4,7 +4,7 @@
 :root{
   color-scheme:dark;
   --bg:#060606; --bg2:#0C0C0C; --bg3:#141414; --bg4:#1C1C1C; --bg5:#262626;
-  --border:#1F1F1F; --border-gold:rgba(218,177,73,.28);
+  --border:#1F1F1F; --border-gold:rgba(var(--gold-rgb),.28);
   /* --gold-deep sert deux fois : depart des degrades dores, et couleur de
      texte dans le pave legal. A #8A6E36 il echouait des deux cotes — le noir
      pose dessus tombait a 4,2:1, et lui-meme a 3,9:1 sur fond noir. Eclairci
@@ -14,14 +14,14 @@
      il cesse d'etre beige. Les contrastes y gagnent au passage — noir pose
      dessus 9,9:1, en texte sur fond sombre 9,1:1. --gold-deep suit, sature
      mais toujours au-dessus du seuil dans les deux sens (5,9 et 5,4). */
-  --gold:#DAB149; --gold-2:#F1CC6F; --gold-3:#FFE9A8; --gold-deep:#AF842C;
+  --gold:#DAB149; --gold-2:#F1CC6F; --gold-3:#FFE9A8; --gold-deep:#AF842C; --gold-rgb:218,177,73;
   /* --text-3 portait les mentions secondaires a 4,1:1, sous le seuil ;
      --text-4 les mentions legales a 2,0:1, c'est-a-dire a la limite du
      visible. Les deux remontent, --text-4 restant le plus efface des deux
      puisqu'il ne sert plus qu'aux textes de remplacement des champs. */
   --text:#F5F0E6; --text-2:#B8B2A7; --text-3:#8F8880; --text-4:#6E665C;
   --success:#4ABA6A; --danger:#E05050; --warning:#E8A84A;
-  --sh-gold:0 0 0 1px rgba(218,177,73,.18), 0 12px 36px rgba(218,177,73,.15);
+  --sh-gold:0 0 0 1px rgba(var(--gold-rgb),.18), 0 12px 36px rgba(var(--gold-rgb),.15);
   --ease:cubic-bezier(.4,0,.2,1);
   --ease-pop:cubic-bezier(.16,1,.3,1);
 }
@@ -41,7 +41,7 @@ body::before{
 body::after{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background-image:
-    radial-gradient(ellipse at 20% 0%,rgba(218,177,73,.06),transparent 55%),
+    radial-gradient(ellipse at 20% 0%,rgba(var(--gold-rgb),.06),transparent 55%),
     radial-gradient(ellipse at 80% 100%,rgba(175,132,44,.04),transparent 55%);
 }
 a{color:inherit;text-decoration:none}
@@ -50,7 +50,7 @@ input,select,textarea{font-family:inherit;font-size:16px;color:inherit;outline:n
 img{display:block;max-width:100%}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(218,177,73,.18);border-radius:2px}
+::-webkit-scrollbar-thumb{background:rgba(var(--gold-rgb),.18);border-radius:2px}
 
 /* ── SPLASH ── */
 /* Composition IDENTIQUE a l'ecran de lancement iOS (/img/splash-b-*.png,
@@ -155,7 +155,7 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
 /* Une chaleur monte derriere le nom a mesure qu'il se forme. */
 .splash-scene::after{
   content:'';position:absolute;inset:-120% -25%;z-index:-1;pointer-events:none;
-  background:radial-gradient(ellipse at center, rgba(218,177,73,.22), transparent 66%);
+  background:radial-gradient(ellipse at center, rgba(var(--gold-rgb),.22), transparent 66%);
   animation:splash-halo 1.6s var(--ease) .25s both;
 }
 @keyframes splash-halo{
@@ -286,7 +286,7 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
    qu'il indique. */
 .rl-bronze {--m1:#F6C9A0;--m2:#C07A45;--m3:#6E3616;--lueur:rgba(192,110,55,.38);--lampe:#FFB77E}
 .rl-argent {--m1:#FFFFFF;--m2:#B9C0CA;--m3:#5D646E;--lueur:rgba(190,205,225,.30);--lampe:#EAF3FF}
-.rl-or     {--m1:#FFF1B8;--m2:#DAB149;--m3:#86611A;--lueur:rgba(218,177,73,.38);--lampe:#FFE08A}
+.rl-or     {--m1:#FFF1B8;--m2:#DAB149;--m3:#86611A;--lueur:rgba(var(--gold-rgb),.38);--lampe:#FFE08A}
 .rl-diamant{--m1:#FFFFFF;--m2:#9FE0EE;--m3:#3F8FA5;--lueur:rgba(143,216,232,.38);--lampe:#D8FAFF}
 .rl-btn{flex-shrink:0;border:0;border-radius:10px;padding:10px 16px;font:600 14px/1 inherit;font-family:inherit;color:#0A0A0A;cursor:pointer;
   background:var(--m2);box-shadow:0 3px 0 var(--m3);transition:transform .08s,box-shadow .08s}
@@ -343,7 +343,7 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
   padding:7px 6px;
   background:rgba(16,16,18,.94);
   backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);
-  border:1px solid rgba(218,177,73,.16);
+  border:1px solid rgba(var(--gold-rgb),.16);
   border-radius:19px;
   box-shadow:0 16px 44px rgba(0,0,0,.55);
 }
@@ -356,7 +356,7 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
 .step i{font-size:19px;line-height:1}
 .step-l{font-size:11px;letter-spacing:.5px;text-transform:uppercase;font-weight:700;color:inherit}
 .step.done{color:var(--text-2)}
-.step.active{color:var(--gold);background:rgba(218,177,73,.14)}
+.step.active{color:var(--gold);background:rgba(var(--gold-rgb),.14)}
 /* Le verre seul ne suffit pas : une photo claire qui defile dessous reste
    lisible au travers. Le voile eteint le bas de la page avant la barre. */
 .steps-voile{
@@ -397,7 +397,7 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
   display:flex;flex-direction:column;
 }
 .svc:active{transform:scale(.98)}
-.svc.sel{border-color:var(--gold);background:linear-gradient(180deg,rgba(218,177,73,.06),var(--bg2))}
+.svc.sel{border-color:var(--gold);background:linear-gradient(180deg,rgba(var(--gold-rgb),.06),var(--bg2))}
 .svc.sel{box-shadow:var(--sh-gold)}
 .svc-img-wrap{position:relative;width:100%;aspect-ratio:1.4/1;background:#0A0A0A;overflow:hidden}
 .svc-img{width:100%;height:100%;object-fit:cover;transition:transform .4s var(--ease)}
@@ -430,7 +430,7 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
   cursor:pointer;transition:.2s var(--ease);display:flex;align-items:center;gap:12px;
 }
 .addon:active{transform:scale(.99)}
-.addon.sel{border-color:var(--gold);background:linear-gradient(90deg,rgba(218,177,73,.06),var(--bg2))}
+.addon.sel{border-color:var(--gold);background:linear-gradient(90deg,rgba(var(--gold-rgb),.06),var(--bg2))}
 .addon-img{width:42px;height:42px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#0A0A0A}
 .addon-name{flex:1;min-width:0;font-size:15.5px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .addon-dur{font-size:11px;font-weight:400;color:var(--text-3);margin-left:6px}
@@ -472,13 +472,13 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
 .cal-d.sel.libre::after{background:#080808}
 .cal-d.complet{color:var(--text-3)}
 .cal-d.empty{pointer-events:none;opacity:0}
-.cal-d.sel{background:linear-gradient(135deg,var(--gold-deep),var(--gold) 45%,var(--gold-2));color:#080808;font-weight:800;box-shadow:0 0 0 2px var(--gold),0 4px 14px rgba(218,177,73,.35);border-color:var(--gold-2)!important;color:#080808!important}
-.cal-d.sel.today{background:linear-gradient(135deg,var(--gold-deep),var(--gold) 45%,var(--gold-2));color:#080808;font-weight:800;box-shadow:0 0 0 2px var(--gold),0 4px 14px rgba(218,177,73,.35);border-color:var(--gold-2)}
+.cal-d.sel{background:linear-gradient(135deg,var(--gold-deep),var(--gold) 45%,var(--gold-2));color:#080808;font-weight:800;box-shadow:0 0 0 2px var(--gold),0 4px 14px rgba(var(--gold-rgb),.35);border-color:var(--gold-2)!important;color:#080808!important}
+.cal-d.sel.today{background:linear-gradient(135deg,var(--gold-deep),var(--gold) 45%,var(--gold-2));color:#080808;font-weight:800;box-shadow:0 0 0 2px var(--gold),0 4px 14px rgba(var(--gold-rgb),.35);border-color:var(--gold-2)}
 .cal-panne{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:26px 18px;font-size:12.5px;line-height:1.6;color:var(--text-2)}
 .cal-panne i{font-size:30px;color:var(--gold)}
 .cal-panne b{color:var(--text)}
 .cal-loading{grid-column:1/-1;text-align:center;padding:24px;color:var(--text-3);font-size:12.5px;display:flex;align-items:center;justify-content:center;gap:8px}
-.cal-loading::before{content:'';width:16px;height:16px;border:2px solid rgba(218,177,73,.18);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
+.cal-loading::before{content:'';width:16px;height:16px;border:2px solid rgba(var(--gold-rgb),.18);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── SLOTS ── */
@@ -495,7 +495,7 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
   min-height:48px;display:flex;align-items:center;justify-content:center;
 }
 .slot:active{transform:scale(.93);transition-duration:.06s}
-.slot.sel{background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-2));color:#080808;border:2px solid var(--gold);box-shadow:0 6px 18px rgba(218,177,73,.32);font-weight:900;animation:selPop .22s var(--ease-pop) both}
+.slot.sel{background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-2));color:#080808;border:2px solid var(--gold);box-shadow:0 6px 18px rgba(var(--gold-rgb),.32);font-weight:900;animation:selPop .22s var(--ease-pop) both}
 @keyframes selPop{from{transform:scale(.88)}to{transform:scale(1)}}
 /* Les heures se posent l'une apres l'autre plutot que d'apparaitre en bloc.
    Le decalage est porte par --i, ecrit sur chaque bouton au rendu ; le retard
@@ -528,14 +528,14 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
   background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-2));
   color:#080808;font-family:'Unbounded',sans-serif;font-size:12px;font-weight:800;
   padding:14px 20px;border-radius:14px;text-decoration:none;
-  box-shadow:0 6px 22px rgba(218,177,73,.4);
+  box-shadow:0 6px 22px rgba(var(--gold-rgb),.4);
   transition:transform .12s var(--ease), box-shadow .15s var(--ease);
 }
 /* Le second choix garde la forme du premier mais pas son or : un aplat
    sombre, pas un bouton transparent. Pose sur les heures barrees qu'il
    recouvre, le fond translucide les laissait lire au travers. */
 .slots-full-link.second{
-  background:#131313;border:1px solid rgba(218,177,73,.45);color:var(--gold);
+  background:#131313;border:1px solid rgba(var(--gold-rgb),.45);color:var(--gold);
   box-shadow:0 6px 20px rgba(0,0,0,.5);
 }
 .slots-full-link i{font-size:19px}
@@ -563,13 +563,13 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
 
 /* ── RECAP ── */
 .recap{
-  background:linear-gradient(135deg,rgba(218,177,73,.06),rgba(218,177,73,.02));
+  background:linear-gradient(135deg,rgba(var(--gold-rgb),.06),rgba(var(--gold-rgb),.02));
   border:1px solid var(--border-gold);border-radius:16px;padding:16px;margin-bottom:16px;
   box-shadow:0 2px 14px rgba(0,0,0,.3);
 }
-.recap-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed rgba(218,177,73,.12);font-size:13px;gap:10px}
+.recap-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed rgba(var(--gold-rgb),.12);font-size:13px;gap:10px}
 .recap-row:first-child{padding-top:0}
-.recap-row:last-child{border-bottom:none;padding-bottom:0;padding-top:12px;margin-top:4px;border-top:1px solid rgba(218,177,73,.2)}
+.recap-row:last-child{border-bottom:none;padding-bottom:0;padding-top:12px;margin-top:4px;border-top:1px solid rgba(var(--gold-rgb),.2)}
 .recap-label{color:var(--text-3);font-size:11.5px;font-weight:600;letter-spacing:.3px}
 .recap-val{color:var(--text);font-weight:600;text-align:right;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .recap-row:last-child .recap-label{color:var(--gold);font-size:13px;text-transform:uppercase;letter-spacing:1.5px}
@@ -583,9 +583,9 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
   padding:14px 16px;cursor:pointer;transition:.2s var(--ease);
   display:flex;align-items:center;gap:14px;
 }
-.pay-opt.sel{border-color:var(--gold);background:linear-gradient(90deg,rgba(218,177,73,.05),var(--bg2))}
+.pay-opt.sel{border-color:var(--gold);background:linear-gradient(90deg,rgba(var(--gold-rgb),.05),var(--bg2))}
 .pay-opt-icon{width:42px;height:42px;border-radius:11px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gold);flex-shrink:0}
-.pay-opt.sel .pay-opt-icon{background:rgba(218,177,73,.18)}
+.pay-opt.sel .pay-opt-icon{background:rgba(var(--gold-rgb),.18)}
 .pay-opt-body{flex:1;min-width:0}
 .pay-opt-title{font-size:13.5px;font-weight:700;color:var(--text)}
 .pay-opt-sub{font-size:11px;color:var(--text-3);margin-top:2px}
@@ -602,13 +602,13 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
   transition:.25s var(--ease);min-height:52px;
 }
 @media(max-width:500px){.btn{min-height:48px;font-size:12px}}
-.btn-gold{background:linear-gradient(135deg,var(--gold-deep),var(--gold) 45%,var(--gold-2));color:#080808;box-shadow:0 8px 24px rgba(218,177,73,.32)}
+.btn-gold{background:linear-gradient(135deg,var(--gold-deep),var(--gold) 45%,var(--gold-2));color:#080808;box-shadow:0 8px 24px rgba(var(--gold-rgb),.32)}
 .btn-gold:active:not(:disabled){transform:translateY(0)}
 .btn-out{background:transparent;color:var(--text-2);border:1px solid var(--border);margin-top:10px}
 /* L'opacite eteint le texte, la bordure et le fond ensemble : le libelle du
    bouton en attente tombait a 2,2:1. L'etat se dit maintenant en couleurs. */
 .btn:disabled{pointer-events:none;background:var(--bg3);color:var(--text-3);border:1px solid var(--border);box-shadow:none;background-image:none}
-.btn-ghost{background:transparent;color:var(--gold);border:1.5px solid rgba(218,177,73,.35)}
+.btn-ghost{background:transparent;color:var(--gold);border:1.5px solid rgba(var(--gold-rgb),.35)}
 .btn-danger{background:transparent;color:#E05050;border:1.5px solid rgba(224,80,80,.25)}
 .rdv-actions{display:flex;flex-direction:column;gap:var(--ecart,12px);width:100%;max-width:400px;margin:0 auto}
 .rdv-actions .btn-out,.rdv-actions .btn-ghost,.rdv-actions .btn-danger{margin-top:0}
@@ -632,7 +632,7 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
   background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-2));
   display:flex;align-items:center;justify-content:center;margin:0 auto 22px;
   font-size:48px;color:#080808;
-  box-shadow:0 20px 60px rgba(218,177,73,.4), 0 0 0 8px rgba(218,177,73,.08);
+  box-shadow:0 20px 60px rgba(var(--gold-rgb),.4), 0 0 0 8px rgba(var(--gold-rgb),.08);
   animation:successPop .6s var(--ease-pop) both;
 }
 @keyframes successPop{from{transform:scale(.3);opacity:0}50%{transform:scale(1.1)}to{transform:scale(1);opacity:1}}
@@ -647,13 +647,13 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
      animation-timing-function:cubic-bezier(.55,0,.85,.4)}
   6%{opacity:.8}
   77%{transform:scale(.46);opacity:1;
-      box-shadow:0 0 50px 18px rgba(241,204,111,.55), 0 0 0 0 rgba(218,177,73,.08);
+      box-shadow:0 0 50px 18px rgba(241,204,111,.55), 0 0 0 0 rgba(var(--gold-rgb),.08);
       animation-timing-function:cubic-bezier(.3,0,.7,1)}
   80%{transform:scale(.4);
-      box-shadow:0 0 30px 8px rgba(241,204,111,.4), 0 0 0 0 rgba(218,177,73,.08);
+      box-shadow:0 0 30px 8px rgba(241,204,111,.4), 0 0 0 0 rgba(var(--gold-rgb),.08);
       animation-timing-function:cubic-bezier(.16,1,.3,1)}
   88%{transform:scale(1.1)}
-  100%{transform:scale(1);opacity:1;box-shadow:0 20px 60px rgba(218,177,73,.4), 0 0 0 8px rgba(218,177,73,.08)}
+  100%{transform:scale(1);opacity:1;box-shadow:0 20px 60px rgba(var(--gold-rgb),.4), 0 0 0 8px rgba(var(--gold-rgb),.08)}
 }
 @keyframes successCoche{
   0%,80%{opacity:0;transform:scale(.4) rotate(-12deg)}
@@ -688,30 +688,30 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
 .rm-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rm-prix{flex-shrink:0;font-family:'Unbounded',sans-serif;font-size:15px;font-weight:900;color:var(--gold);letter-spacing:-.3px}
 .recap-map{cursor:pointer;border-radius:10px;margin:-4px -6px;padding:4px 6px;transition:background .2s}
-.recap-map:focus-visible{background:rgba(218,177,73,.09);outline:none}
+.recap-map:focus-visible{background:rgba(var(--gold-rgb),.09);outline:none}
 .recap-map .rm-go{display:block;font-size:11px;color:var(--gold);font-weight:700;margin-top:2px}
 
 /* ── CARTE FIDÉLITÉ ── */
 .fid-card{background:var(--bg2);border:1px solid var(--border-gold);border-radius:16px;padding:18px 16px;text-align:center;box-shadow:0 2px 14px rgba(0,0,0,.3);opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s cubic-bezier(.22,1.2,.36,1)}
 .fid-card.show{opacity:1;transform:translateY(0)}
-.fid-card.gold{border-color:var(--gold);background:linear-gradient(135deg,rgba(218,177,73,.14),rgba(218,177,73,.05) 60%);position:relative;overflow:hidden}
+.fid-card.gold{border-color:var(--gold);background:linear-gradient(135deg,rgba(var(--gold-rgb),.14),rgba(var(--gold-rgb),.05) 60%);position:relative;overflow:hidden}
 .fid-card.gold::before{content:'';position:absolute;top:0;left:-80%;width:60%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,238,178,.16),transparent);animation:fidShimmer 2.2s ease-in-out infinite}
 @keyframes fidShimmer{0%{left:-80%}60%,100%{left:120%}}
 .fid-title{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;font-weight:700;color:var(--gold);margin-bottom:12px}
 .fid-slots{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;max-width:250px;margin:0 auto 12px}
-.fid-slot{width:38px;height:38px;border-radius:50%;border:1.5px dashed rgba(218,177,73,.35);display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(218,177,73,.25);position:relative}
+.fid-slot{width:38px;height:38px;border-radius:50%;border:1.5px dashed rgba(var(--gold-rgb),.35);display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(var(--gold-rgb),.25);position:relative}
 .fid-slot i{transition:none}
-.fid-slot.filled{border-style:solid;border-color:var(--gold);background:rgba(218,177,73,.15);color:var(--gold)}
+.fid-slot.filled{border-style:solid;border-color:var(--gold);background:rgba(var(--gold-rgb),.15);color:var(--gold)}
 .fid-slot.filled.pop i{animation:fidStamp .45s cubic-bezier(.22,1.6,.36,1) both}
 @keyframes fidStamp{0%{transform:scale(2.2) rotate(-14deg);opacity:0}55%{transform:scale(.92) rotate(2deg);opacity:1}100%{transform:scale(1) rotate(0)}}
 .fid-slot.next{border-color:var(--gold);animation:fidPulse 1.6s ease-in-out infinite}
-@keyframes fidPulse{0%,100%{box-shadow:0 0 0 0 rgba(218,177,73,.35)}50%{box-shadow:0 0 0 7px rgba(218,177,73,0)}}
+@keyframes fidPulse{0%,100%{box-shadow:0 0 0 0 rgba(var(--gold-rgb),.35)}50%{box-shadow:0 0 0 7px rgba(var(--gold-rgb),0)}}
 /* Nouveau tampon (gagné depuis la dernière visite) : gros coup de tampon + onde + pastille +1 */
 .fid-slot.stamp-new i{animation:fidStampBig .75s cubic-bezier(.22,1.5,.36,1) both}
 @keyframes fidStampBig{0%{transform:scale(3.4) rotate(-32deg);opacity:0}45%{transform:scale(.82) rotate(5deg);opacity:1}68%{transform:scale(1.14) rotate(-3deg)}100%{transform:scale(1) rotate(0)}}
 .fid-slot.stamp-new::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:2px solid var(--gold);animation:fidRing .8s ease-out .18s both;pointer-events:none}
 @keyframes fidRing{0%{transform:scale(.55);opacity:.9}100%{transform:scale(1.8);opacity:0}}
-.fid-plus1{position:absolute;top:-13px;right:-8px;background:linear-gradient(135deg,var(--gold),#F1CC6F);color:#080808;font-size:9px;font-weight:800;font-family:'Unbounded',sans-serif;padding:2px 6px;border-radius:10px;box-shadow:0 2px 8px rgba(218,177,73,.5);animation:fidPlus1 .5s cubic-bezier(.22,1.6,.36,1) .4s both;z-index:2}
+.fid-plus1{position:absolute;top:-13px;right:-8px;background:linear-gradient(135deg,var(--gold),#F1CC6F);color:#080808;font-size:9px;font-weight:800;font-family:'Unbounded',sans-serif;padding:2px 6px;border-radius:10px;box-shadow:0 2px 8px rgba(var(--gold-rgb),.5);animation:fidPlus1 .5s cubic-bezier(.22,1.6,.36,1) .4s both;z-index:2}
 @keyframes fidPlus1{0%{transform:translateY(8px) scale(.3);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
 .fid-slot.roulette{border-style:dashed;border-color:var(--m2)}
 .fid-slot.roulette.filled{border-style:solid;background:color-mix(in srgb,var(--m2) 18%,transparent)}
@@ -744,7 +744,7 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
 /* Trois par rangee, et ce qui reste s'etire : quatre tuiles font 3 + 1 pleine
    largeur, cinq font 3 + 2. Une grille fixe laissait une case vide, qui se lit
    comme un chiffre manquant. */
-.ps-tile{flex:1 1 calc(33.333% - 6px);min-width:88px;background:rgba(218,177,73,.05);border:1px solid var(--border-gold);border-radius:12px;padding:12px 6px;text-align:center}
+.ps-tile{flex:1 1 calc(33.333% - 6px);min-width:88px;background:rgba(var(--gold-rgb),.05);border:1px solid var(--border-gold);border-radius:12px;padding:12px 6px;text-align:center}
 /* Les lapins ne sont pas une performance : ni or, ni mis en avant. */
 .ps-tile.alerte{background:rgba(224,80,80,.06);border-color:rgba(224,80,80,.22)}
 .ps-tile.alerte .ps-v{color:#F0A8A8}
@@ -756,7 +756,7 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
 /* ── MON SAMEDI ──
    La proposition de garder son creneau, et le rappel de la serie en cours. */
 .sam-card{padding:16px 15px;border-radius:16px;
-  background:linear-gradient(145deg,rgba(218,177,73,.09),rgba(218,177,73,.02));
+  background:linear-gradient(145deg,rgba(var(--gold-rgb),.09),rgba(var(--gold-rgb),.02));
   border:1px solid var(--border-gold);box-shadow:0 2px 14px rgba(0,0,0,.3);text-align:left}
 .sam-titre{display:flex;align-items:center;gap:8px;font-family:'Unbounded',sans-serif;font-size:13.5px;font-weight:800;
   color:var(--text);letter-spacing:-.2px;margin-bottom:5px}
@@ -862,21 +862,21 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
   width:100%;max-width:var(--bloc);margin-top:var(--ecart)}
 .my-rdv > div:empty{display:none}
 .my-rdv-actions{gap:var(--ecart)}
-.my-rdv-badge{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-2));display:flex;align-items:center;justify-content:center;margin:0 auto 22px;font-size:48px;color:#080808;box-shadow:0 20px 60px rgba(218,177,73,.4), 0 0 0 8px rgba(218,177,73,.08);animation:successPop .6s var(--ease-pop) both}
-.my-rdv-tag{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;font-weight:700;color:var(--gold);margin-bottom:6px;background:rgba(218,177,73,.08);border:1px solid rgba(218,177,73,.2);padding:4px 14px;border-radius:20px}
+.my-rdv-badge{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-2));display:flex;align-items:center;justify-content:center;margin:0 auto 22px;font-size:48px;color:#080808;box-shadow:0 20px 60px rgba(var(--gold-rgb),.4), 0 0 0 8px rgba(var(--gold-rgb),.08);animation:successPop .6s var(--ease-pop) both}
+.my-rdv-tag{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;font-weight:700;color:var(--gold);margin-bottom:6px;background:rgba(var(--gold-rgb),.08);border:1px solid rgba(var(--gold-rgb),.2);padding:4px 14px;border-radius:20px}
 .my-rdv-name{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:800;color:var(--text);margin:6px 0 0;letter-spacing:-.4px}
 .my-rdv-card{
   width:100%;
-  background:linear-gradient(145deg,rgba(218,177,73,.08) 0%,rgba(218,177,73,.02) 100%);
+  background:linear-gradient(145deg,rgba(var(--gold-rgb),.08) 0%,rgba(var(--gold-rgb),.02) 100%);
   border:1px solid var(--border-gold);border-radius:16px;padding:16px;
   box-shadow:0 2px 14px rgba(0,0,0,.3);
 }
 /* Plusieurs RDV listes : le meme ecart que partout ailleurs. */
 #mr-list{display:flex;flex-direction:column;gap:var(--ecart)}
-.my-rdv-row{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px dashed rgba(218,177,73,.1);font-size:14px;font-weight:600;color:var(--text);text-align:left}
+.my-rdv-row{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px dashed rgba(var(--gold-rgb),.1);font-size:14px;font-weight:600;color:var(--text);text-align:left}
 .my-rdv-row:last-of-type{border-bottom:none}
 .my-rdv-row i{font-size:19px;color:var(--gold);flex-shrink:0;width:22px}
-.my-rdv-total{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:16px;border-top:1px solid rgba(218,177,73,.2)}
+.my-rdv-total{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:16px;border-top:1px solid rgba(var(--gold-rgb),.2)}
 .my-rdv-total-l{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;font-weight:700;color:var(--gold)}
 .my-rdv-total-v{font-family:'Unbounded',sans-serif;font-size:26px;font-weight:900;color:var(--gold);letter-spacing:-.5px}
 .my-rdv-actions{display:flex;flex-direction:column}
@@ -886,7 +886,7 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
 /* Un rendez-vous pose par la serie le dit : sans ca, le client ne sait pas
    pourquoi il a un rendez-vous qu'il ne se souvient pas d'avoir pris. */
 .mr-recurrent{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:12px;
-  padding:7px 10px;border-radius:10px;background:rgba(218,177,73,.08);border:1px solid var(--border-gold);
+  padding:7px 10px;border-radius:10px;background:rgba(var(--gold-rgb),.08);border:1px solid var(--border-gold);
   font-size:11.5px;font-weight:700;letter-spacing:.3px;color:var(--gold)}
 .mr-recurrent i{font-size:15px}
 .mr-card-actions{display:flex;gap:8px;margin-top:14px}
@@ -903,13 +903,13 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
 .mr-annule{text-align:center;padding:16px;background:rgba(224,80,80,.08);border:1px solid rgba(224,80,80,.2);border-radius:12px;color:#F0A8A8;font-size:13px;font-weight:600}
 
 /* ── RETROUVER MON RDV ── */
-.fb-box{margin-top:16px;padding:18px 16px 16px;background:linear-gradient(180deg,rgba(218,177,73,.06),rgba(255,255,255,.02));border:1px solid var(--border-gold);border-radius:16px;text-align:left}
+.fb-box{margin-top:16px;padding:18px 16px 16px;background:linear-gradient(180deg,rgba(var(--gold-rgb),.06),rgba(255,255,255,.02));border:1px solid var(--border-gold);border-radius:16px;text-align:left}
 .fb-title{display:flex;align-items:center;gap:8px;font-family:'Unbounded',sans-serif;font-size:13px;font-weight:800;color:var(--text);margin-bottom:5px;letter-spacing:-.2px}
 .fb-title i{font-size:18px;color:var(--gold)}
 .fb-sub{font-size:12px;color:var(--text-3);margin-bottom:14px;line-height:1.45}
 .fb-msg{font-size:12.5px;font-weight:600;margin-top:12px;text-align:center;padding:10px 12px;border-radius:10px;line-height:1.4}
 .fb-msg.ko{color:#F0A8A8;background:rgba(224,80,80,.09);border:1px solid rgba(224,80,80,.22)}
-.fb-msg.ok{color:var(--gold);background:rgba(218,177,73,.08);border:1px solid var(--border-gold)}
+.fb-msg.ok{color:var(--gold);background:rgba(var(--gold-rgb),.08);border:1px solid var(--border-gold)}
 .fb-cta{margin-top:10px}
 
 /* ── TOAST ── */
@@ -962,7 +962,7 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
   margin-top:22px;padding:4px 0;
   font-size:11px;letter-spacing:.3px;color:var(--text-4);
 }
-#pied-legal a{color:var(--text-3);text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(218,177,73,.28)}
+#pied-legal a{color:var(--text-3);text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(var(--gold-rgb),.28)}
 
 /* La regle d'annulation, a l'endroit ou elle engage : juste avant le bouton
    qui valide, et non repliee au fond de la page. */
@@ -981,20 +981,20 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
    reste souleve. Le survol est donc reserve aux appareils qui pointent vraiment.
    Les etats de selection (.sel) et le focus clavier, eux, restent dehors. */
 @media (hover:hover) and (pointer:fine){
-  .h-ico:hover{background:rgba(218,177,73,.13);border-color:rgba(218,177,73,.38)}
-  .h-account:hover{background:rgba(218,177,73,.13);border-color:rgba(218,177,73,.38)}
+  .h-ico:hover{background:rgba(var(--gold-rgb),.13);border-color:rgba(var(--gold-rgb),.38)}
+  .h-account:hover{background:rgba(var(--gold-rgb),.13);border-color:rgba(var(--gold-rgb),.38)}
   .svc:hover .svc-img{transform:scale(1.04)}
-  .cal-nav:hover{border-color:var(--gold);color:var(--gold);background:rgba(218,177,73,.05)}
-  .slot:hover{border-color:var(--gold);color:var(--gold);background:linear-gradient(180deg,rgba(218,177,73,.05),var(--bg2))}
-  .slots-full-link:hover{box-shadow:0 8px 28px rgba(218,177,73,.55)}
-  .btn-gold:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 12px 32px rgba(218,177,73,.42)}
+  .cal-nav:hover{border-color:var(--gold);color:var(--gold);background:rgba(var(--gold-rgb),.05)}
+  .slot:hover{border-color:var(--gold);color:var(--gold);background:linear-gradient(180deg,rgba(var(--gold-rgb),.05),var(--bg2))}
+  .slots-full-link:hover{box-shadow:0 8px 28px rgba(var(--gold-rgb),.55)}
+  .btn-gold:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 12px 32px rgba(var(--gold-rgb),.42)}
   .btn-out:hover{border-color:var(--gold);color:var(--gold)}
-  .btn-ghost:hover{background:rgba(218,177,73,.06);border-color:var(--gold)}
+  .btn-ghost:hover{background:rgba(var(--gold-rgb),.06);border-color:var(--gold)}
   .btn-danger:hover{background:rgba(224,80,80,.08);border-color:rgba(224,80,80,.45)}
-  .svc:hover{border-color:var(--gold);background:linear-gradient(180deg,rgba(218,177,73,.06),var(--bg2))}
-  .addon:hover{border-color:var(--gold);background:linear-gradient(90deg,rgba(218,177,73,.06),var(--bg2))}
-  .pay-opt:hover{border-color:var(--gold);background:linear-gradient(90deg,rgba(218,177,73,.05),var(--bg2))}
-  .recap-map:hover{background:rgba(218,177,73,.09);outline:none}
+  .svc:hover{border-color:var(--gold);background:linear-gradient(180deg,rgba(var(--gold-rgb),.06),var(--bg2))}
+  .addon:hover{border-color:var(--gold);background:linear-gradient(90deg,rgba(var(--gold-rgb),.06),var(--bg2))}
+  .pay-opt:hover{border-color:var(--gold);background:linear-gradient(90deg,rgba(var(--gold-rgb),.05),var(--bg2))}
+  .recap-map:hover{background:rgba(var(--gold-rgb),.09);outline:none}
 }
 
 /* ════════════════════════════════════════════════════════
@@ -1136,7 +1136,7 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
      la colonne, plutot que dans deux coins opposes. */
   body>canvas{opacity:.55}
   body::after{
-    background-image:radial-gradient(ellipse 55% 60% at 50% 0%,rgba(218,177,73,.1),transparent 65%);
+    background-image:radial-gradient(ellipse 55% 60% at 50% 0%,rgba(var(--gold-rgb),.1),transparent 65%);
   }
   .wrap{padding-top:24px}
   .s-title{font-size:23px}

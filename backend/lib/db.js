@@ -118,6 +118,18 @@ const SCHEMA = [
   // seule fois), les nouveaux partent à NULL et passent par le parcours guidé.
   `ALTER TABLE salons ADD COLUMN IF NOT EXISTS mise_en_route_le TIMESTAMPTZ DEFAULT NOW()`,
   `ALTER TABLE salons ALTER COLUMN mise_en_route_le DROP DEFAULT`,
+  // Personnalisation de la page de réservation.
+  `ALTER TABLE salons ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT ''`,
+  `ALTER TABLE salons ADD COLUMN IF NOT EXISTS instagram TEXT NOT NULL DEFAULT ''`,
+  `ALTER TABLE salons ADD COLUMN IF NOT EXISTS couleur TEXT NOT NULL DEFAULT ''`,
+  `ALTER TABLE salons ADD COLUMN IF NOT EXISTS logo_maj TIMESTAMPTZ`,
+  `ALTER TABLE prestations ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT ''`,
+  // Le logo vit à part : salons est lu à chaque requête authentifiée (SELECT s.*),
+  // une image de 60 Ko y serait relue pour rien.
+  `CREATE TABLE IF NOT EXISTS salon_logos (
+     salon_id TEXT PRIMARY KEY REFERENCES salons(id) ON DELETE CASCADE,
+     type TEXT NOT NULL,
+     image BYTEA NOT NULL)`,
   `CREATE INDEX IF NOT EXISTS rdv_salon_date ON rdv (salon_id, date)`,
   `CREATE INDEX IF NOT EXISTS clients_salon ON clients (salon_id)`,
   `CREATE INDEX IF NOT EXISTS attente_salon_date ON attente (salon_id, date)`,

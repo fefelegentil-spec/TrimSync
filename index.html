@@ -53,10 +53,12 @@ button{cursor:pointer;border:none;background:none;font:inherit;color:inherit}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
 
 /* grain */
-/* Sous le bandeau (9950), pas au-dessus : Safari iOS teinte la zone de la barre
-   d'état d'après l'élément fixe qui touche le haut de l'écran. Avec ce grain
-   transparent au premier plan, il montrait la page floutée à travers. */
-body::before{content:'';position:fixed;inset:0;z-index:9940;pointer-events:none;opacity:.4;
+/* Sous le bandeau, et démarre SOUS lui (top:--nav-h) : Safari 26 (Mac et
+   iPhone) teinte la zone de l'encoche / barre d'état d'après les éléments fixes
+   qui touchent le haut de l'écran. Ce grain transparent plein écran y laissait
+   voir la page au lieu de la couleur du bandeau. Le bandeau doit rester le SEUL
+   élément fixe collé en haut. */
+body::before{content:'';position:fixed;inset:0;top:var(--nav-h,68px);z-index:9940;pointer-events:none;opacity:.4;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")}
 
 

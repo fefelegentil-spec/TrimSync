@@ -77,8 +77,10 @@ function init() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
   const canvas = renderer.domElement;
-  // fixed + inset:0 → s'étend sur toute la surface physique (safe-area incluse)
-  canvas.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;';
+  // Fixe, sous le bandeau (--nav-h) : un élément fixe transparent collé en haut
+  // de l'écran brouille la teinte que Safari 26 met sous l'encoche / la barre
+  // d'état — la page y apparaissait au-dessus du bandeau.
+  canvas.style.cssText = 'position:fixed;left:0;right:0;bottom:0;top:var(--nav-h,68px);width:100%;height:calc(100% - var(--nav-h,68px));z-index:-1;pointer-events:none;';
   document.body.insertBefore(canvas, document.body.firstChild);
 
   const scene  = new THREE.Scene();
@@ -94,7 +96,7 @@ function init() {
   scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
 
   function onResize() {
-    const w = window.innerWidth, h = window.innerHeight;
+    const w = window.innerWidth, h = canvas.clientHeight || window.innerHeight;
     renderer.setSize(w, h, false);
     uniforms.iResolution.value.set(w, h);
   }

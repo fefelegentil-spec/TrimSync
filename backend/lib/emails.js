@@ -20,7 +20,7 @@ function gabarit(titre, paragraphes, bouton) {
     <h2 style="color:#2a9ea3;margin:0 0 16px">${escHtml(titre)}</h2>
     ${paragraphes.map(p => `<p style="line-height:1.6;margin:0 0 12px">${p}</p>`).join('')}
     ${bouton ? `<p style="margin:24px 0"><a href="${escHtml(bouton.url)}" style="background:#2a9ea3;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">${escHtml(bouton.texte)}</a></p>` : ''}
-    <p style="color:#999;font-size:12px;margin-top:32px">TrimSync — ta chaise se remplit toute seule.</p>
+    <p style="color:#999;font-size:12px;margin-top:32px">TrimSync — ton agenda se remplit tout seul.</p>
   </div>`;
 }
 

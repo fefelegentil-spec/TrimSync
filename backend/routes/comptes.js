@@ -68,7 +68,7 @@ router.post('/api/comptes/inscription', quotaComptes, async (req, res) => {
       return { compteId, salon, jeton };
     });
     if (!r) return res.status(409).json({ error: 'Un compte existe déjà avec cet email' });
-    emails.verification(email, r.jeton);
+    emails.verification(email, r.jeton, r.salon);
     emails.alerteAdmin(`Nouveau salon inscrit : ${r.salon.nom}`, {
       Salon: r.salon.nom, Ville: r.salon.ville, Email: email, Téléphone: r.salon.telephone, Page: vueSalon(r.salon).lien_public,
     });
@@ -108,7 +108,7 @@ router.post('/api/comptes/renvoyer-verification', quotaComptes, exigerCompte, as
   try {
     if (req.salon.email_verifie_le) return res.json({ ok: true, deja: true });
     const jeton = await creerJeton(pool, req.compteId, 'verification', 24 * HEURE_MS);
-    emails.verification(req.salon.email, jeton);
+    emails.verification(req.salon.email, jeton, req.salon);
     res.json({ ok: true });
   } catch (e) { erreurServeur(res, e, 'renvoyer-verification'); }
 });

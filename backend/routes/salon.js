@@ -44,6 +44,21 @@ router.patch('/api/salon', exigerCompte, async (req, res) => {
   }
 });
 
+// Fin du parcours de mise en route : refusée tant que la page de réservation
+// n'a rien à proposer (aucune prestation active ou aucun jour ouvert).
+router.post('/api/salon/mise-en-route', exigerCompte, async (req, res) => {
+  try {
+    const [presta, jours] = await Promise.all([
+      pool.query('SELECT COUNT(*)::int AS n FROM prestations WHERE salon_id = $1 AND actif', [req.salonId]),
+      pool.query('SELECT COUNT(*)::int AS n FROM horaires WHERE salon_id = $1', [req.salonId]),
+    ]);
+    if (!presta.rows[0].n) return res.status(400).json({ error: 'Ajoute au moins une prestation' });
+    if (!jours.rows[0].n) return res.status(400).json({ error: 'Ouvre au moins un jour dans la semaine' });
+    const r = await pool.query('UPDATE salons SET mise_en_route_le = COALESCE(mise_en_route_le, NOW()) WHERE id = $1 RETURNING *', [req.salonId]);
+    res.json({ salon: vueSalon(r.rows[0]) });
+  } catch (e) { erreurServeur(res, e, 'salon/mise-en-route'); }
+});
+
 // Félix ne doit pas appeler une adresse bidon : email vérifié d'abord.
 router.post('/api/salon/demande-bot', exigerCompte, async (req, res) => {
   if (!req.salon.email_verifie_le) {

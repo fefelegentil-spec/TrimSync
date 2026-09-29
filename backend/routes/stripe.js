@@ -64,6 +64,8 @@ async function paiementRecu(session) {
        stripe_abonnement = COALESCE($4, stripe_abonnement) WHERE id = $1`,
     [salon.id, plan, session.customer || null, session.subscription || null]);
   emails.alerteAdmin(`Nouveau client payant : ${salon.nom}`, { Plan: plan, Montant: (session.amount_total / 100) + ' €', Email: client });
+  const compte = (await pool.query('SELECT c.email, s.nom, s.slug FROM comptes c JOIN salons s ON s.id = c.salon_id WHERE s.id = $1', [salon.id])).rows[0];
+  if (compte) emails.abonnementActive(compte.email, compte, plan);
   notifierSalon(salon.id, { type: 'abonnement', titre: 'Abonnement activé', corps: 'Merci ! Ton salon TrimSync est actif.' });
 }
 

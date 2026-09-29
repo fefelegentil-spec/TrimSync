@@ -113,6 +113,11 @@ const SCHEMA = [
   `ALTER TABLE rdv ADD COLUMN IF NOT EXISTS note TEXT NOT NULL DEFAULT ''`,
   `ALTER TABLE salons ADD COLUMN IF NOT EXISTS stripe_client TEXT`,
   `ALTER TABLE salons ADD COLUMN IF NOT EXISTS stripe_abonnement TEXT`,
+  // Mise en route obligatoire : les salons déjà inscrits au moment de l'ajout
+  // sont tenus pour « faits » (DEFAULT NOW() remplit les lignes existantes une
+  // seule fois), les nouveaux partent à NULL et passent par le parcours guidé.
+  `ALTER TABLE salons ADD COLUMN IF NOT EXISTS mise_en_route_le TIMESTAMPTZ DEFAULT NOW()`,
+  `ALTER TABLE salons ALTER COLUMN mise_en_route_le DROP DEFAULT`,
   `CREATE INDEX IF NOT EXISTS rdv_salon_date ON rdv (salon_id, date)`,
   `CREATE INDEX IF NOT EXISTS clients_salon ON clients (salon_id)`,
   `CREATE INDEX IF NOT EXISTS attente_salon_date ON attente (salon_id, date)`,

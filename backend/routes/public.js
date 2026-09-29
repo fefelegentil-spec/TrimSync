@@ -14,6 +14,7 @@ const { reservable } = require('../lib/salon');
 const { nowParis, decaleJours, estDate, estHeure, creneauPasse, jourLisible } = require('../lib/dates');
 const { telAStocker, telComposable } = require('../lib/telephone');
 const { sanitizeText } = require('../lib/texte');
+const emails = require('../lib/emails');
 const { erreurServeur, quota } = require('../lib/http');
 
 const router = express.Router();
@@ -128,6 +129,13 @@ router.post('/api/public/salons/:slug/reserver', quotaEcriture, async (req, res)
       type: 'nouveau-rdv', titre: 'Nouveau rendez-vous',
       corps: `${client.nom} — ${presta.nom}, ${jourLisible(b.date)} à ${b.heure}`,
     });
+    if (client.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(client.email)) {
+      emails.confirmationClient(client.email, {
+        salon,
+        rdv: { date: b.date, heure: b.heure, prestation: presta.nom, prix: presta.prix, duree: presta.duree_min },
+        jeton: rdv.jeton,
+      });
+    }
     res.status(201).json({ rdv: { date: b.date, heure: b.heure, prestation: presta.nom, prix: presta.prix }, annulation: rdv.jeton });
   } catch (e) { erreurServeur(res, e, 'public/reserver'); }
 });

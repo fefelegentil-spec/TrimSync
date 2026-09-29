@@ -63,6 +63,7 @@ async function main() {
     { email: `c-${RUN}@test.fr`, mdp: 'motdepasse1', salon: 'X', ville: 'Y' })).s === 400, 'sans consentement refusé');
   ok((await appel('POST', '/api/comptes/inscription',
     { email: `d-${RUN}@test.fr`, mdp: 'court', salon: 'X', ville: 'Y', consentement: true })).s === 400, 'mot de passe trop court refusé');
+  ok(insA.d.salon.mise_en_route === false, 'nouveau salon : mise en route à faire', insA.d.salon);
   const insN = await appel('POST', '/api/comptes/inscription',
     { email: `n-${RUN}@test.fr`, mdp: 'motdepasse1', salon: 'Studio Ongles', metier: 'ongles', consentement: true });
   const prestasN = (await appel('GET', '/api/prestations', undefined, insN.d?.jeton)).d?.prestations || [];
@@ -273,6 +274,15 @@ async function main() {
   const kpi = await appel('GET', '/api/admin/kpi', undefined, ADM);
   ok(kpi.s === 200 && kpi.d.demandes_bot >= 1 && kpi.d.mrr >= 79 && kpi.d.essai >= 1, 'indicateurs', kpi.d);
   ok((await appel('PATCH', `/api/admin/salons/${salonB}`, { plan: 'gratuit' }, ADM)).s === 400, 'plan inconnu refusé');
+
+  console.log('T14 — mise en route obligatoire');
+  const X = insX.d?.jeton;
+  ok((await appel('PUT', '/api/horaires', { semaine: [] }, X)).s === 200, 'semaine fermée');
+  ok((await appel('POST', '/api/salon/mise-en-route', undefined, X)).s === 400, 'mise en route refusée sans jour ouvert');
+  ok((await appel('PUT', '/api/horaires', { semaine: [{ jour: 2, ouverture: '09:00', fermeture: '18:00' }] }, X)).s === 200, 'un jour ouvert');
+  const fin = await appel('POST', '/api/salon/mise-en-route', undefined, X);
+  ok(fin.s === 200 && fin.d.salon.mise_en_route === true, 'mise en route terminée', fin.d);
+  ok((await appel('GET', '/api/moi', undefined, X)).d?.salon?.mise_en_route === true, 'mise en route retenue côté serveur');
 
   console.log('T13 — paiement Stripe');
   async function webhook(evt, signature) {

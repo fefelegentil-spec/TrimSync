@@ -34,6 +34,7 @@ function vueSalon(salon) {
     jours_essai_restants: statut === 'essai' ? joursRestants(salon) : null,
     plan: salon.plan,
     bot_statut: salon.bot_statut,
+    mise_en_route: !!salon.mise_en_route_le,
     lien_public: `${SITE()}/r/${salon.slug}`,
   };
 }

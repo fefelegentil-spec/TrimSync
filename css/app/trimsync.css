@@ -211,3 +211,42 @@ body { overflow-x: hidden; overflow-x: clip; }
 .ts-offre:hover { border-color: rgba(var(--accent-rgb), .6); }
 .ts-offre strong { font-size: 15px; }
 .ts-offre span { font-size: 13px; opacity: .75; }
+
+/* ── Mise en route obligatoire (plein écran, sans bouton de fermeture) ── */
+.mer { position: fixed; inset: 0; z-index: 5000; background: rgb(14, 15, 19); overflow-y: auto; padding: max(24px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)); }
+.mer-carte { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+.mer-haut { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
+.mer-marque { font-weight: 800; font-size: 20px; letter-spacing: -.02em; }
+.mer-marque span { color: rgb(var(--accent-rgb)); }
+.mer-etapes { display: flex; gap: 6px; }
+.mer-etapes span { flex: 1; height: 4px; border-radius: 4px; background: rgba(var(--accent-rgb), .15); }
+.mer-etapes span.fait, .mer-etapes span.actif { background: rgb(var(--accent-rgb)); }
+.mer-etapes span.actif { opacity: .6; }
+.mer-compteur { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; opacity: .6; }
+.mer-corps h2 { font-size: 24px; line-height: 1.2; margin: 0 0 8px; }
+.mer-intro { opacity: .75; margin: 0 0 18px; line-height: 1.5; }
+.mer-champ { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.mer-champ span { font-size: 13px; font-weight: 600; }
+.mer-champ em { font-weight: 400; opacity: .6; font-style: normal; }
+.mer-prestas { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.mer-presta { display: grid; grid-template-columns: minmax(0, 1fr) 96px 84px 40px; gap: 8px; align-items: center; }
+.mer-prix { position: relative; }
+.mer-prix .input { width: 100%; padding-right: 26px; }
+.mer-prix span { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); opacity: .6; }
+.mer-jours { display: flex; flex-direction: column; gap: 8px; }
+.mer-jour { display: grid; grid-template-columns: 44px minmax(70px, 1fr) 104px auto 104px; gap: 8px; align-items: center; }
+.mer-jour.ferme .mer-jour-nom { opacity: .45; }
+.mer-jour-nom { font-weight: 600; }
+.mer-lien { padding: 16px; border-radius: 12px; border: 1px solid rgba(var(--accent-rgb), .35); background: rgba(var(--accent-rgb), .08); word-break: break-all; }
+.mer-lien strong { font-size: 17px; }
+.mer-insta { margin: 18px 0 0; padding-left: 20px; line-height: 1.9; opacity: .85; }
+.mer-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 8px; }
+@media (max-width: 480px) {
+  .mer-presta { grid-template-columns: minmax(0, 1fr) 84px 40px; }
+  .mer-presta [data-champ=duree_min] { grid-column: 1; }
+  .mer-presta .mer-prix { grid-column: 2; grid-row: 2; }
+  .mer-presta [data-champ=nom] { grid-column: 1 / 3; }
+  .mer-presta > button { grid-column: 3; grid-row: 1; }
+  .mer-jour { grid-template-columns: 44px minmax(0, 1fr) 90px 90px; }
+  .mer-jour .ts-a { display: none; }
+}

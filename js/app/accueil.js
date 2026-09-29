@@ -62,12 +62,12 @@ async function renderAccueil() {
   const faites = etapesFaites();
   const etapes = [
     ['Confirme ton adresse email', SESSION.email_verifie, "Lien reçu à l'inscription", null],
-    ['Vérifie tes prestations et tes prix', faites.prestations, 'Paramètres', "nav('parametres')"],
-    ['Règle tes horaires', faites.horaires, 'Disponibilités', "nav('disponibilites')"],
-    ['Mets ton lien dans ta bio Instagram', faites.lien, 'Copier le lien', 'copierLienAccueil()'],
+    ['Vérifie tes prestations et tes prix', faites.prestations || SESSION.salon.mise_en_route, 'Paramètres', "nav('parametres')"],
+    ['Règle tes horaires', faites.horaires || SESSION.salon.mise_en_route, 'Disponibilités', "nav('disponibilites')"],
+    ['Mets ton lien dans ta bio Instagram', faites.lien || SESSION.salon.mise_en_route, 'Copier le lien', 'copierLienAccueil()'],
   ];
   const miseEnRoute = etapes.every(e => e[1]) ? '' : `<div class="card ts-carte ts-mise-en-route">
-    <div class="card-h"><div><div class="card-title">Mise en route</div><div class="card-sub">Quatre étapes et ta page de réservation tourne toute seule.</div></div></div>
+    <div class="card-h"><div><div class="card-title">Mise en route</div><div class="card-sub">${(n => n > 1 ? `Encore ${n} étapes` : "Plus qu'une étape")(etapes.filter(e => !e[1]).length)} et ta page de réservation tourne toute seule.</div></div></div>
     ${etapes.map(([t, ok, lien, action]) => `<div class="ts-etape${ok ? ' faite' : ''}">
       <i class="ti ${ok ? 'ti-circle-check' : 'ti-circle'}"></i><span>${t}</span>
       ${!ok && action ? `<button class="btn btn-ghost btn-sm" onclick="${action}">${lien}</button>` : `<em>${ok ? '' : lien}</em>`}

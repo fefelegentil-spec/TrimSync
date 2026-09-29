@@ -55,7 +55,7 @@ async function api(methode, chemin, corps) {
 
 // Message à montrer pour une erreur d'API ; l'essai terminé a le sien.
 function messageErreur(e) {
-  if (e && e.statut === 402) return 'Ton essai est terminé : ton agenda est en lecture seule. Réponds à mon email pour choisir ton plan.';
+  if (e && e.statut === 402) return "Ton essai est terminé : ton agenda est en lecture seule. Choisis ton offre depuis l'accueil pour tout rouvrir.";
   return (e && e.message) || 'Erreur inattendue';
 }
 
@@ -162,6 +162,7 @@ async function ouvrirSession() {
   afficherSalon();
   nav('dashboard');
   reinscrirePush();
+  if (!SESSION.salon.mise_en_route) ouvrirMiseEnRoute();
 }
 
 function deconnecter() {

@@ -27,29 +27,29 @@ const SWIRL_TIME_MULT = 5.0;
 const NOISE_SWIRL_FACTOR = 0.2;
 // Number of fractal noise octaves in fbm (must be integer).
 const FBM_OCTAVES = 10;
-// 20-step palette of blues.
+// 20-step palette in TrimSync colors (dark teal → brand cyan #3bbfcc → aqua green).
 // If the darkest color is used, alpha=0 => total transparency in darkest areas.
 const seaColors = [
-  [0.0, 0.02, 0.05],
-  [0.0, 0.04, 0.08],
-  [0.0, 0.06, 0.12],
-  [0.0, 0.08, 0.18],
-  [0.0, 0.1, 0.24],
-  [0.0, 0.14, 0.32],
-  [0.0, 0.2, 0.4],
-  [0.0, 0.24, 0.48],
-  [0.0, 0.3, 0.55],
-  [0.05, 0.35, 0.6],
-  [0.08, 0.4, 0.65],
-  [0.1, 0.45, 0.7],
-  [0.15, 0.5, 0.75],
-  [0.2, 0.58, 0.8],
-  [0.25, 0.65, 0.85],
-  [0.3, 0.72, 0.9],
-  [0.4, 0.78, 0.92],
-  [0.5, 0.85, 0.95],
-  [0.7, 0.9, 0.97],
-  [0.85, 0.95, 1.0],
+  [0.00, 0.02, 0.03],
+  [0.00, 0.04, 0.06],
+  [0.01, 0.06, 0.09],
+  [0.01, 0.09, 0.12],
+  [0.02, 0.12, 0.16],
+  [0.03, 0.16, 0.21],
+  [0.04, 0.21, 0.26],
+  [0.05, 0.26, 0.31],
+  [0.07, 0.32, 0.37],
+  [0.09, 0.38, 0.43],
+  [0.11, 0.45, 0.49],
+  [0.14, 0.52, 0.55],
+  [0.17, 0.59, 0.61],
+  [0.20, 0.66, 0.67],
+  [0.23, 0.72, 0.72],
+  [0.28, 0.77, 0.74],
+  [0.36, 0.82, 0.76],
+  [0.46, 0.87, 0.80],
+  [0.60, 0.91, 0.86],
+  [0.76, 0.95, 0.92],
 ];
 
 function buildFragmentShader(): string {
@@ -71,7 +71,7 @@ uniform float uTime;
 
 #define NUM_COLORS 20
 
-// 20-step palette of blues.
+// 20-step palette (TrimSync colors).
 vec3 seaColors[NUM_COLORS] = vec3[](
   ${colorArraySrc}
 );

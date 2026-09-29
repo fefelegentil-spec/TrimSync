@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "include": [
+    "/backend/*", "/docs/*", "/src/*", "/components/*", "/graphify-out/*", "/functions/*", "/.github/*",
+    "/package.json", "/package-lock.json", "/tsconfig.json", "/vite.config.ts", "/tailwind.config.ts",
+    "/postcss.config.js", "/components.json", "/_devserver.py", "/PRODUCT.md", "/README.md", "/.gitignore"
+  ],
+  "exclude": []
+}

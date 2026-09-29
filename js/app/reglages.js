@@ -176,7 +176,10 @@ async function renderParametres() {
        </div>`)
     + carte('Bot Instagram', '', bot)
     + carte('Abonnement', '', `<p class="ts-texte">${abonnement}</p>
-       <a class="btn btn-out" href="/trimsync-booking.html" target="_blank" rel="noopener"><i class="ti ti-calendar-event"></i>Parler de mon plan avec Félix</a>`)
+       ${SESSION.salon.statut === 'actif'
+         ? `<p class="ts-texte">Pour changer d'offre ou résilier, écris à <a href="mailto:felix@trimsync.tech">felix@trimsync.tech</a>. Sans engagement : tu peux arrêter quand tu veux.</p>`
+         : `<div class="ts-boutons"><a class="btn btn-gold" href="${esc(lienPaiement('max'))}" target="_blank" rel="noopener"><i class="ti ti-credit-card"></i>Max · 99 €/mois</a>
+            <a class="btn btn-out" href="${esc(lienPaiement('starter'))}" target="_blank" rel="noopener">Starter · 59 €/mois</a></div>`}`)
     + carte('Compte', esc(SESSION.email),
       `<div class="ts-grille2">
          <input class="input" id="mdp-actuel" type="password" autocomplete="current-password" placeholder="Mot de passe actuel">

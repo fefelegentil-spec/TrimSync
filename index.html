@@ -41,7 +41,7 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 /* Page verticale uniquement : rien ne doit pouvoir la faire glisser de côté. */
-html{-webkit-font-smoothing:antialiased;overflow-x:clip;background:var(--bg)}
+html{-webkit-font-smoothing:antialiased;overflow-x:clip;background:#040608;background:oklch(0.12 0.008 222)}
 body{background-color:var(--bg);color:var(--t);font-family:var(--fb);font-size:16px;line-height:1.65;overflow-x:clip}
 a{color:inherit;text-decoration:none}
 img,svg,canvas{display:block}
@@ -51,7 +51,10 @@ button{cursor:pointer;border:none;background:none;font:inherit;color:inherit}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
 
 /* grain */
-body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.4;
+/* Sous le bandeau (9950), pas au-dessus : Safari iOS teinte la zone de la barre
+   d'état d'après l'élément fixe qui touche le haut de l'écran. Avec ce grain
+   transparent au premier plan, il montrait la page floutée à travers. */
+body::before{content:'';position:fixed;inset:0;z-index:9940;pointer-events:none;opacity:.4;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")}
 
 
@@ -91,11 +94,10 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .btn-nav:hover{background:oklch(0.82 0.11 190)}
 
 /* nav */
-.nav{position:fixed;top:0;left:0;right:0;z-index:9950;background:#040608;background:oklch(0.12 0.008 222);border-bottom:1px solid var(--bd);transition:background .3s,border-color .3s;padding-top:env(safe-area-inset-top);transform:translate3d(0,0,0)}
-/* iOS safe-area fix: backdrop-filter ne couvre pas la zone padding-top sur Safari Mobile */
-/* Bandeau opaque et prolongé vers le haut : rien du site ne doit apparaître sous
-   l'encoche / la Dynamic Island, ni quand iOS fait rebondir la page en haut. */
-.nav::before{content:'';position:absolute;left:0;right:0;bottom:100%;height:100vh;background:#040608;background:oklch(0.12 0.008 222);pointer-events:none}
+.nav{position:fixed;top:0;left:0;right:0;z-index:9950;background:#040608;background:oklch(0.12 0.008 222);border-bottom:1px solid var(--bd);transition:background .3s,border-color .3s;padding-top:env(safe-area-inset-top)}
+/* Bandeau opaque, premier élément fixe en haut de l'écran, sans transform :
+   c'est lui que Safari iOS recopie dans la zone de la barre d'état / Dynamic
+   Island. Au-delà (rebond de la page), c'est le fond de <html>, même couleur. */
 .nav.scrolled{background:#040608;background:oklch(0.12 0.008 222);border-bottom-color:var(--bd2)}
 :root{--nav-h:68px}
 .nav-inner{max-width:var(--max);margin:0 auto;padding:0 2.5rem;display:flex;align-items:center;justify-content:space-between;height:var(--nav-h)}
@@ -1433,14 +1435,10 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     </button>
   </div>
 </header>
-<!-- Hors de <header> : .nav porte transform:translate3d(0,0,0) (accélération
-     GPU du bandeau fixe), ce qui en fait la containing block de tout
-     position:fixed placé à l'intérieur (règle CSS des transforms). Imbriqué
-     dans .nav (69px de haut), ce panneau — pourtant top/bottom/fixed — se
-     calait sur cette hauteur de 69px au lieu de l'écran entier : replié sur
-     une tranche de quelques dizaines de pixels sous le bandeau, débordant
-     dessus au lieu de s'étendre dessous. Frère de .nav, il redevient
-     positionné par rapport à l'écran, plein cadre, comme le veut son CSS. -->
+<!-- Hors de <header> : quand .nav portait un transform, il devenait la containing
+     block de tout position:fixed placé dedans, et ce panneau se repliait sur
+     les 69px du bandeau au lieu de l'écran entier. Frère de .nav, il reste
+     positionné par rapport à l'écran quoi qu'on mette un jour sur le bandeau. -->
 <nav class="nav-mob" id="nm" aria-label="Mobile navigation">
   <a href="#problem"  data-en="Problem"            data-fr="Problème">Problem</a>
   <a href="#solution" data-en="How it works"       data-fr="Comment ça marche">How it works</a>

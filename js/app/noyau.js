@@ -144,7 +144,7 @@ function afficherSalon() {
   const essai = document.getElementById('essai-pastille');
   if (s.statut === 'essai') {
     essai.textContent = `Essai gratuit : ${s.jours_essai_restants} jour${s.jours_essai_restants > 1 ? 's' : ''} restant${s.jours_essai_restants > 1 ? 's' : ''}`;
-    essai.className = 'essai-pastille' + (s.jours_essai_restants <= 7 ? ' alerte' : '');
+    essai.className = 'essai-pastille' + (s.jours_essai_restants <= 2 ? ' alerte' : '');
     essai.hidden = false;
   } else if (s.statut === 'expire' || s.statut === 'suspendu') {
     essai.textContent = 'Essai terminé : agenda en lecture seule';
@@ -161,6 +161,7 @@ async function ouvrirSession() {
   window.scrollTo(0, 0);
   afficherSalon();
   nav('dashboard');
+  reinscrirePush();
 }
 
 function deconnecter() {

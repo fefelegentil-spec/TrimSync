@@ -26,6 +26,7 @@ jobs:
       ADMIN_PASSWORD: test
       TRIMSYNC_TEST: '1'
       QUOTA_FACTEUR: '100'
+      STRIPE_WEBHOOK_SECRET: whsec_test
       PORT: '3998'
     steps:
       - uses: actions/checkout@v4

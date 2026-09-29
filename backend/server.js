@@ -27,6 +27,8 @@ app.use(cors({
     cb(null, false);
   },
 }));
+// Avant express.json : le webhook Stripe a besoin du corps brut pour vérifier sa signature.
+if (pool) app.use(require('./routes/stripe'));
 app.use(express.json({ limit: '100kb' }));
 
 /* ── Santé ── */

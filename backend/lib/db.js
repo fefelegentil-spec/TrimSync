@@ -111,6 +111,8 @@ const SCHEMA = [
      cles JSONB NOT NULL)`,
   // Ajouts après la première mise en ligne : toujours en ALTER idempotent.
   `ALTER TABLE rdv ADD COLUMN IF NOT EXISTS note TEXT NOT NULL DEFAULT ''`,
+  `ALTER TABLE salons ADD COLUMN IF NOT EXISTS stripe_client TEXT`,
+  `ALTER TABLE salons ADD COLUMN IF NOT EXISTS stripe_abonnement TEXT`,
   `CREATE INDEX IF NOT EXISTS rdv_salon_date ON rdv (salon_id, date)`,
   `CREATE INDEX IF NOT EXISTS clients_salon ON clients (salon_id)`,
   `CREATE INDEX IF NOT EXISTS attente_salon_date ON attente (salon_id, date)`,

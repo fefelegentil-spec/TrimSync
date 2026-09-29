@@ -2,7 +2,10 @@
    Parcours réels contre un serveur lancé avec TRIMSYNC_TEST=1 et une base
    jetable (voir README). Emails et noms de salon sont suffixés par
    l'horodatage : la suite se rejoue sur la même base. */
+import crypto from 'node:crypto';
+
 const API = process.env.API || 'http://localhost:3998';
+const STRIPE_SECRET = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_test';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'test';
 
 let echecs = 0, total = 0;
@@ -270,6 +273,27 @@ async function main() {
   const kpi = await appel('GET', '/api/admin/kpi', undefined, ADM);
   ok(kpi.s === 200 && kpi.d.demandes_bot >= 1 && kpi.d.mrr >= 79 && kpi.d.essai >= 1, 'indicateurs', kpi.d);
   ok((await appel('PATCH', `/api/admin/salons/${salonB}`, { plan: 'gratuit' }, ADM)).s === 400, 'plan inconnu refusé');
+
+  console.log('T13 — paiement Stripe');
+  async function webhook(evt, signature) {
+    const corps = JSON.stringify(evt);
+    const t = Math.floor(Date.now() / 1000);
+    const sig = signature ?? `t=${t},v1=${crypto.createHmac('sha256', STRIPE_SECRET).update(`${t}.${corps}`).digest('hex')}`;
+    const r = await fetch(API + '/api/stripe/webhook', { method: 'POST', headers: { 'content-type': 'application/json', 'stripe-signature': sig }, body: corps });
+    return r.status;
+  }
+  const salonN = insN.d?.salon?.id;
+  const paiementN = { type: 'checkout.session.completed', data: { object: { id: 'cs_n', amount_total: 5900, client_reference_id: salonN, customer: 'cus_n', subscription: `sub_n_${Date.now()}` } } };
+  ok(await webhook(paiementN, 't=1,v1=00') === 400, 'signature Stripe fausse refusée');
+  ok(await webhook(paiementN) === 200, 'paiement reçu');
+  let moiN = await appel('GET', '/api/moi', undefined, insN.d?.jeton);
+  ok(moiN.d?.salon?.statut === 'actif' && moiN.d.salon.plan === 'starter', 'salon actif en Starter après paiement', moiN.d?.salon);
+  ok(await webhook({ type: 'checkout.session.completed', data: { object: { id: 'cs_x', amount_total: 19900, customer_details: { email: `x-${RUN}@test.fr` } } } }) === 200, 'paiement sans référence');
+  const moiX = await appel('GET', '/api/moi', undefined, insX.d?.jeton);
+  ok(moiX.d?.salon?.statut === 'actif' && moiX.d.salon.plan === 'max', 'retrouvé par email, frais de mise en place ignorés : Max', moiX.d?.salon);
+  ok(await webhook({ type: 'customer.subscription.deleted', data: { object: { id: paiementN.data.object.subscription } } }) === 200, 'résiliation reçue');
+  moiN = await appel('GET', '/api/moi', undefined, insN.d?.jeton);
+  ok(moiN.d?.salon?.statut === 'expire', 'salon expiré après résiliation', moiN.d?.salon);
 
   console.log('T11 — suppression du compte');
   ok((await appel('DELETE', '/api/salon', { confirmation: 'pas le bon' }, B)).s === 400, 'confirmation exigée');

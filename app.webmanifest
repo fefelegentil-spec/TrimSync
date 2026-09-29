@@ -1,0 +1,17 @@
+{
+  "name": "TrimSync",
+  "short_name": "TrimSync",
+  "description": "Ton agenda, tes clients et tes réservations.",
+  "id": "/app",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#040608",
+  "theme_color": "#040608",
+  "lang": "fr",
+  "icons": [
+    { "src": "/img/app/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/img/app/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/img/app/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

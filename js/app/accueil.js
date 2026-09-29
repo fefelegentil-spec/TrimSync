@@ -8,6 +8,39 @@ function marquerEtape(nom) {
   try { localStorage.setItem(ETAPES_CLE(), JSON.stringify({ ...etapesFaites(), [nom]: true })); } catch (_) {}
 }
 
+/* ── Abonnement ──
+   Liens de paiement Stripe SANS frais de mise en place (offerts aux 10 premiers,
+   comme l'annonce le site). client_reference_id = id du salon : le webhook
+   (backend/routes/stripe.js) active le salon avec le bon plan dès le paiement. */
+const LIENS_STRIPE = {
+  starter: 'https://buy.stripe.com/9B6fZhe7Bd0MgiegmtgEg06',
+  max: 'https://buy.stripe.com/9B614n9Rl9OA5DA9Y5gEg07',
+};
+function lienPaiement(plan) {
+  const p = new URLSearchParams({ client_reference_id: SESSION.salon.id, prefilled_email: SESSION.email || '' });
+  return `${LIENS_STRIPE[plan]}?${p}`;
+}
+function carteAbonnement() {
+  const s = SESSION.salon;
+  if (s.statut === 'actif') return '';
+  const titre = s.statut === 'essai'
+    ? `Essai gratuit : ${s.jours_essai_restants} jour${s.jours_essai_restants > 1 ? 's' : ''} restant${s.jours_essai_restants > 1 ? 's' : ''}`
+    : 'Ton essai est terminé';
+  const sous = s.statut === 'essai'
+    ? 'Choisis ton offre quand tu veux : ton salon reste ouvert sans interruption.'
+    : "Ton agenda est en lecture seule et ta page ne prend plus de réservations. Rien n'est effacé : choisis une offre pour tout rouvrir.";
+  return `<div class="card ts-carte ts-abonnement">
+    <div class="card-h"><div><div class="card-title">${titre}</div><div class="card-sub">${sous}</div></div></div>
+    <div class="ts-offres">
+      <a class="ts-offre" href="${esc(lienPaiement('max'))}" target="_blank" rel="noopener">
+        <strong>Max · 99 €/mois</strong><span>Agenda, page de réservation, clients, stats. Bot Instagram sur demande.</span></a>
+      <a class="ts-offre" href="${esc(lienPaiement('starter'))}" target="_blank" rel="noopener">
+        <strong>Starter · 59 €/mois</strong><span>Le bot Instagram seul, avec ton outil de réservation actuel.</span></a>
+    </div>
+    <div class="card-sub">Sans engagement, mise en place offerte. Paiement sécurisé par Stripe ; ton salon s'active tout seul.</div>
+  </div>`;
+}
+
 async function renderAccueil() {
   const page = document.getElementById('page-dashboard');
   const auj = TODAY();
@@ -64,7 +97,8 @@ async function renderAccueil() {
       </div>`).join('')}
     </div>` : '';
 
-  page.innerHTML = miseEnRoute + carteProchain
+  const notifs = await carteNotifications();
+  page.innerHTML = carteAbonnement() + notifs + miseEnRoute + carteProchain
     + `<div class="kpi-grid">${kpi("RDV aujourd'hui", duJour.length, 'ti-calendar')}${kpi("Prévu aujourd'hui", fmtMoney(caJour), 'ti-cash')}${kpi('RDV sur 7 jours', rdv.length, 'ti-calendar-week')}${kpi('Prévu sur 7 jours', fmtMoney(caSemaine), 'ti-trending-up')}</div>`
     + `<div class="card ts-carte"><div class="card-h"><div class="card-title">Aujourd'hui</div>
          <button class="btn btn-ghost btn-sm" onclick="nav('agenda')">Agenda <i class="ti ti-arrow-right"></i></button></div>${journee}</div>`

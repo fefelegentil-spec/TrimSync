@@ -345,6 +345,14 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
 .plan-demo-btn::after{content:'→';font-size:.7rem;opacity:.4}
 @media(max-width:960px){.plans-wrap{grid-template-columns:1fr;gap:2.5rem}}
 @media(max-width:760px){.plans-grid{grid-template-columns:1fr;gap:.75rem}.plan-pop{margin-top:14px}.plan-pop{order:-1}}
+/* Au doigt, :hover reste « collé » après un tap : la fiche restait soulevée,
+   bord allumé (et lueur cyan sur Max). Même traitement que les cartes .feat. */
+@media(hover:none){
+  .plan:hover{transform:none;box-shadow:none;border-color:oklch(0.76 0.13 193/.15)}
+  .plan-pop:hover{transform:none;box-shadow:0 8px 32px oklch(0 0 0/.28),0 0 0 1px oklch(0.76 0.13 193/.10);border-color:oklch(0.76 0.13 193/.40)}
+  .plan-cta:hover{transform:none}
+  .plan-demo-btn:hover{transform:none}
+}
 /* plan sélectionné dans le bot step 3 */
 #bot-plans-grid .plan{cursor:pointer}
 #bot-plans-grid .plan.plan-sel{border-color:var(--a)!important;transform:translateY(-4px)!important;box-shadow:0 20px 48px oklch(0 0 0/.28)!important}

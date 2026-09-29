@@ -131,7 +131,11 @@ function init() {
   // Fixe, SOUS le bandeau (--nav-h) : Safari 26 teinte la zone de l'encoche /
   // barre d'état d'après les éléments fixes qui touchent le haut de l'écran ;
   // un canvas transparent collé en haut y laissait voir la page.
-  canvas.style.cssText = `position:fixed;left:0;right:0;bottom:0;top:var(--nav-h,68px);width:100%;height:calc(100% - var(--nav-h,68px));z-index:-1;pointer-events:none;opacity:${OPACITE};`;
+  // Hauteur = écran barres de Safari RENTRÉES (100lvh), pas 100 % : sur iPhone,
+  // 100 % d'un élément fixe = l'écran avec la barre du bas affichée ; quand on
+  // fait défiler, Safari la cache et une bande noire apparaissait en bas.
+  // Le surplus (hauteur du bandeau) déborde sous l'écran, sans effet.
+  canvas.style.cssText = `position:fixed;left:0;right:0;top:var(--nav-h,68px);width:100%;height:100vh;height:100lvh;z-index:-1;pointer-events:none;opacity:${OPACITE};`;
   canvas.setAttribute('aria-hidden', 'true');
 
   const gl = canvas.getContext('webgl2', { alpha: true, premultipliedAlpha: false, antialias: false });

@@ -2484,18 +2484,27 @@ restartChat('chat-msgs');
   const BASE_W=1280, BASE_H=900; /* dimensions logiques rendues par le dashboard */
   ifr.style.width=BASE_W+'px';
   ifr.style.height=BASE_H+'px';
+  const phone=document.querySelector('.chat-phone');
+  const coteACote=matchMedia('(min-width:1121px)'); /* même seuil que .hero-inner */
   function fit(){
     const w=frame.clientWidth;
     if(!w)return;
-    /* échelle « contain largeur » : le dashboard entier est visible, aucun rognage */
+    /* échelle « contain largeur » : le dashboard entier est visible en largeur */
     const s=w/BASE_W;
-    const h=Math.round(BASE_H*s);
+    /* Côte à côte, le cadre prend exactement la hauteur du chat voisin : sans
+       ça, sa hauteur suivait sa largeur (format 1280×900) et les deux visuels
+       n'avaient pas la même taille. Le dashboard est alors rendu plus ou moins
+       haut (il est responsive), jamais déformé ni rogné en largeur. */
+    const h=(coteACote.matches&&phone?.offsetHeight)?phone.offsetHeight:Math.round(BASE_H*s);
     frame.style.height=h+'px';
+    ifr.style.height=Math.round(h/s)+'px';
     ifr.style.transform=`scale(${s})`;
   }
   fit();
   ifr.addEventListener('load',fit);
   window.addEventListener('resize',fit,{passive:true});
+  window.addEventListener('load',fit);
+  if(phone&&window.ResizeObserver)new ResizeObserver(fit).observe(phone);
   setTimeout(fit,350);
   /* re-synchronise la couleur d'accent avec la marque une fois l'iframe prête */
   ifr.addEventListener('load',()=>{

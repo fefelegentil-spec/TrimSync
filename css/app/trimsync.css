@@ -15,6 +15,26 @@
 
 body { font-family: 'Figtree', sans-serif; }
 
+/* ── Barre de navigation mobile, collée en bas ──
+   Dans base.css (copie du dashboard FCUTZ) la barre est une bulle flottante :
+   décollée de 12px des bords et du bas, coins arrondis, bordure de l'accent.
+   Ici on la veut comme une vraie barre d'onglets : pleine largeur, collée au
+   bord bas, fond plein, sans arrondi ni bordure latérale — elle coupe le bas
+   de l'écran. La sidebar desktop n'est pas concernée : ce bloc ne touche
+   qu'aux écrans ≤ 768px, où la bulle apparaît. */
+@media (max-width:768px){
+  .mnav{
+    left:0;right:0;bottom:0;max-width:none;
+    margin:0;border-radius:0;border:0;border-top:1px solid rgba(var(--accent-rgb),.12);
+    background:#0E0F13;
+    box-shadow:0 -8px 24px rgba(0,0,0,.4);
+    padding:6px 4px max(calc(env(safe-area-inset-bottom,0px) - 12px), 6px);
+  }
+  /* Le voile noir dégradé du bas (body::before, hérité de FCUTZ pour la bulle
+     translucide) n'a plus de raison d'être : la barre est opaque. */
+  body::before{display:none}
+}
+
 /* L'attribut hidden l'emporte toujours : plusieurs composants ont leur propre display. */
 [hidden] { display: none !important; }
 

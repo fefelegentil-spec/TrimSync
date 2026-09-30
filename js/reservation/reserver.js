@@ -48,6 +48,8 @@ function fmtDay(ds) {
   return `${FULL_DAYS[d.getDay()]} ${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
 }
 function prix(n) { return (Math.round((n || 0) * 100) / 100).toLocaleString('fr-FR'); }
+// Montant affiché : « Sur devis » quand le salon masque ses prix (prix null).
+function montant(n) { return n === null || n === undefined ? 'Sur devis' : prix(n) + ' €'; }
 function normalizePhone(p) {
   if (!p) return '';
   const brut = String(p).trim();
@@ -105,8 +107,9 @@ function presenterSalon() {
   const logo = SALON.logo ? `<img class="salon-logo" src="${API}/api/public/salons/${encodeURIComponent(SALON.slug)}/logo?v=${SALON.logo}" alt="${escHtml(SALON.nom)}">` : '';
   const desc = SALON.description ? `<div class="salon-desc">${escHtml(SALON.description)}</div>` : '';
   const insta = SALON.instagram ? `<a class="salon-insta" href="https://instagram.com/${encodeURIComponent(SALON.instagram)}" target="_blank" rel="noopener"><i class="ti ti-brand-instagram"></i>@${escHtml(SALON.instagram)}</a>` : '';
-  if (!logo && !desc && !insta) return;
-  bloc.innerHTML = logo + `<div class="salon-intro-txt">${desc}${insta}</div>`;
+  const regle = SALON.annulation_h ? `<div class="salon-regle"><i class="ti ti-info-circle"></i>Annulation en ligne jusqu'à ${SALON.annulation_h} h avant</div>` : '';
+  if (!logo && !desc && !insta && !regle) return;
+  bloc.innerHTML = logo + `<div class="salon-intro-txt">${desc}${insta}${regle}</div>`;
   bloc.hidden = false;
 }
 
@@ -144,7 +147,7 @@ function renderServices() {
           <div class="svc-name">${escHtml(s.nom)}</div>
           ${s.description ? `<div class="svc-desc">${escHtml(s.description)}</div>` : ''}
           <div class="svc-meta">
-            <div class="svc-price">${prix(s.prix)}€</div>
+            <div class="svc-price">${montant(s.prix)}</div>
             <div class="svc-dur"><i class="ti ti-clock" style="font-size:12px"></i>${s.duree_min}min</div>
           </div>
         </div>
@@ -182,7 +185,7 @@ function goStep(n) {
     if (!telValide(ph)) { toast('Numéro invalide — ex : 06 12 34 56 78', 'r'); return; }
     updateRecap('recap-4');
     majQuiReserve();
-    document.getElementById('pay-amount').textContent = prix(selSvc.prix) + ' €';
+    document.getElementById('pay-btn').innerHTML = texteConfirmer();
   }
   if (n === 0) remplirMonRdv();
   const enArriere = n < currentStep;
@@ -203,6 +206,14 @@ function infosCompletes() {
   return !!document.getElementById('b-fname').value.trim() && telValide(normalizePhone(document.getElementById('b-phone').value));
 }
 function apresCreneau() { goStep(infosCompletes() ? 4 : 3); }
+// Salon qui valide ses RDV : on envoie une demande, on ne confirme pas.
+function libelleConfirmer() { return SALON && SALON.validation ? 'Envoyer ma demande' : 'Confirmer le RDV'; }
+// Contenu du bouton final : le montant n'y figure que s'il est affiché (pas « Sur devis »).
+function texteConfirmer() {
+  const libelle = `<i class="ti ti-lock"></i>${libelleConfirmer()}`;
+  return selSvc && selSvc.prix !== null && selSvc.prix !== undefined ? `${libelle} — <span id="pay-amount">${montant(selSvc.prix)}</span>` : libelle;
+}
+
 function updatePayBtn() {
   const checked = document.getElementById('consent-check')?.checked;
   const btn = document.getElementById('pay-btn');
@@ -224,7 +235,7 @@ function updateRecap(id) {
     el.classList.add('mini');
     el.innerHTML = `<div class="recap-mini"><i class="ti ti-scissors"></i>
       <span class="rm-txt">${escHtml(selSvc.nom)} · ${escHtml(fmtDay(selDate))} · ${escHtml(selSlot)}</span>
-      <span class="rm-prix">${prix(selSvc.prix)} €</span></div>`;
+      <span class="rm-prix">${montant(selSvc.prix)}</span></div>`;
     return;
   }
   el.classList.remove('mini');
@@ -232,7 +243,7 @@ function updateRecap(id) {
     <div class="recap-row"><span class="recap-label">Prestation</span><span class="recap-val">${escHtml(selSvc.nom)}</span></div>
     <div class="recap-row"><span class="recap-label">Créneau</span><span class="recap-val">${fmtDay(selDate)} · ${selSlot}</span></div>
     <div class="recap-row"><span class="recap-label">Durée</span><span class="recap-val">${selSvc.duree_min} min</span></div>
-    <div class="recap-row"><span class="recap-label">Total</span><span class="recap-val">${prix(selSvc.prix)} €</span></div>`;
+    <div class="recap-row"><span class="recap-label">Total</span><span class="recap-val">${montant(selSvc.prix)}</span></div>`;
 }
 
 /* ── Calendrier : jours donnés par le serveur pour la prestation choisie ── */
@@ -403,7 +414,7 @@ async function processBooking() {
     // Créneau pris entre-temps : on revient sur la journée, à jour.
     if (e.statut === 409) { delete HEURES[selDate]; selSlot = null; goStep(2); renderSlots(selDate); }
   } finally {
-    btn.innerHTML = '<i class="ti ti-lock"></i>Confirmer le RDV — <span id="pay-amount">' + prix(selSvc.prix) + ' €</span>';
+    btn.innerHTML = texteConfirmer();
     updatePayBtn();
   }
 }
@@ -411,12 +422,15 @@ async function processBooking() {
 function showSuccess(r) {
   // Le créneau pris disparaît aussitôt pour une réservation dans la foulée.
   if (HEURES[selDate]) HEURES[selDate] = HEURES[selDate].filter(h => h !== selSlot);
-  document.getElementById('success-msg').innerHTML = `Ton RDV est confirmé.<br><span style="color:var(--gold);font-weight:700">${prix(r.rdv.prix)} €</span> à régler sur place.`;
+  const aRegler = r.rdv.prix === null ? '' : `<br><span style="color:var(--gold);font-weight:700">${montant(r.rdv.prix)}</span> à régler sur place.`;
+  document.getElementById('success-msg').innerHTML = r.rdv.statut === 'en_attente'
+    ? `Demande envoyée ! <strong>${escHtml(SALON.nom)}</strong> valide chaque rendez-vous : tu reçois une confirmation par email très vite. Ton créneau est gardé en attendant.`
+    : `Ton RDV est confirmé.${aRegler}`;
   document.getElementById('success-recap').innerHTML = `
     <div class="success-recap-item"><i class="ti ti-calendar-event"></i>${fmtDay(r.rdv.date)}</div>
     <div class="success-recap-item"><i class="ti ti-clock"></i>${r.rdv.heure}</div>
     <div class="success-recap-item"><i class="ti ti-scissors"></i>${escHtml(r.rdv.prestation)}</div>
-    <div class="success-recap-item"><i class="ti ti-currency-euro"></i>${prix(r.rdv.prix)} €</div>
+    ${r.rdv.prix === null ? '' : `<div class="success-recap-item"><i class="ti ti-currency-euro"></i>${montant(r.rdv.prix)}</div>`}
     ${adresseSalon() ? `<div class="success-recap-item recap-map" role="link" tabindex="0" onclick="openMaps()"><i class="ti ti-map-pin"></i><span>${escHtml(adresseSalon())}<span class="rm-go">Ouvrir dans Google Maps</span></span></div>` : ''}`;
   document.getElementById('cancel-rdv-btn').style.display = '';
   document.getElementById('cancel-confirm-msg').style.display = 'none';
@@ -452,7 +466,7 @@ function remplirMonRdv() {
   document.getElementById('mr-service').textContent = b.prestation;
   document.getElementById('mr-date').textContent = fmtDay(b.date);
   document.getElementById('mr-time').textContent = b.heure;
-  document.getElementById('mr-price').textContent = prix(b.prix) + ' €';
+  document.getElementById('mr-price').textContent = montant(b.prix);
   const annule = b.statut === 'annule';
   const passe = !b.annulable && b.statut === 'confirme';
   document.getElementById('mr-actions').style.display = annule ? 'none' : '';

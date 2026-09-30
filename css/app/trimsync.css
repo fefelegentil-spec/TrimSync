@@ -263,3 +263,16 @@ body { overflow-x: hidden; overflow-x: clip; }
 textarea#par-description { width: 100%; margin-bottom: var(--sp-2); }
 .ts-presta-desc { grid-column: 2 / 5; font-size: 13px; }
 @media (max-width: 560px) { .ts-presta-desc { grid-column: 2 / 3; } }
+
+/* Règles de réservation et demandes à valider */
+.ts-regle { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-2) 0; }
+.ts-regle > span { font-size: 14px; }
+.ts-regle select.input { width: auto; min-width: 150px; }
+.ts-demandes { border-color: rgba(var(--accent-rgb), .45); }
+.ag-appt-pay.ts-a-valider { background: rgba(var(--accent-rgb), .25); color: #fff; }
+
+@media (max-width: 560px) {
+  .ts-demandes .ts-ligne { flex-wrap: wrap; }
+  .ts-demandes .ts-ligne-txt { flex: 1 1 calc(100% - 40px); }
+  .ts-demandes .ts-ligne .btn { flex: 1; margin-top: 6px; }
+}

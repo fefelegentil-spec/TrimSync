@@ -41,6 +41,8 @@ function carteAbonnement() {
   </div>`;
 }
 
+let DEMANDES = [];
+
 async function renderAccueil() {
   const page = document.getElementById('page-dashboard');
   const auj = TODAY();
@@ -48,7 +50,7 @@ async function renderAccueil() {
   let rdv, attente;
   try {
     [rdv, attente] = await Promise.all([
-      api('GET', `/api/rdv?du=${auj}&au=${dans6}`).then(r => r.rdv.filter(x => x.statut === 'confirme')),
+      api('GET', `/api/rdv?du=${auj}&au=${ymd(new Date(Date.now() + 60 * 86400000))}`).then(r => { DEMANDES = r.rdv.filter(x => x.statut === 'en_attente'); return r.rdv.filter(x => x.statut === 'confirme' && x.date <= dans6); }),
       api('GET', '/api/attente').then(r => r.attente),
       chargerClients(),
     ]);
@@ -98,7 +100,16 @@ async function renderAccueil() {
     </div>` : '';
 
   const notifs = await carteNotifications();
-  page.innerHTML = carteAbonnement() + notifs + miseEnRoute + carteProchain
+  const demandes = DEMANDES.length ? `<div class="card ts-carte ts-demandes">
+      <div class="card-h"><div><div class="card-title"><i class="ti ti-hourglass"></i> ${DEMANDES.length} demande${DEMANDES.length > 1 ? 's' : ''} à valider</div>
+        <div class="card-sub">Le créneau est gardé. Accepte ou refuse : le client est prévenu par email.</div></div></div>
+      ${DEMANDES.map(d => `<div class="ts-ligne">
+        <i class="ti ti-calendar-event"></i><div class="ts-ligne-txt"><strong>${esc(dateLongue(d.date))} à ${d.heure} · ${esc(d.client_nom)}</strong><span>${esc(d.prestation_nom)}${d.telephone ? ' · ' + esc(d.telephone) : ''}</span></div>
+        <button class="btn btn-gold btn-sm" onclick="validerRdv('${esc(d.id)}', true)">Accepter</button>
+        <button class="btn btn-ghost btn-sm" onclick="validerRdv('${esc(d.id)}', false)">Refuser</button>
+      </div>`).join('')}
+    </div>` : '';
+  page.innerHTML = demandes + carteAbonnement() + notifs + miseEnRoute + carteProchain
     + `<div class="kpi-grid">${kpi("RDV aujourd'hui", duJour.length, 'ti-calendar')}${kpi("Prévu aujourd'hui", fmtMoney(caJour), 'ti-cash')}${kpi('RDV sur 7 jours', rdv.length, 'ti-calendar-week')}${kpi('Prévu sur 7 jours', fmtMoney(caSemaine), 'ti-trending-up')}</div>`
     + `<div class="card ts-carte"><div class="card-h"><div class="card-title">Aujourd'hui</div>
          <button class="btn btn-ghost btn-sm" onclick="nav('agenda')">Agenda <i class="ti ti-arrow-right"></i></button></div>${journee}</div>`

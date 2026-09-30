@@ -160,6 +160,17 @@ async function renderParametres() {
        <div class="ts-form-ligne"><span class="ts-a">trimsync.tech/r/</span><input class="input" id="par-slug" value="${esc(s.slug)}" maxlength="50" aria-label="Adresse de ta page">
          <button class="btn btn-ghost btn-sm" onclick="enregistrerSalon(['slug'])">Changer</button></div>`)
     + carte('Personnalise ta page', 'Ce que tes clients voient en arrivant sur ta page de réservation.', cartePersonnalisation(s))
+    + carte('Règles de réservation', 'Ce que tes clients peuvent faire sur ta page.', `
+      <label class="ts-regle"><span>Délai minimum avant un rendez-vous</span>
+        <select class="input" onchange="enregistrerRegle('delai_min_h', Number(this.value))">${[[0, 'Aucun'], [1, '1 h'], [2, '2 h'], [3, '3 h'], [6, '6 h'], [12, '12 h'], [24, '24 h'], [48, '48 h']]
+          .map(([v, t]) => `<option value="${v}" ${s.delai_min_h === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+      <label class="ts-regle"><span>Annulation en ligne possible jusqu'à</span>
+        <select class="input" onchange="enregistrerRegle('annulation_h', Number(this.value))">${[[0, "l'heure du RDV"], [2, '2 h avant'], [6, '6 h avant'], [12, '12 h avant'], [24, '24 h avant'], [48, '48 h avant']]
+          .map(([v, t]) => `<option value="${v}" ${s.annulation_h === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+      <label class="ts-regle"><span>Email de rappel au client la veille</span>
+        <label class="switch"><input type="checkbox" ${s.rappel_veille ? 'checked' : ''} onchange="enregistrerRegle('rappel_veille', this.checked)"><span class="slider"></span></label></label>
+      ${s.options && s.options.validation ? '<p class="ts-texte"><i class="ti ti-hourglass"></i> Tu valides chaque rendez-vous pris en ligne : les demandes apparaissent sur ton accueil.</p>' : ''}
+      ${s.options && s.options.prix_masques ? '<p class="ts-texte"><i class="ti ti-eye-off"></i> Tes prix sont masqués sur ta page : tes clients voient « Sur devis ».</p>' : ''}`)
     + carte('Ton salon', 'Affiché en haut de ta page de réservation.',
       `<div class="ts-grille2">
          <input class="input" id="par-nom" value="${esc(s.nom)}" maxlength="80" placeholder="Nom du salon" aria-label="Nom du salon">
@@ -303,6 +314,14 @@ function cartePersonnalisation(s) {
       <button class="btn btn-gold" onclick="enregistrerSalon(['description','instagram'])"><i class="ti ti-check"></i>Enregistrer</button>
       <a class="btn btn-out" href="${esc(s.lien_public)}" target="_blank" rel="noopener"><i class="ti ti-external-link"></i>Voir ma page</a>
     </div>`;
+}
+
+async function enregistrerRegle(champ, valeur) {
+  try {
+    const r = await api('PATCH', '/api/salon', { [champ]: valeur });
+    SESSION.salon = r.salon;
+    toast('Enregistré ✓', 'success');
+  } catch (e) { toast(messageErreur(e), 'danger'); renderParametres(); }
 }
 
 async function choisirCouleur(couleur) {

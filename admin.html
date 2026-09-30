@@ -32,6 +32,8 @@ body { padding: 24px 16px 48px; }
 .bo-actions select { width: auto; padding: 6px 8px; min-height: 32px; }
 @media (max-width: 760px) { .bo-salon { grid-template-columns: 1fr 1fr; } .bo-actions { grid-column: 1 / -1; justify-content: flex-start; } }
 #bo-connexion { max-width: 380px; margin: 12vh auto 0; }
+.bo-options{display:flex;flex-wrap:wrap;gap:10px;width:100%;font-size:12px;opacity:.85}
+.bo-options label{display:inline-flex;align-items:center;gap:5px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -147,9 +149,17 @@ function afficher() {
         <button class="btn btn-out btn-sm" onclick="prolonger('${esc(s.id)}', '${esc(s.essai_fin)}')">+14 j d'essai</button>
         ${s.bot_statut !== 'actif' ? `<button class="btn btn-out btn-sm" onclick="modifier('${esc(s.id)}', { bot_statut: 'actif' }, 'Bot marqué actif')">Bot branché</button>` : ''}
         ${s.statut !== 'suspendu' ? `<button class="btn btn-ghost btn-sm" onclick="suspendre('${esc(s.id)}', '${esc(s.nom)}')">Suspendre</button>` : ''}
+        <div class="bo-options">${OPTIONS_SALON.map(([cle, nom, aide]) => `<label title="${esc(aide)}">
+          <input type="checkbox" ${(s.options || {})[cle] ? 'checked' : ''} onchange="modifier('${esc(s.id)}', { options: { ${cle}: this.checked } }, '${esc(nom)} ' + (this.checked ? 'activé' : 'désactivé'))"> ${esc(nom)}</label>`).join('')}</div>
       </div>
     </div>`).join('') : '<div class="ts-vide">Aucun salon ici.</div>';
 }
+
+// Fonctionnalités sur mesure, activées salon par salon (backend : OPTIONS de routes/admin.js).
+const OPTIONS_SALON = [
+  ['validation', 'RDV à valider', 'Les RDV pris en ligne arrivent en attente : le salon accepte ou refuse.'],
+  ['prix_masques', 'Prix masqués', 'La page de réservation affiche « Sur devis » au lieu des prix.'],
+];
 
 async function modifier(id, corps, message) {
   try { await api('PATCH', '/api/admin/salons/' + id, corps); toast(message + ' ✓', 'success'); charger(); }

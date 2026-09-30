@@ -21,8 +21,8 @@ let agDate = new Date();
 let rdvCharges = { du: null, au: null };
 
 /* ── Traduction API TrimSync → forme FCUTZ ── */
-const STATUT_VERS_FCUTZ = { confirme: 'confirmed', annule: 'cancelled', noshow: 'noshow' };
-const STATUT_VERS_API = { confirmed: 'confirme', cancelled: 'annule', noshow: 'noshow' };
+const STATUT_VERS_FCUTZ = { confirme: 'confirmed', annule: 'cancelled', noshow: 'noshow', en_attente: 'pending' };
+const STATUT_VERS_API = { confirmed: 'confirme', cancelled: 'annule', noshow: 'noshow', pending: 'en_attente' };
 
 function versAppt(r) {
   return {
@@ -234,7 +234,8 @@ function buildAgendaGrid(days, start, end) {
       const top = `calc(${(h - start) * 60 + m}px + var(--ag-header-h))`;
       const height = Math.max(28, ((a.duration || 30) / 60) * 60 - 4);
       const absent = a.status === 'noshow'
-        ? '<span class="ag-appt-pay unpaid"><i class="ti ti-user-x"></i><span class="lbl">Absent</span></span>' : '';
+        ? '<span class="ag-appt-pay unpaid"><i class="ti ti-user-x"></i><span class="lbl">Absent</span></span>'
+        : a.status === 'pending' ? '<span class="ag-appt-pay ts-a-valider"><i class="ti ti-hourglass"></i><span class="lbl">À valider</span></span>' : '';
       html += `<div class="ag-appt ${svcClassFor(a.service)}${height < 44 ? ' ag-appt-compact' : ''}" data-id="${a.id}" draggable="true" style="top:${top};height:${height}px" onclick="event.stopPropagation();openEditRdv('${a.id}')">
         <div class="ag-appt-row"><span class="ag-appt-time">${a.time}</span><span class="ag-appt-name">${esc(a.clientName || 'Client')}</span>${absent}</div>
         <div class="ag-appt-svc">${esc(a.service || '')}</div>
@@ -637,6 +638,10 @@ async function saveEditRdv() {
     if (!await confirmer('Ce créneau chevauche un autre RDV. Enregistrer quand même ?')) return;
     forcer = true;
   }
+  if (a.status === 'pending' && (status === 'confirmed' || status === 'cancelled')) {
+    await validerRdv(id, status === 'confirmed', true);
+    return;
+  }
   try {
     const r = await api('PATCH', '/api/rdv/' + id, {
       date, heure: time, statut: STATUT_VERS_API[status], forcer,
@@ -648,6 +653,18 @@ async function saveEditRdv() {
     toast('RDV mis à jour ✓', 'success');
     closeModal('modal-rdv-edit');
     renderAgenda();
+  } catch (e) { toast(messageErreur(e), 'danger'); }
+}
+// Demande de RDV (salon qui valide) : accepter ou refuser prévient le client par email.
+async function validerRdv(id, accepte, depuisFenetre) {
+  if (!accepte && !await confirmer('Refuser cette demande ? Le client est prévenu et le créneau se libère.')) return;
+  try {
+    const r = await api('POST', '/api/rdv/' + id + '/valider', { accepte });
+    remplacerAppt(r.rdv);
+    toast(accepte ? 'Rendez-vous confirmé, client prévenu ✓' : 'Demande refusée, client prévenu', 'success');
+    if (depuisFenetre) closeModal('modal-rdv-edit');
+    if (document.getElementById('page-agenda')?.classList.contains('active')) renderAgenda();
+    if (document.getElementById('page-dashboard')?.classList.contains('active')) renderAccueil();
   } catch (e) { toast(messageErreur(e), 'danger'); }
 }
 async function annulerRdv() {

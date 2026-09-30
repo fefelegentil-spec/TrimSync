@@ -276,3 +276,65 @@ textarea#par-description { width: 100%; margin-bottom: var(--sp-2); }
   .ts-demandes .ts-ligne-txt { flex: 1 1 calc(100% - 40px); }
   .ts-demandes .ts-ligne .btn { flex: 1; margin-top: 6px; }
 }
+
+/* ── Accueil façon aperçu de la page d'accueil (indicateurs, agenda du jour,
+   top prestations, courbe du chiffre, objectif) ── */
+.ts-kpis .kpi-value .unit { font-size: 14px; font-weight: 600; color: var(--marble-2); margin-left: 2px; }
+.kpi-trend { font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 8px; }
+.kpi-trend.up { color: var(--success); }
+.kpi-trend.down { color: var(--danger); }
+.kpi-trend.flat { color: var(--marble-2); }
+.card-link { font-size: 12px; font-weight: 600; color: var(--gold-0); cursor: pointer; white-space: nowrap; }
+.card-link:hover { text-decoration: underline; }
+.ts-grille-accueil { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--sp-4); align-items: start; margin-bottom: var(--sp-4); }
+.ts-grille-accueil.ts-grille-egale { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.ts-grille-accueil > .ts-carte, .ts-colonne > .ts-carte { margin-bottom: 0; }
+.ts-colonne { display: flex; flex-direction: column; gap: var(--sp-4); }
+@media (max-width: 900px) { .ts-grille-accueil, .ts-grille-accueil.ts-grille-egale { grid-template-columns: minmax(0, 1fr); } }
+.rdv-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, .05); cursor: pointer; }
+.rdv-item:last-child { border-bottom: none; }
+.rdv-item.passe { opacity: .45; }
+.rdv-time { font-size: 13px; font-weight: 700; color: var(--gold-0); width: 44px; flex-shrink: 0; }
+.rdv-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.rdv-info { flex: 1; min-width: 0; }
+.rdv-name { font-size: 14px; font-weight: 600; color: var(--marble-0); }
+.rdv-svc { font-size: 12px; color: var(--marble-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rdv-price { font-size: 13px; font-weight: 700; color: var(--gold-0); white-space: nowrap; }
+.client-avatar { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; font-weight: 800; font-size: 14px; color: #06070A; }
+.ts-prochain-ligne { display: flex; align-items: center; gap: 12px; padding: 4px 0 8px; }
+.ts-dans { font-size: 12px; font-weight: 700; color: var(--gold-0); margin-top: 3px; }
+.presta-item { margin-bottom: 12px; }
+.presta-item:last-child { margin-bottom: 0; }
+.presta-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; }
+.presta-name { color: var(--marble-1); font-weight: 600; }
+.presta-count { color: var(--marble-2); }
+.presta-bar { height: 6px; background: rgba(255, 255, 255, .06); border-radius: 3px; overflow: hidden; }
+.presta-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--gold-deep), var(--gold-0)); }
+.chart-wrap { position: relative; height: 200px; }
+.ts-objectif { text-align: left; }
+.ts-objectif-valeur { text-align: center; font-family: 'Bricolage Grotesque', sans-serif; font-size: 36px; font-weight: 900; color: var(--marble-0); letter-spacing: -1px; margin-top: 6px; }
+.ts-objectif-valeur span { font-size: 16px; color: var(--marble-2); margin-left: 3px; }
+.ts-objectif-sur { text-align: center; font-size: 12px; color: var(--marble-2); margin: 4px 0 8px; }
+.ts-jauge { height: 7px; border-radius: 4px; background: rgba(255, 255, 255, .06); overflow: hidden; margin: 10px 0 6px; }
+.ts-jauge div { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--gold-deep), var(--gold-0)); transition: width .6s; }
+.ts-objectif .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid rgba(255, 255, 255, .05); font-size: 13px; }
+.ts-objectif .stat-label { color: var(--marble-2); }
+.ts-objectif .stat-val { color: var(--marble-0); font-weight: 600; text-transform: capitalize; }
+
+/* Bouton « Nouveau RDV » dans la barre du haut */
+.ts-nouveau-rdv { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 18px; border-radius: 21px; border: 0; cursor: pointer;
+  background: linear-gradient(135deg, var(--gold-0), var(--gold-deep)); color: #06070A; font-weight: 800; font-size: 14px; box-shadow: 0 8px 24px rgba(var(--accent-rgb), .25); flex-shrink: 0; }
+.ts-nouveau-rdv i { font-size: 18px; }
+@media (max-width: 767px) { .ts-nouveau-rdv { width: 42px; padding: 0; justify-content: center; } .ts-nouveau-rdv span { display: none; } }
+/* Bandeaux d'une ligne (essai, notifications, email à confirmer) */
+.ts-bandeau { display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin-bottom: var(--sp-3); border-radius: 12px;
+  border: 1px solid rgba(var(--accent-rgb), .22); background: rgba(var(--accent-rgb), .06); font-size: 13px; color: var(--marble-1); }
+.ts-bandeau > i { font-size: 18px; color: var(--gold-0); flex-shrink: 0; }
+.ts-bandeau > span { flex: 1; min-width: 0; line-height: 1.45; }
+.ts-bandeau strong { color: var(--marble-0); }
+.ts-bandeau-actions, .ts-bandeau .ts-boutons { display: flex; gap: 6px; flex-shrink: 0; margin: 0; }
+@media (max-width: 600px) { .ts-bandeau { flex-wrap: wrap; } .ts-bandeau-actions, .ts-bandeau .ts-boutons { width: 100%; } .ts-bandeau-actions .btn, .ts-bandeau .ts-boutons .btn { flex: 1; } }
+.ts-kpis { margin-top: var(--sp-2); }
+
+/* Grand écran : les 4 indicateurs sur une ligne, comme l'aperçu */
+@media (min-width: 1100px) { #page-dashboard .ts-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

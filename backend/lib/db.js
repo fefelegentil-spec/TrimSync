@@ -131,6 +131,7 @@ const SCHEMA = [
   `ALTER TABLE salons ADD COLUMN IF NOT EXISTS rappel_veille BOOLEAN NOT NULL DEFAULT true`,
   `ALTER TABLE salons ADD COLUMN IF NOT EXISTS options JSONB NOT NULL DEFAULT '{}'::jsonb`,
   `ALTER TABLE rdv ADD COLUMN IF NOT EXISTS rappel_le TIMESTAMPTZ`,
+  `ALTER TABLE salons ADD COLUMN IF NOT EXISTS objectif_mensuel INTEGER NOT NULL DEFAULT 0`,
   // « en_attente » : RDV pris sur la page d'un salon qui valide lui-même ses RDV.
   `ALTER TABLE rdv DROP CONSTRAINT IF EXISTS rdv_statut_check`,
   `ALTER TABLE rdv ADD CONSTRAINT rdv_statut_check CHECK (statut IN ('confirme','annule','noshow','en_attente'))`,

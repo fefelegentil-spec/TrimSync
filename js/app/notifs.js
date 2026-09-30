@@ -67,9 +67,8 @@ async function carteNotifications() {
   try {
     if (Date.now() - Number(localStorage.getItem(NOTIF_PLUS_TARD) || 0) < 7 * 86400000) return '';
   } catch (_) {}
-  const carte = (texte, bouton) => `<div class="card ts-carte ts-notifs">
-    <div class="card-h"><div><div class="card-title"><i class="ti ti-bell-ringing"></i> Sois prévenu à chaque réservation</div>
-      <div class="card-sub">${texte}</div></div></div>
+  const carte = (texte, bouton) => `<div class="ts-bandeau ts-notifs"><i class="ti ti-bell-ringing"></i>
+    <span><strong>Sois prévenu à chaque réservation.</strong> ${texte}</span>
     <div class="ts-boutons">${bouton}<button class="btn btn-ghost btn-sm" onclick="notifsPlusTard()">Plus tard</button></div>
   </div>`;
 

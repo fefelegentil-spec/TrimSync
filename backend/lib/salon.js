@@ -43,6 +43,7 @@ function vueSalon(salon) {
     annulation_h: salon.annulation_h || 0,
     rappel_veille: salon.rappel_veille !== false,
     options: salon.options || {},
+    objectif_mensuel: salon.objectif_mensuel || 0,
     lien_public: `${SITE()}/r/${salon.slug}`,
   };
 }

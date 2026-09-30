@@ -40,6 +40,11 @@ router.patch('/api/salon', exigerCompte, async (req, res) => {
     champs.annulation_h = Number(b.annulation_h);
   }
   if (b.rappel_veille !== undefined) champs.rappel_veille = !!b.rappel_veille;
+  if (b.objectif_mensuel !== undefined) {
+    const o = Math.round(Number(b.objectif_mensuel));
+    if (!Number.isFinite(o) || o < 0 || o > 1000000) return res.status(400).json({ error: 'Objectif invalide' });
+    champs.objectif_mensuel = o;
+  }
   if (b.couleur !== undefined) {
     const c = String(b.couleur || '').trim().toLowerCase();
     if (c && !/^#[0-9a-f]{6}$/.test(c)) return res.status(400).json({ error: 'Couleur invalide' });

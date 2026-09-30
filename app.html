@@ -17,12 +17,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
 <link rel="stylesheet" href="css/app/base.css?v=1">
-<link rel="stylesheet" href="css/app/trimsync.css?v=8">
+<link rel="stylesheet" href="css/app/trimsync.css?v=11">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 <script src="js/app/noyau.js?v=5" defer></script>
-<script src="js/app/notifs.js?v=1" defer></script>
+<script src="js/app/notifs.js?v=2" defer></script>
 <script src="js/app/miseenroute.js?v=1" defer></script>
 <script src="js/app/agenda.js?v=3" defer></script>
-<script src="js/app/accueil.js?v=6" defer></script>
+<script src="js/app/accueil.js?v=8" defer></script>
 <script src="js/app/clients.js?v=1" defer></script>
 <script src="js/app/reglages.js?v=4" defer></script>
 </head>
@@ -120,10 +121,7 @@
       <div class="page-title" id="topbar-title">Agenda</div>
       <div class="page-subtitle" id="topbar-sub">—</div>
     </div>
-  </div>
-
-  <div class="action-buttons">
-    <button class="action-btn action-btn-solo" onclick="resetRdvModal(); openModal('modal-rdv-new')" aria-label="Nouveau rendez-vous"><i class="ti ti-plus"></i></button>
+    <button class="ts-nouveau-rdv" onclick="resetRdvModal(); openModal('modal-rdv-new')" aria-label="Nouveau rendez-vous"><i class="ti ti-plus"></i><span>Nouveau RDV</span></button>
   </div>
 
   <!-- ═══════════ PAGE AGENDA ═══════════ -->

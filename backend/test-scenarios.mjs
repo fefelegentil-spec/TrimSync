@@ -282,6 +282,8 @@ async function main() {
   const prestaN = (await pubN()).d?.prestations?.[0] || {};
   const libresN = async date => (await appel('GET', `/api/public/salons/${slugN}/dispo?date=${date}&prestation=${prestaN.id}`)).d?.heures || [];
   ok((await appel('PATCH', '/api/salon', { delai_min_h: 5 }, N)).s === 400, 'délai hors liste refusé');
+  ok((await appel('PATCH', '/api/salon', { objectif_mensuel: 4000 }, N)).d?.salon?.objectif_mensuel === 4000, 'objectif mensuel enregistré');
+  ok((await appel('PATCH', '/api/salon', { objectif_mensuel: -5 }, N)).s === 400, 'objectif négatif refusé');
   const regles = await appel('PATCH', '/api/salon', { delai_min_h: 48, annulation_h: 48, rappel_veille: true }, N);
   ok(regles.s === 200 && regles.d.salon.delai_min_h === 48 && regles.d.salon.annulation_h === 48, 'règles enregistrées', regles.d);
   ok((await libresN(dansJours(1))).length === 0 && (await libresN(dansJours(4))).length > 0, 'rien de réservable avant le délai minimum');

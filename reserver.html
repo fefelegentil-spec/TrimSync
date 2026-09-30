@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,maximum-scale=1.0,user-scalable=no">
 <meta name="color-scheme" content="dark">
-<style>html{background:#060606}</style>
-<meta name="theme-color" content="#080808">
+<style>html{background:#06070B}</style>
+<meta name="theme-color" content="#06070B">
 <meta name="format-detection" content="telephone=no">
 <title>Réserver</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;800;900&family=Syne:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700;800&family=Figtree:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
-<!-- La page de réservation de FCUTZ, telle quelle (css/reservation/fcutz.css),
-     plus les seuls ajustements propres à TrimSync (css/reservation/trimsync.css). -->
-<link rel="stylesheet" href="/css/reservation/fcutz.css?v=2">
-<link rel="stylesheet" href="/css/reservation/trimsync.css?v=4">
+<!-- Identité propre à TrimSync : trimsync.css est une feuille autonome (sombre
+     signature, accent = couleur du salon, stepper en tête, barre d'action en
+     bas). La page ne charge plus fcutz.css. -->
+<link rel="stylesheet" href="/css/reservation/trimsync.css?v=5">
 </head>
 <body data-page="booking">
 
@@ -24,8 +24,10 @@
 <div id="splash" class="police-attendue" aria-hidden="true">
   <div class="splash-fond"></div>
   <div class="splash-scene">
+    <div class="splash-mark" id="splash-mark">TS</div>
     <div class="splash-name" id="splash-name"></div>
     <div class="splash-filet"></div>
+    <div class="splash-sous">Réservation en ligne</div>
   </div>
 </div>
 <script>
@@ -64,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function(){
   function reveler(){ if(fini) return; fini = true; s.classList.remove('police-attendue'); window._splashRevele = Date.now(); }
   function essayer(){ if(policePrete && dispositionStable) reveler(); }
   if(document.fonts && document.fonts.load){
-    document.fonts.load('900 100px Unbounded').then(function(){ policePrete = true; essayer(); }, function(){ policePrete = true; essayer(); });
+    document.fonts.load('800 100px "Bricolage Grotesque"').then(function(){ policePrete = true; essayer(); }, function(){ policePrete = true; essayer(); });
   } else policePrete = true;
   var derniere = -1, identiques = 0, images = 0;
   (function guetter(){
@@ -83,11 +85,21 @@ document.addEventListener('DOMContentLoaded', function(){
 <div class="voile-haut" aria-hidden="true"></div>
 <div class="header">
   <div class="h-bar">
+    <div class="h-mark" id="h-mark" aria-hidden="true"></div>
     <a class="h-name" id="h-name" href="#" onclick="event.preventDefault();resetBooking()"></a>
     <div class="h-side" id="h-side">
       <button type="button" class="h-account" id="h-account" onclick="goStep(0)" hidden>Mon RDV</button>
     </div>
   </div>
+  <nav class="stepper" id="stepper" aria-label="Étapes de réservation">
+    <div class="st-item act" id="st-1"><div class="st-n">1</div><div class="st-l">Prestation</div></div>
+    <div class="st-sep" id="sep-1"></div>
+    <div class="st-item" id="st-2"><div class="st-n">2</div><div class="st-l">Créneau</div></div>
+    <div class="st-sep" id="sep-2"></div>
+    <div class="st-item" id="st-3"><div class="st-n">3</div><div class="st-l">Infos</div></div>
+    <div class="st-sep" id="sep-3"></div>
+    <div class="st-item" id="st-4"><div class="st-n">4</div><div class="st-l">Récap</div></div>
+  </nav>
 </div>
 
 <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -135,7 +147,6 @@ document.addEventListener('DOMContentLoaded', function(){
     <div class="salon-intro" id="salon-intro" hidden></div>
     <div class="s-title">Choisis ta prestation</div>
     <div class="svc-list" id="svc-list"></div>
-    <button class="btn btn-gold" onclick="goStep(2)">Continuer<i class="ti ti-arrow-right"></i></button>
   </section>
 
   <!-- STEP 2 : CRENEAU -->
@@ -163,8 +174,6 @@ document.addEventListener('DOMContentLoaded', function(){
         </div>
       </div>
     </div>
-    <button class="btn btn-gold" id="btn-step2" onclick="apresCreneau()" disabled>Continuer<i class="ti ti-arrow-right"></i></button>
-    <button class="btn btn-out" onclick="goStep(1)"><i class="ti ti-arrow-left"></i>Retour</button>
   </section>
 
   <!-- STEP 3 : INFOS -->
@@ -177,8 +186,6 @@ document.addEventListener('DOMContentLoaded', function(){
     </div>
     <div class="field"><label for="b-phone">Téléphone *</label><input id="b-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="06 12 34 56 78" onblur="rangerTel(this)"></div>
     <div class="field"><label for="b-email">Email (facultatif)</label><input id="b-email" type="email" inputmode="email" autocomplete="email" placeholder="ton@email.com"></div>
-    <button class="btn btn-gold" onclick="goStep(4)">Continuer<i class="ti ti-arrow-right"></i></button>
-    <button class="btn btn-out" onclick="goStep(2)"><i class="ti ti-arrow-left"></i>Retour</button>
   </section>
 
   <!-- STEP 4 : VALIDATION -->
@@ -192,8 +199,6 @@ document.addEventListener('DOMContentLoaded', function(){
       <input type="checkbox" id="consent-check" onchange="updatePayBtn()">
       <span>J'accepte que mes coordonnées soient utilisées par <span class="js-nom"></span> pour gérer ma réservation. <a href="/privacy" target="_blank" rel="noopener">Politique de confidentialité</a></span>
     </label>
-    <button class="btn btn-gold" id="pay-btn" onclick="processBooking()"><i class="ti ti-lock"></i>Confirmer le RDV — <span id="pay-amount">0 €</span></button>
-    <button class="btn btn-out" onclick="goStep(infosCompletes() ? 2 : 3)"><i class="ti ti-arrow-left"></i>Retour</button>
   </section>
 
   <!-- STEP 5 : SUCCESS -->
@@ -243,9 +248,18 @@ document.addEventListener('DOMContentLoaded', function(){
   </nav>
 </div>
 
-<script src="/js/reservation/reserver.js?v=3"></script>
-<script src="/js/reservation/background.js?v=2" defer></script>
-<script src="/js/reservation/glass-filter.js?v=1"></script>
+<!-- ── BARRE D'ACTION FIXE : Continuer / Confirmer suit le bas de l'écran,
+     Retour l'accompagne dès l'étape 2. majCta() (reserver.js) tient le
+     libellé, l'état et le stepper en phase avec l'étape courante. ── -->
+<div class="cta-bar">
+  <div class="cta-inner">
+    <button type="button" class="cta-back" id="cta-back" onclick="retourCta()" hidden><i class="ti ti-arrow-left"></i>Retour</button>
+    <button type="button" class="btn-main" id="pay-btn" onclick="ctaSuivant()"></button>
+  </div>
+</div>
+
+<script src="/js/reservation/reserver.js?v=4"></script>
+<script src="/js/reservation/background.js?v=3" defer></script>
 <script src="/js/reservation/ripple.js?v=1" defer></script>
 </body>
 </html>

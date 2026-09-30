@@ -97,6 +97,11 @@ function appliquerCouleur(hex) {
   r.setProperty('--gold-3', mele([255, 255, 255], .55));
   r.setProperty('--gold-deep', mele([0, 0, 0], .2));
   r.setProperty('--gold-rgb', rgb.join(','));
+  // L'encre posée SUR l'accent suit la couleur du salon : sombre sur une teinte
+  // claire (le teal TrimSync), claire sur une teinte foncée — sinon le texte
+  // du bouton principal et des créneaux sélectionnés devenait illisible.
+  const lum = (0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]) / 255;
+  r.setProperty('--ink-sur-accent', lum > 0.55 ? '#0A1418' : '#F2F6F7');
   // Fond animé : repeint tout de suite s'il tourne déjà, sinon il lira _couleurSalon au démarrage.
   window._couleurSalon = rgb;
   if (window._bgSetAccent) window._bgSetAccent(...rgb);
@@ -118,12 +123,18 @@ function habillerSalon() {
   appliquerCouleur(SALON.couleur);
   presenterSalon();
   const splash = document.getElementById('splash-name');
-  splash.style.setProperty('--lettres', Math.max(5, SALON.nom.length));
-  splash.innerHTML = [...SALON.nom.toUpperCase()]
-    .map((c, i) => `<span style="--i:${i}">${c === ' ' ? '&nbsp;' : escHtml(c)}</span>`).join('')
-    + `<div class="splash-reflet">${escHtml(SALON.nom.toUpperCase())}</div>`;
+  if (splash) {
+    splash.style.setProperty('--lettres', Math.max(5, SALON.nom.length));
+    splash.innerHTML = [...SALON.nom.toUpperCase()]
+      .map((c, i) => `<span style="--i:${i}">${c === ' ' ? '&nbsp;' : escHtml(c)}</span>`).join('')
+      + `<div class="splash-reflet">${escHtml(SALON.nom.toUpperCase())}</div>`;
+  }
   const nom = document.getElementById('h-name');
   nom.textContent = SALON.nom.toUpperCase();
+  // Monogramme : initiales des deux premiers mots, sur la tuile du header et
+  // du splash — la marque visuelle TrimSync qui remplace le mot-logo FCUTZ.
+  const mono = SALON.nom.trim().split(/\s+/).slice(0, 2).map(w => (w[0] || '').toUpperCase()).join('');
+  document.querySelectorAll('#h-mark, #splash-mark').forEach(e => { e.textContent = mono; });
   const cote = document.getElementById('h-side');
   const liens = [];
   if (adresseSalon()) liens.push(`<a class="h-ico" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adresseSalon())}" target="_blank" rel="noopener" title="${escHtml(adresseSalon())}" aria-label="${escHtml(adresseSalon())}"><i class="ti ti-map-pin"></i></a>`);
@@ -199,6 +210,7 @@ function goStep(n) {
   if (cc && n !== 4) cc.checked = false;
   updatePayBtn();
   document.querySelector('.wrap').classList.toggle('at-success', n === 0 || n === 5 || n === 'indispo');
+  majCta(n);
   if (n === 5) window.retirerSplash(true);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -206,6 +218,48 @@ function infosCompletes() {
   return !!document.getElementById('b-fname').value.trim() && telValide(normalizePhone(document.getElementById('b-phone').value));
 }
 function apresCreneau() { goStep(infosCompletes() ? 4 : 3); }
+
+/* ── Barre d'action fixe + stepper ──
+   Le bouton principal (id pay-btn, qui porte aussi « Confirmer le RDV » à
+   l'étape 4) et le stepper suivent l'étape courante ; goStep() appelle
+   majCta() après avoir basculé la section. */
+function majCta(n) {
+  const nav = document.getElementById('stepper');
+  if (nav) {
+    const visible = n >= 1 && n <= 4;
+    nav.hidden = !visible;
+    if (visible) {
+      for (let i = 1; i <= 4; i++) {
+        const st = document.getElementById('st-' + i);
+        st.classList.toggle('act', i === n);
+        st.classList.toggle('done', i < n);
+        st.querySelector('.st-n').textContent = i < n ? '✓' : i;
+        const sep = document.getElementById('sep-' + i);
+        if (sep) sep.classList.toggle('done', i < n);
+      }
+    }
+  }
+  const main = document.getElementById('pay-btn');
+  if (!main) return;
+  document.getElementById('cta-back').hidden = !(n === 2 || n === 3 || n === 4);
+  if (n < 1 || n > 4) return; // écrans sans barre : le CSS la cache (.at-success)
+  if (n === 2) main.disabled = !selDate || !selSlot;
+  else if (n === 1 || n === 3) main.disabled = false;
+  // Étape 4 : updatePayBtn() garde la main (consentement) et le libellé est
+  // déjà posé par goStep() via texteConfirmer().
+  if (n <= 3) main.innerHTML = 'Continuer<i class="ti ti-arrow-right"></i>';
+}
+function ctaSuivant() {
+  if (currentStep === 1) goStep(2);
+  else if (currentStep === 2) apresCreneau();
+  else if (currentStep === 3) goStep(4);
+  else if (currentStep === 4) processBooking();
+}
+function retourCta() {
+  if (currentStep === 4) goStep(infosCompletes() ? 2 : 3);
+  else if (currentStep === 3) goStep(2);
+  else if (currentStep === 2) goStep(1);
+}
 // Salon qui valide ses RDV : on envoie une demande, on ne confirme pas.
 function libelleConfirmer() { return SALON && SALON.validation ? 'Envoyer ma demande' : 'Confirmer le RDV'; }
 // Contenu du bouton final : le montant n'y figure que s'il est affiché (pas « Sur devis »).
@@ -215,6 +269,9 @@ function texteConfirmer() {
 }
 
 function updatePayBtn() {
+  // La barre n'obéit au consentement qu'à l'étape 4 : appelé pour toute
+  // navigation par goStep(), il ne doit pas désactiver « Continuer » ailleurs.
+  if (currentStep !== 4) return;
   const checked = document.getElementById('consent-check')?.checked;
   const btn = document.getElementById('pay-btn');
   if (!btn) return;
@@ -251,7 +308,7 @@ async function preparerCalendrier() {
   if (JOURS_PRESTA === selSvc.id) { renderCal(); return; }
   JOURS = {}; HEURES = {}; JOURS_PRESTA = null; DISPO_ERREUR = false;
   selDate = null; selSlot = null;
-  document.getElementById('btn-step2').disabled = true;
+  document.getElementById('pay-btn').disabled = true;
   document.getElementById('slots-wrap').style.display = 'none';
   document.getElementById('s2').classList.remove('slots-on', 'vient-d-ouvrir');
   renderCal();
@@ -307,7 +364,7 @@ function selectDay(ds, el) {
   if (el.classList.contains('past') || el.classList.contains('closed') || el.classList.contains('empty')) return;
   selDate = ds;
   selSlot = null;
-  document.getElementById('btn-step2').disabled = true;
+  document.getElementById('pay-btn').disabled = true;
   const prev = document.querySelector('.cal-d.sel');
   if (prev) prev.classList.remove('sel');
   el.classList.add('sel');
@@ -351,7 +408,7 @@ function selectSlot(el, t) {
   el.classList.add('sel');
   el.setAttribute('aria-pressed', 'true');
   selSlot = t;
-  document.getElementById('btn-step2').disabled = false;
+  document.getElementById('pay-btn').disabled = false;
 }
 
 /* ── Liste d'attente : nom et numéro, pas de notification (le barbier prévient) ── */
@@ -422,7 +479,7 @@ async function processBooking() {
 function showSuccess(r) {
   // Le créneau pris disparaît aussitôt pour une réservation dans la foulée.
   if (HEURES[selDate]) HEURES[selDate] = HEURES[selDate].filter(h => h !== selSlot);
-  const aRegler = r.rdv.prix === null ? '' : `<br><span style="color:var(--gold);font-weight:700">${montant(r.rdv.prix)}</span> à régler sur place.`;
+  const aRegler = r.rdv.prix === null ? '' : `<br><span style="color:var(--accent);font-weight:700">${montant(r.rdv.prix)}</span> à régler sur place.`;
   document.getElementById('success-msg').innerHTML = r.rdv.statut === 'en_attente'
     ? `Demande envoyée ! <strong>${escHtml(SALON.nom)}</strong> valide chaque rendez-vous : tu reçois une confirmation par email très vite. Ton créneau est gardé en attendant.`
     : `Ton RDV est confirmé.${aRegler}`;
@@ -511,7 +568,7 @@ function startNewBooking() {
 function resetBooking() {
   selSvc = SERVICES[0];
   selDate = null; selSlot = null;
-  document.getElementById('btn-step2').disabled = true;
+  document.getElementById('pay-btn').disabled = true;
   document.getElementById('slots-wrap').style.display = 'none';
   document.getElementById('s2').classList.remove('slots-on', 'vient-d-ouvrir');
   renderServices();

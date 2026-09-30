@@ -19,9 +19,11 @@ body { font-family: 'Figtree', sans-serif; }
 [hidden] { display: none !important; }
 
 /* Rien ne s'affiche avant la session : la coquille reste cachée tant que
-   l'écran de connexion est là. */
+   l'écran de connexion est là. La barre du bas suit : sinon elle restait seule
+   sur l'écran de connexion, sans rapport avec ce qui s'y passe. */
 body.hors-session .layout,
 body.hors-session .sidebar,
+body.hors-session .mnav,
 body.hors-session .mnav-burger,
 body.hors-session #sidebar-backdrop { display: none !important; }
 body:not(.hors-session) #ecran-connexion { display: none; }

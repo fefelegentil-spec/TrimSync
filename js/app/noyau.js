@@ -112,6 +112,8 @@ function nav(id) {
   document.querySelectorAll('.modal-bg').forEach(m => m.classList.remove('open'));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + id));
   document.querySelectorAll('.nav-item').forEach(t => t.classList.toggle('active', t.dataset.page === id));
+  // La barre du bas (mobile) porte les mêmes segments que la sidebar.
+  document.querySelectorAll('.mnav-item').forEach(t => t.classList.toggle('active', t.dataset.page === id));
   const titre = id === 'dashboard' ? 'Bonjour, <span class="accent">' + esc(SESSION.salon.nom) + '</span>' : esc(PAGES[id].titre);
   document.getElementById('topbar-title').innerHTML = titre;
   document.getElementById('topbar-sub').textContent = PAGES[id].sous;

@@ -2328,7 +2328,11 @@ select.input{appearance:none;cursor:pointer;background-image:url("data:image/svg
   .kpi-value{font-size:20px}
   .ag-day-col{min-width:68px}
   .modal{padding:var(--sp-4)}
-  .input,select.input,textarea.input{font-size:14px}
+  /* Pas de font-size < 16px sur un champ : iOS Safari zoome automatiquement la
+     page au focus d'un input plus petit, et le recadrage qui suit fait glisser
+     tout l'ecran en lateral (symptome surtout net sur l'inscription et la mise
+     en route, ou l'on saisit plusieurs champs d'affilee). La regle 14px posee
+     ici a l'origine declenchait exactement ce zoom sur iPhone SE et 360 px. */
   input[type="date"],input[type="time"]{font-size:16px}
 }
 

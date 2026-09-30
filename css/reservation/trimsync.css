@@ -1,49 +1,733 @@
-/* ── Page de réservation TrimSync : ce qui diffère de la page FCUTZ ──
-   fcutz.css est la feuille de la vraie page FCUTZ, recopiée avec une seule
-   retouche : l'or en dur rgba(218,177,73,…) y devient rgba(var(--gold-rgb),…),
-   pour que chaque salon ait sa couleur (posée par habillerSalon()). Tout autre
-   ajustement vit ici. */
+/* ════════════════════════════════════════════════════════
+   TRIMSYNC RÉSERVATION — identité propre, sombre signature
+   ════════════════════════════════════════════════════════
+   Cette feuille est AUTONOME : la page ne charge plus fcutz.css. Même
+   parcours (prestation → créneau → infos → récap), mais une autre maison :
+   - noir bleuté (FCUTZ : noir chaud) ;
+   - Bricolage Grotesque + Figtree (FCUTZ : Unbounded + Syne) ;
+   - l'accent est la COULEUR DU SALON (teal TrimSync si non définie),
+     posée par appliquerCouleur() sur --gold-rgb et dérivée ici ;
+   - un stepper en tête et une barre d'action fixe en bas, à la place des
+     boutons Continuer/Retour empilés dans le flux. */
+:root{
+  color-scheme:dark;
+  --bg:#06070B; --bg-2:#0B0D13; --bg-3:#12151D; --bg-4:#1A1E28;
+  --border:rgba(255,255,255,.07); --border-2:rgba(255,255,255,.13);
+  /* L'accent dérive des variables posées par appliquerCouleur() — mêmes
+     dérivations que l'or de FCUTZ (clair, très clair, profond), avec un
+     repli teal TrimSync si le salon n'a pas de couleur. */
+  --accent-rgb:var(--gold-rgb, 96,196,200);
+  --accent:rgb(var(--accent-rgb));
+  --accent-2:var(--gold-2, #9ADDE1);
+  --accent-3:var(--gold-3, #D8F5F6);
+  --accent-deep:var(--gold-deep, #3E9EA3);
+  /* Texte posé SUR l'accent : sombre par défaut, blanc si le salon choisit
+     une couleur foncée (calculé par appliquerCouleur()). */
+  --accent-ink:var(--ink-sur-accent, #05191B);
+  --grad-accent:linear-gradient(135deg, var(--accent-deep), var(--accent) 50%, var(--accent-2));
+  --text:#EEF1F5; --text-2:#A9AFBA; --text-3:#7A808C; --text-4:#575D68;
+  --success:#4ABA6A; --danger:#E05050;
+  --lueur-accent:0 8px 26px rgba(var(--accent-rgb),.28);
+  --ease:cubic-bezier(.4,0,.2,1);
+  --ease-pop:cubic-bezier(.16,1,.3,1);
+  --fd:'Bricolage Grotesque',sans-serif;
+  --fb:'Figtree',sans-serif;
+}
 
-[hidden] { display: none !important; }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+html{touch-action:manipulation;background:#06070B}
+html,body{overscroll-behavior:none}
+body{
+  background:transparent;color:var(--text);font-family:var(--fb);font-size:15px;line-height:1.55;
+  min-height:100vh;min-height:100dvh;
+  overflow-x:hidden;overflow-x:clip;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.26;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    radial-gradient(ellipse at 50% -10%,rgba(var(--accent-rgb),.07),transparent 55%);
+}
+a{color:inherit;text-decoration:none}
+button{background:none;border:none;cursor:pointer;font-family:inherit;color:inherit}
+input,select,textarea{font-family:inherit;font-size:16px;color:inherit;outline:none}
+img{display:block;max-width:100%}
+[hidden]{display:none!important}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(var(--accent-rgb),.2);border-radius:2px}
 
-/* Les prestations d'un salon TrimSync n'ont pas (encore) de photo : un fond
-   dans la teinte de la page et une icône, à la place de l'image. */
-.svc-img-wrap.ts-sans-image {
-  display: grid;
-  place-items: center;
+/* ── RIPPLE (js/reservation/ripple.js crée ces spans au toucher) ── */
+.ripple-clip{position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none;z-index:0}
+.ripple-wave{
+  position:absolute;border-radius:50%;transform:scale(0);pointer-events:none;
+  background:radial-gradient(circle,rgba(255,255,255,.28) 0%,rgba(var(--accent-rgb),.22) 45%,transparent 72%);
+  animation:tsRipple .55s var(--ease) forwards;
+}
+@keyframes tsRipple{to{transform:scale(2.6);opacity:0}}
+
+/* ── SPLASH ──
+   La mécanique (police attendue, fond prêt, sortie) est celle de la page,
+   le rendu est TrimSync : le monogramme du salon dans une tuile dégradée,
+   le nom en dessous, un filet de la couleur du salon. */
+#splash{
+  position:fixed;inset:0;z-index:9999;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+  transition:opacity .5s var(--ease), transform .65s var(--ease-pop);
+  will-change:opacity, transform;
+}
+html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events:none!important}
+#splash.out{opacity:0;transform:scale(1.05)}
+#splash.out .splash-scene{filter:blur(6px);transition:filter .5s var(--ease)}
+.splash-fond{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 44%, #0B1420 0%, #06070B 58%, #050609 100%);
+  transition:opacity .9s var(--ease);
+}
+#splash.fond-pret .splash-fond{opacity:0}
+.splash-scene{
+  position:relative;display:inline-flex;flex-direction:column;align-items:center;gap:18px;
+}
+.splash-scene::after{
+  content:'';position:absolute;inset:-110% -30%;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse at center, rgba(var(--accent-rgb),.16), transparent 64%);
+  animation:tsHalo 1.5s var(--ease) .25s both;
+}
+@keyframes tsHalo{0%{opacity:0;transform:scale(.86)}45%{opacity:1}100%{opacity:.65;transform:scale(1)}}
+.splash-mark{
+  width:86px;height:86px;border-radius:22px;
+  background:var(--grad-accent);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-size:36px;font-weight:800;color:var(--accent-ink);letter-spacing:-1px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.09), 0 24px 60px rgba(var(--accent-rgb),.34);
+  animation:tsMark .7s var(--ease-pop) both, tsMarkSouffle 2.4s ease-in-out 1s infinite alternate;
+}
+@keyframes tsMark{0%{transform:scale(.6) translateY(18px);opacity:0}60%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}
+@keyframes tsMarkSouffle{
+  from{box-shadow:0 0 0 1px rgba(255,255,255,.09), 0 24px 60px rgba(var(--accent-rgb),.26)}
+  to{box-shadow:0 0 0 1px rgba(255,255,255,.09), 0 30px 78px rgba(var(--accent-rgb),.44)}
+}
+.splash-name{
+  position:relative;
+  font-family:var(--fd);font-weight:800;color:var(--text);
+  font-size:calc(13.5vw * 6 / var(--lettres, 6));
+  letter-spacing:calc(-.18vw * 6 / var(--lettres, 6));
+  line-height:1;white-space:nowrap;
+  text-shadow:0 8px 30px rgba(0,0,0,.6);
+}
+.splash-name span{
+  display:inline-block;will-change:transform,opacity,filter;
+  animation:splashLettre 1s var(--ease-pop) calc(.06s + var(--i) * .05s) both;
+}
+@keyframes splashLettre{
+  from{opacity:0;transform:translateY(26%)}
+  to{opacity:1;transform:none}
+}
+/* Reflet : une lumière de la couleur du salon traverse le nom une fois posé. */
+.splash-reflet{
+  position:absolute;inset:0;pointer-events:none;
+  font:inherit;letter-spacing:inherit;line-height:inherit;white-space:nowrap;
+  color:transparent;-webkit-text-fill-color:transparent;text-shadow:none;
+  background:linear-gradient(105deg, transparent 38%, rgba(var(--accent-rgb),.55) 45%, rgba(255,255,255,.92) 50%, rgba(var(--accent-rgb),.55) 55%, transparent 62%) no-repeat;
+  background-size:250% 100%;background-position:100% 0;
+  -webkit-background-clip:text;background-clip:text;
+  animation:splashReflet .85s cubic-bezier(.65,0,.35,1) .6s both;
+}
+@keyframes splashReflet{from{background-position:100% 0}to{background-position:0% 0}}
+.splash-filet{
+  width:62%;height:1px;
+  background:linear-gradient(90deg, transparent, var(--accent) 30%, var(--accent-2) 50%, var(--accent) 70%, transparent);
+  transform:scaleX(0);opacity:0;
+  animation:splashFilet .9s var(--ease-pop) .5s both;
+}
+@keyframes splashFilet{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:.9}}
+.splash-sous{
+  font-size:10.5px;letter-spacing:4.5px;text-transform:uppercase;font-weight:600;color:var(--text-3);
+  animation:splashSous .6s var(--ease) .75s both;
+}
+@keyframes splashSous{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#splash.police-attendue .splash-name span,
+#splash.police-attendue .splash-reflet,
+#splash.police-attendue .splash-filet,
+#splash.police-attendue .splash-mark,
+#splash.police-attendue .splash-sous,
+#splash.police-attendue .splash-scene::after{animation:none;opacity:0}
+@media (prefers-reduced-motion:reduce){
+  .splash-name span{animation:splashFondu .5s var(--ease) both}
+  .splash-reflet{display:none}
+  .splash-mark,.splash-filet,.splash-sous{animation:splashFondu .5s var(--ease) both}
+  .splash-scene::after{animation:none}
+  #splash.out{transform:none}
+  #splash.out .splash-scene{filter:none}
+}
+@keyframes splashFondu{from{opacity:0}}
+
+/* ── VOILE HAUT ──
+   Éteint la zone sure au-dessus du bandeau (encoche, Dynamic Island). */
+.voile-haut{
+  position:fixed;z-index:2;left:0;right:0;top:0;
+  height:calc(env(safe-area-inset-top,0px) + 34px);
+  background:linear-gradient(180deg,
+    #06070B 0,
+    #06070B env(safe-area-inset-top,0px),
+    rgba(6,7,11,.86) calc(env(safe-area-inset-top,0px) + 11px),
+    rgba(6,7,11,.45) calc(env(safe-area-inset-top,0px) + 21px),
+    rgba(6,7,11,0) 100%);
+  pointer-events:none;
+}
+
+/* ── HEADER ──
+   Bandeau sticky : monogramme du salon dans sa tuile, nom, icônes nues à
+   droite, et le stepper qui suit — la seule navigation de la page. */
+.header{
+  position:sticky;top:0;z-index:20;
+  background:rgba(6,7,11,.86);
+  backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);
+  border-bottom:1px solid var(--border);
+  padding:calc(env(safe-area-inset-top,0px) + 8px)
+          calc(14px + env(safe-area-inset-right,0px))
+          0
+          calc(16px + env(safe-area-inset-left,0px));
+}
+.h-bar{display:flex;align-items:center;gap:12px;max-width:560px;margin:0 auto;min-height:52px}
+.h-mark{
+  width:40px;height:40px;border-radius:11px;flex-shrink:0;
+  background:var(--grad-accent);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-size:16px;font-weight:800;color:var(--accent-ink);letter-spacing:-.5px;
+  box-shadow:0 6px 18px rgba(var(--accent-rgb),.28);
+}
+.h-name{
+  flex:1;min-width:0;
+  font-family:var(--fd);font-size:18px;font-weight:800;
+  color:var(--text);letter-spacing:-.02em;line-height:1.15;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;
+}
+.h-side{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.h-ico{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  color:var(--text-2);transition:color .2s,background .2s;
+}
+.h-ico i{font-size:19px}
+.h-ico:active{background:rgba(255,255,255,.07);color:var(--text)}
+.h-account{
+  display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  height:38px;margin-left:4px;padding:0 4px 0 8px;border:0;
+  color:var(--text);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;
+}
+/* ── STEPPER ──
+   Prestation → Créneau → Infos → Récap. Synchronisé par majCta() dans goStep(). */
+.stepper{
+  display:flex;align-items:flex-start;justify-content:center;
+  max-width:560px;margin:0 auto;padding:8px 2px 12px;gap:0;
+}
+.st-item{display:flex;flex-direction:column;align-items:center;gap:5px;flex:0 1 76px;min-width:0}
+.st-n{
+  width:27px;height:27px;border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.16);background:rgba(18,21,29,.85);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-size:11.5px;font-weight:800;color:var(--text-3);
+  transition:all .3s var(--ease);
+}
+.st-item.act .st-n{
+  background:var(--accent);border-color:var(--accent);color:var(--accent-ink);
+  box-shadow:0 0 0 4px rgba(var(--accent-rgb),.14), 0 5px 14px rgba(var(--accent-rgb),.3);
+}
+.st-item.done .st-n{background:transparent;border-color:var(--accent);color:var(--accent)}
+.st-l{
+  font-size:9px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:var(--text-3);
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .3s var(--ease);
+}
+.st-item.act .st-l{color:var(--accent)}
+.st-item.done .st-l{color:var(--text-2)}
+.st-sep{flex:0 1 22px;min-width:8px;height:1.5px;margin-top:13px;background:rgba(255,255,255,.14);transition:background .3s var(--ease)}
+.st-sep.done{background:var(--accent)}
+
+/* ── BARRE D'ACTION FIXE ──
+   Le bouton principal suit le bas de l'écran (Continuer, puis Confirmer le
+   RDV quand l'ID pay-btn la porte) ; Retour l'accompagne dès l'étape 2.
+   Cachée sur les écrans « Mon RDV » et de fin : .wrap porte .at-success. */
+.cta-bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:120;
+  padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(to top, #06070B 62%, rgba(6,7,11,.82) 82%, transparent);
+  pointer-events:none;
+}
+.wrap.at-success + .cta-bar{display:none}
+.cta-inner{
+  display:flex;align-items:center;gap:10px;
+  max-width:560px;margin:0 auto;pointer-events:auto;
+}
+.cta-back{
+  flex:0 0 auto;padding:0 18px;min-height:52px;border-radius:100px;
+  border:1px solid var(--border-2);color:var(--text-2);
+  font-family:var(--fb);font-size:13px;font-weight:600;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  background:rgba(18,21,29,.7);cursor:pointer;transition:.2s var(--ease);
+}
+.cta-back i{font-size:16px}
+.cta-back:active{transform:scale(.96)}
+.btn-main{
+  flex:1;min-height:52px;border-radius:100px;
+  background:var(--grad-accent);color:var(--accent-ink);
+  font-family:var(--fd);font-size:14px;font-weight:800;letter-spacing:.01em;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:var(--lueur-accent);cursor:pointer;
+  transition:transform .2s var(--ease), box-shadow .2s var(--ease), opacity .2s var(--ease);
+}
+.btn-main i{font-size:17px}
+.btn-main:active:not(:disabled){transform:translateY(1px) scale(.99)}
+.btn-main:disabled{opacity:.4;pointer-events:none}
+.cta-inner>.btn-main:disabled{opacity:.4}
+
+/* ── MAIN ── */
+.wrap{
+  position:relative;z-index:1;max-width:560px;margin:0 auto;
+  padding:18px calc(18px + env(safe-area-inset-right,0px))
+          calc(122px + env(safe-area-inset-bottom,0px))
+          calc(18px + env(safe-area-inset-left,0px));
+}
+.wrap.at-success{padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+.section{display:none;animation:tsSectionIn .32s var(--ease)}
+.section.active{display:block}
+@keyframes tsSectionIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.section.retour{animation-name:tsSectionRetour}
+@keyframes tsSectionRetour{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.s-title{font-family:var(--fd);font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:14px}
+
+/* ── PRÉSENTATION DU SALON ── */
+.salon-intro{display:flex;gap:14px;align-items:center;margin:2px 0 20px;padding:14px;background:var(--bg-2);border:1px solid var(--border);border-radius:16px}
+.salon-logo{width:56px;height:56px;flex:none;border-radius:14px;object-fit:cover;border:1px solid var(--border-2);background:var(--bg-3)}
+.salon-intro-txt{min-width:0;display:flex;flex-direction:column;gap:5px}
+.salon-desc{color:var(--text-2);font-size:13.5px;line-height:1.5}
+.salon-insta{display:inline-flex;align-items:center;gap:6px;width:fit-content;font-size:12.5px;font-weight:600;color:var(--accent)}
+.salon-insta i{font-size:15px}
+.salon-regle{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-3)}
+.salon-regle i{color:var(--text-3)}
+
+/* ── PRESTATIONS ── */
+.svc-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.svc-list>.svc:last-child:nth-child(odd){grid-column:1}
+.svc{
+  position:relative;background:var(--bg-2);border:1px solid var(--border);border-radius:16px;
+  text-align:left;overflow:hidden;cursor:pointer;
+  display:flex;flex-direction:column;
+  transition:border-color .2s var(--ease), background .2s var(--ease), box-shadow .2s var(--ease), transform .1s var(--ease);
+}
+.svc:active{transform:scale(.97)}
+.svc.sel{
+  border-color:var(--accent);
+  background:color-mix(in srgb, var(--accent) 6%, var(--bg-2));
+  box-shadow:0 0 0 1px rgba(var(--accent-rgb),.24), 0 8px 28px rgba(var(--accent-rgb),.13);
+}
+/* Les prestations d'un salon n'ont pas (encore) de photo : une icône dans un
+   bandeau teinté, à la place. Avec photo : l'image en couverture. */
+.svc-img-wrap{position:relative;width:100%;aspect-ratio:1.7/1;overflow:hidden}
+.svc-img{width:100%;height:100%;object-fit:cover;transition:transform .4s var(--ease)}
+.svc-img-wrap.ts-sans-image{
+  display:grid;place-items:center;
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(var(--gold-rgb), .18), transparent 60%),
-    linear-gradient(160deg, #15130E, #0A0A0A);
+    radial-gradient(ellipse at 30% 18%, rgba(var(--accent-rgb),.13), transparent 62%),
+    linear-gradient(160deg, var(--bg-3), var(--bg-2));
 }
-.svc-img-wrap.ts-sans-image i {
-  position: relative;
-  z-index: 1;
-  font-size: 44px;
-  color: var(--gold);
-  opacity: .85;
+.svc-img-wrap.ts-sans-image i{
+  position:relative;z-index:1;font-size:36px;
+  color:color-mix(in srgb, var(--accent) 62%, #8a9099);
+  transition:color .2s var(--ease), transform .3s var(--ease-pop);
+}
+.svc.sel .svc-img-wrap.ts-sans-image{background:
+    radial-gradient(ellipse at 30% 18%, rgba(var(--accent-rgb),.2), transparent 62%),
+    linear-gradient(160deg, var(--bg-3), var(--bg-2));}
+.svc.sel .svc-img-wrap.ts-sans-image i{color:var(--accent);transform:scale(1.07)}
+.svc-tag{position:absolute;top:8px;left:8px;background:rgba(224,80,80,.92);color:#fff;font-size:9px;padding:3px 8px;border-radius:6px;font-weight:700;letter-spacing:.5px;z-index:1}
+.svc-body{padding:12px 13px 13px;display:flex;flex-direction:column;gap:4px;flex:1}
+.svc-name{font-family:var(--fb);font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.01em;transition:color .2s var(--ease)}
+.svc.sel .svc-name{color:var(--accent)}
+.svc-desc{font-size:11.5px;line-height:1.45;color:var(--text-3)}
+.svc-meta{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:5px}
+.svc-price{font-family:var(--fd);font-size:18px;font-weight:800;color:var(--accent);letter-spacing:-.02em}
+.svc-dur{font-size:10.5px;color:var(--text-3);display:inline-flex;align-items:center;gap:3px}
+.svc-check{
+  position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.3);background:rgba(4,5,8,.5);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;color:transparent;z-index:1;
+  transition:background .18s var(--ease), border-color .18s var(--ease), color .18s var(--ease), transform .15s var(--ease-pop);
+}
+.svc.sel .svc-check{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);transform:scale(1.12)}
+
+/* ── CALENDRIER ── */
+.cal-card{background:var(--bg-2);border:1px solid var(--border);border-radius:16px;padding:15px;margin-bottom:14px;box-shadow:0 4px 22px rgba(0,0,0,.32)}
+.cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-month{font-family:var(--fd);font-size:15px;font-weight:800;letter-spacing:-.02em;text-transform:capitalize}
+.cal-nav{
+  width:34px;height:34px;border-radius:10px;
+  background:var(--bg-3);border:1px solid var(--border);color:var(--text-2);
+  display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:.2s var(--ease);
+}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-dn{font-size:9.5px;color:var(--text-3);text-align:center;padding:4px 0;letter-spacing:1.2px;text-transform:uppercase;font-weight:700}
+.cal-d{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  border-radius:9px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;
+  transition:background .15s var(--ease), box-shadow .15s var(--ease), color .15s var(--ease), transform .1s var(--ease);
+  border:1px solid transparent;background:transparent;min-height:38px;
+}
+.cal-d:active:not(.past):not(.closed):not(.empty){transform:scale(.88)}
+/* Un jour fermé n'est pas raturé : il s'efface. L'état se lit par la couleur,
+   pas par une opacité qui plongerait sous les seuils de contraste. */
+.cal-d.past,.cal-d.closed{opacity:1;color:var(--text-4);pointer-events:none}
+.cal-d.today{color:var(--accent);font-weight:700}
+.cal-d.complet{color:var(--text-3)}
+/* Le point sous le chiffre : il reste de la place ce jour-là. */
+.cal-d.libre{position:relative}
+.cal-d.libre::after{content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--accent)}
+.cal-d.sel.libre::after{background:var(--accent-ink)}
+.cal-d.empty{pointer-events:none;opacity:0}
+.cal-d.sel{
+  background:var(--grad-accent);color:var(--accent-ink)!important;font-weight:800;border-color:transparent;
+  box-shadow:0 0 0 2px var(--accent), 0 4px 14px rgba(var(--accent-rgb),.32);
+}
+.cal-panne{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:24px 16px;font-size:12.5px;line-height:1.6;color:var(--text-2)}
+.cal-panne i{font-size:28px;color:var(--accent)}
+.cal-panne b{color:var(--text)}
+.cal-loading{grid-column:1/-1;text-align:center;padding:22px;color:var(--text-3);font-size:12.5px;display:flex;align-items:center;justify-content:center;gap:8px}
+.cal-loading::before{content:'';width:15px;height:15px;border:2px solid rgba(var(--accent-rgb),.18);border-top-color:var(--accent);border-radius:50%;animation:tsSpin 1s linear infinite}
+@keyframes tsSpin{to{transform:rotate(360deg)}}
+
+/* ── CRÉNEAUX ── */
+.slots-h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+.slots-h-t{font-family:var(--fd);font-size:13.5px;font-weight:800}
+.slots-h-d{font-size:11px;color:var(--text-3)}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px;animation:tsSlotsIn .22s var(--ease) both}
+@keyframes tsSlotsIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.slot{
+  background:var(--bg-2);border:1px solid var(--border);border-radius:12px;
+  padding:13px 4px;text-align:center;font-size:13px;cursor:pointer;
+  font-family:var(--fd);font-weight:700;color:var(--text);min-height:46px;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .15s var(--ease), color .15s var(--ease), background .15s var(--ease), box-shadow .15s var(--ease), transform .1s var(--ease);
+}
+.slot:active{transform:scale(.92)}
+.slot.sel{
+  background:var(--grad-accent);color:var(--accent-ink);border:2px solid var(--accent);font-weight:800;
+  box-shadow:0 6px 18px rgba(var(--accent-rgb),.3);
+  animation:tsSelPop .2s var(--ease-pop) both;
+}
+@keyframes tsSelPop{from{transform:scale(.88)}to{transform:scale(1)}}
+/* Les heures se posent l'une après l'autre ; --i est écrit au rendu, --retard
+   est allongé là où le calendrier glisse (voir responsive). */
+.slot{animation:tsSlotArrive .3s var(--ease-pop) both;animation-delay:calc(var(--retard,0ms) + var(--i,0) * 26ms)}
+@keyframes tsSlotArrive{from{opacity:0;transform:translateY(8px) scale(.95)}to{opacity:1;transform:none}}
+
+/* ── JOUR COMPLET / PARTIEL ── */
+.slots-zone{position:relative}
+.slots-zone.full .slots,.slots-zone.partial .slots{display:none}
+#slots-wrap:has(.slots-zone.full) .slots-h,
+#slots-wrap:has(.slots-zone.partial) .slots-h{display:none}
+.slots-full,.slots-partial{
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;
+  padding:30px 22px;margin-bottom:12px;animation:tsSlotsIn .25s var(--ease) both;
+  background:var(--bg-2);border:1px solid var(--border);border-radius:16px;
+}
+.slots-zone.full .slots-full{display:flex}
+.slots-zone.partial .slots-partial{display:flex}
+.slots-partial{gap:13px}
+.slots-full-title{font-family:var(--fd);font-size:18px;font-weight:800;letter-spacing:-.02em;line-height:1.3;color:var(--text)}
+.slots-full-link{
+  display:inline-flex;align-items:center;gap:9px;
+  background:var(--grad-accent);color:var(--accent-ink);
+  font-family:var(--fd);font-size:12px;font-weight:800;
+  padding:13px 20px;border-radius:100px;box-shadow:var(--lueur-accent);
+  transition:transform .12s var(--ease), box-shadow .15s var(--ease);
+}
+.slots-full-link.second{background:var(--bg-3);border:1px solid rgba(var(--accent-rgb),.4);color:var(--accent);box-shadow:none}
+.slots-full-link i{font-size:17px}
+.slots-full-link:active{transform:scale(.95)}
+.slots-partial-sub{font-size:12.5px;line-height:1.55;color:var(--text-2);max-width:290px}
+.slots-partial-sub b{color:var(--accent-2);font-weight:700}
+
+/* ── CHAMPS ── */
+.field{margin-bottom:13px}
+.field label{display:block;font-size:10.5px;letter-spacing:1.6px;color:var(--text-3);text-transform:uppercase;font-weight:700;margin-bottom:7px}
+.field .input,.field input,.field select,.field textarea{
+  width:100%;background:var(--bg-2);border:1.5px solid var(--border-2);border-radius:12px;
+  color:var(--text);font-family:var(--fb);font-size:16px;font-weight:500;
+  padding:13px 15px;transition:.2s var(--ease);min-height:48px;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--accent);background:var(--bg-3);
+  box-shadow:0 0 0 3.5px rgba(var(--accent-rgb),.1);
+}
+.field input::placeholder{color:var(--text-4)}
+#b-phone{font-family:var(--fd);font-size:14px;font-weight:700;letter-spacing:.5px}
+.fields-row{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:480px){.fields-row{grid-template-columns:1fr 1fr}}
+
+/* ── RÉCAP ── */
+.recap{
+  background:color-mix(in srgb, var(--accent) 5%, var(--bg-2));
+  border:1px solid rgba(var(--accent-rgb),.26);border-radius:16px;padding:15px;margin-bottom:14px;
+  box-shadow:0 2px 16px rgba(0,0,0,.3);
+}
+.recap-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed rgba(var(--accent-rgb),.14);font-size:13px;gap:10px}
+.recap-row:first-child{padding-top:0}
+.recap-row:last-child{border-bottom:none;padding-bottom:0;padding-top:11px;margin-top:3px;border-top:1px solid rgba(var(--accent-rgb),.2)}
+.recap-label{color:var(--text-3);font-size:11.5px;font-weight:600;letter-spacing:.3px}
+.recap-val{color:var(--text);font-weight:600;text-align:right;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recap-row:last-child .recap-label{color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:1.4px}
+.recap-row:last-child .recap-val{font-family:var(--fd);font-size:21px;font-weight:800;color:var(--accent);letter-spacing:-.02em}
+.recap-mini{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:600;color:var(--text)}
+.recap-mini i{color:var(--accent);font-size:17px;flex-shrink:0}
+.recap-mini .rm-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recap-mini .rm-prix{font-family:var(--fd);font-weight:800;color:var(--accent);flex-shrink:0}
+
+/* Qui réserve, sous le récap de validation. */
+.qui{display:flex;align-items:center;gap:9px;margin:-4px 0 14px;padding:11px 13px;background:var(--bg-2);border:1px solid var(--border);border-radius:12px;font-size:12.5px}
+.qui i{color:var(--accent);font-size:16px;flex-shrink:0}
+.qui .qui-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-2);font-weight:600}
+.qui .qui-mod{background:none;border:0;padding:0;font-family:inherit;font-size:12px;font-weight:700;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+
+/* ── BOUTONS DANS LE FLUX (écrans Mon RDV, succès, indispo) ── */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:14px 22px;border-radius:14px;cursor:pointer;
+  font-family:var(--fb);font-size:13.5px;font-weight:700;letter-spacing:.01em;
+  transition:.22s var(--ease);min-height:50px;position:relative;
+}
+.btn:disabled{opacity:.4;pointer-events:none}
+.btn-gold{background:var(--grad-accent);color:var(--accent-ink);font-family:var(--fd);font-weight:800;box-shadow:var(--lueur-accent);border-radius:100px}
+.btn-out{background:transparent;color:var(--text-2);border:1px solid var(--border-2)}
+.btn-ghost{background:transparent;color:var(--text-2)}
+.btn-danger{background:rgba(224,80,80,.09);border:1px solid rgba(224,80,80,.32);color:#F0A8A8}
+
+/* ── ÉCRAN SUCCÈS / INDISPO ── */
+.success{text-align:center;padding:26px 0 6px}
+.success-icon{
+  width:74px;height:74px;border-radius:50%;margin:0 auto 18px;
+  background:rgba(var(--accent-rgb),.1);border:2px solid rgba(var(--accent-rgb),.5);
+  display:flex;align-items:center;justify-content:center;
+  animation:tsPop .5s var(--ease-pop) both;
+}
+.success-icon i{font-size:31px;color:var(--accent)}
+@keyframes tsPop{0%{transform:scale(.5);opacity:0}100%{transform:scale(1);opacity:1}}
+.success h2{font-family:var(--fd);font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+.success p{font-size:13.5px;color:var(--text-2);line-height:1.6;max-width:300px;margin:0 auto 20px}
+.success p strong{color:var(--text)}
+.success-recap{
+  display:flex;flex-direction:column;gap:0;text-align:left;margin-bottom:20px;
+  background:color-mix(in srgb, var(--accent) 5%, var(--bg-2));
+  border:1px solid rgba(var(--accent-rgb),.25);border-radius:16px;padding:6px 16px;
+}
+.success-recap-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);font-size:13.5px;font-weight:600}
+.success-recap-item:last-child{border-bottom:none}
+.success-recap-item i{font-size:17px;color:var(--accent);width:22px;text-align:center;flex-shrink:0}
+.recap-map{cursor:pointer}
+.recap-map .rm-go{display:block;font-size:10.5px;font-weight:700;color:var(--accent);letter-spacing:.3px;margin-top:1px}
+
+/* ── MON RDV (dernier pris ici, ou lien d'annulation) ── */
+.my-rdv{display:flex;flex-direction:column;align-items:center;padding:8px 0;text-align:center;--bloc:420px;--ecart:12px}
+.my-rdv > *:not(.my-rdv-badge):not(.my-rdv-tag):not(.my-rdv-name){width:100%;max-width:var(--bloc);margin-top:var(--ecart)}
+.my-rdv > div:empty{display:none}
+.my-rdv-badge{
+  width:84px;height:84px;border-radius:50%;
+  background:var(--grad-accent);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+  font-size:40px;color:var(--accent-ink);
+  box-shadow:0 18px 50px rgba(var(--accent-rgb),.36), 0 0 0 7px rgba(var(--accent-rgb),.08);
+  position:relative;animation:tsPop .6s var(--ease-pop) both;
+}
+.my-rdv-ring,.my-rdv-ring2{position:absolute;inset:-7px;border-radius:50%;border:1.5px solid rgba(var(--accent-rgb),.3);animation:tsOnde 2.6s ease-out infinite}
+.my-rdv-ring2{animation-delay:1.3s}
+@keyframes tsOnde{0%{transform:scale(.92);opacity:.9}70%{transform:scale(1.28);opacity:0}100%{opacity:0}}
+.my-rdv-tag{
+  font-size:10.5px;letter-spacing:1.8px;text-transform:uppercase;font-weight:700;color:var(--accent);
+  background:rgba(var(--accent-rgb),.09);border:1px solid rgba(var(--accent-rgb),.22);
+  padding:4px 14px;border-radius:20px;margin-bottom:2px;
+}
+.my-rdv-name{font-family:var(--fd);font-size:19px;font-weight:800;letter-spacing:-.02em;margin:8px 0 0;color:var(--text)}
+.my-rdv-card{
+  background:color-mix(in srgb, var(--accent) 4%, var(--bg-2));
+  border:1px solid rgba(var(--accent-rgb),.22);border-radius:16px;padding:6px 16px;
+  box-shadow:0 2px 16px rgba(0,0,0,.3);
+}
+.my-rdv-row{display:flex;align-items:center;gap:13px;padding:12px 0;border-bottom:1px dashed rgba(var(--accent-rgb),.13);font-size:13.5px;font-weight:600;color:var(--text);text-align:left}
+.my-rdv-row:last-of-type{border-bottom:none}
+.my-rdv-row i{font-size:18px;color:var(--accent);flex-shrink:0;width:22px;text-align:center}
+.my-rdv-total{display:flex;align-items:center;justify-content:space-between;margin-top:2px;padding-top:13px;border-top:1px solid rgba(var(--accent-rgb),.2)}
+.my-rdv-total-l{font-size:10.5px;letter-spacing:1.8px;text-transform:uppercase;font-weight:700;color:var(--accent)}
+.my-rdv-total-v{font-family:var(--fd);font-size:24px;font-weight:800;color:var(--accent);letter-spacing:-.02em}
+.my-rdv-actions{display:flex;flex-direction:column;gap:var(--ecart)}
+.rdv-actions{display:flex;flex-direction:column;gap:10px}
+.rdv-actions-sep{height:1px;background:var(--border);margin:4px 0}
+/* Le rang du client autour de sa photo (réutilisé de FCUTZ sans les métaux) :
+   un simple anneau de la couleur du salon. */
+.h-account.avatar{width:34px;height:34px;padding:0;border-radius:50%;overflow:hidden;background:var(--bg-3);border:1px solid var(--border-2);font-family:var(--fd);font-size:12px;font-weight:800;color:var(--text)}
+.h-account.avatar img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+.mr-annule{text-align:center;padding:16px;background:rgba(224,80,80,.07);border:1px solid rgba(224,80,80,.2);border-radius:12px;color:#F0A8A8;font-size:13px;font-weight:600}
+/* Dialog d'annulation inline. */
+.cancel-dialog{background:var(--bg-2);border:1px solid rgba(224,80,80,.25);border-radius:14px;padding:14px;animation:tsSlotsIn .22s var(--ease) both}
+.cancel-dialog-msg{font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px}
+.cancel-dialog-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.cancel-dialog-row .btn{padding:11px 8px;min-height:44px;font-size:12px}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);left:50%;
+  transform:translateX(-50%) translateY(-18px);
+  background:var(--bg-3);border:1px solid rgba(var(--accent-rgb),.3);border-radius:12px;
+  padding:11px 18px;font-size:13px;font-weight:600;line-height:1.45;z-index:9000;
+  opacity:0;transition:all .32s var(--ease);pointer-events:none;
+  max-width:min(92vw,420px);text-align:center;box-shadow:0 12px 30px rgba(0,0,0,.55);
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.t-gold{border-color:rgba(var(--accent-rgb),.42);color:var(--accent-2)}
+#toast.t-r{border-color:rgba(224,80,80,.4);background:#251719;color:#F0A8A8}
+
+/* ── NOTES, CONSENTEMENT, PIED ── */
+.note-annulation{display:flex;align-items:center;gap:8px;margin-bottom:11px;font-size:12px;color:var(--text-3)}
+.note-annulation i{font-size:15px;color:var(--accent);flex-shrink:0}
+.consent-label{
+  display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;cursor:pointer;
+  padding:12px 14px;background:var(--bg-2);border:1px solid var(--border);border-radius:12px;
+}
+.consent-label input[type="checkbox"]{margin-top:3px;flex-shrink:0;accent-color:var(--accent);width:16px;height:16px;cursor:pointer}
+.consent-label span{font-size:12px;color:var(--text-2);line-height:1.6}
+.consent-label a{color:var(--accent);text-decoration:underline}
+#pied-legal{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:22px;padding:4px 0;font-size:11px;letter-spacing:.3px;color:var(--text-4)}
+#pied-legal a{color:var(--text-3);text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(var(--accent-rgb),.3)}
+
+/* ── FOCUS ── */
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+.svc:focus-visible,.slot:focus-visible{outline-offset:0;border-radius:16px}
+.cal-d:focus-visible{outline-offset:0;border-radius:9px}
+.cal-nav:focus-visible{outline-offset:0;border-radius:10px}
+.btn:focus-visible,.btn-main:focus-visible,.cta-back:focus-visible{outline-offset:0;border-radius:14px}
+.btn-main:focus-visible,.slots-full-link:focus-visible,.cta-back:focus-visible{border-radius:100px}
+
+/* ── SURVOL (appareils à pointeur seulement : un téléphone garde l'état
+   « hover » après un appui, ce qui figerait les cartes allumées) ── */
+@media (hover:hover) and (pointer:fine){
+  .h-ico:hover{background:rgba(var(--accent-rgb),.12);color:var(--text)}
+  .h-account:hover{background:rgba(var(--accent-rgb),.12)}
+  .svc:hover{border-color:rgba(var(--accent-rgb),.5);background:color-mix(in srgb, var(--accent) 4%, var(--bg-2))}
+  .svc:hover .svc-img{transform:scale(1.04)}
+  .svc:hover .svc-img-wrap.ts-sans-image i{color:color-mix(in srgb, var(--accent) 80%, #fff)}
+  .cal-nav:hover{border-color:var(--accent);color:var(--accent);background:rgba(var(--accent-rgb),.07)}
+  .slot:hover:not(.sel){border-color:var(--accent);color:var(--accent);background:color-mix(in srgb, var(--accent) 6%, var(--bg-2))}
+  .cal-d:hover:not(.past):not(.closed):not(.sel):not(.empty){background:rgba(255,255,255,.06);border-color:var(--border-2)}
+  .btn-main:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 12px 34px rgba(var(--accent-rgb),.4)}
+  .cta-back:hover{border-color:rgba(var(--accent-rgb),.55);color:var(--text)}
+  .btn-out:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-ghost:hover{color:var(--text)}
+  .btn-danger:hover{background:rgba(224,80,80,.14);border-color:rgba(224,80,80,.5)}
+  .recap-map:hover{background:rgba(var(--accent-rgb),.08);outline:none;border-radius:8px}
+  .slots-full-link:hover{box-shadow:0 10px 28px rgba(var(--accent-rgb),.42)}
 }
 
-/* Le nom du salon remplace le mot-logo FCUTZ : il peut être long. */
-.splash-name { white-space: nowrap; }
-.h-name { max-width: 60vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* ════════════════════════════════════════════════════════
+   TABLETTE & ORDINATEUR
+   La page est dessinée pour un téléphone ; dès qu'il y a de la place,
+   le calendrier et les créneaux se posent côte à côte, et une seule
+   largeur est partagée par le bandeau, le stepper et le contenu.
+   ════════════════════════════════════════════════════════ */
+@media(min-width:600px){
+  .svc-img-wrap{aspect-ratio:1.9/1}
+  .svc-name{font-size:14.5px}
+  .svc-price{font-size:19px}
+}
+@media(min-width:768px){
+  body>canvas{opacity:.72}
+  .header{padding-left:24px;padding-right:24px}
+  .h-bar,.stepper,.cta-inner{max-width:860px}
+  .h-name{font-size:20px}
+  .h-mark{width:44px;height:44px;border-radius:12px;font-size:17px}
+  .st-item{flex:0 1 96px}
+  .st-sep{flex:0 1 34px}
 
-/* Même encombrement que « FCUTZ » (5 lettres à 17,5vw) quelle que soit la
-   longueur du nom : --lettres est posé par habillerSalon(). */
-.splash-name { font-size: calc(17.5vw * 5 / var(--lettres, 5)); letter-spacing: calc(-.27vw * 5 / var(--lettres, 5)); }
+  .wrap{max-width:908px;padding:24px 24px calc(122px + env(safe-area-inset-bottom,0px))}
+  .s-title{font-size:23px;margin-bottom:18px}
+  .svc-list{grid-template-columns:repeat(2,1fr);gap:12px}
 
-/* body ne doit pas etre une boite de defilement : avec overflow-x:hidden il en devient une,
-   et overscroll-behavior:none empeche la molette de remonter au document. Resultat : la page
-   ne defilait qu'avec le curseur sur un element fixe (le menu). clip coupe sans defiler ;
-   hidden reste en repli pour les navigateurs qui ne connaissent pas clip. */
-body { overflow-x: hidden; overflow-x: clip; }
+  .cal-card{padding:18px}
+  .cal-month{font-size:16px}
+  .cal-nav{width:38px;height:38px}
+  .cal-d{aspect-ratio:auto;height:48px;min-height:0;font-size:14px;border-radius:10px}
+  .slots{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:9px}
+  .slot{padding:12px 4px;min-height:44px}
 
-/* ── Présentation du salon (logo, description, Instagram) en tête de page ── */
-.salon-intro { display: flex; gap: 16px; align-items: center; margin: 4px 0 22px; }
-.salon-logo { width: 64px; height: 64px; flex: none; border-radius: 50%; object-fit: cover; border: 2px solid rgba(var(--gold-rgb), .55); background: var(--bg3); }
-.salon-intro-txt { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-.salon-desc { color: var(--text-2, #bbb); font-size: 14px; line-height: 1.5; }
-.salon-insta { display: inline-flex; align-items: center; gap: 6px; width: fit-content; font-size: 13px; font-weight: 600; color: var(--gold); text-decoration: none; }
-.salon-insta i { font-size: 16px; }
-.svc-desc { font-size: 12.5px; line-height: 1.45; color: var(--text-2, #bbb); opacity: .85; }
+  /* Étape 2 : calendrier à gauche, créneaux à droite. La colonne s'ouvre
+     quand selectDay() pose .slots-on (grille animée, comme le rideau de
+     FCUTZ mais en plus sobre). */
+  #s2.active{
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,0fr);column-gap:0;align-items:start;
+    transition:grid-template-columns .55s cubic-bezier(.34,1.18,.42,1), column-gap .55s cubic-bezier(.34,1.18,.42,1);
+  }
+  #s2.slots-on{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:26px}
+  #s2.vient-d-ouvrir>.cal-card{animation:tsCalSeTasse .55s cubic-bezier(.34,1.18,.42,1) both}
+  @keyframes tsCalSeTasse{0%{transform:scale(1)}38%{transform:scale(.975)}100%{transform:scale(1)}}
+  #s2>#slots-wrap{transition:opacity .26s ease}
+  #s2.vient-d-ouvrir>#slots-wrap{animation:tsHeuresEntrent .3s var(--ease) .34s both}
+  @keyframes tsHeuresEntrent{from{opacity:0}to{opacity:1}}
+  #s2.vient-d-ouvrir .slot{--retard:380ms}
+  #s2>.s-title{grid-column:1/-1;grid-row:1}
+  #s2>.cal-card{grid-column:1;grid-row:2;width:100%;max-width:560px;margin:0 auto}
+  #s2>#slots-wrap{grid-column:2;grid-row:2;overflow:hidden}
+  #s2:not(.slots-on)>#slots-wrap{opacity:0}
 
-.salon-regle { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-3, #999); }
+  /* Étape 3 : les champs se partagent deux colonnes. */
+  #s3.active{display:grid;grid-template-columns:1fr 1fr;column-gap:18px}
+  #s3>.s-title,#s3>.recap,#s3>.fields-row,#s3>.qui{grid-column:1/-1}
+  #s3>.btn{display:none}
+  #s3>.field{margin-bottom:0}
+  #s3>.fields-row{margin-bottom:0}
+  #s3>.field:last-of-type,#s3>.fields-row,#s3>.qui{margin-top:0}
+
+  .my-rdv{--bloc:none}
+  .my-rdv-card{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;padding:10px 20px}
+  .my-rdv-row:nth-last-of-type(-n+2){border-bottom:none}
+  .my-rdv-total{grid-column:1/-1;margin-top:0;padding-top:14px;border-top:1px solid rgba(var(--accent-rgb),.2)}
+  .success-recap{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;padding:4px 20px}
+  .success-recap-item:nth-last-child(2){border-bottom:none}
+  .rdv-actions{display:flex;flex-direction:row;flex-wrap:wrap;gap:10px}
+  .rdv-actions>.btn{flex:1 1 200px;margin-top:0}
+  .rdv-actions>.rdv-actions-sep,.rdv-actions>.cancel-dialog{flex:1 1 100%}
+  .btn{max-width:none}
+  .success{padding:36px 0 10px}
+}
+@media(min-width:1024px){
+  body>canvas{opacity:.55}
+  body::after{background-image:radial-gradient(ellipse 52% 60% at 50% 0%,rgba(var(--accent-rgb),.09),transparent 65%)}
+  .wrap{padding-top:28px}
+}
+@media(min-width:1440px){
+  .h-bar,.stepper,.cta-inner{max-width:960px}
+  .wrap{max-width:1008px}
+}
+
+/* ── TÉLÉPHONE COUCHE (la hauteur manque, pas la largeur) ── */
+@media(orientation:landscape) and (max-height:520px){
+  .header{padding-top:calc(env(safe-area-inset-top,0px) + 4px)}
+  .h-bar{min-height:42px}
+  .h-mark{width:34px;height:34px;border-radius:9px;font-size:13px}
+  .h-name{font-size:16px}
+  .stepper{padding:6px 2px 8px}
+  .st-n{width:22px;height:22px;font-size:10px}
+  .st-l{display:none}
+  .st-sep{margin-top:11px}
+  .wrap{padding-top:10px}
+  .svc-img-wrap{aspect-ratio:3.2/1}
+  .cal-d{aspect-ratio:auto;height:34px;min-height:0}
+  .success{padding:10px 0 0}
+  .success-icon,.my-rdv-badge{width:56px;height:56px;font-size:26px;margin-bottom:10px}
+  .success h2{font-size:18px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}

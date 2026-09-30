@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="css/app/base.css?v=1">
-<link rel="stylesheet" href="css/app/trimsync.css?v=11">
+<link rel="stylesheet" href="css/app/base.css?v=2">
+<link rel="stylesheet" href="css/app/trimsync.css?v=12">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-<script src="js/app/noyau.js?v=5" defer></script>
+<script src="js/app/noyau.js?v=6" defer></script>
 <script src="js/app/notifs.js?v=2" defer></script>
 <script src="js/app/miseenroute.js?v=1" defer></script>
 <script src="js/app/agenda.js?v=3" defer></script>
@@ -269,6 +269,17 @@
     </div>
   </div>
 </div>
+
+<!-- ═══════════ BARRE DE NAVIGATION MOBILE ═══════════
+     Mêmes segments que la sidebar (cf. .mnav dans base.css). Cachée en
+     desktop (display:none), affichée ≤ 768 px, et masquée hors session. -->
+<nav class="mnav" aria-label="Navigation mobile">
+  <button class="mnav-item active" data-page="dashboard" onclick="nav('dashboard')"><i class="ti ti-layout-dashboard"></i>Accueil</button>
+  <button class="mnav-item" data-page="agenda" onclick="nav('agenda')"><i class="ti ti-calendar"></i>Agenda</button>
+  <button class="mnav-item" data-page="clients" onclick="nav('clients')"><i class="ti ti-users"></i>Clients</button>
+  <button class="mnav-item" data-page="disponibilites" onclick="nav('disponibilites')"><i class="ti ti-calendar-time"></i>Dispos</button>
+  <button class="mnav-item" data-page="parametres" onclick="nav('parametres')"><i class="ti ti-settings"></i>Paramètres</button>
+</nav>
 
 <div class="toast-wrap" id="toast-wrap"></div>
 </body>

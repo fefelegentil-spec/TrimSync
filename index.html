@@ -1788,13 +1788,29 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
       <!-- Grille 3 plans -->
       <div class="plans-grid">
 
+        <!-- Essentiel — recommandé -->
+        <div class="plan plan-pop rv d1">
+          <div class="plan-hot" data-en="Recommended" data-fr="Recommandé">Recommandé</div>
+          <div>
+            <div class="plan-name" data-en="Essentiel" data-fr="Essentiel">Essentiel</div>
+            <div class="plan-price">€19<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
+          </div>
+          <ul class="plan-feats">
+            <li data-en="Your own booking page" data-fr="Ta page de réservation en ligne">Your own booking page</li>
+            <li data-en="Auto confirmations & day-before reminders" data-fr="Confirmations + rappels automatiques la veille">Auto confirmations &amp; day-before reminders</li>
+            <li data-en="Optional deposit to fight no-shows" data-fr="Acompte optionnel anti no-show">Optional deposit to fight no-shows</li>
+          </ul>
+          <button class="plan-cta" data-plan="essentiel" data-en="Get started" data-fr="Commencer">Get started</button>
+        </div>
+
         <!-- Starter -->
-        <div class="plan rv d1">
+        <div class="plan rv d2">
           <div>
             <div class="plan-name" data-en="Starter" data-fr="Starter">Starter</div>
             <div class="plan-price">€59<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
           </div>
           <ul class="plan-feats">
+            <li data-en="Everything in Essentiel" data-fr="Tout l'Essentiel">Everything in Essentiel</li>
             <li data-en="AI Instagram bot, 24/7" data-fr="Bot IA Instagram, 24h/24">AI Instagram bot, 24/7</li>
             <li data-en="Unlimited DMs" data-fr="DMs illimités">Unlimited DMs</li>
             <li data-en="Beta: activated on request" data-fr="Bêta : activé sur demande">Beta: activated on request</li>
@@ -1809,17 +1825,16 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
           <button class="plan-cta" data-plan="starter" data-en="Get started" data-fr="Commencer">Get started</button>
         </div>
 
-        <!-- Max — recommandé -->
-        <div class="plan plan-pop rv d2">
-          <div class="plan-hot" data-en="Recommended" data-fr="Recommandé">Recommended</div>
+        <!-- Max -->
+        <div class="plan rv d3">
           <div>
             <div class="plan-name" data-en="Max" data-fr="Max">Max</div>
             <div class="plan-price">€99<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
           </div>
           <ul class="plan-feats">
-            <li data-en="Everything in Starter" data-fr="Tout le Starter">Everything in Starter</li>
-            <li data-en="Calendar + booking page" data-fr="Agenda + page de réservation">Calendar + booking page</li>
-            <li data-en="Client files &amp; stats" data-fr="Fiches clients &amp; stats">Client files &amp; stats</li>
+            <li data-en="Everything in Essentiel" data-fr="Tout l'Essentiel">Everything in Essentiel</li>
+            <li data-en="Calendar + client files &amp; stats" data-fr="Agenda + fiches clients &amp; stats">Calendar + client files &amp; stats</li>
+            <li data-en="Waitlist & revenue goals" data-fr="Liste d'attente &amp; objectif de CA">Waitlist &amp; revenue goals</li>
           </ul>
           <div class="plan-demo-sep"><span data-en="Try" data-fr="Essayer">Try</span></div>
           <div class="plan-demo-row">
@@ -2568,6 +2583,15 @@ document.querySelectorAll('.faq-item').forEach(item=>{
 (()=>{
   /* Uniquement ce qui existe aujourd'hui. Le bot Instagram est en bêta, activé à la main. */
   const PLANS={
+    essentiel:{
+      price:'€19',
+      en:{name:'Essentiel',hot:'Recommended',tagline:'Your own booking page, confirmations and reminders — the easiest way to stop losing clients in your DMs.',
+        feats:[{t:'Your own online booking page',h:1},{t:'Unlimited services & prices'},{t:'Auto confirmation emails'},{t:'Day-before reminder for every client',h:1},{t:'Optional deposit to fight no-shows'},{t:'Waitlist when a day is full'},{t:'Support by email'}],
+        steps:[{n:'1',title:'Create your salon',desc:'2 minutes, no card, 7 days free'},{n:'2',title:'Set services & hours',desc:'Your booking page is live right away'},{n:'3',title:'Share your link',desc:'Put it in your Instagram bio'}]},
+      fr:{name:'Essentiel',hot:'Recommandé',tagline:'Ta page de réservation, tes confirmations et tes rappels — le plus simple pour ne plus perdre de clients dans tes DMs.',
+        feats:[{t:'Ta propre page de réservation en ligne',h:1},{t:'Prestations et prix illimités'},{t:'Emails de confirmation automatiques'},{t:'Rappel la veille pour chaque client',h:1},{t:'Acompte optionnel anti no-show'},{t:"Liste d'attente quand un jour est complet"},{t:'Support par email'}],
+        steps:[{n:'1',title:'Crée ton salon',desc:'2 minutes, sans carte, 7 jours offerts'},{n:'2',title:'Règle prestations et horaires',desc:'Ta page de réservation est en ligne tout de suite'},{n:'3',title:'Partage ton lien',desc:'Mets-le dans ta bio Instagram'}]}
+    },
     starter:{
       price:'€59',
       en:{name:'Starter',hot:null,tagline:'Your AI bot answers your Instagram DMs, 24/7, in your tone. Beta: activated on request.',

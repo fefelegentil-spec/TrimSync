@@ -135,6 +135,25 @@ const SCHEMA = [
   // « en_attente » : RDV pris sur la page d'un salon qui valide lui-même ses RDV.
   `ALTER TABLE rdv DROP CONSTRAINT IF EXISTS rdv_statut_check`,
   `ALTER TABLE rdv ADD CONSTRAINT rdv_statut_check CHECK (statut IN ('confirme','annule','noshow','en_attente'))`,
+  // Plan « essentiel » (19 €/mois, page de réservation + rappels, sans bot) : la
+  // contrainte en ligne de la table d'origine ne le connaissait pas.
+  `ALTER TABLE salons DROP CONSTRAINT IF EXISTS salons_plan_check`,
+  `ALTER TABLE salons ADD CONSTRAINT salons_plan_check CHECK (plan IN ('essentiel','starter','pro','max'))`,
+  // Acompte anti no-show : montant demandé par prestation, payé par le client sur
+  // Stripe juste après la réservation. Sur le RDV : copie au moment de la prise
+  // (le montant demandé ne doit pas bouger si le pro change sa prestation après).
+  `ALTER TABLE prestations ADD COLUMN IF NOT EXISTS acompte NUMERIC(10,2) NOT NULL DEFAULT 0`,
+  `ALTER TABLE rdv ADD COLUMN IF NOT EXISTS acompte NUMERIC(10,2) NOT NULL DEFAULT 0`,
+  `ALTER TABLE rdv ADD COLUMN IF NOT EXISTS acompte_paye_le TIMESTAMPTZ`,
+  // Une ligne par paiement d'acompte, retrouvable et remboursable à la main :
+  // le backend n'a pas de clé Stripe secrète, seul le webhook écrit ici.
+  `CREATE TABLE IF NOT EXISTS acomptes (
+     id TEXT PRIMARY KEY,
+     rdv_id TEXT NOT NULL REFERENCES rdv(id) ON DELETE CASCADE,
+     stripe_session TEXT NOT NULL,
+     montant NUMERIC(10,2) NOT NULL,
+     statut TEXT NOT NULL DEFAULT 'paye' CHECK (statut IN ('paye','a_rembourser','rembourse')),
+     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`,
   // Le logo vit à part : salons est lu à chaque requête authentifiée (SELECT s.*),
   // une image de 60 Ko y serait relue pour rien.
   `CREATE TABLE IF NOT EXISTS salon_logos (
@@ -144,6 +163,14 @@ const SCHEMA = [
   `CREATE INDEX IF NOT EXISTS rdv_salon_date ON rdv (salon_id, date)`,
   `CREATE INDEX IF NOT EXISTS clients_salon ON clients (salon_id)`,
   `CREATE INDEX IF NOT EXISTS attente_salon_date ON attente (salon_id, date)`,
+  `CREATE INDEX IF NOT EXISTS acomptes_rdv ON acomptes (rdv_id)`,
+  // Le badge « Réservation par TrimSync » des pages /r/ : un clic = une ligne.
+  // Rien sur le client (pas d'IP, pas de cookie) : juste le salon d'origine.
+  `CREATE TABLE IF NOT EXISTS badge_clics (
+     id TEXT PRIMARY KEY,
+     salon_id TEXT NOT NULL REFERENCES salons(id) ON DELETE CASCADE,
+     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`,
+  `CREATE INDEX IF NOT EXISTS badge_clics_salon ON badge_clics (salon_id)`,
 ];
 
 async function initDB() {

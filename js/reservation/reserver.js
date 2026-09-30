@@ -480,9 +480,18 @@ function showSuccess(r) {
   // Le créneau pris disparaît aussitôt pour une réservation dans la foulée.
   if (HEURES[selDate]) HEURES[selDate] = HEURES[selDate].filter(h => h !== selSlot);
   const aRegler = r.rdv.prix === null ? '' : `<br><span style="color:var(--accent);font-weight:700">${montant(r.rdv.prix)}</span> à régler sur place.`;
+  const acompte = r.acompte && r.acompte.montant > 0 ? r.acompte : null;
   document.getElementById('success-msg').innerHTML = r.rdv.statut === 'en_attente'
     ? `Demande envoyée ! <strong>${escHtml(SALON.nom)}</strong> valide chaque rendez-vous : tu reçois une confirmation par email très vite. Ton créneau est gardé en attendant.`
     : `Ton RDV est confirmé.${aRegler}`;
+  // Acompte anti no-show : le paiement se fait ici, tout de suite, pendant que
+  // l'écran de confirmation est sous les yeux (l'email propose le même bouton).
+  if (acompte && !r.rdv.acompte_paye) {
+    document.getElementById('success-acompte').innerHTML =
+      `<div class="acompte-bloc"><div class="acompte-titre"><i class="ti ti-shield-check"></i>Acompte à régler pour garder ton créneau</div>
+        <a class="btn btn-gold" href="${escHtml(acompte.url)}" target="_blank" rel="noopener"><i class="ti ti-credit-card"></i>Payer l'acompte de ${montant(acompte.montant)}</a>
+        <p class="acompte-sub">Remboursé si tu annules jusqu'à ${SALON.annulation_h ? SALON.annulation_h + ' h avant' : "l'heure du RDV"}. Lien aussi envoyé par email.</p></div>`;
+  }
   document.getElementById('success-recap').innerHTML = `
     <div class="success-recap-item"><i class="ti ti-calendar-event"></i>${fmtDay(r.rdv.date)}</div>
     <div class="success-recap-item"><i class="ti ti-clock"></i>${r.rdv.heure}</div>

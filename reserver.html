@@ -16,7 +16,7 @@
 <!-- Identité propre à TrimSync : trimsync.css est une feuille autonome (sombre
      signature, accent = couleur du salon, stepper en tête, barre d'action en
      bas). La page ne charge plus fcutz.css. -->
-<link rel="stylesheet" href="/css/reservation/trimsync.css?v=5">
+<link rel="stylesheet" href="/css/reservation/trimsync.css?v=6">
 </head>
 <body data-page="booking">
 
@@ -208,6 +208,7 @@ document.addEventListener('DOMContentLoaded', function(){
       <h2>RDV Confirmé</h2>
       <p id="success-msg">Ton créneau est réservé.</p>
       <div class="success-recap" id="success-recap"></div>
+      <div id="success-acompte"></div>
       <div class="rdv-actions">
         <button class="btn btn-gold" onclick="addToCalendar()"><i class="ti ti-calendar-plus"></i>Ajouter au calendrier</button>
         <button class="btn btn-out js-maps" onclick="openMaps()"><i class="ti ti-map-pin"></i>Voir sur Google Maps</button>
@@ -244,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function(){
     <span aria-hidden="true">·</span>
     <a href="/terms#mentions">Mentions légales</a>
     <span aria-hidden="true">·</span>
-    <a href="https://trimsync.tech" target="_blank" rel="noopener">Réservation par TrimSync</a>
+    <a href="https://trimsync.tech" target="_blank" rel="noopener" id="badge-trimsync">Réservation par TrimSync</a>
   </nav>
 </div>
 
@@ -258,8 +259,31 @@ document.addEventListener('DOMContentLoaded', function(){
   </div>
 </div>
 
-<script src="/js/reservation/reserver.js?v=4"></script>
+<script src="/js/reservation/reserver.js?v=5"></script>
 <script src="/js/reservation/background.js?v=3" defer></script>
 <script src="/js/reservation/ripple.js?v=1" defer></script>
+<script>
+/* Le pied de page « Réservation par TrimSync » est le canal d'acquisition
+   virale : chaque salon client expose TrimSync à ses propres clients. Le clic
+   est compté (sans rien stocker sur le visiteur) avant d'ouvrir la landing.
+   L'appel part vers le backend (API, défini par reserver.js) : keepalive pour
+   ne pas être annulé par la navigation vers trimsync.tech. */
+(function(){
+  var badge = document.getElementById('badge-trimsync');
+  if(!badge) return;
+  badge.addEventListener('click', function(){
+    try {
+      var slug = new URLSearchParams(location.search).get('salon')
+        || (location.pathname.match(/^\/r\/([a-z0-9-]+)/) || [])[1] || '';
+      if (slug && typeof API === 'string') {
+        fetch(API + '/api/public/badge-clic', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ salon: slug }), keepalive: true,
+        }).catch(function(){});
+      }
+    } catch(_) {}
+  });
+})();
+</script>
 </body>
 </html>

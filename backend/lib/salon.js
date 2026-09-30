@@ -2,7 +2,7 @@
 const { nowParis } = require('./dates');
 
 const SITE = () => process.env.SITE_URL || 'https://trimsync.tech';
-const PRIX_PLANS = { starter: 59, pro: 79, max: 99 };
+const PRIX_PLANS = { essentiel: 19, starter: 59, pro: 79, max: 99 };
 
 // Un essai dépassé est expiré dès le lendemain, sans attendre la tâche du jour.
 function statutEffectif(salon, aujourdhui = nowParis().date) {

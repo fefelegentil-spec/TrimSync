@@ -8,7 +8,7 @@
    Sans STRIPE_WEBHOOK_SECRET, la route répond 503 et rien d'autre ne change. */
 const crypto = require('crypto');
 const express = require('express');
-const { pool } = require('../lib/db');
+const { pool, uid, transaction } = require('../lib/db');
 const emails = require('../lib/emails');
 const { notifierSalon } = require('../lib/push');
 
@@ -16,7 +16,7 @@ const router = express.Router();
 const TOLERANCE_S = 300;
 // Montants mensuels (centimes) → plan. Les liens avec frais de mise en place
 // (100 €) facturent en plus une ligne unique : on la retire avant de lire le plan.
-const PLAN_PAR_MONTANT = { 5900: 'starter', 7900: 'pro', 9900: 'max' };
+const PLAN_PAR_MONTANT = { 1900: 'essentiel', 5900: 'starter', 7900: 'pro', 9900: 'max' };
 const FRAIS_MISE_EN_PLACE = 10000;
 
 function signatureValide(brut, entete, secret) {
@@ -84,8 +84,14 @@ router.post('/api/stripe/webhook', express.raw({ type: '*/*', limit: '1mb' }), a
   try { evt = JSON.parse(brut); } catch (_) { return res.status(400).json({ error: 'Corps invalide' }); }
   try {
     const o = evt.data?.object || {};
-    if (evt.type === 'checkout.session.completed') await paiementRecu(o);
+    // Une session d'acompte porte le jeton d'annulation du RDV (48 hex), pas un
+    // id de salon : c'est le seul moyen de la distinguer d'un abonnement.
+    const acompte = /^[0-9a-f]{48}$/.test(String(o.client_reference_id || ''));
+    if (acompte && (evt.type === 'checkout.session.completed' || evt.type === 'checkout.session.async_payment_succeeded')) await acompteRecu(o);
+    else if (evt.type === 'checkout.session.completed') await paiementRecu(o);
+    else if (evt.type === 'checkout.session.async_payment_succeeded') await paiementRecu(o);
     else if (evt.type === 'customer.subscription.deleted') await abonnementTermine(o);
+    else if (acompte && evt.type === 'checkout.session.expired') await acompteExpire(o);
     else if (evt.type === 'invoice.payment_failed') {
       emails.alerteAdmin('Paiement Stripe échoué', { Client: o.customer_email || o.customer || '—', Montant: (o.amount_due / 100) + ' €' });
     }
@@ -95,5 +101,33 @@ router.post('/api/stripe/webhook', express.raw({ type: '*/*', limit: '1mb' }), a
     res.status(500).json({ error: 'Erreur de traitement' }); // Stripe renverra l'événement
   }
 });
+
+/* ── Acomptes anti no-show ──
+   Un acompte vit sur un RDV de page de réservation : le montant est demandé au
+   client juste après sa réservation, via un lien de paiement Stripe unique
+   (client_reference_id = jeton d'annulation du RDV — indépendant de la base).
+   Le webhook coche le paiement ; l'annulation en ligne dans le délai annule
+   l'acompte, le remboursement se fait ensuite à la main dans le dashboard
+   Stripe (le backend n'a pas de clé secrète, et c'est volontaire). */
+async function acompteRecu(session) {
+  const jeton = String(session.client_reference_id || '');
+  if (!/^[0-9a-f]{48}$/.test(jeton)) return;
+  const rdv = (await pool.query(
+    `SELECT r.id, r.acompte, r.acompte_paye_le FROM rdv r WHERE r.jeton_annulation = $1 AND r.acompte > 0`, [jeton])).rows[0];
+  if (!rdv || rdv.acompte_paye_le) return;
+  await transaction(async q => {
+    await q.query('UPDATE rdv SET acompte_paye_le = NOW() WHERE id = $1 AND acompte_paye_le IS NULL', [rdv.id]);
+    await q.query(
+      `INSERT INTO acomptes (id, rdv_id, stripe_session, montant)
+       SELECT $1, $2, $3, $4 WHERE NOT EXISTS (SELECT 1 FROM acomptes WHERE stripe_session = $3)`,
+      [uid('ac'), rdv.id, session.id, rdv.acompte]);
+  });
+}
+
+async function acompteExpire(session) {
+  await pool.query(
+    `UPDATE rdv SET acompte = 0 WHERE jeton_annulation = $1 AND acompte_paye_le IS NULL`,
+    [String(session.client_reference_id || '')]);
+}
 
 module.exports = router;

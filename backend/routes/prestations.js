@@ -25,6 +25,11 @@ function lireChamps(b, partiel) {
     c.prix = Math.round(p * 100) / 100;
   }
   if (b.description !== undefined) c.description = sanitizeText(b.description, 200);
+  if (b.acompte !== undefined) {
+    const a = Number(b.acompte);
+    if (!Number.isFinite(a) || a < 0 || a > 200) return { erreur: 'Acompte invalide (0 à 200 €)' };
+    c.acompte = Math.round(a * 100) / 100;
+  }
   if (partiel && b.actif !== undefined) c.actif = !!b.actif;
   return { c };
 }
@@ -41,9 +46,9 @@ router.post('/api/prestations', exigerCompte, exigerEcriture, async (req, res) =
   if (erreur) return res.status(400).json({ error: erreur });
   try {
     const r = await pool.query(
-      `INSERT INTO prestations (id, salon_id, nom, duree_min, prix, description, ordre)
-       VALUES ($1, $2, $3, $4, $5, $6, (SELECT COALESCE(MAX(ordre) + 1, 0) FROM prestations WHERE salon_id = $2))
-       RETURNING *`, [uid('p'), req.salonId, c.nom, c.duree_min, c.prix, c.description || '']);
+      `INSERT INTO prestations (id, salon_id, nom, duree_min, prix, acompte, description, ordre)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, (SELECT COALESCE(MAX(ordre) + 1, 0) FROM prestations WHERE salon_id = $2))
+       RETURNING *`, [uid('p'), req.salonId, c.nom, c.duree_min, c.prix, c.acompte || 0, c.description || '']);
     res.status(201).json({ prestation: r.rows[0] });
   } catch (e) { erreurServeur(res, e, 'prestations/creer'); }
 });

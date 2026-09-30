@@ -13,6 +13,7 @@ function marquerEtape(nom) {
    comme l'annonce le site). client_reference_id = id du salon : le webhook
    (backend/routes/stripe.js) active le salon avec le bon plan dès le paiement. */
 const LIENS_STRIPE = {
+  essentiel: 'https://buy.stripe.com/4gMfZh5B57Gsgie3zHgEg0a',
   starter: 'https://buy.stripe.com/9B6fZhe7Bd0MgiegmtgEg06',
   max: 'https://buy.stripe.com/9B614n9Rl9OA5DA9Y5gEg07',
 };
@@ -29,7 +30,8 @@ function carteAbonnement() {
     return `<div class="ts-bandeau"><i class="ti ti-sparkles"></i>
       <span><strong>Essai gratuit</strong> · ${s.jours_essai_restants} jours restants</span>
       <div class="ts-bandeau-actions"><a class="btn btn-ghost btn-sm" href="${esc(lienPaiement('max'))}" target="_blank" rel="noopener">Max · 99 €</a>
-        <a class="btn btn-ghost btn-sm" href="${esc(lienPaiement('starter'))}" target="_blank" rel="noopener">Starter · 59 €</a></div></div>`;
+        <a class="btn btn-ghost btn-sm" href="${esc(lienPaiement('starter'))}" target="_blank" rel="noopener">Starter · 59 €</a>
+        <a class="btn btn-ghost btn-sm" href="${esc(lienPaiement('essentiel'))}" target="_blank" rel="noopener">Essentiel · 19 €</a></div></div>`;
   }
   const titre = s.statut === 'essai'
     ? `Essai gratuit : ${s.jours_essai_restants} jour${s.jours_essai_restants > 1 ? 's' : ''} restant${s.jours_essai_restants > 1 ? 's' : ''}`
@@ -40,6 +42,8 @@ function carteAbonnement() {
   return `<div class="card ts-carte ts-abonnement">
     <div class="card-h"><div><div class="card-title">${titre}</div><div class="card-sub">${sous}</div></div></div>
     <div class="ts-offres">
+      <a class="ts-offre ts-offre-une" href="${esc(lienPaiement('essentiel'))}" target="_blank" rel="noopener">
+        <strong>Essentiel · 19 €/mois</strong><span>Ta page de réservation, confirmations et rappels automatiques. Sans bot.</span></a>
       <a class="ts-offre" href="${esc(lienPaiement('max'))}" target="_blank" rel="noopener">
         <strong>Max · 99 €/mois</strong><span>Agenda, page de réservation, clients, stats. Bot Instagram sur demande.</span></a>
       <a class="ts-offre" href="${esc(lienPaiement('starter'))}" target="_blank" rel="noopener">

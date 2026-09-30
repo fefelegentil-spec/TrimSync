@@ -181,6 +181,7 @@ function detailsRdv(salon, rdv) {
     ['Prestation', rdv.prestation],
     ['Durée', rdv.duree ? `${rdv.duree} min` : ''],
     ['Prix', rdv.prix !== undefined && rdv.prix !== null ? `${Math.round(rdv.prix)} €` : ''],
+    ['Acompte', rdv.acompte ? `${Math.round(rdv.acompte)} € — à régler avec le bouton ci-dessous` : ''],
     ['Adresse', salon.adresse],
     ['Téléphone', salon.telephone],
   ]);
@@ -232,7 +233,7 @@ function rappelVeille(a, { salon, rdv, jeton }) {
 }
 
 // Confirmation de rendez-vous, avec le lien pour l'annuler.
-function confirmationClient(a, { salon, rdv, jeton }) {
+function confirmationClient(a, { salon, rdv, jeton, acompte }) {
   const lien = `${SITE()}/r/${salon.slug}?annuler=${jeton}`;
   const tel = contactSalon(salon);
   return envoyer({ a, type: 'confirmation-client', repondreA: null, sujet: `C'est réservé : ${salon.nom}, ${jourLisible(rdv.date)} à ${rdv.heure}`,
@@ -242,6 +243,10 @@ function confirmationClient(a, { salon, rdv, jeton }) {
       titre: `À ${jourLisible(rdv.date)} !`,
       corps: para(`Ton rendez-vous chez <strong>${escHtml(salon.nom)}</strong> est bien réservé.`)
         + detailsRdv(salon, rdv)
+        + (acompte && acompte.url
+          ? para(`Pour garder ton créneau, règle l'acompte de <strong>${Math.round(acompte.montant)} €</strong> maintenant — c'est ce qui sécurise ta place :`)
+            + bouton({ url: acompte.url, texte: `Payer l'acompte de ${Math.round(acompte.montant)} €` })
+          : '')
         + para('Un empêchement ? Annule en un clic pour libérer ta place à quelqu\'un d\'autre :')
         + bouton({ url: lien, texte: 'Voir ou annuler mon rendez-vous' }),
       pourquoi: `Tu reçois cet email parce que tu as réservé chez ${salon.nom} via TrimSync.`,
@@ -250,10 +255,22 @@ function confirmationClient(a, { salon, rdv, jeton }) {
 }
 
 /* ── Alertes pour Félix ── */
+// Acomptes d'annulations : à rembourser à la main dans le dashboard Stripe.
+function acomptesARembourser(lignes) {
+  return envoyer({ a: ADMIN(), type: 'acomptes', sujet: `[TrimSync] ${lignes.length} acompte${lignes.length > 1 ? 's' : ''} à rembourser`,
+    html: gabarit({
+      apercu: 'Des rendez-vous annulés ont un acompte payé : à rembourser dans le dashboard Stripe.',
+      surtitre: 'Acomptes',
+      titre: 'Acomptes à rembourser',
+      corps: details(lignes.map(l => [l.salon, `${l.montant} € — session ${l.session}`]))
+        + bouton({ url: 'https://dashboard.stripe.com/payments', texte: 'Ouvrir le dashboard Stripe' }),
+      pourquoi: 'Le remboursement des acomptes des annulations en ligne se fait à la main dans le dashboard Stripe.',
+    }) });
+}
 function alerteAdmin(sujet, champs) {
   return envoyer({ a: ADMIN(), type: 'alerte-admin', sujet: `[TrimSync] ${sujet}`,
     html: gabarit({ apercu: sujet, surtitre: 'Back-office', titre: sujet,
       corps: details(Object.entries(champs).map(([k, v]) => [k, v || '—'])) + bouton({ url: `${SITE()}/admin`, texte: 'Ouvrir le back-office' }) }) });
 }
 
-module.exports = { client, verification, reset, rappelEssai, abonnementActive, confirmationClient, demandeRecue, refusClient, rappelVeille, alerteAdmin, gabarit };
+module.exports = { client, verification, reset, rappelEssai, abonnementActive, confirmationClient, demandeRecue, refusClient, rappelVeille, alerteAdmin, acomptesARembourser, gabarit };

@@ -51,6 +51,17 @@ router.get('/api/admin/kpi', exigerAdmin, async (_req, res) => {
   } catch (e) { erreurServeur(res, e, 'admin/kpi'); }
 });
 
+// Acomptes d'annulations : remboursés à la main dans le dashboard Stripe.
+router.get('/api/admin/acomptes', exigerAdmin, async (_req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT a.id, a.montant, a.stripe_session, a.created_at, s.nom AS salon
+         FROM acomptes a JOIN rdv r ON r.id = a.rdv_id JOIN salons s ON s.id = r.salon_id
+        WHERE a.statut = 'a_rembourser' ORDER BY a.created_at DESC`);
+    res.json({ acomptes: r.rows });
+  } catch (e) { erreurServeur(res, e, 'admin/acomptes'); }
+});
+
 router.patch('/api/admin/salons/:id', exigerAdmin, async (req, res) => {
   const b = req.body || {};
   try {

@@ -55,7 +55,7 @@ router.get('/api/public/salons/:slug', quotaLecture, async (req, res) => {
     const salon = await salonDuSlug(req.params.slug);
     if (!salon) return res.status(404).json({ error: 'Salon introuvable' });
     const p = await pool.query(
-      'SELECT id, nom, duree_min, prix, description FROM prestations WHERE salon_id = $1 AND actif ORDER BY ordre, nom', [salon.id]);
+      'SELECT id, nom, duree_min, prix, acompte, description FROM prestations WHERE salon_id = $1 AND actif ORDER BY ordre, nom', [salon.id]);
     if (prixMasques(salon)) p.rows.forEach(x => { x.prix = null; });
     res.json({
       nom: salon.nom, ville: salon.ville, adresse: salon.adresse, telephone: salon.telephone, slug: salon.slug,
@@ -141,9 +141,9 @@ router.post('/api/public/salons/:slug/reserver', quotaEcriture, async (req, res)
       const clientId = await trouverOuCreerClient(q, salon.id, client);
       const nouveau = { id: uid('r'), jeton: crypto.randomBytes(24).toString('hex') };
       await q.query(
-        `INSERT INTO rdv (id, salon_id, client_id, client_nom, telephone, prestation_id, prestation_nom, prix, duree_min, date, heure, source, jeton_annulation, statut)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'site', $12, $13)`,
-        [nouveau.id, salon.id, clientId, client.nom, client.telephone, presta.id, presta.nom, presta.prix, presta.duree_min, b.date, b.heure, nouveau.jeton,
+        `INSERT INTO rdv (id, salon_id, client_id, client_nom, telephone, prestation_id, prestation_nom, prix, acompte, duree_min, date, heure, source, jeton_annulation, statut)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'site', $13, $14)`,
+        [nouveau.id, salon.id, clientId, client.nom, client.telephone, presta.id, presta.nom, presta.prix, presta.acompte || 0, presta.duree_min, b.date, b.heure, nouveau.jeton,
           aValider(salon) ? 'en_attente' : 'confirme']);
       return nouveau;
     });
@@ -161,8 +161,14 @@ router.post('/api/public/salons/:slug/reserver', quotaEcriture, async (req, res)
       });
     }
     res.status(201).json({
-      rdv: { date: b.date, heure: b.heure, prestation: presta.nom, prix: prixMasques(salon) ? null : presta.prix, statut: enAttente ? 'en_attente' : 'confirme' },
+      rdv: { date: b.date, heure: b.heure, prestation: presta.nom, prix: prixMasques(salon) ? null : presta.prix, acompte: presta.acompte || 0, acompte_paye: false, statut: enAttente ? 'en_attente' : 'confirme' },
       annulation: rdv.jeton,
+      acompte: (presta.acompte || 0) > 0 ? {
+        montant: presta.acompte,
+        // Lien de paiement Stripe à usage unique côté client : sa complétion
+        // active l'acompte via le webhook (checkout.session.completed).
+        url: `https://buy.stripe.com/4gMfZh5B57Gsgie3zHgEg0a?client_reference_id=${rdv.jeton}`,
+      } : null,
     });
   } catch (e) { erreurServeur(res, e, 'public/reserver'); }
 });
@@ -190,6 +196,35 @@ router.post('/api/public/salons/:slug/attente', quotaEcriture, async (req, res) 
 });
 
 const JETON = /^[0-9a-f]{48}$/;
+
+// Le badge « Réservation par TrimSync » du pied de page : chaque clic est
+// compté, sans rien stocker sur le client (pas d'IP, pas de cookie) — c'est la
+// mesure de l'acquisition virale : les clients des salons voient TrimSync.
+router.post('/api/public/badge-clic', quotaLecture, async (req, res) => {
+  try {
+    const salon = await salonDuSlug(req.body?.salon);
+    if (salon) await pool.query('INSERT INTO badge_clics (id, salon_id) VALUES ($1, $2)', [uid('bc'), salon.id]);
+    res.json({ ok: true });
+  } catch (e) { erreurServeur(res, e, 'public/badge-clic'); }
+});
+
+/* ── Annuaire public des salons ──
+   Les salons ouverts à la réservation en ligne : une page d'entrée pour les
+   clients finaux (SEO), et de la visibilité pour les pros. Rien de personnel :
+   nom, ville, couleur et trois premières prestations. */
+router.get('/api/public/annuaire', quotaLecture, async (_req, res) => {
+  try {
+    const r = await pool.query(`
+      SELECT s.slug, s.nom, s.ville, s.couleur,
+             (SELECT json_agg(x.nom) FROM
+               (SELECT nom FROM prestations WHERE salon_id = s.id AND actif ORDER BY ordre, nom LIMIT 3) x) AS prestations
+        FROM salons s
+       WHERE s.statut IN ('essai','actif')
+         AND EXISTS (SELECT 1 FROM prestations p WHERE p.salon_id = s.id AND p.actif)
+       ORDER BY s.nom`);
+    res.json({ salons: r.rows });
+  } catch (e) { erreurServeur(res, e, 'public/annuaire'); }
+});
 
 router.get('/api/public/rdv/:jeton', quotaAnnulation, async (req, res) => {
   if (!JETON.test(req.params.jeton)) return res.status(404).json({ error: 'Rendez-vous introuvable' });
@@ -223,6 +258,13 @@ router.post('/api/public/annuler', quotaAnnulation, async (req, res) => {
     }
     const maj = await pool.query(`UPDATE rdv SET statut = 'annule' WHERE id = $1 AND statut IN ('confirme', 'en_attente')`, [r.id]);
     if (!maj.rowCount) return res.status(409).json({ error: 'Ce rendez-vous est déjà annulé' });
+    // Acompte déjà payé : à rembourser à la main dans le dashboard Stripe.
+    const acompte = (await pool.query(
+      `UPDATE acomptes SET statut = 'a_rembourser' WHERE rdv_id = $1 AND statut = 'paye' RETURNING montant, stripe_session`, [r.id])).rows[0];
+    if (acompte) {
+      const salonNom = (await pool.query('SELECT nom FROM salons WHERE id = $1', [r.salon_id])).rows[0]?.nom || r.salon_id;
+      emails.acomptesARembourser([{ salon: salonNom, montant: Math.round(acompte.montant), session: acompte.stripe_session }]);
+    }
     notifierSalon(r.salon_id, { type: 'annulation', titre: 'Rendez-vous annulé', corps: `${r.client_nom} a annulé ${jourLisible(r.date)} à ${r.heure}` });
     await signalerPlaceLibre(r.salon_id, r.date);
     res.json({ ok: true });

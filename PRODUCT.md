@@ -28,9 +28,10 @@ brand
 6. Jamais « barbier » / « barbershop » dans ce que voit un visiteur : le produit vise tous les métiers de la beauté (décision de Félix, 29/09/2026)
 
 ## Pricing (actuel)
+- Essentiel : €19/mois (page de réservation native, confirmations + rappels auto, acompte optionnel anti no-show) — l'entrée de gamme, recommandée
 - Starter : €59/mois (bot Instagram 24/7, DMs illimités, confirmations auto)
 - Pro : €79/mois (+ dashboard, CRM, WhatsApp)
-- Max : €99/mois (+ page réservation native, stats, fidélité, SumUp)
+- Max : €99/mois (+ dashboard, CRM, stats, fidélité, SumUp)
 - Setup fee unique : €300 (accès plateforme + appel onboarding)
 
 ## Anti-references

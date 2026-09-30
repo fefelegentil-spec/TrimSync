@@ -136,6 +136,7 @@ async function renderParametres() {
       <input class="input ts-presta-nom" data-champ="nom" value="${esc(p.nom)}" maxlength="60" aria-label="Nom" onchange="modifierPresta('${esc(p.id)}', this)">
       <label class="ts-unite"><input class="input" type="number" data-champ="duree_min" value="${p.duree_min}" min="5" max="480" step="5" aria-label="Durée" onchange="modifierPresta('${esc(p.id)}', this)"><span>min</span></label>
       <label class="ts-unite"><input class="input" type="number" data-champ="prix" value="${p.prix}" min="0" step="0.5" aria-label="Prix" onchange="modifierPresta('${esc(p.id)}', this)"><span>€</span></label>
+      <label class="ts-unite" title="Acompte demandé au client à la réservation (anti no-show). Remboursé s'il annule dans ton délai."><input class="input" type="number" data-champ="acompte" value="${p.acompte || 0}" min="0" max="200" step="1" aria-label="Acompte" onchange="modifierPresta('${esc(p.id)}', this)"><span>ac.</span></label>
       <label class="switch" title="${p.actif ? 'Proposée sur ta page' : 'Masquée'}"><input type="checkbox" data-champ="actif" ${p.actif ? 'checked' : ''} onchange="modifierPresta('${esc(p.id)}', this)"><span class="slider"></span></label>
       <input class="input ts-presta-desc" data-champ="description" value="${esc(p.description || '')}" maxlength="200" placeholder="Description vue par tes clients (facultatif) — ex. dépose comprise" aria-label="Description" onchange="modifierPresta('${esc(p.id)}', this)">
     </div>`).join('');
@@ -179,20 +180,22 @@ async function renderParametres() {
          <input class="input" id="par-telephone" value="${esc(s.telephone)}" type="tel" placeholder="Téléphone" aria-label="Téléphone">
        </div>
        <button class="btn btn-gold" onclick="enregistrerSalon(['nom','ville','adresse','telephone'])"><i class="ti ti-check"></i>Enregistrer</button>`)
-    + carte('Prestations', 'Nom, durée et prix. L\'interrupteur masque une prestation de ta page sans l\'effacer. Enregistré à chaque changement.',
+    + carte('Prestations', 'Nom, durée et prix. « ac. » : acompte demandé au client à la réservation (anti no-show, remboursé s\'il annule dans ton délai). L\'interrupteur masque une prestation de ta page sans l\'effacer. Enregistré à chaque changement.',
       `<div class="ts-prestas">${lignesPresta}</div>
        <div class="ts-form-ligne ts-presta-ajout">
          <input class="input" id="np-nom" maxlength="60" placeholder="Nouvelle prestation">
          <label class="ts-unite"><input class="input" id="np-duree" type="number" value="30" min="5" max="480" step="5" aria-label="Durée"><span>min</span></label>
          <label class="ts-unite"><input class="input" id="np-prix" type="number" value="20" min="0" step="0.5" aria-label="Prix"><span>€</span></label>
+         <label class="ts-unite" title="Acompte demandé à la réservation (0 = aucun)"><input class="input" id="np-acompte" type="number" value="0" min="0" max="200" step="1" aria-label="Acompte"><span>ac.</span></label>
          <button class="btn btn-out" onclick="ajouterPresta()"><i class="ti ti-plus"></i>Ajouter</button>
        </div>`)
     + carte('Bot Instagram', '', bot)
     + carte('Abonnement', '', `<p class="ts-texte">${abonnement}</p>
        ${SESSION.salon.statut === 'actif'
          ? `<p class="ts-texte">Pour changer d'offre ou résilier, écris à <a href="mailto:felix@trimsync.tech">felix@trimsync.tech</a>. Sans engagement : tu peux arrêter quand tu veux.</p>`
-         : `<div class="ts-boutons"><a class="btn btn-gold" href="${esc(lienPaiement('max'))}" target="_blank" rel="noopener"><i class="ti ti-credit-card"></i>Max · 99 €/mois</a>
-            <a class="btn btn-out" href="${esc(lienPaiement('starter'))}" target="_blank" rel="noopener">Starter · 59 €/mois</a></div>`}`)
+         : `<div class="ts-boutons"><a class="btn btn-gold" href="${esc(lienPaiement('essentiel'))}" target="_blank" rel="noopener"><i class="ti ti-credit-card"></i>Essentiel · 19 €/mois</a>
+            <a class="btn btn-out" href="${esc(lienPaiement('starter'))}" target="_blank" rel="noopener">Starter · 59 €/mois</a>
+            <a class="btn btn-out" href="${esc(lienPaiement('max'))}" target="_blank" rel="noopener">Max · 99 €/mois</a></div>`}`)
     + carte('Compte', esc(SESSION.email),
       `<div class="ts-grille2">
          <input class="input" id="mdp-actuel" type="password" autocomplete="current-password" placeholder="Mot de passe actuel">
@@ -247,7 +250,7 @@ async function ajouterPresta() {
   const nom = document.getElementById('np-nom').value.trim();
   if (!nom) { toast('Donne un nom à la prestation', 'warning'); return; }
   try {
-    await api('POST', '/api/prestations', { nom, duree_min: Number(document.getElementById('np-duree').value), prix: Number(document.getElementById('np-prix').value) });
+    await api('POST', '/api/prestations', { nom, duree_min: Number(document.getElementById('np-duree').value), prix: Number(document.getElementById('np-prix').value), acompte: Number(document.getElementById('np-acompte').value || 0) });
     SERVICES = [];
     toast('Prestation ajoutée ✓', 'success');
     renderParametres();

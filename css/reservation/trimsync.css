@@ -529,6 +529,18 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
 .recap-map{cursor:pointer}
 .recap-map .rm-go{display:block;font-size:10.5px;font-weight:700;color:var(--accent);letter-spacing:.3px;margin-top:1px}
 
+/* ── ACOMPTE ANTI NO-SHOW ──
+   Bloc proposé à l'écran de succès quand la prestration porte un acompte :
+   le client règle tout de suite, pendant que la confirmation est sous ses yeux. */
+.acompte-bloc{
+  margin:0 auto 20px;max-width:380px;text-align:left;
+  background:color-mix(in srgb, var(--accent) 7%, var(--bg-2));
+  border:1px solid rgba(var(--accent-rgb),.3);border-radius:16px;padding:16px;
+}
+.acompte-titre{display:flex;align-items:center;gap:8px;font-family:var(--fd);font-size:14px;font-weight:800;margin-bottom:12px}
+.acompte-titre i{font-size:19px;color:var(--accent)}
+.acompte-sub{margin-top:9px;font-size:11.5px;color:var(--text-3);line-height:1.5}
+
 /* ── MON RDV (dernier pris ici, ou lien d'annulation) ── */
 .my-rdv{display:flex;flex-direction:column;align-items:center;padding:8px 0;text-align:center;--bloc:420px;--ecart:12px}
 .my-rdv > *:not(.my-rdv-badge):not(.my-rdv-tag):not(.my-rdv-name){width:100%;max-width:var(--bloc);margin-top:var(--ecart)}

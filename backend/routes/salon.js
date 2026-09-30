@@ -30,6 +30,16 @@ router.patch('/api/salon', exigerCompte, async (req, res) => {
     if (pseudo && !/^[A-Za-z0-9._]{1,30}$/.test(pseudo)) return res.status(400).json({ error: 'Pseudo Instagram invalide' });
     champs.instagram = pseudo;
   }
+  // Valeurs proposées par le dashboard : rien d'autre n'est accepté.
+  if (b.delai_min_h !== undefined) {
+    if (![0, 1, 2, 3, 6, 12, 24, 48].includes(Number(b.delai_min_h))) return res.status(400).json({ error: 'Délai de réservation invalide' });
+    champs.delai_min_h = Number(b.delai_min_h);
+  }
+  if (b.annulation_h !== undefined) {
+    if (![0, 2, 6, 12, 24, 48].includes(Number(b.annulation_h))) return res.status(400).json({ error: "Délai d'annulation invalide" });
+    champs.annulation_h = Number(b.annulation_h);
+  }
+  if (b.rappel_veille !== undefined) champs.rappel_veille = !!b.rappel_veille;
   if (b.couleur !== undefined) {
     const c = String(b.couleur || '').trim().toLowerCase();
     if (c && !/^#[0-9a-f]{6}$/.test(c)) return res.status(400).json({ error: 'Couleur invalide' });

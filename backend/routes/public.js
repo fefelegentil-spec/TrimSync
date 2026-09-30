@@ -11,7 +11,12 @@ const { trouverOuCreerClient } = require('../lib/clients');
 const { signalerPlaceLibre } = require('../lib/notifs');
 const { notifierSalon } = require('../lib/push');
 const { reservable } = require('../lib/salon');
-const { nowParis, decaleJours, estDate, estHeure, creneauPasse, jourLisible } = require('../lib/dates');
+const { nowParis, decaleJours, estDate, estHeure, creneauPasse, jourLisible, dansHeures } = require('../lib/dates');
+
+// Limite « au plus tôt » d'un salon : maintenant + son délai minimum de réservation.
+const auPlusTot = salon => dansHeures(salon.delai_min_h);
+const prixMasques = salon => !!(salon.options && salon.options.prix_masques);
+const aValider = salon => !!(salon.options && salon.options.validation);
 const { telAStocker, telComposable } = require('../lib/telephone');
 const { sanitizeText } = require('../lib/texte');
 const emails = require('../lib/emails');
@@ -51,8 +56,10 @@ router.get('/api/public/salons/:slug', quotaLecture, async (req, res) => {
     if (!salon) return res.status(404).json({ error: 'Salon introuvable' });
     const p = await pool.query(
       'SELECT id, nom, duree_min, prix, description FROM prestations WHERE salon_id = $1 AND actif ORDER BY ordre, nom', [salon.id]);
+    if (prixMasques(salon)) p.rows.forEach(x => { x.prix = null; });
     res.json({
       nom: salon.nom, ville: salon.ville, adresse: salon.adresse, telephone: salon.telephone, slug: salon.slug,
+      annulation_h: salon.annulation_h || 0, validation: aValider(salon), prix_masques: prixMasques(salon),
       description: salon.description || '', instagram: salon.instagram || '', couleur: salon.couleur || '',
       logo: salon.logo_maj ? new Date(salon.logo_maj).getTime() : null,
       reservable: reservable(salon), horizon_jours: HORIZON_JOURS, prestations: p.rows,
@@ -85,8 +92,9 @@ router.get('/api/public/salons/:slug/jours', quotaLecture, async (req, res) => {
     for (let i = 0; i < HORIZON_JOURS; i++) {
       const date = decaleJours(maintenant.date, i);
       // « ouvert » : le jour a des horaires (hors fermeture) ; ouvert sans place libre = complet.
-      const ouvert = creneaux({ ...ctx, rdv: [], duree: presta.duree_min, date, maintenant }).length > 0;
-      jours.push({ date, ouvert, libres: ouvert ? creneaux({ ...ctx, duree: presta.duree_min, date, maintenant }).length : 0 });
+      const limite = auPlusTot(salon);
+      const ouvert = creneaux({ ...ctx, rdv: [], duree: presta.duree_min, date, maintenant: limite }).length > 0;
+      jours.push({ date, ouvert, libres: ouvert ? creneaux({ ...ctx, duree: presta.duree_min, date, maintenant: limite }).length : 0 });
     }
     res.json({ jours });
   } catch (e) { erreurServeur(res, e, 'public/jours'); }
@@ -101,7 +109,7 @@ router.get('/api/public/salons/:slug/dispo', quotaLecture, async (req, res) => {
     const presta = await prestationActive(salon.id, req.query.prestation);
     if (!presta) return res.status(404).json({ error: 'Prestation introuvable' });
     const ctx = await contexteDispo(pool, salon.id, date, date);
-    res.json({ heures: creneaux({ ...ctx, duree: presta.duree_min, date, maintenant: nowParis() }) });
+    res.json({ heures: creneaux({ ...ctx, duree: presta.duree_min, date, maintenant: auPlusTot(salon) }) });
   } catch (e) { erreurServeur(res, e, 'public/dispo'); }
 });
 
@@ -122,35 +130,40 @@ router.post('/api/public/salons/:slug/reserver', quotaEcriture, async (req, res)
     // Heure hors de la grille du jour (10:07, jour fermé, heure passée) : 400.
     // Déjà prise : 409, vérifié sous verrou juste après.
     const grille = await contexteDispo(pool, salon.id, b.date, b.date)
-      .then(ctx => creneaux({ ...ctx, rdv: [], duree: presta.duree_min, date: b.date, maintenant: nowParis() }));
+      .then(ctx => creneaux({ ...ctx, rdv: [], duree: presta.duree_min, date: b.date, maintenant: auPlusTot(salon) }));
     if (!grille.includes(b.heure)) return res.status(400).json({ error: "Cette heure n'est pas proposée" });
     // Verrou par salon : deux clients qui cliquent la même heure au même instant
     // ne l'obtiennent pas tous les deux.
     const rdv = await transaction(async q => {
       await q.query('SELECT pg_advisory_xact_lock(hashtext($1))', [salon.id]);
       const ctx = await contexteDispo(q, salon.id, b.date, b.date);
-      if (!creneaux({ ...ctx, duree: presta.duree_min, date: b.date, maintenant: nowParis() }).includes(b.heure)) return null;
+      if (!creneaux({ ...ctx, duree: presta.duree_min, date: b.date, maintenant: auPlusTot(salon) }).includes(b.heure)) return null;
       const clientId = await trouverOuCreerClient(q, salon.id, client);
       const nouveau = { id: uid('r'), jeton: crypto.randomBytes(24).toString('hex') };
       await q.query(
-        `INSERT INTO rdv (id, salon_id, client_id, client_nom, telephone, prestation_id, prestation_nom, prix, duree_min, date, heure, source, jeton_annulation)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'site', $12)`,
-        [nouveau.id, salon.id, clientId, client.nom, client.telephone, presta.id, presta.nom, presta.prix, presta.duree_min, b.date, b.heure, nouveau.jeton]);
+        `INSERT INTO rdv (id, salon_id, client_id, client_nom, telephone, prestation_id, prestation_nom, prix, duree_min, date, heure, source, jeton_annulation, statut)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'site', $12, $13)`,
+        [nouveau.id, salon.id, clientId, client.nom, client.telephone, presta.id, presta.nom, presta.prix, presta.duree_min, b.date, b.heure, nouveau.jeton,
+          aValider(salon) ? 'en_attente' : 'confirme']);
       return nouveau;
     });
     if (!rdv) return res.status(409).json({ error: "Ce créneau vient d'être pris, choisis-en un autre" });
-    notifierSalon(salon.id, {
-      type: 'nouveau-rdv', titre: 'Nouveau rendez-vous',
-      corps: `${client.nom} — ${presta.nom}, ${jourLisible(b.date)} à ${b.heure}`,
-    });
+    const enAttente = aValider(salon);
+    notifierSalon(salon.id, enAttente
+      ? { type: 'demande-rdv', titre: 'Demande de rendez-vous à valider', corps: `${client.nom} — ${presta.nom}, ${jourLisible(b.date)} à ${b.heure}` }
+      : { type: 'nouveau-rdv', titre: 'Nouveau rendez-vous', corps: `${client.nom} — ${presta.nom}, ${jourLisible(b.date)} à ${b.heure}` });
     if (client.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(client.email)) {
-      emails.confirmationClient(client.email, {
+      const envoi = enAttente ? emails.demandeRecue : emails.confirmationClient;
+      envoi(client.email, {
         salon,
-        rdv: { date: b.date, heure: b.heure, prestation: presta.nom, prix: presta.prix, duree: presta.duree_min },
+        rdv: { date: b.date, heure: b.heure, prestation: presta.nom, prix: prixMasques(salon) ? undefined : presta.prix, duree: presta.duree_min },
         jeton: rdv.jeton,
       });
     }
-    res.status(201).json({ rdv: { date: b.date, heure: b.heure, prestation: presta.nom, prix: presta.prix }, annulation: rdv.jeton });
+    res.status(201).json({
+      rdv: { date: b.date, heure: b.heure, prestation: presta.nom, prix: prixMasques(salon) ? null : presta.prix, statut: enAttente ? 'en_attente' : 'confirme' },
+      annulation: rdv.jeton,
+    });
   } catch (e) { erreurServeur(res, e, 'public/reserver'); }
 });
 
@@ -182,13 +195,15 @@ router.get('/api/public/rdv/:jeton', quotaAnnulation, async (req, res) => {
   if (!JETON.test(req.params.jeton)) return res.status(404).json({ error: 'Rendez-vous introuvable' });
   try {
     const r = (await pool.query(
-      `SELECT r.*, s.nom AS salon_nom, s.telephone AS salon_tel, s.slug FROM rdv r JOIN salons s ON s.id = r.salon_id WHERE r.jeton_annulation = $1`,
+      `SELECT r.*, s.nom AS salon_nom, s.telephone AS salon_tel, s.slug, s.annulation_h, s.options
+         FROM rdv r JOIN salons s ON s.id = r.salon_id WHERE r.jeton_annulation = $1`,
       [req.params.jeton])).rows[0];
     if (!r) return res.status(404).json({ error: 'Rendez-vous introuvable' });
     res.json({
       salon: { nom: r.salon_nom, telephone: r.salon_tel, slug: r.slug },
-      rdv: { date: r.date, heure: r.heure, prestation: r.prestation_nom, prix: r.prix, statut: r.statut,
-        annulable: r.statut === 'confirme' && !creneauPasse(r.date, r.heure) },
+      rdv: { date: r.date, heure: r.heure, prestation: r.prestation_nom, prix: prixMasques(r) ? null : r.prix, statut: r.statut,
+        annulation_h: r.annulation_h || 0,
+        annulable: (r.statut === 'confirme' || r.statut === 'en_attente') && !creneauPasse(r.date, r.heure, dansHeures(r.annulation_h)) },
     });
   } catch (e) { erreurServeur(res, e, 'public/rdv'); }
 });
@@ -197,13 +212,16 @@ router.post('/api/public/annuler', quotaAnnulation, async (req, res) => {
   const jeton = String(req.body?.jeton || '');
   if (!JETON.test(jeton)) return res.status(404).json({ error: 'Rendez-vous introuvable' });
   try {
-    const r = (await pool.query('SELECT * FROM rdv WHERE jeton_annulation = $1', [jeton])).rows[0];
+    const r = (await pool.query('SELECT r.*, s.annulation_h FROM rdv r JOIN salons s ON s.id = r.salon_id WHERE r.jeton_annulation = $1', [jeton])).rows[0];
     if (!r) return res.status(404).json({ error: 'Rendez-vous introuvable' });
-    if (r.statut !== 'confirme') return res.status(409).json({ error: 'Ce rendez-vous est déjà annulé' });
+    if (r.statut !== 'confirme' && r.statut !== 'en_attente') return res.status(409).json({ error: 'Ce rendez-vous est déjà annulé' });
     if (creneauPasse(r.date, r.heure)) {
       return res.status(409).json({ error: "L'heure du rendez-vous est passée : il ne s'annule plus en ligne" });
     }
-    const maj = await pool.query(`UPDATE rdv SET statut = 'annule' WHERE id = $1 AND statut = 'confirme'`, [r.id]);
+    if (r.annulation_h && creneauPasse(r.date, r.heure, dansHeures(r.annulation_h))) {
+      return res.status(409).json({ error: `L'annulation en ligne est possible jusqu'à ${r.annulation_h} h avant : appelle le salon`, delai: true });
+    }
+    const maj = await pool.query(`UPDATE rdv SET statut = 'annule' WHERE id = $1 AND statut IN ('confirme', 'en_attente')`, [r.id]);
     if (!maj.rowCount) return res.status(409).json({ error: 'Ce rendez-vous est déjà annulé' });
     notifierSalon(r.salon_id, { type: 'annulation', titre: 'Rendez-vous annulé', corps: `${r.client_nom} a annulé ${jourLisible(r.date)} à ${r.heure}` });
     await signalerPlaceLibre(r.salon_id, r.date);

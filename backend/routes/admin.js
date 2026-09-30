@@ -10,6 +10,8 @@ const { erreurServeur, quota } = require('../lib/http');
 
 const router = express.Router();
 const STATUTS = ['essai', 'actif', 'expire', 'suspendu'];
+// Fonctionnalités activables salon par salon depuis le back-office.
+const OPTIONS = ['validation', 'prix_masques'];
 const BOT = ['inactif', 'demande', 'actif'];
 const empreinte = s => crypto.createHash('sha256').update(String(s)).digest();
 
@@ -72,6 +74,12 @@ router.patch('/api/admin/salons/:id', exigerAdmin, async (req, res) => {
     if (b.bot_statut !== undefined) {
       if (!BOT.includes(b.bot_statut)) return res.status(400).json({ error: 'Statut de bot inconnu' });
       c.bot_statut = b.bot_statut;
+    }
+    // Options sur mesure : seules les clés connues sont retenues, fusionnées avec l'existant.
+    if (b.options !== undefined) {
+      const o = { ...(salon.options || {}) };
+      for (const k of OPTIONS) if (b.options && b.options[k] !== undefined) o[k] = !!b.options[k];
+      c.options = JSON.stringify(o);
     }
     if (c.statut === 'actif' && !(c.plan || salon.plan)) return res.status(400).json({ error: 'Choisis un plan pour activer ce salon' });
     const cles = Object.keys(c); // clés fixées ci-dessus

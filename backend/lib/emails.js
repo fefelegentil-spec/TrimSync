@@ -168,28 +168,80 @@ function abonnementActive(a, salon, plan) {
     }) });
 }
 
-/* ── Email du client final ── */
+/* ── Emails du client final ──
+   Le pied renvoie vers le salon, jamais vers TrimSync ; pas d'adresse de réponse. */
+function contactSalon(salon) {
+  return salon.telephone
+    ? `<a href="tel:${escHtml(String(salon.telephone).replace(/\s/g, ''))}" style="color:#3bbfcc;text-decoration:none">Une question ? Appelle ${escHtml(salon.nom)} au ${escHtml(salon.telephone)}</a>`
+    : `<span style="color:#8aa3a8">Une question ? Contacte directement ${escHtml(salon.nom)}.</span>`;
+}
+function detailsRdv(salon, rdv) {
+  return details([
+    ['Quand', `${jourLisible(rdv.date)} à ${rdv.heure}`],
+    ['Prestation', rdv.prestation],
+    ['Durée', rdv.duree ? `${rdv.duree} min` : ''],
+    ['Prix', rdv.prix !== undefined && rdv.prix !== null ? `${Math.round(rdv.prix)} €` : ''],
+    ['Adresse', salon.adresse],
+    ['Téléphone', salon.telephone],
+  ]);
+}
+
+// Salon qui valide ses RDV : la demande est enregistrée, le salon confirme ensuite.
+function demandeRecue(a, { salon, rdv, jeton }) {
+  const lien = `${SITE()}/r/${salon.slug}?annuler=${jeton}`;
+  return envoyer({ a, type: 'demande-client', repondreA: null, sujet: `Demande envoyée : ${salon.nom}, ${jourLisible(rdv.date)} à ${rdv.heure}`,
+    html: gabarit({
+      apercu: `${salon.nom} te confirme ton rendez-vous très vite.`,
+      surtitre: 'Demande envoyée',
+      titre: 'Ta demande est bien reçue',
+      corps: para(`<strong>${escHtml(salon.nom)}</strong> valide chaque rendez-vous : tu reçois un email dès que c'est confirmé. Le créneau est réservé pour toi en attendant.`)
+        + detailsRdv(salon, rdv)
+        + bouton({ url: lien, texte: 'Voir ou annuler ma demande' }),
+      pourquoi: `Tu reçois cet email parce que tu as demandé un rendez-vous chez ${salon.nom} via TrimSync.`,
+      contact: contactSalon(salon),
+    }) });
+}
+
+function refusClient(a, { salon, rdv }) {
+  return envoyer({ a, type: 'refus-client', repondreA: null, sujet: `${salon.nom} ne peut pas te recevoir ${jourLisible(rdv.date)} à ${rdv.heure}`,
+    html: gabarit({
+      apercu: 'Choisis un autre créneau en un clic.',
+      surtitre: 'Rendez-vous',
+      titre: 'Ce créneau n\'est pas possible',
+      corps: para(`<strong>${escHtml(salon.nom)}</strong> ne peut pas te recevoir ${escHtml(jourLisible(rdv.date))} à ${escHtml(rdv.heure)} pour ${escHtml(rdv.prestation)}. Choisis un autre moment, ça ne prend qu'une minute :`)
+        + bouton({ url: `${SITE()}/r/${salon.slug}`, texte: 'Choisir un autre créneau' }),
+      pourquoi: `Tu reçois cet email parce que tu as demandé un rendez-vous chez ${salon.nom} via TrimSync.`,
+      contact: contactSalon(salon),
+    }) });
+}
+
+function rappelVeille(a, { salon, rdv, jeton }) {
+  const lien = `${SITE()}/r/${salon.slug}?annuler=${jeton}`;
+  return envoyer({ a, type: 'rappel-client', repondreA: null, sujet: `Rappel : ${salon.nom} demain à ${rdv.heure}`,
+    html: gabarit({
+      apercu: `${rdv.prestation} · demain à ${rdv.heure}`,
+      surtitre: 'Rappel',
+      titre: `À demain, ${rdv.heure} !`,
+      corps: para(`Petit rappel de ton rendez-vous chez <strong>${escHtml(salon.nom)}</strong>.`)
+        + detailsRdv(salon, rdv)
+        + para('Un empêchement ? Préviens en annulant, ta place ira à quelqu\'un d\'autre :')
+        + bouton({ url: lien, texte: 'Voir ou annuler mon rendez-vous' }),
+      pourquoi: `Tu reçois cet email parce que tu as un rendez-vous chez ${salon.nom}.`,
+      contact: contactSalon(salon),
+    }) });
+}
 
 // Confirmation de rendez-vous, avec le lien pour l'annuler.
 function confirmationClient(a, { salon, rdv, jeton }) {
   const lien = `${SITE()}/r/${salon.slug}?annuler=${jeton}`;
-  const tel = salon.telephone
-    ? `<a href="tel:${escHtml(String(salon.telephone).replace(/\s/g, ''))}" style="color:#3bbfcc;text-decoration:none">Une question ? Appelle ${escHtml(salon.nom)} au ${escHtml(salon.telephone)}</a>`
-    : `<span style="color:#8aa3a8">Une question ? Contacte directement ${escHtml(salon.nom)}.</span>`;
+  const tel = contactSalon(salon);
   return envoyer({ a, type: 'confirmation-client', repondreA: null, sujet: `C'est réservé : ${salon.nom}, ${jourLisible(rdv.date)} à ${rdv.heure}`,
     html: gabarit({
       apercu: `${rdv.prestation} · ${jourLisible(rdv.date)} à ${rdv.heure}`,
       surtitre: 'Rendez-vous confirmé',
       titre: `À ${jourLisible(rdv.date)} !`,
       corps: para(`Ton rendez-vous chez <strong>${escHtml(salon.nom)}</strong> est bien réservé.`)
-        + details([
-          ['Quand', `${jourLisible(rdv.date)} à ${rdv.heure}`],
-          ['Prestation', rdv.prestation],
-          ['Durée', rdv.duree ? `${rdv.duree} min` : ''],
-          ['Prix', rdv.prix !== undefined ? `${Math.round(rdv.prix)} €` : ''],
-          ['Adresse', salon.adresse],
-          ['Téléphone', salon.telephone],
-        ])
+        + detailsRdv(salon, rdv)
         + para('Un empêchement ? Annule en un clic pour libérer ta place à quelqu\'un d\'autre :')
         + bouton({ url: lien, texte: 'Voir ou annuler mon rendez-vous' }),
       pourquoi: `Tu reçois cet email parce que tu as réservé chez ${salon.nom} via TrimSync.`,
@@ -204,4 +256,4 @@ function alerteAdmin(sujet, champs) {
       corps: details(Object.entries(champs).map(([k, v]) => [k, v || '—'])) + bouton({ url: `${SITE()}/admin`, texte: 'Ouvrir le back-office' }) }) });
 }
 
-module.exports = { client, verification, reset, rappelEssai, abonnementActive, confirmationClient, alerteAdmin, gabarit };
+module.exports = { client, verification, reset, rappelEssai, abonnementActive, confirmationClient, demandeRecue, refusClient, rappelVeille, alerteAdmin, gabarit };

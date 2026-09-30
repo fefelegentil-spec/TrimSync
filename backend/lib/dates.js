@@ -38,4 +38,9 @@ function jourLisible(ymd) {
     { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
 }
 
-module.exports = { nowParis, creneauPasse, decaleJours, estDate, estHeure, jourLisible };
+// « Maintenant » décalé de h heures : sert de limite pour le délai minimum de
+// réservation et le délai d'annulation (décalage en temps absolu, puis lu à
+// l'heure de Paris : juste même un jour de changement d'heure).
+function dansHeures(h) { return nowParis(new Date(Date.now() + (Number(h) || 0) * 3600 * 1000)); }
+
+module.exports = { nowParis, creneauPasse, decaleJours, estDate, estHeure, jourLisible, dansHeures };

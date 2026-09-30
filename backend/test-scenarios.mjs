@@ -275,6 +275,46 @@ async function main() {
   ok(kpi.s === 200 && kpi.d.demandes_bot >= 1 && kpi.d.mrr >= 79 && kpi.d.essai >= 1, 'indicateurs', kpi.d);
   ok((await appel('PATCH', `/api/admin/salons/${salonB}`, { plan: 'gratuit' }, ADM)).s === 400, 'plan inconnu refusé');
 
+  console.log('T16 — règles de réservation et options');
+  const N = insN.d?.jeton, slugN = insN.d?.salon?.slug, idN = insN.d?.salon?.id;
+  const pubN = () => appel('GET', `/api/public/salons/${slugN}`);
+  ok((await appel('PUT', '/api/horaires', { semaine: [0, 1, 2, 3, 4, 5, 6].map(jour => ({ jour, ouverture: '08:00', fermeture: '20:00' })) }, N)).s === 200, 'salon N ouvert tous les jours');
+  const prestaN = (await pubN()).d?.prestations?.[0] || {};
+  const libresN = async date => (await appel('GET', `/api/public/salons/${slugN}/dispo?date=${date}&prestation=${prestaN.id}`)).d?.heures || [];
+  ok((await appel('PATCH', '/api/salon', { delai_min_h: 5 }, N)).s === 400, 'délai hors liste refusé');
+  const regles = await appel('PATCH', '/api/salon', { delai_min_h: 48, annulation_h: 48, rappel_veille: true }, N);
+  ok(regles.s === 200 && regles.d.salon.delai_min_h === 48 && regles.d.salon.annulation_h === 48, 'règles enregistrées', regles.d);
+  ok((await libresN(dansJours(1))).length === 0 && (await libresN(dansJours(4))).length > 0, 'rien de réservable avant le délai minimum');
+  await appel('PATCH', '/api/salon', { delai_min_h: 0 }, N);
+  ok((await appel('PATCH', `/api/admin/salons/${idN}`, { options: { validation: true, prix_masques: true, inconnue: true } }, ADM)).s === 200, "options activées par l'admin");
+  const pubOpt = await pubN();
+  ok(pubOpt.d?.validation === true && pubOpt.d?.prix_masques === true && pubOpt.d.prestations.every(p => p.prix === null), 'prix masqués, validation annoncée', pubOpt.d);
+  ok(!((await appel('GET', '/api/moi', undefined, N)).d?.salon?.options || {}).inconnue, 'option inconnue ignorée');
+  const emailClientN = `client-n-${RUN}@test.fr`;
+  const resaN = (date, heure) => appel('POST', `/api/public/salons/${slugN}/reserver`,
+    { prestation_id: prestaN.id, date, heure, nom: 'Léa Test', telephone: '0611223344', email: emailClientN, consentement: true });
+  const demain = dansJours(1);
+  const d1 = await resaN(demain, '10:00');
+  ok(d1.s === 201 && d1.d.rdv.statut === 'en_attente' && d1.d.rdv.prix === null, 'réservation en attente de validation', d1.d);
+  ok((await boite()).some(m => m.type === 'demande-client' && m.a === emailClientN), 'client prévenu que sa demande est reçue');
+  ok(!(await libresN(demain)).includes('10:00'), 'la demande en attente bloque le créneau');
+  const rdvN = (await appel('GET', `/api/rdv?du=${demain}&au=${demain}`, undefined, N)).d?.rdv?.find(r => r.heure === '10:00') || {};
+  ok(rdvN.statut === 'en_attente', 'le pro voit la demande', rdvN);
+  ok((await appel('POST', `/api/rdv/${rdvN.id}/valider`, { accepte: true }, N)).d?.rdv?.statut === 'confirme', 'demande acceptée');
+  ok((await boite()).some(m => m.type === 'confirmation-client' && m.a === emailClientN), 'client prévenu de la confirmation');
+  ok((await appel('POST', `/api/rdv/${rdvN.id}/valider`, { accepte: true }, N)).s === 409, 'déjà validée : refus');
+  const annulTard = await appel('POST', '/api/public/annuler', { jeton: d1.d.annulation });
+  ok(annulTard.s === 409 && annulTard.d.delai === true, 'annulation refusée dans le délai du salon', annulTard.d);
+  await appel('POST', '/api/test/rappels');
+  await appel('POST', '/api/test/rappels');
+  ok((await boite()).filter(m => m.type === 'rappel-client' && m.a === emailClientN).length === 1, 'rappel de la veille envoyé une seule fois');
+  const d5 = await resaN(dansJours(5), '11:00');
+  const rdv5 = (await appel('GET', `/api/rdv?du=${dansJours(5)}&au=${dansJours(5)}`, undefined, N)).d?.rdv?.find(r => r.heure === '11:00') || {};
+  ok(d5.s === 201 && (await appel('POST', `/api/rdv/${rdv5.id}/valider`, { accepte: false }, N)).d?.rdv?.statut === 'annule', 'demande refusée');
+  ok((await boite()).some(m => m.type === 'refus-client' && m.a === emailClientN), 'client prévenu du refus');
+  ok((await libresN(dansJours(5))).includes('11:00'), 'le créneau refusé est de nouveau libre');
+  await appel('PATCH', `/api/admin/salons/${idN}`, { options: { validation: false, prix_masques: false } }, ADM);
+
   console.log('T15 — personnalisation de la page');
   const perso = await appel('PATCH', '/api/salon', { description: 'Ongles et cils à Lyon', instagram: 'https://www.instagram.com/studio_a/?hl=fr', couleur: '#E91E63' }, A);
   ok(perso.s === 200 && perso.d.salon.instagram === 'studio_a' && perso.d.salon.couleur === '#e91e63' && perso.d.salon.description === 'Ongles et cils à Lyon', 'description, pseudo et couleur enregistrés', perso.d);

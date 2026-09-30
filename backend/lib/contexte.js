@@ -4,7 +4,7 @@ async function contexteDispo(q, salonId, du, au) {
     q.query('SELECT jour, ouverture, fermeture, pause_debut, pause_fin FROM horaires WHERE salon_id = $1', [salonId]),
     q.query('SELECT date, debut, fin FROM fermetures WHERE salon_id = $1 AND date BETWEEN $2 AND $3', [salonId, du, au]),
     q.query(`SELECT id, date, heure, duree_min, statut FROM rdv
-              WHERE salon_id = $1 AND date BETWEEN $2 AND $3 AND statut = 'confirme'`, [salonId, du, au]),
+              WHERE salon_id = $1 AND date BETWEEN $2 AND $3 AND statut IN ('confirme', 'en_attente')`, [salonId, du, au]),
   ]);
   return { horaires: horaires.rows, fermetures: fermetures.rows, rdv: rdv.rows };
 }

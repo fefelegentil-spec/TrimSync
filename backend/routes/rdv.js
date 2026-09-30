@@ -10,10 +10,11 @@ const { trouverOuCreerClient } = require('../lib/clients');
 const { signalerPlaceLibre } = require('../lib/notifs');
 const { estDate, estHeure, nowParis, decaleJours } = require('../lib/dates');
 const { sanitizeText } = require('../lib/texte');
+const emails = require('../lib/emails');
 const { erreurServeur } = require('../lib/http');
 
 const router = express.Router();
-const STATUTS = ['confirme', 'annule', 'noshow'];
+const STATUTS = ['confirme', 'annule', 'noshow', 'en_attente'];
 const CHEVAUCHEMENT = { error: 'Ce créneau chevauche un autre rendez-vous', chevauchement: true };
 
 const rdvDuJour = (salonId, date) =>
@@ -101,6 +102,28 @@ router.patch('/api/rdv/:id', exigerCompte, exigerEcriture, async (req, res) => {
     if (avant.statut === 'confirme' && (apres.statut !== 'confirme' || bouge)) await signalerPlaceLibre(req.salonId, avant.date);
     res.json({ rdv: r.rows[0] });
   } catch (e) { erreurServeur(res, e, 'rdv/modifier'); }
+});
+
+// Salon qui valide ses RDV : accepter confirme et prévient le client ;
+// refuser annule, libère la place et prévient le client.
+router.post('/api/rdv/:id/valider', exigerCompte, exigerEcriture, async (req, res) => {
+  const accepte = req.body?.accepte === true;
+  try {
+    const r = (await pool.query(
+      `UPDATE rdv SET statut = $3 WHERE id = $1 AND salon_id = $2 AND statut = 'en_attente' RETURNING *`,
+      [req.params.id, req.salonId, accepte ? 'confirme' : 'annule'])).rows[0];
+    if (!r) return res.status(409).json({ error: "Ce rendez-vous n'est plus en attente" });
+    const client = (await pool.query('SELECT email FROM clients WHERE id = $1', [r.client_id])).rows[0];
+    const salon = req.salon;
+    const masques = !!(salon.options && salon.options.prix_masques);
+    if (client && client.email) {
+      const rdv = { date: r.date, heure: r.heure, prestation: r.prestation_nom, prix: masques ? undefined : r.prix, duree: r.duree_min };
+      if (accepte) emails.confirmationClient(client.email, { salon, rdv, jeton: r.jeton_annulation });
+      else emails.refusClient(client.email, { salon, rdv });
+    }
+    if (!accepte) await signalerPlaceLibre(req.salonId, r.date);
+    res.json({ rdv: r });
+  } catch (e) { erreurServeur(res, e, 'rdv/valider'); }
 });
 
 module.exports = router;

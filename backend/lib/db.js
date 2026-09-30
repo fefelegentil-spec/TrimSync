@@ -92,7 +92,7 @@ const SCHEMA = [
      duree_min INT NOT NULL,
      date TEXT NOT NULL,
      heure TEXT NOT NULL,
-     statut TEXT NOT NULL DEFAULT 'confirme' CHECK (statut IN ('confirme','annule','noshow')),
+     statut TEXT NOT NULL DEFAULT 'confirme' CHECK (statut IN ('confirme','annule','noshow','en_attente')),
      source TEXT NOT NULL DEFAULT 'dashboard' CHECK (source IN ('site','dashboard','instagram')),
      jeton_annulation TEXT UNIQUE,
      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`,
@@ -124,6 +124,16 @@ const SCHEMA = [
   `ALTER TABLE salons ADD COLUMN IF NOT EXISTS couleur TEXT NOT NULL DEFAULT ''`,
   `ALTER TABLE salons ADD COLUMN IF NOT EXISTS logo_maj TIMESTAMPTZ`,
   `ALTER TABLE prestations ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT ''`,
+  // Règles de réservation réglées par le pro, et options activées par Félix
+  // salon par salon (back-office) : { validation, prix_masques }.
+  `ALTER TABLE salons ADD COLUMN IF NOT EXISTS delai_min_h INTEGER NOT NULL DEFAULT 0`,
+  `ALTER TABLE salons ADD COLUMN IF NOT EXISTS annulation_h INTEGER NOT NULL DEFAULT 0`,
+  `ALTER TABLE salons ADD COLUMN IF NOT EXISTS rappel_veille BOOLEAN NOT NULL DEFAULT true`,
+  `ALTER TABLE salons ADD COLUMN IF NOT EXISTS options JSONB NOT NULL DEFAULT '{}'::jsonb`,
+  `ALTER TABLE rdv ADD COLUMN IF NOT EXISTS rappel_le TIMESTAMPTZ`,
+  // « en_attente » : RDV pris sur la page d'un salon qui valide lui-même ses RDV.
+  `ALTER TABLE rdv DROP CONSTRAINT IF EXISTS rdv_statut_check`,
+  `ALTER TABLE rdv ADD CONSTRAINT rdv_statut_check CHECK (statut IN ('confirme','annule','noshow','en_attente'))`,
   // Le logo vit à part : salons est lu à chaque requête authentifiée (SELECT s.*),
   // une image de 60 Ko y serait relue pour rien.
   `CREATE TABLE IF NOT EXISTS salon_logos (

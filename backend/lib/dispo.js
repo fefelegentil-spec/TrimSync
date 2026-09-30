@@ -7,8 +7,9 @@ const enMinutes = hhmm => { const [h, m] = String(hhmm).split(':').map(Number); 
 const enHeure = min => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
 const jourSemaine = ymd => new Date(ymd + 'T12:00:00Z').getUTCDay();
 
-// Seuls les RDV confirmés occupent l'agenda : annulé et no-show libèrent.
-const occupants = (rdv, date) => rdv.filter(r => r.date === date && r.statut === 'confirme');
+// RDV confirmés et demandes en attente de validation occupent l'agenda ;
+// annulé et no-show libèrent.
+const occupants = (rdv, date) => rdv.filter(r => r.date === date && (r.statut === 'confirme' || r.statut === 'en_attente'));
 
 function creneaux({ horaires, fermetures, rdv, duree, date, maintenant }) {
   const h = horaires.find(x => x.jour === jourSemaine(date));

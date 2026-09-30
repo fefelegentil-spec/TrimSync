@@ -74,7 +74,7 @@
     <p class="content-meta" data-en="Last updated: September 29, 2026" data-fr="Dernière mise à jour : 29 septembre 2026"></p>
   </div>
   <h2 id="mentions" data-en="Legal notice" data-fr="Mentions légales"></h2>
-  <p data-en="Félix Lucas, sole trader (French micro-entreprise), trading as TrimSync — SIREN 929 257 731 — 23 rue de Keravel, 22300 Lannion, France. VAT not applicable, article 293 B of the French General Tax Code. Publication director: Félix Lucas. Contact: felix@trimsync.tech." data-fr="Félix Lucas, entrepreneur individuel (micro-entreprise), exerçant sous le nom commercial TrimSync — SIREN 929 257 731 — 23 rue de Keravel, 22300 Lannion, France. TVA non applicable, article 293 B du Code général des impôts. Directeur de la publication : Félix Lucas. Contact : felix@trimsync.tech."></p>
+  <p data-en="Félix Lucas, sole trader (French micro-entreprise), trading as TrimSync and FCUTZ — SIREN 929 257 731 — 23 rue de Keravel, 22300 Lannion, France. VAT not applicable, article 293 B of the French General Tax Code. Publication director: Félix Lucas. Contact: felix@trimsync.tech." data-fr="Félix Lucas, entrepreneur individuel (micro-entreprise), exerçant sous les noms commerciaux TrimSync et FCUTZ — SIREN 929 257 731 — 23 rue de Keravel, 22300 Lannion, France. TVA non applicable, article 293 B du Code général des impôts. Directeur de la publication : Félix Lucas. Contact : felix@trimsync.tech."></p>
   <p data-en="Website: Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, USA. Application and database: Railway Corp., USA (railway.com)." data-fr="Site : Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, États-Unis. Application et base de données : Railway Corp., États-Unis (railway.com)."></p>
 
   <div class="divider"></div>
@@ -168,7 +168,7 @@
 
 <script>
   const LANGS={en:{flag:'🇫🇷',code:'FR',next:'fr'},fr:{flag:'🇬🇧',code:'EN',next:'en'}};
-  let cur=localStorage.getItem('ts-lang')||'fr';
+  let cur=localStorage.getItem('ts-lang')||((navigator.language||'').toLowerCase().startsWith('fr')?'fr':'en');
   function applyLang(l){
     cur=l;localStorage.setItem('ts-lang',l);
     document.documentElement.lang=l;

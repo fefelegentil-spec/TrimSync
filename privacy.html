@@ -75,7 +75,7 @@
     <p class="content-meta" data-en="Last updated: September 29, 2026" data-fr="Dernière mise à jour : 29 septembre 2026"></p>
   </div>
   <h2 data-en="1. Who is responsible" data-fr="1. Qui est responsable"></h2>
-  <p data-en="Félix Lucas, sole trader (French micro-entreprise), trading as TrimSync — SIREN 929 257 731 — 23 rue de Keravel, 22300 Lannion, France. VAT not applicable, article 293 B of the French General Tax Code. Publication director: Félix Lucas. Contact: felix@trimsync.tech." data-fr="Félix Lucas, entrepreneur individuel (micro-entreprise), exerçant sous le nom commercial TrimSync — SIREN 929 257 731 — 23 rue de Keravel, 22300 Lannion, France. TVA non applicable, article 293 B du Code général des impôts. Directeur de la publication : Félix Lucas. Contact : felix@trimsync.tech."></p>
+  <p data-en="Félix Lucas, sole trader (French micro-entreprise), trading as TrimSync and FCUTZ — SIREN 929 257 731 — 23 rue de Keravel, 22300 Lannion, France. VAT not applicable, article 293 B of the French General Tax Code. Publication director: Félix Lucas. Contact: felix@trimsync.tech." data-fr="Félix Lucas, entrepreneur individuel (micro-entreprise), exerçant sous les noms commerciaux TrimSync et FCUTZ — SIREN 929 257 731 — 23 rue de Keravel, 22300 Lannion, France. TVA non applicable, article 293 B du Code général des impôts. Directeur de la publication : Félix Lucas. Contact : felix@trimsync.tech."></p>
   <ul>
     <li data-en="For the data of salon owners (our customers): TrimSync is the data controller." data-fr="Pour les données des pros (nos clients) : TrimSync est responsable de traitement."></li>
     <li data-en="For the data of the salons&#x27; own clients (people who book or send a message): the salon is the data controller, TrimSync is its processor." data-fr="Pour les données des clients des salons (personnes qui réservent ou écrivent) : le salon est responsable de traitement, TrimSync est son sous-traitant."></li>
@@ -140,7 +140,7 @@
 
 <script>
   const LANGS={en:{flag:'🇫🇷',code:'FR',next:'fr'},fr:{flag:'🇬🇧',code:'EN',next:'en'}};
-  let cur=localStorage.getItem('ts-lang')||'fr';
+  let cur=localStorage.getItem('ts-lang')||((navigator.language||'').toLowerCase().startsWith('fr')?'fr':'en');
   function applyLang(l){
     cur=l;localStorage.setItem('ts-lang',l);
     document.documentElement.lang=l;

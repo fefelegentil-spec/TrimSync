@@ -203,7 +203,7 @@
 
 <script>
   const LANGS={en:{flag:'🇫🇷',code:'FR',next:'fr'},fr:{flag:'🇬🇧',code:'EN',next:'en'}};
-  let cur=localStorage.getItem('ts-lang')||'fr';
+  let cur=localStorage.getItem('ts-lang')||((navigator.language||'').toLowerCase().startsWith('fr')?'fr':'en');
   function applyLang(l){
     cur=l;localStorage.setItem('ts-lang',l);
     document.documentElement.lang=l;

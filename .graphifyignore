@@ -27,3 +27,8 @@ docs/superpowers/plans/
 
 # Orphelin : plus aucune page ne le charge depuis la suppression de dashboard-template.html.
 js/dashboard-template.js
+
+# Sons et vidéos : rien à extraire.
+*.wav
+*.mp3
+*.mp4

@@ -1,2 +1,29 @@
 # Le graphe ne se digère pas lui-même.
 graphify-out/
+
+# Maquettes, aperçus et anciennes versions : ils doubleraient les vrais modules.
+*-preview.html
+demo.html
+index-legacy-*.html
+src/demo.tsx
+src/wavy-demo.tsx
+dist/
+public/3d/
+
+# Captures, rendus et images (le graphe parle du code, pas des pixels).
+*.png
+*.jpeg
+*.jpg
+*.svg
+
+# Outillage local.
+node_modules/
+.superpowers/
+.claude/
+
+# Les plans d'implémentation sont de l'historique : le code les a remplacés.
+**/docs/superpowers/plans/
+docs/superpowers/plans/
+
+# Orphelin : plus aucune page ne le charge depuis la suppression de dashboard-template.html.
+js/dashboard-template.js

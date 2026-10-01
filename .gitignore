@@ -12,3 +12,12 @@ render-*.jpeg
 pain-sections-*.png
 feat-cards-*.png
 index-legacy-*.html
+
+# Graphe graphify : reconstruit à chaque commit par le hook (rafraichir.py).
+# Seules ses entrées faites à la main sont suivies : la couche sémantique et
+# les noms de modules.
+graphify-out/*
+!graphify-out/.graphify_chunk_*.json
+!graphify-out/.graphify_semantic.json
+!graphify-out/.graphify_noms_noeuds.json
+!graphify-out/.graphify_root_nom

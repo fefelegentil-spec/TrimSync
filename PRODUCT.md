@@ -28,11 +28,12 @@ brand
 6. Jamais « barbier » / « barbershop » dans ce que voit un visiteur : le produit vise tous les métiers de la beauté (décision de Félix, 29/09/2026)
 
 ## Pricing (actuel)
-- Essentiel : €19/mois (page de réservation native, confirmations + rappels auto, acompte optionnel anti no-show) — l'entrée de gamme, recommandée
-- Starter : €59/mois (bot Instagram 24/7, DMs illimités, confirmations auto)
-- Pro : €79/mois (+ dashboard, CRM, WhatsApp)
-- Max : €99/mois (+ dashboard, CRM, stats, fidélité, SumUp)
-- Setup fee unique : €300 (accès plateforme + appel onboarding)
+Grille du 01/10/2026 — une échelle qui s'empile : chaque palier = le précédent + une seule chose. L'app ne bride rien selon l'offre ; ne jamais vendre dans un palier supérieur une fonction que l'Essentiel a déjà.
+- Essentiel : €19/mois — toute l'app : page de réservation, agenda, fiches clients, rappels, acompte anti no-show, liste d'attente, stats. Sans bot.
+- Pro : €49/mois — Essentiel + bot IA Instagram qui répond et réserve dans les DM (bêta, mis en place à la main). **Recommandé.**
+- Max : €89/mois — Pro + bot à ton style, stories auto quand il reste de la place, créneau libéré reproposé en DM, support direct WhatsApp.
+- Mise en place du bot (Pro et Max seulement) : €100 une fois, offerte aux 10 premiers.
+- Stripe (compte live FCUTZ) : un lien de paiement par plan, ouvert depuis le dashboard (`js/app/accueil.js`, `LIENS_STRIPE`) ; le webhook reconnaît le plan au montant (`backend/routes/stripe.js`).
 
 ## Anti-references
 - Pas de design SaaS générique (bleu navy + blanc + illustrations vecteur Storyset)

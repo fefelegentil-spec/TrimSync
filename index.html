@@ -312,7 +312,8 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
 .setup-old{font-family:var(--fd);font-size:1.5rem;font-weight:700;color:var(--t3);text-decoration:line-through;text-decoration-color:oklch(0.66 0.16 25/.65)}
 .setup-free{font-family:var(--fd);font-size:clamp(2.4rem,5vw,3.4rem);font-weight:800;letter-spacing:-.03em;color:oklch(0.80 0.13 193);line-height:1}
 .plans-wrap{display:block}
-.plans-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.1rem;max-width:760px;margin:0 auto}
+.plans-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.1rem;max-width:1080px;margin:0 auto;align-items:stretch}
+@media(max-width:1020px){.plans-grid{grid-template-columns:1fr;max-width:520px}}
 .plans-reassure{text-align:center;margin:1.7rem auto 0;font-size:.84rem;color:var(--t3);letter-spacing:.01em}
 .plan{background:oklch(0.11 0.008 222);border:1px solid oklch(0.76 0.13 193/.15);border-radius:18px;padding:1.75rem 1.5rem;display:flex;flex-direction:column;gap:1.3rem;position:relative;transition:transform .35s var(--ex),box-shadow .35s var(--ex),border-color .3s}
 .plan:hover{transform:translateY(-5px);box-shadow:0 24px 64px oklch(0 0 0/.35);border-color:oklch(0.76 0.13 193/.42)}
@@ -342,7 +343,7 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
 .plan-demo-btn span{flex:1;text-align:left}
 .plan-demo-btn::after{content:'→';font-size:.7rem;opacity:.4}
 @media(max-width:960px){.plans-wrap{grid-template-columns:1fr;gap:2.5rem}}
-@media(max-width:760px){.plans-grid{grid-template-columns:1fr;gap:.75rem}.plan-pop{margin-top:14px}.plan-pop{order:-1}}
+@media(max-width:760px){.plans-grid{grid-template-columns:1fr;gap:.75rem}.plan-pop{margin-top:14px}}
 /* Au doigt, :hover reste « collé » après un tap : la fiche restait soulevée,
    bord allumé (et lueur cyan sur Max). Même traitement que les cartes .feat. */
 @media(hover:none){
@@ -364,7 +365,7 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
 #bstep-3 .setup-desc{font-size:.81rem;max-width:34ch}
 #bstep-3 .setup-checks span{font-size:.77rem}
 #bstep-3 .plans-wrap{display:block}
-#bstep-3 .plans-grid{grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1.4rem}
+#bstep-3 .plans-grid{grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1.4rem;max-width:none}
 #bstep-3 .plan{padding:1.3rem 1.3rem;gap:.85rem}
 #bstep-3 .plan-price{font-size:clamp(1.7rem,4vw,2.2rem)}
 #bstep-3 .plan-feats{gap:.4rem}
@@ -1773,88 +1774,88 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
         </div>
       </div>
       <div class="setup-checks">
-        <span data-en="Only for the Instagram bot (Starter & Max) — Essentiel needs none" data-fr="Uniquement pour le bot Instagram (Starter & Max) — l'Essentiel n'en a pas">✓ Only for the Instagram bot (Starter & Max) — Essentiel needs none</span>
-        <span data-en="Instagram API connection + onboarding call" data-fr="Connexion API Instagram + appel d'onboarding">✓ Instagram API connection + onboarding call</span>
+        <span data-en="✓ Only with the bot (Pro &amp; Max) — Essentiel needs none" data-fr="✓ Seulement avec le bot (Pro &amp; Max) — l&#x27;Essentiel n&#x27;en a pas">✓ Only with the bot (Pro &amp; Max) — Essentiel needs none</span>
+        <span data-en="✓ Instagram connection + onboarding call" data-fr="✓ Connexion Instagram + appel de mise en route">✓ Instagram connection + onboarding call</span>
         <span data-en="✓ Bot training + full config" data-fr="✓ Entraînement + configuration complète">✓ Bot training + full config</span>
+        <span data-en="✓ The bot is in beta: we switch it on together" data-fr="✓ Le bot est en bêta : on l&#x27;allume ensemble">✓ The bot is in beta: we switch it on together</span>
       </div>
     </div>
 
     <!-- Plans + tableau ROI -->
     <div class="plans-wrap">
 
-      <!-- Grille 3 plans -->
+      <!-- Grille 3 plans : chaque palier = le précédent + une chose -->
       <div class="plans-grid">
 
-        <!-- Essentiel — recommandé -->
-        <div class="plan plan-pop rv d1">
-          <div class="plan-hot" data-en="Recommended" data-fr="Recommandé">Recommandé</div>
+        <!-- Essentiel : toute l'app, sans bot -->
+        <div class="plan rv d1">
           <div>
             <div class="plan-name" data-en="Essentiel" data-fr="Essentiel">Essentiel</div>
             <div class="plan-price">€19<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
           </div>
           <ul class="plan-feats">
             <li data-en="Your own booking page" data-fr="Ta page de réservation en ligne">Your own booking page</li>
-            <li data-en="Unlimited services &amp; prices" data-fr="Prestations et prix illimités">Unlimited services &amp; prices</li>
-            <li data-en="Auto confirmations &amp; day-before reminders" data-fr="Confirmations + rappels automatiques la veille">Auto confirmations &amp; day-before reminders</li>
-            <li data-en="Optional deposit to fight no-shows" data-fr="Acompte optionnel anti no-show">Optional deposit to fight no-shows</li>
-            <li data-en="Waitlist when a day is full" data-fr="Liste d'attente quand un jour est complet">Waitlist when a day is full</li>
+            <li data-en="Calendar, services &amp; hours" data-fr="Agenda, prestations et horaires">Calendar, services &amp; hours</li>
+            <li data-en="Client files &amp; stats" data-fr="Fiches clients et stats">Client files &amp; stats</li>
+            <li data-en="Day-before reminders, automatic" data-fr="Rappels automatiques la veille">Day-before reminders, automatic</li>
+            <li data-en="Optional deposit against no-shows" data-fr="Acompte optionnel anti no-show">Optional deposit against no-shows</li>
+            <li data-en="Waitlist when a day is full" data-fr="Liste d&#x27;attente quand un jour est complet">Waitlist when a day is full</li>
           </ul>
-          <div class="plan-demo-sep"><span data-en="Try" data-fr="Essayer">Essayer</span></div>
+          <div class="plan-demo-sep"><span data-en="Try" data-fr="Essayer">Try</span></div>
           <div class="plan-demo-row">
             <button class="plan-demo-btn" onclick="openPreview('booking')">
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-              <span data-en="The booking page" data-fr="La page booking">La page booking</span>
-            </button>
-          </div>
-          <button class="plan-cta" data-plan="essentiel" data-en="Get started" data-fr="Commencer">Get started</button>
-        </div>
-
-        <!-- Starter -->
-        <div class="plan rv d2">
-          <div>
-            <div class="plan-name" data-en="Starter" data-fr="Starter">Starter</div>
-            <div class="plan-price">€59<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
-          </div>
-          <ul class="plan-feats">
-            <li data-en="Everything in Essentiel" data-fr="Tout l'Essentiel">Everything in Essentiel</li>
-            <li data-en="AI Instagram bot, 24/7" data-fr="Bot IA Instagram, 24h/24">AI Instagram bot, 24/7</li>
-            <li data-en="Unlimited DMs" data-fr="DMs illimités">Unlimited DMs</li>
-            <li data-en="Beta: activated on request" data-fr="Bêta : activé sur demande">Beta: activated on request</li>
-          </ul>
-          <div class="plan-demo-sep"><span data-en="Try" data-fr="Essayer">Try</span></div>
-          <div class="plan-demo-row">
-            <button class="plan-demo-btn" onclick="openBotModal()">
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="13" height="13" rx="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h4M11 6l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <span data-en="The bot" data-fr="Le bot">The bot</span>
-            </button>
-          </div>
-          <button class="plan-cta" data-plan="starter" data-en="Get started" data-fr="Commencer">Get started</button>
-        </div>
-
-        <!-- Max -->
-        <div class="plan rv d3">
-          <div>
-            <div class="plan-name" data-en="Max" data-fr="Max">Max</div>
-            <div class="plan-price">€99<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
-          </div>
-          <ul class="plan-feats">
-            <li data-en="Everything in Essentiel" data-fr="Tout l'Essentiel">Everything in Essentiel</li>
-            <li data-en="Calendar + client files &amp; stats" data-fr="Agenda + fiches clients &amp; stats">Calendar + client files &amp; stats</li>
-            <li data-en="Waitlist & revenue goals" data-fr="Liste d'attente &amp; objectif de CA">Waitlist &amp; revenue goals</li>
-          </ul>
-          <div class="plan-demo-sep"><span data-en="Try" data-fr="Essayer">Try</span></div>
-          <div class="plan-demo-row">
-            <button class="plan-demo-btn" onclick="openBotModal()">
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="13" height="13" rx="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h4M11 6l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <span data-en="The bot" data-fr="Le bot">The bot</span>
+              <span data-en="The booking page" data-fr="La page de réservation">The booking page</span>
             </button>
             <button class="plan-demo-btn" onclick="openPreview('dashboard')">
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/></svg>
               <span data-en="The dashboard" data-fr="Le dashboard">The dashboard</span>
             </button>
-            <button class="plan-demo-btn" onclick="openPreview('booking')">
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-              <span data-en="The booking page" data-fr="La page booking">The booking page</span>
+          </div>
+          <button class="plan-cta" data-plan="essentiel" data-en="Get started" data-fr="Commencer">Get started</button>
+        </div>
+
+        <!-- Pro : + le bot Instagram — recommandé -->
+        <div class="plan plan-pop rv d2">
+          <div class="plan-hot" data-en="Recommended" data-fr="Recommandé">Recommended</div>
+          <div>
+            <div class="plan-name" data-en="Pro" data-fr="Pro">Pro</div>
+            <div class="plan-price">€49<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
+          </div>
+          <ul class="plan-feats">
+            <li data-en="Everything in Essentiel" data-fr="Tout l&#x27;Essentiel">Everything in Essentiel</li>
+            <li data-en="AI Instagram bot, 24/7" data-fr="Bot IA Instagram, 24h/24">AI Instagram bot, 24/7</li>
+            <li data-en="Answers and books right in your DMs" data-fr="Il répond et réserve dans tes DM">Answers and books right in your DMs</li>
+            <li data-en="Unlimited DMs" data-fr="DM illimités">Unlimited DMs</li>
+          </ul>
+          <div class="plan-demo-sep"><span data-en="Try" data-fr="Essayer">Try</span></div>
+          <div class="plan-demo-row">
+            <button class="plan-demo-btn" onclick="openBotModal()">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="13" height="13" rx="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h4M11 6l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span data-en="The bot" data-fr="Le bot">The bot</span>
+            </button>
+          </div>
+          <button class="plan-cta" data-plan="pro" data-en="Get started" data-fr="Commencer">Get started</button>
+        </div>
+
+        <!-- Max : + le bot qui travaille pour toi -->
+        <div class="plan rv d3">
+          <div>
+            <div class="plan-name" data-en="Max" data-fr="Max">Max</div>
+            <div class="plan-price">€89<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
+          </div>
+          <ul class="plan-feats">
+            <li data-en="Everything in Pro" data-fr="Tout le Pro">Everything in Pro</li>
+            <li data-en="The bot writes in your style" data-fr="Le bot écrit avec ton style">The bot writes in your style</li>
+            <li data-en="Auto stories when spots are left" data-fr="Stories auto quand il reste de la place">Auto stories when spots are left</li>
+            <li data-en="Freed-up slot offered again by DM" data-fr="Créneau libéré reproposé tout seul en DM">Freed-up slot offered again by DM</li>
+            <li data-en="Direct WhatsApp support" data-fr="Support direct sur WhatsApp">Direct WhatsApp support</li>
+          </ul>
+          <div class="plan-demo-sep"><span data-en="Try" data-fr="Essayer">Try</span></div>
+          <div class="plan-demo-row">
+            <button class="plan-demo-btn" onclick="openBotModal()">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="13" height="13" rx="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h4M11 6l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span data-en="The bot" data-fr="Le bot">The bot</span>
             </button>
           </div>
           <button class="plan-cta" data-plan="max" data-en="Get started" data-fr="Commencer">Get started</button>
@@ -2012,11 +2013,11 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
   <div class="plan-modal">
     <button class="modal-close" aria-label="Close">✕</button>
     <div class="modal-badge-row">
-      <span class="modal-plan-badge" id="modal-plan-title">Starter</span>
+      <span class="modal-plan-badge" id="modal-plan-title">Pro</span>
       <span class="modal-hot-tag" id="modal-hot-tag" style="display:none">Recommended</span>
     </div>
     <div class="modal-price-block">
-      <span class="modal-price" id="modal-price">€59</span><span class="modal-price-mo">/mo</span>
+      <span class="modal-price" id="modal-price">€49</span><span class="modal-price-mo">/mo</span>
     </div>
     <p class="modal-tagline" id="modal-tagline"></p>
     <div class="modal-section-lbl" data-en="What's included" data-fr="Ce qui est inclus">What's included</div>
@@ -2266,41 +2267,18 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
             <!-- Grille plans -->
             <div class="plans-grid" id="bot-plans-grid">
 
-              <!-- Starter -->
-              <div class="plan" id="bplan-starter" onclick="bSelectPlan('starter')">
-                <div>
-                  <div class="plan-name" data-en="Starter" data-fr="Starter">Starter</div>
-                  <div class="plan-price">€59<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
-                </div>
-                <ul class="plan-feats">
-                  <li data-en="AI Instagram bot, 24/7" data-fr="Bot IA Instagram, 24h/24">AI Instagram bot, 24/7</li>
-                  <li data-en="Unlimited DMs" data-fr="DMs illimités">Unlimited DMs</li>
-                  <li data-en="Beta: activated on request" data-fr="Bêta : activé sur demande">Beta: activated on request</li>
-                </ul>
-                <div class="plan-demo-sep"><span data-en="You tested it ✓" data-fr="Tu l'as testé ✓">You tested it ✓</span></div>
-                <div class="plan-demo-row">
-                  <button class="plan-demo-btn" disabled style="opacity:.5;cursor:default" onclick="event.stopPropagation()">
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="13" height="13" rx="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h4M11 6l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    <span data-en="Bot demo active ✓" data-fr="Démo bot active ✓">Bot demo active ✓</span>
-                  </button>
-                </div>
-                <button class="plan-cta" onclick="event.stopPropagation();bBuyPlan('starter')" data-en="Get started" data-fr="Commencer">Get started</button>
-              </div>
-
-              <!-- Max — recommandé -->
-              <div class="plan plan-pop" id="bplan-max" onclick="bSelectPlan('max')">
+              <!-- Le bot est dans Pro et Max (l'Essentiel n'en a pas) -->
+              <div class="plan plan-pop" id="bplan-pro" onclick="bSelectPlan('pro')">
                 <div class="plan-hot" data-en="Recommended" data-fr="Recommandé">Recommended</div>
                 <div>
-                  <div class="plan-name" data-en="Max" data-fr="Max">Max</div>
-                  <div class="plan-price">€99<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
+                  <div class="plan-name" data-en="Pro" data-fr="Pro">Pro</div>
+                  <div class="plan-price">€49<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
                 </div>
                 <ul class="plan-feats">
+                  <li data-en="Everything in Essentiel: booking page, calendar, clients" data-fr="Tout l&#x27;Essentiel : page de réservation, agenda, clients">Everything in Essentiel: booking page, calendar, clients</li>
                   <li data-en="AI Instagram bot, 24/7" data-fr="Bot IA Instagram, 24h/24">AI Instagram bot, 24/7</li>
-                  <li data-en="Integrated booking calendar — no third-party app needed" data-fr="Agenda de réservation intégré — sans appli tierce">Integrated booking calendar — no third-party app needed</li>
-                  <li data-en="Bot + agenda fully connected" data-fr="Bot + agenda entièrement connectés">Bot + agenda fully connected</li>
-                  <li data-en="Client management (CRM)" data-fr="Gestion clients (CRM)">Client management (CRM)</li>
-                  <li data-en="Stats &amp; analytics" data-fr="Stats &amp; analytics">Stats &amp; analytics</li>
-                  <li data-en="Client files &amp; stats" data-fr="Fiches clients &amp; stats">Client files &amp; stats</li>
+                  <li data-en="Answers and books right in your DMs" data-fr="Il répond et réserve dans tes DM">Answers and books right in your DMs</li>
+                  <li data-en="Unlimited DMs" data-fr="DM illimités">Unlimited DMs</li>
                 </ul>
                 <div class="plan-demo-sep"><span data-en="You tested it ✓" data-fr="Tu l'as testé ✓">You tested it ✓</span></div>
                 <div class="plan-demo-row">
@@ -2308,13 +2286,27 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
                     <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="13" height="13" rx="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h4M11 6l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     <span data-en="Bot demo active ✓" data-fr="Démo bot active ✓">Bot demo active ✓</span>
                   </button>
-                  <button class="plan-demo-btn" onclick="event.stopPropagation();openPreview('dashboard')">
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/></svg>
-                    <span data-en="The dashboard" data-fr="Le dashboard">The dashboard</span>
-                  </button>
-                  <button class="plan-demo-btn" onclick="event.stopPropagation();openPreview('booking')">
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-                    <span data-en="The booking page" data-fr="La page booking">The booking page</span>
+                </div>
+                <button class="plan-cta" onclick="event.stopPropagation();bBuyPlan('pro')" data-en="Get started" data-fr="Commencer">Get started</button>
+              </div>
+
+              <div class="plan" id="bplan-max" onclick="bSelectPlan('max')">
+                <div>
+                  <div class="plan-name" data-en="Max" data-fr="Max">Max</div>
+                  <div class="plan-price">€89<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
+                </div>
+                <ul class="plan-feats">
+                  <li data-en="Everything in Pro" data-fr="Tout le Pro">Everything in Pro</li>
+                  <li data-en="The bot writes in your style" data-fr="Le bot écrit avec ton style">The bot writes in your style</li>
+                  <li data-en="Auto stories when spots are left" data-fr="Stories auto quand il reste de la place">Auto stories when spots are left</li>
+                  <li data-en="Freed-up slot offered again by DM" data-fr="Créneau libéré reproposé tout seul en DM">Freed-up slot offered again by DM</li>
+                  <li data-en="Direct WhatsApp support" data-fr="Support direct sur WhatsApp">Direct WhatsApp support</li>
+                </ul>
+                <div class="plan-demo-sep"><span data-en="You tested it ✓" data-fr="Tu l'as testé ✓">You tested it ✓</span></div>
+                <div class="plan-demo-row">
+                  <button class="plan-demo-btn" disabled style="opacity:.5;cursor:default" onclick="event.stopPropagation()">
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="13" height="13" rx="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h4M11 6l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span data-en="Bot demo active ✓" data-fr="Démo bot active ✓">Bot demo active ✓</span>
                   </button>
                 </div>
                 <button class="plan-cta" onclick="event.stopPropagation();bBuyPlan('max')" data-en="Get started" data-fr="Commencer">Get started</button>
@@ -2327,7 +2319,7 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
           </div><!-- /plans-wrap -->
         </div><!-- /wrap -->
       </div><!-- /pricing -->
-      <span id="bplan-label" style="display:none">starter</span>
+      <span id="bplan-label" style="display:none">pro</span>
     </div>
 
     <!-- STEP 4 : Succès + Instagram -->
@@ -2556,34 +2548,36 @@ document.querySelectorAll('.faq-item').forEach(item=>{
 
 /* ── PLAN DETAIL MODAL ── */
 (()=>{
-  /* Uniquement ce qui existe aujourd'hui. Le bot Instagram est en bêta, activé à la main. */
+  /* Chaque palier = le précédent + une chose. L'app ne bride rien selon
+     l'offre : l'Essentiel a tout le dashboard ; Pro ajoute le bot, Max ce
+     que le bot fait en plus. Le bot est en bêta, mis en place à la main. */
   const PLANS={
     essentiel:{
       price:'€19',
-      en:{name:'Essentiel',hot:'Recommended',tagline:'Your own booking page, confirmations and reminders — the easiest way to stop losing clients in your DMs.',
-        feats:[{t:'Your own online booking page',h:1},{t:'Unlimited services & prices'},{t:'Auto confirmation emails'},{t:'Day-before reminder for every client',h:1},{t:'Optional deposit to fight no-shows'},{t:'Waitlist when a day is full'},{t:'Support by email'}],
+      en:{name:'Essentiel',hot:null,tagline:'Everything you need to run your bookings: your booking page, your calendar and your clients, in one place.',
+        feats:[{t:'Your own online booking page',h:1},{t:'Calendar, services & opening hours',h:1},{t:'Client files & visit history'},{t:'Day-before reminder for every client',h:1},{t:'Optional deposit against no-shows'},{t:'Waitlist when a day is full'},{t:'Daily & weekly revenue'},{t:'Support by email'}],
         steps:[{n:'1',title:'Create your salon',desc:'2 minutes, no card, 7 days free'},{n:'2',title:'Set services & hours',desc:'Your booking page is live right away'},{n:'3',title:'Share your link',desc:'Put it in your Instagram bio'}]},
-      fr:{name:'Essentiel',hot:'Recommandé',tagline:'Ta page de réservation, tes confirmations et tes rappels — le plus simple pour ne plus perdre de clients dans tes DMs.',
-        feats:[{t:'Ta propre page de réservation en ligne',h:1},{t:'Prestations et prix illimités'},{t:'Emails de confirmation automatiques'},{t:'Rappel la veille pour chaque client',h:1},{t:'Acompte optionnel anti no-show'},{t:"Liste d'attente quand un jour est complet"},{t:'Support par email'}],
+      fr:{name:'Essentiel',hot:null,tagline:'Tout pour gérer tes rendez-vous : ta page de réservation, ton agenda et tes clients, au même endroit.',
+        feats:[{t:'Ta propre page de réservation en ligne',h:1},{t:'Agenda, prestations et horaires',h:1},{t:'Fiches clients et historique des visites'},{t:'Rappel la veille pour chaque client',h:1},{t:'Acompte optionnel anti no-show'},{t:"Liste d'attente quand un jour est complet"},{t:'Chiffre du jour et de la semaine'},{t:'Support par email'}],
         steps:[{n:'1',title:'Crée ton salon',desc:'2 minutes, sans carte, 7 jours offerts'},{n:'2',title:'Règle prestations et horaires',desc:'Ta page de réservation est en ligne tout de suite'},{n:'3',title:'Partage ton lien',desc:'Mets-le dans ta bio Instagram'}]}
     },
-    starter:{
-      price:'€59',
-      en:{name:'Starter',hot:null,tagline:'Your AI bot answers your Instagram DMs, 24/7, in your tone. Beta: activated on request.',
-        feats:[{t:'AI Instagram bot, 24/7 (beta, on request)',h:1},{t:'Unlimited DMs handled'},{t:'Replies in your tone',h:1},{t:'Support by email'}],
-        steps:[{n:'1',title:'Start your free trial',desc:'2 minutes, no card, 7 days free'},{n:'2',title:'Request the bot',desc:'From your dashboard — we set it up with you'},{n:'3',title:'Go live',desc:'Your AI answers your DMs'}]},
-      fr:{name:'Starter',hot:null,tagline:'Ton bot IA répond à tes DMs Instagram, 24h/24, dans ton ton. Bêta : activé sur demande.',
-        feats:[{t:'Bot IA Instagram, 24h/24 (bêta, sur demande)',h:1},{t:'DMs illimités'},{t:'Répond dans ton ton',h:1},{t:'Support par email'}],
-        steps:[{n:'1',title:"Lance ton essai gratuit",desc:'2 minutes, sans carte, 7 jours offerts'},{n:'2',title:'Demande le bot',desc:'Depuis ton dashboard — on le met en place avec toi'},{n:'3',title:'Mise en ligne',desc:'Ton IA répond à tes DMs'}]}
+    pro:{
+      price:'€49',
+      en:{name:'Pro',hot:'Recommended',tagline:'Everything in Essentiel, plus an AI that answers your Instagram DMs and books clients straight into your calendar, 24/7.',
+        feats:[{t:'Everything in Essentiel'},{t:'AI Instagram bot, 24/7',h:1},{t:'Answers and books right in your DMs',h:1},{t:'Unlimited DMs'},{t:'Bot setup free for the first 10'},{t:'Support by email'}],
+        steps:[{n:'1',title:'Start your free trial',desc:'2 minutes, no card, 7 days free'},{n:'2',title:'Connect your Instagram',desc:'We set the bot up with you (beta)'},{n:'3',title:'Go live',desc:'Your AI answers and books in your DMs'}]},
+      fr:{name:'Pro',hot:'Recommandé',tagline:"Tout l'Essentiel, plus une IA qui répond à tes DM Instagram et pose les rendez-vous dans ton agenda, 24h/24.",
+        feats:[{t:"Tout l'Essentiel"},{t:'Bot IA Instagram, 24h/24',h:1},{t:'Il répond et réserve dans tes DM',h:1},{t:'DM illimités'},{t:'Mise en place offerte aux 10 premiers'},{t:'Support par email'}],
+        steps:[{n:'1',title:'Lance ton essai gratuit',desc:'2 minutes, sans carte, 7 jours offerts'},{n:'2',title:'Branche ton Instagram',desc:'On met le bot en place avec toi (bêta)'},{n:'3',title:'Mise en ligne',desc:'Ton IA répond et réserve dans tes DM'}]}
     },
     max:{
-      price:'€99',
-      en:{name:'Max',hot:'Recommended',tagline:'Your calendar, your booking page and your clients in one place. The AI bot plugs in when you want it.',
-        feats:[{t:'Your own online booking page',h:1},{t:'Calendar, services & opening hours',h:1},{t:'Client files & visit history',h:1},{t:'Waitlist'},{t:'A notification for every booking'},{t:'Daily & weekly revenue'},{t:'AI Instagram bot (beta, on request)'},{t:'Support by email'}],
-        steps:[{n:'1',title:'Create your salon',desc:'2 minutes, no card, 7 days free'},{n:'2',title:'Set services & hours',desc:'Your booking page is live right away'},{n:'3',title:'Share your link',desc:'Put it in your Instagram bio'}]},
-      fr:{name:'Max',hot:'Recommandé',tagline:'Ton agenda, ta page de réservation et tes clients au même endroit. Le bot IA se branche quand tu veux.',
-        feats:[{t:'Ta propre page de réservation en ligne',h:1},{t:'Agenda, prestations et horaires',h:1},{t:'Fiches clients et historique des visites',h:1},{t:"Liste d'attente"},{t:'Une notification à chaque réservation'},{t:'Chiffre du jour et de la semaine'},{t:'Bot IA Instagram (bêta, sur demande)'},{t:'Support par email'}],
-        steps:[{n:'1',title:'Crée ton salon',desc:'2 minutes, sans carte, 7 jours offerts'},{n:'2',title:'Règle prestations et horaires',desc:'Ta page de réservation est en ligne tout de suite'},{n:'3',title:'Partage ton lien',desc:'Mets-le dans ta bio Instagram'}]}
+      price:'€89',
+      en:{name:'Max',hot:null,tagline:'Everything in Pro, and the bot works for you: it writes like you, fills your empty spots and offers freed-up slots again.',
+        feats:[{t:'Everything in Pro'},{t:'The bot writes in your style',h:1},{t:'Auto stories when spots are left',h:1},{t:'Freed-up slot offered again by DM',h:1},{t:'Direct WhatsApp support'}],
+        steps:[{n:'1',title:'Start your free trial',desc:'2 minutes, no card, 7 days free'},{n:'2',title:'Connect your Instagram',desc:'We set the bot up with you (beta)'},{n:'3',title:'Go live',desc:'Your AI answers and books in your DMs'}]},
+      fr:{name:'Max',hot:null,tagline:'Tout le Pro, et le bot travaille pour toi : il écrit comme toi, remplit tes places vides et repropose les créneaux libérés.',
+        feats:[{t:'Tout le Pro'},{t:'Le bot écrit avec ton style',h:1},{t:'Stories auto quand il reste de la place',h:1},{t:'Créneau libéré reproposé tout seul en DM',h:1},{t:'Support direct sur WhatsApp'}],
+        steps:[{n:'1',title:'Lance ton essai gratuit',desc:'2 minutes, sans carte, 7 jours offerts'},{n:'2',title:'Branche ton Instagram',desc:'On met le bot en place avec toi (bêta)'},{n:'3',title:'Mise en ligne',desc:'Ton IA répond et réserve dans tes DM'}]}
     }
   };
 
@@ -2632,15 +2626,11 @@ document.querySelectorAll('.faq-item').forEach(item=>{
    ═══════════════════════════════════════════════ */
 
 const BBACKEND = 'https://fcutz-automation-multitenant-production.up.railway.app';
-const BSTRIPE  = {
-  starter:'https://buy.stripe.com/aFa5kDfbF9OAfea5HPgEg08', // 59€/mo + 100€ setup
-  max:    'https://buy.stripe.com/dRm28rgfJe4Q2ro7PXgEg09'  // 99€/mo + 100€ setup
-};
 
 const bcfg = {
   name:'', salon:'', ville:'', ig:'',
   services:[], prix:'25', duree:'30',
-  hours:{}, accueil:'', plan:'starter', ton:'chill',
+  hours:{}, accueil:'', plan:'pro', ton:'chill',
   history:[],
   /* ── Flux de réservation ── */
   bookingStep:'initial',
@@ -3109,25 +3099,6 @@ window.bBuyPlan = function(plan) {
   /* Même parcours que partout : essai gratuit d'abord, paiement depuis le dashboard. */
   bcfg.plan = plan;
   window.location.href = '/app#inscription';
-};
-
-/* ── Checkout Stripe ── */
-window.bGoStripe = async function() {
-  const btn = document.getElementById('bcheckout-btn');
-  if(btn){ btn.disabled = true; const sp=btn.querySelector('span'); if(sp) sp.textContent = lang==='fr' ? 'Redirection…' : 'Redirecting…'; }
-  try {
-    await fetch(`${BBACKEND}/api/save-config`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        name:bcfg.name, salon:bcfg.salon, ville:bcfg.ville, ig:bcfg.ig,
-        services:bcfg.services, prix:bcfg.prix, duree:bcfg.duree,
-        hours:bcfg.hours, plan:bcfg.plan
-      })
-    });
-  } catch(_) {}
-  const params = new URLSearchParams({client_reference_id: encodeURIComponent(`${bcfg.salon}|${bcfg.ig}`)});
-  window.location.href = `${BSTRIPE[bcfg.plan]}?${params}`;
 };
 
 /* ── Step 4 : Instagram OAuth ── */

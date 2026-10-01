@@ -13,9 +13,9 @@ function marquerEtape(nom) {
    comme l'annonce le site). client_reference_id = id du salon : le webhook
    (backend/routes/stripe.js) active le salon avec le bon plan dès le paiement. */
 const LIENS_STRIPE = {
-  essentiel: 'https://buy.stripe.com/4gMfZh5B57Gsgie3zHgEg0a',
-  starter: 'https://buy.stripe.com/9B6fZhe7Bd0MgiegmtgEg06',
-  max: 'https://buy.stripe.com/9B614n9Rl9OA5DA9Y5gEg07',
+  essentiel: 'https://buy.stripe.com/4gMfZh5B57Gsgie3zHgEg0a', // 19 €/mois
+  pro: 'https://buy.stripe.com/fZuaEX2oT7Gsgiec6dgEg0b',       // 49 €/mois
+  max: 'https://buy.stripe.com/9B6bJ11kP9OAaXUdahgEg0c',       // 89 €/mois
 };
 function lienPaiement(plan) {
   const p = new URLSearchParams({ client_reference_id: SESSION.salon.id, prefilled_email: SESSION.email || '' });
@@ -29,9 +29,9 @@ function carteAbonnement() {
   if (s.statut === 'essai' && s.jours_essai_restants > 2) {
     return `<div class="ts-bandeau"><i class="ti ti-sparkles"></i>
       <span><strong>Essai gratuit</strong> · ${s.jours_essai_restants} jours restants</span>
-      <div class="ts-bandeau-actions"><a class="btn btn-ghost btn-sm" href="${esc(lienPaiement('max'))}" target="_blank" rel="noopener">Max · 99 €</a>
-        <a class="btn btn-ghost btn-sm" href="${esc(lienPaiement('starter'))}" target="_blank" rel="noopener">Starter · 59 €</a>
-        <a class="btn btn-ghost btn-sm" href="${esc(lienPaiement('essentiel'))}" target="_blank" rel="noopener">Essentiel · 19 €</a></div></div>`;
+      <div class="ts-bandeau-actions"><a class="btn btn-ghost btn-sm" href="${esc(lienPaiement('essentiel'))}" target="_blank" rel="noopener">Essentiel · 19 €</a>
+        <a class="btn btn-ghost btn-sm" href="${esc(lienPaiement('pro'))}" target="_blank" rel="noopener">Pro · 49 €</a>
+        <a class="btn btn-ghost btn-sm" href="${esc(lienPaiement('max'))}" target="_blank" rel="noopener">Max · 89 €</a></div></div>`;
   }
   const titre = s.statut === 'essai'
     ? `Essai gratuit : ${s.jours_essai_restants} jour${s.jours_essai_restants > 1 ? 's' : ''} restant${s.jours_essai_restants > 1 ? 's' : ''}`
@@ -42,12 +42,12 @@ function carteAbonnement() {
   return `<div class="card ts-carte ts-abonnement">
     <div class="card-h"><div><div class="card-title">${titre}</div><div class="card-sub">${sous}</div></div></div>
     <div class="ts-offres">
-      <a class="ts-offre ts-offre-une" href="${esc(lienPaiement('essentiel'))}" target="_blank" rel="noopener">
-        <strong>Essentiel · 19 €/mois</strong><span>Ta page de réservation, confirmations et rappels automatiques. Sans bot.</span></a>
+      <a class="ts-offre" href="${esc(lienPaiement('essentiel'))}" target="_blank" rel="noopener">
+        <strong>Essentiel · 19 €/mois</strong><span>Tout ce que tu utilises ici : page de réservation, agenda, clients, rappels, acompte, stats.</span></a>
+      <a class="ts-offre ts-offre-une" href="${esc(lienPaiement('pro'))}" target="_blank" rel="noopener">
+        <strong>Pro · 49 €/mois</strong><span>Tout l'Essentiel + le bot Instagram qui répond et réserve dans tes DM, 24h/24.</span></a>
       <a class="ts-offre" href="${esc(lienPaiement('max'))}" target="_blank" rel="noopener">
-        <strong>Max · 99 €/mois</strong><span>Agenda, page de réservation, clients, stats. Bot Instagram sur demande.</span></a>
-      <a class="ts-offre" href="${esc(lienPaiement('starter'))}" target="_blank" rel="noopener">
-        <strong>Starter · 59 €/mois</strong><span>Le bot Instagram seul, avec ton outil de réservation actuel.</span></a>
+        <strong>Max · 89 €/mois</strong><span>Tout le Pro + le bot écrit avec ton style, stories auto quand il reste de la place, support direct.</span></a>
     </div>
     <div class="card-sub">Sans engagement, mise en place offerte. Paiement sécurisé par Stripe ; ton salon s'active tout seul.</div>
   </div>`;

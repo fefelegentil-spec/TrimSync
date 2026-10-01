@@ -46,7 +46,7 @@ app.get('/api/ping', (_req, res) => res.json({
      email:     string   — email de contact
      barbershop: string  — nom du salon
      ville:     string   — ville
-     plan:      string   — "starter" | "pro" | "max"
+     plan:      string   — "essentiel" | "pro" | "max"
      message:   string   — message libre (optionnel)
    }
 */
@@ -60,7 +60,7 @@ app.post('/api/devis', async (req, res) => {
     return res.status(400).json({ ok: false, error: 'Champs requis manquants (nom, email, barbershop, plan).' });
   }
 
-  const planLabel = { essentiel: 'Essentiel — 19 €/mois', starter: 'Starter — 59 €/mois', pro: 'Pro — 79 €/mois', max: 'Max — 99 €/mois' }[plan] || plan;
+  const planLabel = { essentiel: 'Essentiel — 19 €/mois', pro: 'Pro — 49 €/mois', max: 'Max — 89 €/mois' }[plan] || plan;
   const dateStr   = new Date().toLocaleDateString('fr-FR', { dateStyle: 'long' });
 
   try {

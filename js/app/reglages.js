@@ -194,8 +194,8 @@ async function renderParametres() {
        ${SESSION.salon.statut === 'actif'
          ? `<p class="ts-texte">Pour changer d'offre ou résilier, écris à <a href="mailto:felix@trimsync.tech">felix@trimsync.tech</a>. Sans engagement : tu peux arrêter quand tu veux.</p>`
          : `<div class="ts-boutons"><a class="btn btn-gold" href="${esc(lienPaiement('essentiel'))}" target="_blank" rel="noopener"><i class="ti ti-credit-card"></i>Essentiel · 19 €/mois</a>
-            <a class="btn btn-out" href="${esc(lienPaiement('starter'))}" target="_blank" rel="noopener">Starter · 59 €/mois</a>
-            <a class="btn btn-out" href="${esc(lienPaiement('max'))}" target="_blank" rel="noopener">Max · 99 €/mois</a></div>`}`)
+            <a class="btn btn-out" href="${esc(lienPaiement('pro'))}" target="_blank" rel="noopener">Pro · 49 €/mois</a>
+            <a class="btn btn-out" href="${esc(lienPaiement('max'))}" target="_blank" rel="noopener">Max · 89 €/mois</a></div>`}`)
     + carte('Compte', esc(SESSION.email),
       `<div class="ts-grille2">
          <input class="input" id="mdp-actuel" type="password" autocomplete="current-password" placeholder="Mot de passe actuel">

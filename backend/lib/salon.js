@@ -2,7 +2,8 @@
 const { nowParis } = require('./dates');
 
 const SITE = () => process.env.SITE_URL || 'https://trimsync.tech';
-const PRIX_PLANS = { essentiel: 19, starter: 59, pro: 79, max: 99 };
+// Starter n'est plus vendu (01/10/2026) : gardé pour un salon qui l'aurait encore.
+const PRIX_PLANS = { essentiel: 19, pro: 49, max: 89, starter: 59 };
 
 // Un essai dépassé est expiré dès le lendemain, sans attendre la tâche du jour.
 function statutEffectif(salon, aujourdhui = nowParis().date) {

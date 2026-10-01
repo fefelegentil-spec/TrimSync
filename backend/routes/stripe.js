@@ -14,9 +14,12 @@ const { notifierSalon } = require('../lib/push');
 
 const router = express.Router();
 const TOLERANCE_S = 300;
-// Montants mensuels (centimes) → plan. Les liens avec frais de mise en place
-// (100 €) facturent en plus une ligne unique : on la retire avant de lire le plan.
-const PLAN_PAR_MONTANT = { 1900: 'essentiel', 5900: 'starter', 7900: 'pro', 9900: 'max' };
+// Montants mensuels (centimes) → plan. Grille du 01/10/2026 : Essentiel 19 €,
+// Pro 49 € (+ bot), Max 89 € (+ bot avancé). Les anciens montants (59 € Starter,
+// 79 € Pro, 99 € Max) restent reconnus pour un lien déjà ouvert chez un client.
+// Les liens avec frais de mise en place (100 €) facturent en plus une ligne
+// unique : on la retire avant de lire le plan.
+const PLAN_PAR_MONTANT = { 1900: 'essentiel', 4900: 'pro', 8900: 'max', 5900: 'starter', 7900: 'pro', 9900: 'max' };
 const FRAIS_MISE_EN_PLACE = 10000;
 
 function signatureValide(brut, entete, secret) {

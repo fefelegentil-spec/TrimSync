@@ -354,12 +354,12 @@ async function main() {
     return r.status;
   }
   const salonN = insN.d?.salon?.id;
-  const paiementN = { type: 'checkout.session.completed', data: { object: { id: 'cs_n', amount_total: 5900, client_reference_id: salonN, customer: 'cus_n', subscription: `sub_n_${Date.now()}` } } };
+  const paiementN = { type: 'checkout.session.completed', data: { object: { id: 'cs_n', amount_total: 4900, client_reference_id: salonN, customer: 'cus_n', subscription: `sub_n_${Date.now()}` } } };
   ok(await webhook(paiementN, 't=1,v1=00') === 400, 'signature Stripe fausse refusée');
   ok(await webhook(paiementN) === 200, 'paiement reçu');
   let moiN = await appel('GET', '/api/moi', undefined, insN.d?.jeton);
-  ok(moiN.d?.salon?.statut === 'actif' && moiN.d.salon.plan === 'starter', 'salon actif en Starter après paiement', moiN.d?.salon);
-  ok(await webhook({ type: 'checkout.session.completed', data: { object: { id: 'cs_x', amount_total: 19900, customer_details: { email: `x-${RUN}@test.fr` } } } }) === 200, 'paiement sans référence');
+  ok(moiN.d?.salon?.statut === 'actif' && moiN.d.salon.plan === 'pro', 'salon actif en Pro après paiement', moiN.d?.salon);
+  ok(await webhook({ type: 'checkout.session.completed', data: { object: { id: 'cs_x', amount_total: 18900, customer_details: { email: `x-${RUN}@test.fr` } } } }) === 200, 'paiement sans référence');
   const moiX = await appel('GET', '/api/moi', undefined, insX.d?.jeton);
   ok(moiX.d?.salon?.statut === 'actif' && moiX.d.salon.plan === 'max', 'retrouvé par email, frais de mise en place ignorés : Max', moiX.d?.salon);
   ok(await webhook({ type: 'customer.subscription.deleted', data: { object: { id: paiementN.data.object.subscription } } }) === 200, 'résiliation reçue');

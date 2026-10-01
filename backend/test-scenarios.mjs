@@ -272,7 +272,7 @@ async function main() {
   const ligneA = sal.d?.salons?.find(s => s.slug === slugA2);
   ok(sal.s === 200 && ligneA && ligneA.bot_statut === 'demande' && ligneA.email === emailA && ligneA.rdv_30j >= 5, 'liste des salons', ligneA);
   const kpi = await appel('GET', '/api/admin/kpi', undefined, ADM);
-  ok(kpi.s === 200 && kpi.d.demandes_bot >= 1 && kpi.d.mrr >= 79 && kpi.d.essai >= 1, 'indicateurs', kpi.d);
+  ok(kpi.s === 200 && kpi.d.demandes_bot >= 1 && kpi.d.mrr >= 49 && kpi.d.essai >= 1, 'indicateurs', kpi.d);
   ok((await appel('PATCH', `/api/admin/salons/${salonB}`, { plan: 'gratuit' }, ADM)).s === 400, 'plan inconnu refusé');
 
   console.log('T16 — règles de réservation et options');

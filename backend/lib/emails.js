@@ -146,7 +146,7 @@ function rappelEssai(a, salon, jours) {
       surtitre: 'Ton essai',
       titre: `Ton essai se termine ${quand}`,
       corps: para(`Après le <strong>${escHtml(jourLisible(salon.essai_fin))}</strong>, ta page de réservation n'acceptera plus de rendez-vous et ton agenda passera en lecture seule. <strong>Rien n'est effacé</strong> : il suffit de choisir une offre pour tout rouvrir.`)
-        + details([['Max · 99 €/mois', 'Agenda, page de réservation, clients'], ['Starter · 59 €/mois', 'Bot Instagram (bêta)']])
+        + details([['Essentiel · 19 €/mois', 'Page de réservation, confirmations et rappels'], ['Max · 99 €/mois', 'Tout, avec agenda et clients'], ['Starter · 59 €/mois', 'Bot Instagram (bêta)']])
         + para('Sans engagement, mise en place offerte. Tu choisis depuis ton dashboard, en deux clics :')
         + bouton({ url: `${SITE()}/app`, texte: 'Choisir mon offre' }),
       pourquoi: `Tu reçois cet email parce que l'essai gratuit de ${salon.nom || 'ton salon'} arrive à son terme.`,

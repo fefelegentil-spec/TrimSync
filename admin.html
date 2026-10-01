@@ -144,7 +144,7 @@ function afficher() {
       <div><small>${s.rdv_30j} RDV sur 30 j</small><small>Vu le ${jour(s.derniere_connexion_le)}</small><small>Inscrit le ${jour(s.created_at)}</small></div>
       <div class="bo-actions">
         <select class="input" onchange="activer('${esc(s.id)}', this.value); this.value=''" aria-label="Activer un plan">
-          <option value="">Activer…</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="max">Max</option>
+          <option value="">Activer…</option><option value="essentiel">Essentiel</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="max">Max</option>
         </select>
         <button class="btn btn-out btn-sm" onclick="prolonger('${esc(s.id)}', '${esc(s.essai_fin)}')">+14 j d'essai</button>
         ${s.bot_statut !== 'actif' ? `<button class="btn btn-out btn-sm" onclick="modifier('${esc(s.id)}', { bot_statut: 'actif' }, 'Bot marqué actif')">Bot branché</button>` : ''}

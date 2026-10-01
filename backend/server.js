@@ -60,7 +60,7 @@ app.post('/api/devis', async (req, res) => {
     return res.status(400).json({ ok: false, error: 'Champs requis manquants (nom, email, barbershop, plan).' });
   }
 
-  const planLabel = { starter: 'Starter — 29 €/mois', pro: 'Pro — 59 €/mois', max: 'Max — 99 €/mois' }[plan] || plan;
+  const planLabel = { essentiel: 'Essentiel — 19 €/mois', starter: 'Starter — 59 €/mois', pro: 'Pro — 79 €/mois', max: 'Max — 99 €/mois' }[plan] || plan;
   const dateStr   = new Date().toLocaleDateString('fr-FR', { dateStyle: 'long' });
 
   try {

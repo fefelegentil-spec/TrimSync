@@ -27,7 +27,7 @@
 @keyframes orb-a{to{transform:translate(32%,48%) scale(1.35)}}
 @keyframes orb-b{to{transform:translate(-38%,-32%) scale(0.72)}}
 @keyframes orb-c{to{transform:translate(-25%,30%) scale(1.28)}}
-@media(prefers-reduced-motion:reduce){.orb{animation:none}}
+@media(prefers-reduced-motion:reduce),(max-width:760px),(hover:none){.orb{animation:none;will-change:auto}}
 :root{
   --bg:oklch(0.12 0.008 222);--bg2:oklch(0.16 0.009 220);--bg3:oklch(0.20 0.010 220);
   --bd:oklch(0.24 0.011 218);--bd2:oklch(0.32 0.013 215);
@@ -64,8 +64,6 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")}
 
 
-/* scroll progress */
-.scroll-prog{position:fixed;top:calc(var(--nav-h) + env(safe-area-inset-top));left:0;width:100%;height:2px;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--a),oklch(0.84 0.10 190));z-index:9997;pointer-events:none}
 
 /* section nav dots */
 .sec-nav{position:fixed;right:1.5rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:.6rem;z-index:90}
@@ -553,7 +551,7 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
 .sol-tline-progress{
   width:100%;
   background:linear-gradient(180deg,var(--a),oklch(0.52 0.12 196));
-  height:0%;box-shadow:0 0 10px oklch(0.76 0.13 193/.5);
+  height:100%;box-shadow:0 0 10px oklch(0.76 0.13 193/.5);
 }
 .sol-step{
   display:grid;grid-template-columns:minmax(0,1fr) 80px minmax(0,1fr);
@@ -1433,7 +1431,6 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
 <body>
 
 <div id="page-bg" aria-hidden="true"><div class="orb orb-a"></div><div class="orb orb-b"></div><div class="orb orb-c"></div></div>
-<div class="scroll-prog" id="sprog" aria-hidden="true"></div>
 <nav class="sec-nav" id="secnav" aria-label="Page sections"></nav>
 <div aria-live="polite" aria-atomic="true" class="sr-only" id="la"></div>
 
@@ -2358,7 +2355,7 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
 </div>
 
 <script type="module">
-import { animate, scroll, inView, spring } from "https://cdn.jsdelivr.net/npm/motion@11/+esm";
+import { animate, inView } from "https://cdn.jsdelivr.net/npm/motion@11/+esm";
 const pref=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ── LANG ── */
@@ -2397,9 +2394,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&nm.classList.contai
 const navEl=document.getElementById('nav');
 window.addEventListener('scroll',()=>navEl.classList.toggle('scrolled',scrollY>40),{passive:true});
 
-/* ── SCROLL PROGRESS ── */
-const sprog=document.getElementById('sprog');
-if(sprog)scroll(info=>{const p=typeof info==='number'?info:(info?.y?.progress??0);sprog.style.transform=`scaleX(${p})`;});
 
 /* ── WAVES SHADER BACKGROUND — chargé via js/waves-bg.js + Three.js ── */
 
@@ -2549,34 +2543,6 @@ restartChat('chat-msgs');
 
 /* ── SCROLL REVEALS — désactivés ── */
 
-
-/* ── ORBES — intensité variable selon section au scroll ── */
-if(!pref){
-  const orbA=document.querySelector('.orb-a');
-  const orbB=document.querySelector('.orb-b');
-  const orbC=document.querySelector('.orb-c');
-  const pricingEl=document.getElementById('pricing');
-  /* pricingTop calculé une fois, mis à jour au resize — évite getBoundingClientRect() à chaque scroll */
-  let pricingTop=0;
-  function cachePricingTop(){pricingTop=pricingEl?(pricingEl.getBoundingClientRect().top+scrollY):0;}
-  cachePricingTop();
-  window.addEventListener('resize',cachePricingTop,{passive:true});
-  function updateOrbOpacity(){
-    const sy=scrollY;
-    const wh=window.innerHeight;
-    let intensity=1;
-    if(pricingEl){
-      if(sy>pricingTop-wh*.5) intensity=0.18;
-      else if(sy>wh*.8) intensity=0.60;
-    }
-    const s=String(intensity);
-    if(orbA) orbA.style.opacity=s;
-    if(orbB) orbB.style.opacity=s;
-    if(orbC) orbC.style.opacity=s;
-  }
-  window.addEventListener('scroll',updateOrbOpacity,{passive:true});
-  updateOrbOpacity();
-}
 
 /* ── FAQ ── */
 document.querySelectorAll('.faq-item').forEach(item=>{
@@ -3223,6 +3189,11 @@ window.bConnectInstagram = function() {
     });
   }
 
+  /* Apparitions au défilement : grand écran seulement. Au doigt, les blocs
+     masqués puis animés pendant le défilement faisaient sauter la page et
+     laissaient des trous vides quand on défilait vite. */
+  const anime=!pref&&!matchMedia('(max-width:760px),(hover:none)').matches;
+
   /* ── HELPER : observer one-shot ── */
   function once(targets,cb,opts){
     const els=typeof targets==='string'
@@ -3236,7 +3207,7 @@ window.bConnectInstagram = function() {
   }
 
   /* ── REVEALS GÉNÉRIQUES (.rv) ── */
-  if(!pref){
+  if(anime){
     document.querySelectorAll('.rv').forEach(el=>{
       el.style.opacity='0';el.style.transform='translateY(28px)';
     });
@@ -3250,7 +3221,7 @@ window.bConnectInstagram = function() {
   }
 
   /* ── PROBLEM — reveal doux (fade + translate) ── */
-  if(!pref){
+  if(anime){
     document.querySelectorAll('.pain').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(22px)';});
     once('.pain',(t)=>{
       animate(t,{opacity:[0,1],y:[22,0]},{duration:0.6,easing:EX});
@@ -3258,7 +3229,7 @@ window.bConnectInstagram = function() {
   }
 
   /* ── SOLUTION TIMELINE — slide alterné + ligne progress ── */
-  if(!pref){
+  if(anime){
     /* Sur téléphone, pas de glissé latéral : les blocs partaient 56px à droite
        de l'écran avant d'apparaître, ce qui élargissait la page et la laissait
        glisser de gauche à droite sur iPhone. */
@@ -3278,22 +3249,10 @@ window.bConnectInstagram = function() {
       if(c) animate(c,etroit?{opacity:[0,1],y:[24,0]}:{opacity:[0,1],x:[isL?-56:56,0]},{duration:0.7,delay:0.1,easing:EX});
     },{rootMargin:'-18% 0px',threshold:0.2});
 
-    /* Ligne progress scrubée au scroll */
-    const tl=document.querySelector('.sol-timeline');
-    const prog=document.querySelector('.sol-tline-progress');
-    if(tl&&prog){
-      const update=()=>{
-        const r=tl.getBoundingClientRect();
-        const vis=Math.max(0,Math.min(tl.offsetHeight,-r.top+window.innerHeight*0.55));
-        prog.style.height=(vis/tl.offsetHeight*100)+'%';
-      };
-      window.addEventListener('scroll',update,{passive:true});
-      update();
-    }
   }
 
   /* ── FEATURES BENTO — entrée cinématique scale+y en cascade ── */
-  if(!pref){
+  if(anime){
     document.querySelectorAll('.feat').forEach(el=>{
       el.style.opacity='0';el.style.transform='translateY(65px) scale(0.93)';
     });
@@ -3331,7 +3290,7 @@ window.bConnectInstagram = function() {
   }
 
   /* ── PRICING — scale in stagger ── */
-  if(!pref){
+  if(anime){
     document.querySelectorAll('.plan').forEach(el=>{
       if(el.closest('#bot-plans-grid')) return; /* plans du modal : jamais masqués (pas d'observer dédié) */
       el.style.opacity='0';el.style.transform='scale(0.9) translateY(24px)';
@@ -3356,7 +3315,7 @@ window.bConnectInstagram = function() {
   }
 
   /* ── FAQ — stagger items ── */
-  if(!pref){
+  if(anime){
     document.querySelectorAll('.faq-item').forEach(el=>{
       el.style.opacity='0';el.style.transform='translateY(20px)';
     });
@@ -3374,7 +3333,7 @@ window.bConnectInstagram = function() {
   }
 
   /* ── BOT DEMO PREVIEW CARDS — stagger ── */
-  if(!pref){
+  if(anime){
     document.querySelectorAll('.bot-prev-card').forEach(el=>{
       el.style.opacity='0';el.style.transform='translateY(28px)';
     });
@@ -3391,22 +3350,6 @@ window.bConnectInstagram = function() {
     }
   }
 
-  /* ── HERO PARALLAX retiré : le bot et le contenu ne suivent plus le scroll ── */
-
-  /* ── ORB PARALLAX (profondeur fond) ── */
-  /* Utilise la propriété CSS `translate` (indépendante de `transform`)
-     pour se composer avec les keyframes existants sans conflit */
-  if(!pref){
-    const oa=document.querySelector('.orb-a');
-    const ob=document.querySelector('.orb-b');
-    const oc=document.querySelector('.orb-c');
-    window.addEventListener('scroll',()=>{
-      const y=window.scrollY;
-      if(oa) oa.style.translate=`0 ${(y*0.07).toFixed(1)}px`;
-      if(ob) ob.style.translate=`0 ${(-y*0.05).toFixed(1)}px`;
-      if(oc) oc.style.translate=`0 ${(y*0.035).toFixed(1)}px`;
-    },{passive:true});
-  }
 })();
 </script>
 <!-- Fond animé « wavy » : WebGL2 natif, sans dépendance (portage de components/ui/wavy.tsx). -->

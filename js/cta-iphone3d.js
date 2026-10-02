@@ -2,8 +2,11 @@
    TrimSync — CTA iPhone 3D
    Remplace la maquette 2D du bas de page (#cta) par un VRAI iPhone 3D :
    modèle glTF « iPhone 15 Pro » (Sketchfab, Sketcher, CC-BY 4.0), éclairage
-   studio HDRI, softboxes RectAreaLight, écran TrimSync dessiné en canvas et
-   incrusté sur la dalle, halo teal arrière.
+   studio HDRI, softboxes RectAreaLight, écran verrouillé iOS dessiné en canvas
+   et incrusté sur la dalle.
+
+   Pas de halo ni de plan additif derrière : le téléphone se détache sur la
+   page uniquement par son éclairage (aucun rectangle visible).
 
    Contraintes :
    - Le 2D reste le fallback : rien n'est masqué tant que la 3D n'a pas dit
@@ -89,28 +92,32 @@ function drawStatusBar(ctx, light = false) {
   }
 }
 
-/* Une notification iOS translucide */
-function drawNotif(ctx, y, icoText, icoBg, meta, title, msg) {
-  const x = 44, w = SCREEN_W - 88, h = 156;
-  const r = 40;
+/* Notification iOS : matériau translucide, icône d'app, nom de l'app + heure,
+   titre en gras, corps. Géométrie calquée sur une vraie bannière iOS. */
+function drawNotif(ctx, y, icoText, c1, c2, icoFg, meta, title, msg) {
+  const x = 40, w = SCREEN_W - 80, h = 152, r = 50;
 
   ctx.save();
-  // verre dépoli : rond semi-transparent + léger liseré clair
-  ctx.fillStyle = 'rgba(255,255,255,0.13)';
+  // Verre dépoli : fond translucide + liseré clair 1px
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
   roundRect(ctx, x, y, w, h, r);
   ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,0.10)';
-  ctx.lineWidth = 1.5;
-  roundRect(ctx, x + 0.75, y + 0.75, w - 1.5, h - 1.5, r);
+  ctx.strokeStyle = 'rgba(255,255,255,0.13)';
+  ctx.lineWidth = 1.2;
+  roundRect(ctx, x + 0.6, y + 0.6, w - 1.2, h - 1.2, r);
   ctx.stroke();
 
-  // Icône app
-  const ix = x + 34, iy = y + 30, is = 62;
-  ctx.fillStyle = icoBg;
-  roundRect(ctx, ix, iy, is, is, 16);
+  // Icône d'app (vrai dégradé canvas — une chaîne CSS ne s'applique pas)
+  const is = 58, ix = x + 30, iy = y + (h - is) / 2;
+  const grad = ctx.createLinearGradient(ix, iy, ix + is, iy + is);
+  grad.addColorStop(0, c1);
+  grad.addColorStop(1, c2);
+  ctx.fillStyle = grad;
+  roundRect(ctx, ix, iy, is, is, 14);
   ctx.fill();
-  ctx.fillStyle = '#04070a';
-  ctx.font = '800 30px "Bricolage Grotesque", "Figtree", system-ui';
+
+  ctx.fillStyle = icoFg;
+  ctx.font = '800 30px "Bricolage Grotesque", "Figtree", -apple-system, system-ui';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(icoText, ix + is / 2, iy + is / 2 + 2);
@@ -119,22 +126,57 @@ function drawNotif(ctx, y, icoText, icoBg, meta, title, msg) {
   const tx = ix + is + 22;
   ctx.textAlign = 'left';
 
-  ctx.fillStyle = 'rgba(255,255,255,0.62)';
-  ctx.font = '600 20px "Figtree", -apple-system, system-ui';
-  ctx.fillText(meta, tx, y + 40);
+  ctx.fillStyle = 'rgba(255,255,255,0.60)';
+  ctx.font = '600 21px "Figtree", -apple-system, system-ui';
+  ctx.fillText(meta, tx, y + 46);
 
   ctx.fillStyle = '#ffffff';
-  ctx.font = '700 26px "Figtree", -apple-system, system-ui';
-  ctx.fillText(title, tx, y + 76);
+  ctx.font = '700 27px "Figtree", -apple-system, system-ui';
+  ctx.fillText(title, tx, y + 82);
 
-  ctx.fillStyle = 'rgba(255,255,255,0.70)';
-  ctx.font = '500 22px "Figtree", -apple-system, system-ui';
-  ctx.fillText(msg, tx, y + 112);
+  ctx.fillStyle = 'rgba(255,255,255,0.74)';
+  ctx.font = '500 23px "Figtree", -apple-system, system-ui';
+  ctx.fillText(msg, tx, y + 116);
 
   ctx.restore();
 }
 
-/* Écran verrouillé TrimSync : date, horloge, deux notifications, indicateur */
+/* Bouton rond du bas d'un écran verrouillé iOS (lampe torche / appareil photo) */
+function drawLockBtn(ctx, cx, cy, r, kind) {
+  ctx.save();
+  ctx.fillStyle = 'rgba(255,255,255,0.16)';
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.14)';
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+
+  ctx.strokeStyle = '#ffffff';
+  ctx.fillStyle = '#ffffff';
+  ctx.lineWidth = 3.2;
+  ctx.lineJoin = 'round';
+  if (kind === 'flash') {
+    // Lampe torche : tête large + corps plus fin
+    roundRect(ctx, cx - 13, cy - 15, 26, 12, 4);
+    ctx.fill();
+    roundRect(ctx, cx - 8, cy - 3, 16, 22, 5);
+    ctx.fill();
+  } else {
+    // Appareil photo : boîtier + objectif + viseur
+    roundRect(ctx, cx - 17, cy - 10, 34, 24, 8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, cy + 2, 7.5, 0, Math.PI * 2);
+    ctx.stroke();
+    roundRect(ctx, cx - 6, cy - 15, 12, 6, 3);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* Écran verrouillé iOS : date, horloge, notifications, boutons du bas,
+   indicateur home. C'est la véritable interface d'un iPhone. */
 function drawLockScreen(ctx) {
   ctx.fillStyle = '#04070a';
   ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
@@ -149,24 +191,28 @@ function drawLockScreen(ctx) {
 
   drawStatusBar(ctx);
 
-  // Date + horloge
+  // Date + horloge (horloge arrondie épaisse, comme iOS 17+)
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = 'rgba(255,255,255,0.72)';
-  ctx.font = '600 30px "Figtree", -apple-system, system-ui';
-  ctx.fillText('Thursday, June 12', SCREEN_W / 2, 262);
+  ctx.fillStyle = 'rgba(255,255,255,0.78)';
+  ctx.font = '600 34px "Figtree", -apple-system, system-ui';
+  ctx.fillText('Thursday, June 12', SCREEN_W / 2, 256);
 
   ctx.fillStyle = '#ffffff';
-  ctx.font = '300 208px "Bricolage Grotesque", "Figtree", -apple-system, system-ui';
-  ctx.fillText('9:41', SCREEN_W / 2, 392);
+  ctx.font = '500 204px "SF Pro Rounded", "SF Pro Display", -apple-system, "Bricolage Grotesque", system-ui';
+  ctx.fillText('9:41', SCREEN_W / 2, 382);
 
   // Notifications
-  drawNotif(ctx, 632, 'TS', 'linear-gradient(135deg,#60c4c8,#2f7f88)', 'TrimSync · now', 'New booking · #47', 'Inès M. · Thu 6pm · Gel nails');
-  drawNotif(ctx, 812, '✓', 'linear-gradient(135deg,#7fe0b0,#3f9f74)', 'Auto-confirmed', 'Reminder scheduled', 'SMS D-1 · 9pm');
+  drawNotif(ctx, 604, 'TS', '#60c4c8', '#2f7f88', '#05242b', 'TrimSync · now', 'New booking · #47', 'Inès M. · Thu 6pm · Gel nails');
+  drawNotif(ctx, 772, '✓', '#7fe0b0', '#3f9f74', '#06301f', 'TrimSync · now', 'Reminder scheduled', 'SMS D-1 · 9pm');
+
+  // Boutons lampe torche + appareil photo
+  drawLockBtn(ctx, 96, SCREEN_H - 148, 44, 'flash');
+  drawLockBtn(ctx, SCREEN_W - 96, SCREEN_H - 148, 44, 'cam');
 
   // Indicateur home
-  ctx.fillStyle = 'rgba(255,255,255,0.55)';
-  roundRect(ctx, SCREEN_W / 2 - 60, SCREEN_H - 22, 120, 6, 3);
+  ctx.fillStyle = 'rgba(255,255,255,0.60)';
+  roundRect(ctx, SCREEN_W / 2 - 62, SCREEN_H - 24, 124, 6, 3);
   ctx.fill();
 }
 
@@ -319,42 +365,13 @@ async function buildPhone(THREE, GLTFLoader, DRACOLoader, targetH) {
     disp2.renderOrder = 2;
   }
 
-  // 6) Halo rim teal derrière
-  const hbz = new THREE.Box3().setFromObject(holder);
-  const glow = new THREE.PointLight(0x60c4c8, 1.6, 0, 2);
-  glow.position.set(0, 0, hbz.min.z - 1.5);
-  group.add(glow);
-
-  // 7) Échelle finale fiable
+  // 6) Échelle finale fiable
   group.updateMatrixWorld(true);
   const realH = new THREE.Box3().setFromObject(group).getSize(new THREE.Vector3()).y || 1;
   const baseScale = targetH / realH;
   group.scale.setScalar(baseScale);
 
   return { group, baseScale };
-}
-
-/* Halo radial teal derrière le téléphone (plan additif, face caméra) */
-function makeBackGlow(THREE) {
-  const c = document.createElement('canvas');
-  c.width = c.height = 512;
-  const ctx = c.getContext('2d');
-  const g = ctx.createRadialGradient(256, 256, 20, 256, 256, 244);
-  g.addColorStop(0, 'rgba(96,196,200,0.40)');
-  g.addColorStop(0.35, 'rgba(96,196,200,0.14)');
-  g.addColorStop(1, 'rgba(96,196,200,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 512, 512);
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  const mat = new THREE.MeshBasicMaterial({
-    map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false,
-  });
-  // Assez petit pour s'éteindre AVANT les bords du canvas : sinon le plan
-  // additif dessine un rectangle visible sur le fond de page.
-  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(3.1, 3.6), mat);
-  mesh.position.set(0, -0.05, -1.2);
-  return mesh;
 }
 
 async function init(mock) {
@@ -407,8 +424,6 @@ async function init(mock) {
     console.warn('[cta3d] HDRI KO → reflets sans HDRI', e);
   }
   pmrem.dispose();
-
-  scene.add(makeBackGlow(THREE));
 
   const phone = await buildPhone(THREE, GLTFLoader, DRACOLoader, 2.55);
   scene.add(phone.group);

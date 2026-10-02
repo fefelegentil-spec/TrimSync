@@ -324,6 +324,12 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
 .plan-pop .plan-name{color:var(--a)}
 .plan-price{font-family:var(--fd);font-size:clamp(2rem,4vw,2.6rem);font-weight:800;letter-spacing:-.04em;color:var(--t);line-height:1.1}
 .plan-mo{font-size:.7rem;font-weight:500;color:var(--t2);vertical-align:super}
+/* Livrables de l'offre — ce que le client obtient concrètement */
+.plan-gets-wrap{display:flex;flex-direction:column;gap:.45rem;margin-top:-.55rem}
+.plan-gets-lbl{font-size:.58rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--t3)}
+.plan-gets{display:flex;flex-wrap:wrap;gap:.4rem}
+.plan-gets .pg{display:inline-flex;align-items:center;padding:.28rem .66rem;border-radius:100px;background:oklch(0.76 0.13 193/.10);border:1px solid oklch(0.76 0.13 193/.28);color:oklch(0.87 0.09 193);font-size:.7rem;font-weight:700;letter-spacing:.01em;white-space:nowrap}
+.plan-pop .plan-gets .pg{background:oklch(0.76 0.13 193/.17);border-color:oklch(0.76 0.13 193/.45);color:oklch(0.92 0.07 193)}
 .plan-feats{list-style:none;display:flex;flex-direction:column;gap:.5rem;flex:1}
 .plan-feats li{font-size:.83rem;color:var(--t2);padding-left:1.1rem;position:relative;line-height:1.4}
 .plan-feats li::before{content:'';position:absolute;left:0;top:.5rem;width:6px;height:6px;border-radius:50%;background:oklch(0.76 0.13 193/.5)}
@@ -1399,7 +1405,13 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
 .cta-proof-strip .ps{display:flex;flex-direction:column;gap:.12rem}
 .cta-proof-strip .ps .n{font-size:1.15rem;font-weight:700;color:var(--a);letter-spacing:-.02em;font-feature-settings:"tnum";line-height:1}
 .cta-proof-strip .ps .l{font-size:.6rem;color:var(--t3);letter-spacing:.06em;text-transform:uppercase}
-.cta-phone-mock{display:flex;justify-content:center;align-items:center;min-height:580px}
+.cta-phone-mock{display:flex;justify-content:center;align-items:center;min-height:580px;position:relative}
+/* iPhone 3D (WebGL) — remplace la maquette 2D une fois chargée. Le 2D reste
+   le fallback : tant que .has-3d n'est pas posé, seule la maquette s'affiche. */
+.iphone3d{display:none;width:min(392px,80vw);aspect-ratio:272/560;position:relative}
+.cta-phone-mock.has-3d .iphone{display:none}
+.cta-phone-mock.has-3d .iphone3d{display:block}
+.iphone3d canvas{width:100%;height:100%;display:block}
 .iphone{position:relative;width:272px;height:560px;border-radius:56px;padding:13px;
   background:linear-gradient(155deg,oklch(0.26 0.008 220),oklch(0.14 0.008 220));
   box-shadow:0 45px 90px -28px oklch(0.76 0.13 193/.30),0 0 0 2px oklch(0.32 0.008 220),inset 0 1px 1px oklch(1 0 0/.10)}
@@ -1428,6 +1440,16 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
   .cta-phone-mock{min-height:auto;order:-1}
 }
 </style>
+
+<!-- Three.js depuis le CDN (utilisé par l'iPhone 3D du CTA et le fond wavy) -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
 </head>
 <body>
 
@@ -1793,6 +1815,13 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
             <div class="plan-name" data-en="Essentiel" data-fr="Essentiel">Essentiel</div>
             <div class="plan-price">€19<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
           </div>
+          <div class="plan-gets-wrap">
+            <div class="plan-gets-lbl" data-en="What you get" data-fr="Ce que tu obtiens">What you get</div>
+            <div class="plan-gets">
+              <span class="pg" data-en="Booking" data-fr="Le booking">Booking</span>
+              <span class="pg" data-en="Dashboard" data-fr="Le dashboard">Dashboard</span>
+            </div>
+          </div>
           <ul class="plan-feats">
             <li data-en="Your own booking page" data-fr="Ta page de réservation en ligne">Your own booking page</li>
             <li data-en="Calendar, services &amp; hours" data-fr="Agenda, prestations et horaires">Calendar, services &amp; hours</li>
@@ -1822,6 +1851,14 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
             <div class="plan-name" data-en="Pro" data-fr="Pro">Pro</div>
             <div class="plan-price">€49<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
           </div>
+          <div class="plan-gets-wrap">
+            <div class="plan-gets-lbl" data-en="What you get" data-fr="Ce que tu obtiens">What you get</div>
+            <div class="plan-gets">
+              <span class="pg" data-en="Booking" data-fr="Le booking">Booking</span>
+              <span class="pg" data-en="Dashboard" data-fr="Le dashboard">Dashboard</span>
+              <span class="pg" data-en="AI bot" data-fr="Le bot IA">AI bot</span>
+            </div>
+          </div>
           <ul class="plan-feats">
             <li data-en="Everything in Essentiel" data-fr="Tout l&#x27;Essentiel">Everything in Essentiel</li>
             <li data-en="AI Instagram bot, 24/7" data-fr="Bot IA Instagram, 24h/24">AI Instagram bot, 24/7</li>
@@ -1843,6 +1880,14 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
           <div>
             <div class="plan-name" data-en="Max" data-fr="Max">Max</div>
             <div class="plan-price">€89<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
+          </div>
+          <div class="plan-gets-wrap">
+            <div class="plan-gets-lbl" data-en="What you get" data-fr="Ce que tu obtiens">What you get</div>
+            <div class="plan-gets">
+              <span class="pg" data-en="Booking" data-fr="Le booking">Booking</span>
+              <span class="pg" data-en="Dashboard" data-fr="Le dashboard">Dashboard</span>
+              <span class="pg" data-en="100% custom bot" data-fr="Le bot 100% perso">100% custom bot</span>
+            </div>
           </div>
           <ul class="plan-feats">
             <li data-en="Everything in Pro" data-fr="Tout le Pro">Everything in Pro</li>
@@ -2020,6 +2065,10 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
       <span class="modal-price" id="modal-price">€49</span><span class="modal-price-mo">/mo</span>
     </div>
     <p class="modal-tagline" id="modal-tagline"></p>
+    <div class="plan-gets-wrap" id="modal-gets-wrap">
+      <div class="plan-gets-lbl" data-en="What you get" data-fr="Ce que tu obtiens">What you get</div>
+      <div class="plan-gets" id="modal-gets"></div>
+    </div>
     <div class="modal-section-lbl" data-en="What's included" data-fr="Ce qui est inclus">What's included</div>
     <ul class="modal-feat-list" id="modal-feat-list"></ul>
     <div class="modal-section-lbl" data-en="Your onboarding" data-fr="Votre onboarding">Your onboarding</div>
@@ -2274,6 +2323,14 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
                   <div class="plan-name" data-en="Pro" data-fr="Pro">Pro</div>
                   <div class="plan-price">€49<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
                 </div>
+                <div class="plan-gets-wrap">
+                  <div class="plan-gets-lbl" data-en="What you get" data-fr="Ce que tu obtiens">What you get</div>
+                  <div class="plan-gets">
+                    <span class="pg" data-en="Booking" data-fr="Le booking">Booking</span>
+                    <span class="pg" data-en="Dashboard" data-fr="Le dashboard">Dashboard</span>
+                    <span class="pg" data-en="AI bot" data-fr="Le bot IA">AI bot</span>
+                  </div>
+                </div>
                 <ul class="plan-feats">
                   <li data-en="Everything in Essentiel: booking page, calendar, clients" data-fr="Tout l&#x27;Essentiel : page de réservation, agenda, clients">Everything in Essentiel: booking page, calendar, clients</li>
                   <li data-en="AI Instagram bot, 24/7" data-fr="Bot IA Instagram, 24h/24">AI Instagram bot, 24/7</li>
@@ -2294,6 +2351,14 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
                 <div>
                   <div class="plan-name" data-en="Max" data-fr="Max">Max</div>
                   <div class="plan-price">€89<span class="plan-mo" data-en="/mo" data-fr="/mois">/mo</span></div>
+                </div>
+                <div class="plan-gets-wrap">
+                  <div class="plan-gets-lbl" data-en="What you get" data-fr="Ce que tu obtiens">What you get</div>
+                  <div class="plan-gets">
+                    <span class="pg" data-en="Booking" data-fr="Le booking">Booking</span>
+                    <span class="pg" data-en="Dashboard" data-fr="Le dashboard">Dashboard</span>
+                    <span class="pg" data-en="100% custom bot" data-fr="Le bot 100% perso">100% custom bot</span>
+                  </div>
                 </div>
                 <ul class="plan-feats">
                   <li data-en="Everything in Pro" data-fr="Tout le Pro">Everything in Pro</li>
@@ -2555,27 +2620,33 @@ document.querySelectorAll('.faq-item').forEach(item=>{
     essentiel:{
       price:'€19',
       en:{name:'Essentiel',hot:null,tagline:'Everything you need to run your bookings: your booking page, your calendar and your clients, in one place.',
+        gets:['Booking','Dashboard'],
         feats:[{t:'Your own online booking page',h:1},{t:'Calendar, services & opening hours',h:1},{t:'Client files & visit history'},{t:'Day-before reminder for every client',h:1},{t:'Optional deposit against no-shows'},{t:'Waitlist when a day is full'},{t:'Daily & weekly revenue'},{t:'Support by email'}],
         steps:[{n:'1',title:'Create your salon',desc:'2 minutes, no card, 7 days free'},{n:'2',title:'Set services & hours',desc:'Your booking page is live right away'},{n:'3',title:'Share your link',desc:'Put it in your Instagram bio'}]},
       fr:{name:'Essentiel',hot:null,tagline:'Tout pour gérer tes rendez-vous : ta page de réservation, ton agenda et tes clients, au même endroit.',
+        gets:['Le booking','Le dashboard'],
         feats:[{t:'Ta propre page de réservation en ligne',h:1},{t:'Agenda, prestations et horaires',h:1},{t:'Fiches clients et historique des visites'},{t:'Rappel la veille pour chaque client',h:1},{t:'Acompte optionnel anti no-show'},{t:"Liste d'attente quand un jour est complet"},{t:'Chiffre du jour et de la semaine'},{t:'Support par email'}],
         steps:[{n:'1',title:'Crée ton salon',desc:'2 minutes, sans carte, 7 jours offerts'},{n:'2',title:'Règle prestations et horaires',desc:'Ta page de réservation est en ligne tout de suite'},{n:'3',title:'Partage ton lien',desc:'Mets-le dans ta bio Instagram'}]}
     },
     pro:{
       price:'€49',
       en:{name:'Pro',hot:'Recommended',tagline:'Everything in Essentiel, plus an AI that answers your Instagram DMs and books clients straight into your calendar, 24/7.',
+        gets:['Booking','Dashboard','AI bot'],
         feats:[{t:'Everything in Essentiel'},{t:'AI Instagram bot, 24/7',h:1},{t:'Answers and books right in your DMs',h:1},{t:'Unlimited DMs'},{t:'Bot setup free for the first 10'},{t:'Support by email'}],
         steps:[{n:'1',title:'Start your free trial',desc:'2 minutes, no card, 7 days free'},{n:'2',title:'Connect your Instagram',desc:'We set the bot up with you (beta)'},{n:'3',title:'Go live',desc:'Your AI answers and books in your DMs'}]},
       fr:{name:'Pro',hot:'Recommandé',tagline:"Tout l'Essentiel, plus une IA qui répond à tes DM Instagram et pose les rendez-vous dans ton agenda, 24h/24.",
+        gets:['Le booking','Le dashboard','Le bot IA'],
         feats:[{t:"Tout l'Essentiel"},{t:'Bot IA Instagram, 24h/24',h:1},{t:'Il répond et réserve dans tes DM',h:1},{t:'DM illimités'},{t:'Mise en place offerte aux 10 premiers'},{t:'Support par email'}],
         steps:[{n:'1',title:'Lance ton essai gratuit',desc:'2 minutes, sans carte, 7 jours offerts'},{n:'2',title:'Branche ton Instagram',desc:'On met le bot en place avec toi (bêta)'},{n:'3',title:'Mise en ligne',desc:'Ton IA répond et réserve dans tes DM'}]}
     },
     max:{
       price:'€89',
       en:{name:'Max',hot:null,tagline:'Everything in Pro, and the bot works for you: it writes like you, fills your empty spots and offers freed-up slots again.',
+        gets:['Booking','Dashboard','100% custom bot'],
         feats:[{t:'Everything in Pro'},{t:'The bot writes in your style',h:1},{t:'Auto stories when spots are left',h:1},{t:'Freed-up slot offered again by DM',h:1},{t:'Direct WhatsApp support'}],
         steps:[{n:'1',title:'Start your free trial',desc:'2 minutes, no card, 7 days free'},{n:'2',title:'Connect your Instagram',desc:'We set the bot up with you (beta)'},{n:'3',title:'Go live',desc:'Your AI answers and books in your DMs'}]},
       fr:{name:'Max',hot:null,tagline:'Tout le Pro, et le bot travaille pour toi : il écrit comme toi, remplit tes places vides et repropose les créneaux libérés.',
+        gets:['Le booking','Le dashboard','Le bot 100% perso'],
         feats:[{t:'Tout le Pro'},{t:'Le bot écrit avec ton style',h:1},{t:'Stories auto quand il reste de la place',h:1},{t:'Créneau libéré reproposé tout seul en DM',h:1},{t:'Support direct sur WhatsApp'}],
         steps:[{n:'1',title:'Lance ton essai gratuit',desc:'2 minutes, sans carte, 7 jours offerts'},{n:'2',title:'Branche ton Instagram',desc:'On met le bot en place avec toi (bêta)'},{n:'3',title:'Mise en ligne',desc:'Ton IA répond et réserve dans tes DM'}]}
     }
@@ -2591,6 +2662,8 @@ document.querySelectorAll('.faq-item').forEach(item=>{
     modal.querySelector('#modal-plan-title').textContent=d.name;
     modal.querySelector('#modal-price').textContent=p.price;
     modal.querySelector('#modal-tagline').textContent=d.tagline;
+    const getsEl=modal.querySelector('#modal-gets');
+    if(getsEl) getsEl.innerHTML=(d.gets||[]).map(g=>`<span class="pg">${g}</span>`).join('');
     const hotEl=modal.querySelector('#modal-hot-tag');
     d.hot?(hotEl.textContent=d.hot,hotEl.style.display=''):(hotEl.style.display='none');
     modal.querySelector('#modal-feat-list').innerHTML=
@@ -3325,5 +3398,6 @@ window.bConnectInstagram = function() {
 </script>
 <!-- Fond animé « wavy » : WebGL2 natif, sans dépendance (portage de components/ui/wavy.tsx). -->
 <script type="module" src="js/waves-bg.js?v=5"></script>
+<script type="module" src="js/cta-iphone3d.js?v=1"></script>
 </body>
 </html>

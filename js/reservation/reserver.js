@@ -151,20 +151,20 @@ function renderServices() {
   const list = document.getElementById('svc-list');
   if (!list.children.length) {
     list.innerHTML = SERVICES.map(s => `
-      <button class="svc" data-id="${escHtml(s.id)}" onclick="selectSvc('${escHtml(s.id)}')">
-        <div class="svc-check"><i class="ti ti-check" style="font-size:14px"></i></div>
+      <button class="svc" data-id="${escHtml(s.id)}" onclick="selectSvc('${escHtml(s.id)}')" aria-pressed="false">
         <div class="svc-img-wrap ts-sans-image"><i class="ti ${iconePresta(s.nom)}"></i></div>
         <div class="svc-body">
           <div class="svc-name">${escHtml(s.nom)}</div>
           ${s.description ? `<div class="svc-desc">${escHtml(s.description)}</div>` : ''}
-          <div class="svc-meta">
-            <div class="svc-price">${montant(s.prix)}</div>
-            <div class="svc-dur"><i class="ti ti-clock" style="font-size:12px"></i>${s.duree_min}min</div>
-          </div>
+          <div class="svc-dur"><i class="ti ti-clock"></i>${s.duree_min} min</div>
+        </div>
+        <div class="svc-side">
+          <div class="svc-price">${montant(s.prix)}</div>
+          <div class="svc-check"><i class="ti ti-check"></i></div>
         </div>
       </button>`).join('');
   }
-  list.querySelectorAll('.svc').forEach(btn => btn.classList.toggle('sel', btn.dataset.id === selSvc?.id));
+  list.querySelectorAll('.svc').forEach(btn => { const on = btn.dataset.id === selSvc?.id; btn.classList.toggle('sel', on); btn.setAttribute('aria-pressed', on); });
 }
 function iconePresta(nom) {
   const n = (nom || '').toLowerCase();
@@ -625,6 +625,7 @@ async function init() {
     indispo('Bientôt', "Aucune prestation n'est encore proposée en ligne.", true);
   } else {
     renderServices();
+    majCta(1);
   }
   // Le nom se pose, le reflet passe, puis la page monte (même tempo que FCUTZ).
   setTimeout(() => {

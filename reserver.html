@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function(){
     <div class="recap" id="recap-3"></div>
     <div class="fields-row">
       <div class="field"><label for="b-fname">Prénom *</label><input id="b-fname" type="text" autocomplete="given-name" placeholder="Ton prénom"></div>
-      <div class="field"><label for="b-lname">Nom</label><input id="b-lname" type="text" autocomplete="family-name" placeholder="(facultatif)"></div>
+      <div class="field"><label for="b-lname">Nom (facultatif)</label><input id="b-lname" type="text" autocomplete="family-name" placeholder="Ton nom"></div>
     </div>
     <div class="field"><label for="b-phone">Téléphone *</label><input id="b-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="06 12 34 56 78" onblur="rangerTel(this)"></div>
     <div class="field"><label for="b-email">Email (facultatif)</label><input id="b-email" type="email" inputmode="email" autocomplete="email" placeholder="ton@email.com"></div>
@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function(){
 <div class="cta-bar">
   <div class="cta-inner">
     <button type="button" class="cta-back" id="cta-back" onclick="retourCta()" hidden><i class="ti ti-arrow-left"></i>Retour</button>
-    <button type="button" class="btn-main" id="pay-btn" onclick="ctaSuivant()"></button>
+    <button type="button" class="btn-main" id="pay-btn" onclick="ctaSuivant()">Continuer<i class="ti ti-arrow-right"></i></button>
   </div>
 </div>
 

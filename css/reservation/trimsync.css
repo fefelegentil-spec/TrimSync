@@ -25,7 +25,7 @@
      une couleur foncée (calculé par appliquerCouleur()). */
   --accent-ink:var(--ink-sur-accent, #05191B);
   --grad-accent:linear-gradient(135deg, var(--accent-deep), var(--accent) 50%, var(--accent-2));
-  --text:#EEF1F5; --text-2:#A9AFBA; --text-3:#7A808C; --text-4:#575D68;
+  --text:#EEF1F5; --text-2:#A9AFBA; --text-3:#7A808C; --text-4:#737985;
   --success:#4ABA6A; --danger:#E05050;
   --lueur-accent:0 8px 26px rgba(var(--accent-rgb),.28);
   --ease:cubic-bezier(.4,0,.2,1);
@@ -463,7 +463,7 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
   border-color:var(--accent);background:var(--bg-3);
   box-shadow:0 0 0 3.5px rgba(var(--accent-rgb),.1);
 }
-.field input::placeholder{color:var(--text-4)}
+.field input::placeholder{color:var(--text-3)}
 #b-phone{font-family:var(--fd);font-size:14px;font-weight:700;letter-spacing:.5px}
 .fields-row{display:grid;grid-template-columns:1fr;gap:12px}
 @media(min-width:480px){.fields-row{grid-template-columns:1fr 1fr}}
@@ -762,3 +762,8 @@ html.splash-on body>:not(#splash):not(canvas){opacity:0!important;pointer-events
 .svc-check{position:static;width:20px;height:20px;background:transparent;backdrop-filter:none;border-color:rgba(255,255,255,.25)}
 .svc-check i{font-size:12px}
 @media(min-width:768px){.svc-list{grid-template-columns:repeat(2,1fr);gap:10px}}
+
+/* Indice quand « Confirmer » est grisé : le consentement manque */
+.consent-hint{display:none;margin:-4px 0 0;font-size:12px;color:var(--text-2);align-items:center;gap:6px}
+.consent-hint.on{display:flex}
+.consent-hint i{color:var(--accent);font-size:14px}

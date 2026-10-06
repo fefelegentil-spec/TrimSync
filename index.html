@@ -31,7 +31,7 @@
 :root{
   --bg:oklch(0.12 0.008 222);--bg2:oklch(0.16 0.009 220);--bg3:oklch(0.20 0.010 220);
   --bd:oklch(0.24 0.011 218);--bd2:oklch(0.32 0.013 215);
-  --t:oklch(0.94 0.010 200);--t1:var(--t);--t2:oklch(0.68 0.015 210);--t3:oklch(0.46 0.012 215);
+  --t:oklch(0.94 0.010 200);--t1:var(--t);--t2:oklch(0.68 0.015 210);--t3:oklch(0.62 0.012 215);
   --a:oklch(0.76 0.13 193);--alo:oklch(0.76 0.13 193/.10);--amid:oklch(0.76 0.13 193/.28);
   --adrench:oklch(0.54 0.15 193);--on-a:oklch(0.97 0.006 200);
   --fd:'Bricolage Grotesque',system-ui,sans-serif;
@@ -173,6 +173,13 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
 .dash-frame::after{content:'';position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 1px oklch(1 0 0/.04)}
 .dash-frame-cta{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:2;display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:100px;background:oklch(0.18 0.02 220/.85);backdrop-filter:blur(6px);border:1px solid var(--bd2);color:var(--t);font-family:var(--fd);font-size:.76rem;font-weight:700;cursor:pointer;transition:background .2s,transform .2s var(--ex);opacity:0}
 .dash-frame:hover .dash-frame-cta{opacity:1}
+
+/* CTA collant (mobile) : apparaît après le hero, se retire sur les tarifs et le CTA final */
+.m-cta{position:fixed;left:0;right:0;bottom:0;z-index:90;display:none;padding:.7rem 1rem calc(.7rem + env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,transparent,oklch(0.10 0.008 222/.92) 38%);transform:translateY(110%);transition:transform .35s var(--ex,ease)}
+.m-cta.on{transform:none}
+.m-cta .btn{width:100%;justify-content:center;text-align:center}
+@media(max-width:760px){.m-cta{display:block}}
+@media(prefers-reduced-motion:reduce){.m-cta{transition:none}}
 @media(hover:none){.dash-frame-cta{opacity:1;white-space:nowrap;bottom:10px}}
 .dash-frame-cta:focus-visible{opacity:1;outline:2px solid var(--a);outline-offset:2px}
 .dash-frame-cta:hover{background:var(--a);color:var(--on-a);transform:translateX(-50%) translateY(-2px)}
@@ -3416,5 +3423,18 @@ window.bConnectInstagram = function() {
 <!-- Fond animé « wavy » : WebGL2 natif, sans dépendance (portage de components/ui/wavy.tsx). -->
 <script type="module" src="js/waves-bg.js?v=5"></script>
 <script type="module" src="js/cta-iphone3d.js?v=1"></script>
+<div class="m-cta" id="m-cta"><a href="/app#inscription" class="btn btn-a" data-en="Start free — 7 days" data-fr="Essai gratuit 7 jours">Start free — 7 days</a></div>
+<script>
+(function(){
+  var bar=document.getElementById('m-cta'),hero=document.getElementById('home');
+  var stop=[document.getElementById('pricing'),document.getElementById('cta')].filter(Boolean);
+  if(!bar||!hero||!('IntersectionObserver' in window))return;
+  var vis={hero:true,stop:0};
+  function maj(){bar.classList.toggle('on',!vis.hero&&vis.stop===0);}
+  new IntersectionObserver(function(e){vis.hero=e[0].isIntersecting;maj();},{threshold:0.15}).observe(hero);
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){vis.stop+=e.isIntersecting?1:-1;});vis.stop=Math.max(0,vis.stop);maj();},{threshold:0.05});
+  stop.forEach(function(el){io.observe(el);});
+})();
+</script>
 </body>
 </html>

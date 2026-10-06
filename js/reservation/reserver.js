@@ -276,6 +276,8 @@ function updatePayBtn() {
   const btn = document.getElementById('pay-btn');
   if (!btn) return;
   btn.disabled = !checked;
+  const hint = document.getElementById('consent-hint');
+  if (hint) hint.classList.toggle('on', !checked);
   btn.style.opacity = checked ? '1' : '0.5';
   btn.style.cursor = checked ? 'pointer' : 'not-allowed';
 }

@@ -208,3 +208,7 @@
 /* ── Tailles ───────────────────────────────────────────────── */
 .glass-btn.glass-btn--sm { padding: 7px 14px; font-size: 12px; border-radius: 10px; }
 .glass-btn.glass-btn--lg { padding: 13px 28px; font-size: 15px; border-radius: 18px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

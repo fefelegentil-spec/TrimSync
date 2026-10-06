@@ -55,7 +55,7 @@ const SCENES = [
   },
   {
     eyebrow: { en: '02 · AI replies',          fr: '02 · L\'IA répond' },
-    title:   { en: 'Trained on barber DMs.',   fr: 'Entraînée sur des DMs de barbiers.' },
+    title:   { en: 'Trained on beauty-pro DMs.',   fr: 'Entraînée sur des DMs de pros de la beauté.' },
     sub:     { en: 'Not on web text. Real conversations, real slang, real bookings.',
                fr: 'Pas sur du texte web. De vraies conversations, du vrai slang, de vrais RDV.' },
     bg: [0.30, 0.10, 200],
@@ -86,8 +86,8 @@ const SCENES = [
   {
     eyebrow: { en: '05 · ROI',                 fr: '05 · Le retour' },
     title:   { en: '€340 a month, back.',      fr: '340 € par mois, récupérés.' },
-    sub:     { en: 'That\'s the average barber saves with TrimSync. Ten minutes to set up.',
-               fr: 'C\'est ce que récupère le barbier moyen avec TrimSync. Dix minutes pour l\'installer.' },
+    sub:     { en: 'That\'s what the average pro saves with TrimSync. Ten minutes to set up.',
+               fr: 'C\'est ce que récupère une pro de la beauté avec TrimSync. Dix minutes pour l\'installer.' },
     bg: [0.88, 0.04, 200],
     iphone: { px:  1.00, py: -0.10, pz: -0.4, rx: -0.05, ry: -0.30, rz: 0.0, scale: 0.74 },
     rim: 0.5,

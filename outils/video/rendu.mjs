@@ -73,8 +73,10 @@ if (STILLS || BANDE || PLANCHE) {
   const de = +opt('de', 0), a = +opt('a', duree), i0 = Math.round(de * FPS), n = Math.round(a * FPS) - i0;
   const muet = path.join(os.tmpdir(), `ts-film-${process.pid}.mp4`);
   const grand = drapeau('4k') && DPR >= 2;
+  // setparams : sans lui, primaires et transfert restent « non précisés » dans le flux, et ffmpeg
+  // range alors dans le mp4 le profil ICC des captures à la place de l'étiquette BT.709 attendue partout.
   const ff = spawn(FFMPEG, ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
-    '-vf', `scale=${grand ? '3840:2160' : '1920:1080'}:flags=lanczos:in_color_matrix=bt601:in_range=pc:out_color_matrix=bt709:out_range=tv,format=yuv420p`,
+    '-vf', `scale=${grand ? '3840:2160' : '1920:1080'}:flags=lanczos:in_color_matrix=bt601:in_range=pc:out_color_matrix=bt709:out_range=tv,format=yuv420p,setparams=colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=tv`,
     '-c:v', 'libx264', '-preset', 'slow', '-crf', opt('crf', grand ? '20' : '18'), '-profile:v', 'high', '-g', String(FPS * 2), '-bf', '2', '-x264-params', 'aq-mode=3:aq-strength=0.9',
     '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv', '-movflags', '+faststart', muet], { stdio: ['pipe', 'inherit', 'inherit'] });
   // Les pages se partagent les images (une sur N chacune) ; on les écrit dans l'ordre.

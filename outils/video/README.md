@@ -31,10 +31,14 @@ Vérifier qu'un clip a bien joué son scénario : `python planche-clip.py resa`.
 
 ## Ce qu'il faut savoir avant d'y toucher
 
-- **Ce qu'on voit dans les téléphones est le vrai site.** `reserver.html`, `app.html` et le
-  formulaire du bot de `index.html` sont ouverts tels quels et filmés. Une retouche du site se
-  retrouve dans le film au prochain `node enregistrer.mjs`. Pour filmer une autre copie du
-  site que celle du dépôt : `SITE=/chemin node enregistrer.mjs`.
+- **Les écrans TrimSync sont le vrai site.** `reserver.html`, `app.html` et le formulaire du
+  bot de `index.html` sont ouverts tels quels et filmés. Une retouche du site se retrouve dans
+  le film au prochain `node enregistrer.mjs`. Pour filmer une autre copie du site que celle du
+  dépôt : `SITE=/chemin node enregistrer.mjs`. Ce qui n'appartient pas à TrimSync est
+  redessiné dans `film/` : l'écran verrouillé, la messagerie Instagram, la feuille
+  d'autorisation de Meta.
+- **Rien d'ici n'est servi par le site.** Cloudflare Pages publie tout le dépôt ; `outils/`
+  est dans la liste de `_routes.json`, que `functions/_middleware.js` répond en 404.
 - **La voix décide du rythme, la musique du découpage.** Chaque geste est calé sur un mot
   (`local('r3', 'acompte')` dans `temps.mjs`) : réécrire une phrase puis relancer `voix.py`
   recale tout. Les scènes durent un nombre entier de temps (140 BPM) ; si une phrase ne tient

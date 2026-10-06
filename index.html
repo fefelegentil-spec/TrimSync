@@ -2115,7 +2115,7 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
         <div class="preview-swatch" style="background:#4ABA6A" data-color="#4ABA6A" onclick="previewSetColor('booking',this)"></div>
         <div class="preview-cpick">
           <div class="preview-cpick-btn"></div>
-          <input type="color" value="#3bbfcc" oninput="previewSetCustomColor('booking',this.value)">
+          <input type="color" aria-label="Accent color" value="#3bbfcc" oninput="previewSetCustomColor('booking',this.value)">
         </div>
       </div>
       <button class="preview-close" onclick="closePreview('booking')" aria-label="Close">✕</button>
@@ -2139,7 +2139,7 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
         <div class="preview-swatch" style="background:#4ABA6A" data-color="#4ABA6A" onclick="previewSetColor('dashboard',this)"></div>
         <div class="preview-cpick">
           <div class="preview-cpick-btn"></div>
-          <input type="color" value="#A78BFA" oninput="previewSetCustomColor('dashboard',this.value)">
+          <input type="color" aria-label="Accent color" value="#A78BFA" oninput="previewSetCustomColor('dashboard',this.value)">
         </div>
       </div>
       <button class="preview-close" onclick="closePreview('dashboard')" aria-label="Close">✕</button>
@@ -2185,12 +2185,12 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
         <div class="bcard-title" data-en="Tell us about your salon" data-fr="Parle-nous de ton salon">Tell us about your salon</div>
         <div class="bcard-sub" data-en="This personalizes your bot's replies. Your clients will notice." data-fr="Ces infos personnalisent les réponses de ton bot. Tes clients verront la différence.">This personalizes your bot's replies. Your clients will notice.</div>
         <div class="b2col">
-          <div class="bf"><label data-en="Your first name" data-fr="Ton prénom">Your first name</label><input type="text" id="bf-name" placeholder="Karim"/></div>
-          <div class="bf"><label data-en="Salon name" data-fr="Nom du salon">Salon name</label><input type="text" id="bf-salon" placeholder="Studio Nova"/></div>
+          <div class="bf"><label data-en="Your first name" data-fr="Ton prénom" for="bf-name">Your first name</label><input type="text" id="bf-name" placeholder="Karim"/></div>
+          <div class="bf"><label data-en="Salon name" data-fr="Nom du salon" for="bf-salon">Salon name</label><input type="text" id="bf-salon" placeholder="Studio Nova"/></div>
         </div>
         <div class="b2col">
-          <div class="bf"><label data-en="City" data-fr="Ville">City</label><input type="text" id="bf-ville" placeholder="Paris" autocomplete="off"/></div>
-          <div class="bf"><label data-en="Your @Instagram" data-fr="Ton @Instagram">Your @Instagram</label><input type="text" id="bf-ig" placeholder="@studionova"/></div>
+          <div class="bf"><label data-en="City" data-fr="Ville" for="bf-ville">City</label><input type="text" id="bf-ville" placeholder="Paris" autocomplete="off"/></div>
+          <div class="bf"><label data-en="Your @Instagram" data-fr="Ton @Instagram" for="bf-ig">Your @Instagram</label><input type="text" id="bf-ig" placeholder="@studionova"/></div>
         </div>
         <div class="bf">
           <label data-en="Services offered" data-fr="Services proposés">Services offered</label>
@@ -2206,8 +2206,8 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
           </div>
         </div>
         <div class="b2col">
-          <div class="bf"><label data-en="Average price (€)" data-fr="Prix moyen (€)">Average price (€)</label><input type="text" id="bf-prix" placeholder="25" value="25"/></div>
-          <div class="bf"><label data-en="Average duration (min)" data-fr="Durée moyenne (min)">Average duration (min)</label><input type="text" id="bf-duree" placeholder="30" value="30"/></div>
+          <div class="bf"><label data-en="Average price (€)" data-fr="Prix moyen (€)" for="bf-prix">Average price (€)</label><input type="text" id="bf-prix" placeholder="25" value="25"/></div>
+          <div class="bf"><label data-en="Average duration (min)" data-fr="Durée moyenne (min)" for="bf-duree">Average duration (min)</label><input type="text" id="bf-duree" placeholder="30" value="30"/></div>
         </div>
         <div class="bf">
           <label data-en="Opening hours" data-fr="Horaires d'ouverture">Opening hours</label>
@@ -2231,7 +2231,7 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
           </div>
         </div>
         <div class="bf">
-          <label data-en="Custom welcome message (optional)" data-fr="Message d'accueil personnalisé (optionnel)">Custom welcome message (optional)</label>
+          <label data-en="Custom welcome message (optional)" data-fr="Message d'accueil personnalisé (optionnel)" for="bf-accueil">Custom welcome message (optional)</label>
           <textarea id="bf-accueil" placeholder="Hey! I'm the bot for Studio Nova. I can help you book an appointment."></textarea>
         </div>
         <div style="margin-top:1.4rem">
@@ -2274,7 +2274,7 @@ body::before{content:'';position:fixed;left:0;right:0;top:var(--nav-h,68px);heig
           </div>
           <div class="bchat-msgs" id="bchat-msgs" aria-live="polite"></div>
           <div class="bchat-inp-row">
-            <input type="text" id="bchat-input" data-en-placeholder="Write your message…" data-fr-placeholder="Écris ton message…" placeholder="Write your message…" onkeydown="if(event.key==='Enter')bSendMsg()"/>
+            <input type="text" id="bchat-input" aria-label="Message" data-en-placeholder="Write your message…" data-fr-placeholder="Écris ton message…" placeholder="Write your message…" onkeydown="if(event.key==='Enter')bSendMsg()"/>
             <button class="bsend-btn" onclick="bSendMsg()" aria-label="Send">
               <svg viewBox="0 0 16 16"><line x1="14" y1="2" x2="7" y2="9"/><polyline points="14 2 10 14 7 9 2 6 14 2"/></svg>
             </button>

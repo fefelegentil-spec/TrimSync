@@ -40,16 +40,16 @@
     </div>
 
     <form class="cx-form" data-onglet="connexion" onsubmit="cxConnexion(event)">
-      <input class="input" id="cx-email" type="email" autocomplete="email" placeholder="Email" required>
-      <input class="input" id="cx-mdp" type="password" autocomplete="current-password" placeholder="Mot de passe" required>
+      <input class="input" id="cx-email" type="email" autocomplete="email" placeholder="Email" required aria-label="Email">
+      <input class="input" id="cx-mdp" type="password" autocomplete="current-password" placeholder="Mot de passe" required aria-label="Mot de passe">
       <div class="cx-erreur" id="cx-erreur-connexion" role="alert"></div>
       <button class="btn btn-gold" type="submit"><i class="ti ti-login"></i>Se connecter</button>
       <button class="cx-lien" type="button" onclick="cxOubli()">Mot de passe oublié ?</button>
     </form>
 
     <form class="cx-form" data-onglet="inscription" onsubmit="cxInscription(event)" hidden>
-      <input class="input" id="cx-i-salon" type="text" autocomplete="organization" placeholder="Nom du salon" required>
-      <select class="input" id="cx-i-metier" required>
+      <input class="input" id="cx-i-salon" type="text" autocomplete="organization" placeholder="Nom du salon" required aria-label="Nom du salon">
+      <select class="input" id="cx-i-metier" required aria-label="Métier">
         <option value="" disabled selected>Ton activité</option>
         <option value="ongles">Ongles</option>
         <option value="coiffure">Coiffure</option>
@@ -57,10 +57,10 @@
         <option value="esthetique">Esthétique</option>
         <option value="autre">Autre</option>
       </select>
-      <input class="input" id="cx-i-ville" type="text" autocomplete="address-level2" placeholder="Ville">
-      <input class="input" id="cx-i-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="Téléphone du salon">
-      <input class="input" id="cx-i-email" type="email" autocomplete="email" placeholder="Email" required>
-      <input class="input" id="cx-i-mdp" type="password" autocomplete="new-password" minlength="8" placeholder="Mot de passe (8 caractères minimum)" required>
+      <input class="input" id="cx-i-ville" type="text" autocomplete="address-level2" placeholder="Ville" aria-label="Ville">
+      <input class="input" id="cx-i-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="Téléphone du salon" aria-label="Téléphone du salon">
+      <input class="input" id="cx-i-email" type="email" autocomplete="email" placeholder="Email" required aria-label="Email">
+      <input class="input" id="cx-i-mdp" type="password" autocomplete="new-password" minlength="8" placeholder="Mot de passe (8 caractères minimum)" required aria-label="Mot de passe">
       <label class="cx-consent">
         <input type="checkbox" id="cx-i-consent">
         <span>J'accepte les <a href="/terms" target="_blank" rel="noopener">conditions d'utilisation</a> et la <a href="/privacy" target="_blank" rel="noopener">politique de confidentialité</a>.</span>
@@ -159,17 +159,17 @@
     <div class="rdv-sec">
       <div class="rdv-sec-t">Client</div>
       <div class="f-group" style="position:relative">
-        <input class="input" id="rdv-client" type="text" autocomplete="off" placeholder="Rechercher ou saisir un nom…" oninput="filterClientsForRdv()">
+        <input class="input" id="rdv-client" type="text" autocomplete="off" placeholder="Rechercher ou saisir un nom…" oninput="filterClientsForRdv()" aria-label="Client">
         <input type="hidden" id="rdv-client-id">
         <div id="rdv-client-suggestions" class="autocomplete-suggestions" style="display:none"></div>
       </div>
-      <div class="f-group"><input class="input" id="rdv-phone" type="tel" inputmode="tel" placeholder="Téléphone — évite les doublons"></div>
+      <div class="f-group"><input class="input" id="rdv-phone" type="tel" inputmode="tel" placeholder="Téléphone — évite les doublons" aria-label="Téléphone"></div>
     </div>
 
     <div class="rdv-sec">
       <div class="rdv-sec-t">Créneau</div>
       <div class="f-row">
-        <div class="f-group"><input class="input" id="rdv-date" type="date" onchange="rdvAutoFillTime()"></div>
+        <div class="f-group"><input class="input" id="rdv-date" type="date" onchange="rdvAutoFillTime()" aria-label="Date"></div>
         <div class="f-group heure-champ"><button type="button" class="input heure-btn" id="rdv-time-btn" onclick="basculerRoue('rdv-time')" aria-haspopup="listbox" aria-expanded="false"><span id="rdv-time-txt">—</span><i class="ti ti-clock"></i></button><input type="hidden" id="rdv-time"><div class="roue-wrap" id="rdv-time-wrap" hidden><div class="roue" id="rdv-time-roue"><div class="roue-piste" id="rdv-time-piste"></div></div><div class="roue-cadre" aria-hidden="true"></div></div></div>
       </div>
       <div class="f-group hidden" id="rdv-conflict">
@@ -179,8 +179,8 @@
 
     <div class="rdv-sec">
       <div class="rdv-sec-t">Prestation</div>
-      <div class="f-group"><select class="input" id="rdv-service" onchange="rdvCheckConflict()"></select></div>
-      <div class="f-group"><input class="input" id="rdv-note" type="text" maxlength="300" placeholder="Note — fade court, ligne nette…"></div>
+      <div class="f-group"><select class="input" id="rdv-service" onchange="rdvCheckConflict()" aria-label="Prestation"></select></div>
+      <div class="f-group"><input class="input" id="rdv-note" type="text" maxlength="300" placeholder="Note — précisions, préférences…" aria-label="Note"></div>
     </div>
 
     <div class="modal-actions">
@@ -200,7 +200,7 @@
 
     <div class="rdv-sec">
       <div class="rdv-sec-t">Client</div>
-      <div class="f-group"><input class="input" id="rdv-edit-client" type="text"></div>
+      <div class="f-group"><input class="input" id="rdv-edit-client" type="text" aria-label="Client"></div>
       <div id="rdv-edit-contact" class="rdv-contact hidden">
         <a id="rdv-edit-call" href="#" class="btn btn-out"><i class="ti ti-phone"></i>Appeler</a>
         <a id="rdv-edit-sms" href="#" class="btn btn-out"><i class="ti ti-message"></i>Message</a>
@@ -210,7 +210,7 @@
     <div class="rdv-sec">
       <div class="rdv-sec-t">Créneau</div>
       <div class="f-row">
-        <div class="f-group"><input class="input" id="rdv-edit-date" type="date" onchange="rdvEditCheckConflict()"></div>
+        <div class="f-group"><input class="input" id="rdv-edit-date" type="date" onchange="rdvEditCheckConflict()" aria-label="Date"></div>
         <div class="f-group heure-champ"><button type="button" class="input heure-btn" id="rdv-edit-time-btn" onclick="basculerRoue('rdv-edit-time')" aria-haspopup="listbox" aria-expanded="false"><span id="rdv-edit-time-txt">—</span><i class="ti ti-clock"></i></button><input type="hidden" id="rdv-edit-time"><div class="roue-wrap" id="rdv-edit-time-wrap" hidden><div class="roue" id="rdv-edit-time-roue"><div class="roue-piste" id="rdv-edit-time-piste"></div></div><div class="roue-cadre" aria-hidden="true"></div></div></div>
       </div>
       <div class="f-group hidden" id="rdv-edit-conflict">
@@ -220,14 +220,14 @@
 
     <div class="rdv-sec">
       <div class="rdv-sec-t">Prestation</div>
-      <div class="f-group"><select class="input" id="rdv-edit-service" onchange="rdvEditCheckConflict()"></select></div>
-      <div class="f-group"><input class="input" id="rdv-edit-note" type="text" maxlength="300" placeholder="Note — fade court, ligne nette…"></div>
+      <div class="f-group"><select class="input" id="rdv-edit-service" onchange="rdvEditCheckConflict()" aria-label="Prestation"></select></div>
+      <div class="f-group"><input class="input" id="rdv-edit-note" type="text" maxlength="300" placeholder="Note — précisions, préférences…" aria-label="Note"></div>
     </div>
 
     <div class="rdv-sec">
       <div class="rdv-sec-t">Statut</div>
       <div class="f-group">
-        <select class="input" id="rdv-edit-status">
+        <select class="input" id="rdv-edit-status" aria-label="Statut">
           <option value="pending">En attente de validation</option>
           <option value="confirmed">Confirmé</option>
           <option value="noshow">Absent (no-show)</option>
@@ -255,12 +255,12 @@
     </div>
     <div class="rdv-sec">
       <div class="rdv-sec-t">Coordonnées</div>
-      <div class="f-group"><input class="input" id="cli-nom" type="text" maxlength="80" placeholder="Prénom et nom"></div>
+      <div class="f-group"><input class="input" id="cli-nom" type="text" maxlength="80" placeholder="Prénom et nom" aria-label="Prénom et nom"></div>
       <div class="f-row">
-        <div class="f-group"><input class="input" id="cli-tel" type="tel" inputmode="tel" placeholder="Téléphone"></div>
-        <div class="f-group"><input class="input" id="cli-email" type="email" placeholder="Email"></div>
+        <div class="f-group"><input class="input" id="cli-tel" type="tel" inputmode="tel" placeholder="Téléphone" aria-label="Téléphone"></div>
+        <div class="f-group"><input class="input" id="cli-email" type="email" placeholder="Email" aria-label="Email"></div>
       </div>
-      <div class="f-group"><textarea class="input" id="cli-notes" rows="2" maxlength="1000" placeholder="Notes — dégradé bas, sabot 2 sur les côtés…"></textarea></div>
+      <div class="f-group"><textarea class="input" id="cli-notes" rows="2" maxlength="1000" placeholder="Notes — préférences, allergies, habitudes…" aria-label="Notes"></textarea></div>
     </div>
     <div class="rdv-sec"><div class="rdv-sec-t">Historique</div><div id="cli-historique" class="ts-historique"></div></div>
     <div class="modal-actions">

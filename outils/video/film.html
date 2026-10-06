@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TrimSync — le film de présentation</title>
+<!--
+  Le film de présentation TrimSync (1920 × 1080, ~101 s, voix off).
+
+  Cette page EST le film : film.mjs pose l'état exact de chaque élément pour un instant t
+  (window.seek(t)), rendu.mjs la photographie image par image puis monte le son.
+  Rien n'y tourne « en vrai » : ni transition CSS, ni minuteur.
+
+  - Quand tombe quoi : temps.mjs (scènes montées sur la musique, gestes calés sur les mots).
+  - Ce qu'on voit dans les téléphones : les vraies pages du site, filmées par
+    enregistrer.mjs dans clips/ (réservation, agenda, appli, réglages, formulaire du bot).
+  - Ce qui est dessiné ici : la mise en scène (film.css), l'écran verrouillé, la
+    messagerie Instagram, la feuille d'autorisation, les offres.
+
+  Ouverte telle quelle dans un navigateur (via un serveur local), elle se lit avec ?t=12.5.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Figtree:ital,wght@0,300..900;1,300..900&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=block">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="film.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><filter id="bouge" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur id="bouge-flou" stdDeviation="0 0"/></filter></svg>
+<div id="scene">
+  <canvas id="fond" width="1920" height="1080"></canvas>
+  <div id="cadre">
+    <div id="monde"></div>
+    <div id="titres"></div>
+  </div>
+  <div id="aplat"></div>
+  <div id="voile"></div>
+  <canvas id="grain" width="480" height="270" style="width:1920px;height:1080px"></canvas>
+  <div id="noir"></div>
+</div>
+<script type="module" src="film.mjs"></script>
+</body>
+</html>

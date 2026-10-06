@@ -1,124 +1,118 @@
-// Rendu de la vidéo de présentation TrimSync (presentation.html), image par image, avec la voix.
+// Rend le film de présentation (film.html) image par image, puis monte le son.
 //
-//   python voix.py                     → la voix off (voix/*.mp3, durees.json, mots.json) — à faire une fois
-//   node rendu.mjs                     → sortie/trimsync-presentation.mp4
-//   node rendu.mjs --stills 12,30,55   → PNG dans ./apercus/, pour relire un instant précis
-//   node rendu.mjs --muet              → sans la bande son
-//   node rendu.mjs --fps 60            → plus fluide, deux fois plus lourd
+//   node rendu.mjs                      → sortie/trimsync-presentation-<voix>.mp4, une par voix (temps.mjs : VOIX)
+//   node rendu.mjs --stills 12.5,30     → apercus/t012.50.png… pour relire un instant
+//   node rendu.mjs --bande 11.4:12.6:8  → apercus/bande-….jpg : 8 images de 11,4 à 12,6 s côte à côte (relire un mouvement)
+//   node rendu.mjs --planche 24         → apercus/planche.jpg : 24 images réparties sur tout le film
+//   node rendu.mjs --de 20 --a 36       → seulement cette portion (essai)
+//   node rendu.mjs --son                → sortie/son-<voix>.wav : la bande son seule, sans rendre l'image
+//   --fps 60 (défaut) · --dpr 2 (défaut : rendu en 3840 × 2160 puis réduit, bords nets) · --travailleurs 4 · --muet · --4k
 //
-// Chrome (ou Edge) est piloté sans fenêtre : pour chaque image la page reçoit seek(t),
-// puis on la photographie. ffmpeg : variable FFMPEG, sinon celui d'imageio-ffmpeg (pip),
-// sinon celui du PATH. Les bruitages et la musique viennent de Mixkit, déjà téléchargés
-// par l'arbre FCUTZ (../../../outils/videos/sons) : licence « commerciale, sans mention,
-// mais pas de redistribution des fichiers seuls », donc jamais commités ici.
+// Avant : python voix.py (la voix), node enregistrer.mjs (les clips du site).
+// Chrome est piloté sans fenêtre ; pour chaque image la page reçoit seek(t) puis est
+// photographiée : aucune animation ne tourne « en vrai », donc aucune saccade.
 import { chromium } from 'playwright-core';
-import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { spawn, spawnSync } from 'node:child_process';
 import { once } from 'node:events';
-import { fileURLToPath } from 'node:url';
+import { ICI, CHROME, FFMPEG, servir, opt, drapeau } from './lib/outils.mjs';
+import { bandeSon, sousTitres } from './lib/son.mjs';
+import { VOIX } from './temps.mjs';
 
-const ICI = path.dirname(fileURLToPath(import.meta.url));
-const args = process.argv.slice(2);
-const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
-const FPS = +opt('fps', 30);
-const STILLS = opt('stills', null);
-const MUET = args.includes('--muet');
-const OUT = path.resolve(ICI, opt('out', 'sortie/trimsync-presentation.mp4'));
-const SONS = path.resolve(ICI, '../../../outils/videos/sons');
-const FFMPEG = process.env.FFMPEG || [
-  path.join(process.env.APPDATA || '', 'Python/Python314/site-packages/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe'),
-].find(p => fs.existsSync(p)) || 'ffmpeg';
+const FPS = +opt('fps', 60), DPR = +opt('dpr', 2), TRAVAILLEURS = +opt('travailleurs', 4);
+const STILLS = opt('stills', null), BANDE = opt('bande', null), PLANCHE = opt('planche', null);
+const serveur = await servir({ '/': ICI });
+const navigateur = await chromium.launch({ ...(CHROME ? { executablePath: CHROME } : {}), args: ['--force-color-profile=srgb', '--disable-lcd-text'] });
 
-const TYPES = { '.html': 'text/html; charset=utf-8', '.json': 'application/json', '.mp3': 'audio/mpeg', '.js': 'text/javascript', '.css': 'text/css' };
-const serveur = http.createServer((req, res) => {
-  const p = path.join(ICI, decodeURIComponent(new URL(req.url, 'http://x').pathname));
-  if (!p.startsWith(ICI) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-  res.writeHead(200, { 'content-type': TYPES[path.extname(p).toLowerCase()] || 'application/octet-stream' });
-  fs.createReadStream(p).pipe(res);
-});
-await new Promise(ok => serveur.listen(0, '127.0.0.1', ok));
-
-const exe = [process.env.CHROME, 'C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
-  'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'].filter(Boolean).find(p => fs.existsSync(p));
-const navigateur = await chromium.launch(exe ? { executablePath: exe } : {});
-const page = await navigateur.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
-page.on('console', m => { if (['error', 'warning'].includes(m.type())) console.error('[page]', m.text()); });
-page.on('pageerror', e => console.error('[page]', e.message));
-await page.goto(`http://127.0.0.1:${serveur.address().port}/presentation.html?capture`);
-await page.waitForFunction(() => window.pret, null, { timeout: 120000 });
-const etat = await page.evaluate(() => window.pret);
-if (etat !== true) throw new Error(`presentation.html ne s'est pas chargée (${etat})`);
-const repères = await page.evaluate(() => ({ DUREE: window.DUREE, SCN: window.SCN, V: window.V, SFX: window.SFX, VOIX: window.VOIX, MUSIQUE: window.MUSIQUE, ECH: window.ECHANTILLONS }));
-const DUREE = repères.DUREE;
-console.log(`durée : ${DUREE.toFixed(1)} s, ${repères.SFX.length} bruitages`);
-console.log('scènes :', repères.SCN.map(s => s.a.toFixed(1)).join(' | '), '\nvoix :', Object.entries(repères.V).map(([k, v]) => k + ' ' + v.toFixed(1)).join(', '));
-
-async function image(t) { await page.evaluate(t => window.seek(t), t); return page.screenshot({ type: 'png' }); }
-
-// ── son : bruitages sommés en Node (décodés par ffmpeg), puis mixage final par ffmpeg ──
-const EXTRAITS = { tic: [.096, .13] };
-function decoder(f) {
-  const r = spawnSync(FFMPEG, ['-v', 'error', '-i', f, '-f', 'f32le', '-ac', '2', '-ar', '48000', '-'], { maxBuffer: 1 << 30 });
-  if (r.status !== 0) throw new Error(`ffmpeg ne lit pas ${f} : ${r.stderr}`);
-  const a = new Float32Array(r.stdout.byteLength >> 2); Buffer.from(a.buffer).set(r.stdout.subarray(0, a.length << 2));
-  return a;
+async function ouvrir(dpr = DPR) {
+  const page = await navigateur.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: dpr });
+  page.on('console', m => { if (['error', 'warning'].includes(m.type()) && !/favicon/.test(m.text())) console.error('[page]', m.text().slice(0, 300)); });
+  page.on('pageerror', e => console.error('[page]', e.message));
+  await page.goto(`${serveur.origine}/film.html`);
+  await page.waitForFunction(() => window.pret, null, { timeout: 120000 });
+  return page;
 }
-function lit(id) { for (const e of ['wav', 'mp3']) { const f = path.join(SONS, `mixkit-${id}.${e}`); if (fs.existsSync(f)) return f; } throw new Error(`son manquant : mixkit-${id} dans ${SONS}`); }
-function lit_musique(id) { const f = path.join(SONS, `mixkit-musique-${id}.mp3`); if (!fs.existsSync(f)) throw new Error(`musique manquante : ${f}`); return f; }
-function ecrireWav(f, pcm) {   // pcm : Float32 entrelacé stéréo, 48 kHz → WAV 16 bits
-  const n = pcm.length, b = Buffer.alloc(44 + n * 2);
-  b.write('RIFF', 0); b.writeUInt32LE(36 + n * 2, 4); b.write('WAVEfmt ', 8); b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(2, 22);
-  b.writeUInt32LE(48000, 24); b.writeUInt32LE(48000 * 4, 28); b.writeUInt16LE(4, 32); b.writeUInt16LE(16, 34); b.write('data', 36); b.writeUInt32LE(n * 2, 40);
-  for (let i = 0; i < n; i++) b.writeInt16LE(Math.round(Math.max(-1, Math.min(1, pcm[i])) * 32767), 44 + i * 2);
-  fs.writeFileSync(f, b);
-}
-function bruitages(chemin) {
-  const total = Math.ceil(DUREE * 48000) * 2, bed = new Float32Array(total), cache = {};
-  for (const e of repères.SFX) {
-    const id = repères.ECH[e.f]; if (!id) throw new Error(`bruitage inconnu : ${e.f}`);
-    let s = cache[e.f] ||= decoder(lit(id));
-    if (EXTRAITS[e.f]) s = s.subarray(Math.round(EXTRAITS[e.f][0] * 48000) * 2, Math.round(EXTRAITS[e.f][1] * 48000) * 2);
-    const o = Math.round(Math.max(0, e.t) * 48000) * 2, g = e.v ?? .5, fin = s.length;
-    for (let i = 0; i < fin && o + i < total; i++) { const rel = i / fin; bed[o + i] += s[i] * g * (rel > .85 ? (1 - rel) / .15 : 1); }
+const photo = async (page, t, type = 'png') => { await page.evaluate(t => window.seek(t), t); return page.screenshot(type === 'png' ? { type: 'png' } : { type: 'jpeg', quality: 97 }); };
+const apercus = path.join(ICI, 'apercus');
+const montagePlanche = (fichiers, sortie, colonnes, largeur) => spawnSync(FFMPEG, ['-y', '-v', 'error', ...fichiers.flatMap(f => ['-i', f]), '-filter_complex',
+  `${fichiers.map((_, i) => `[${i}:v]scale=${largeur}:-1[v${i}]`).join(';')};${fichiers.map((_, i) => `[v${i}]`).join('')}xstack=inputs=${fichiers.length}:layout=${fichiers.map((_, i) => `${(i % colonnes) * largeur}_${Math.floor(i / colonnes) * Math.round(largeur * 9 / 16)}`).join('|')}`,
+  '-frames:v', '1', '-q:v', '3', sortie], { stdio: 'inherit' });
+
+if (STILLS || BANDE || PLANCHE) {
+  fs.mkdirSync(apercus, { recursive: true });
+  const page = await ouvrir(+opt('dpr', 1));
+  const duree = await page.evaluate(() => window.DUREE);
+  const alertes = await page.evaluate(() => window.PARTITION.alertes);
+  if (alertes.length) console.warn('⚠ partition :', alertes.join(' ; '));
+  if (STILLS) for (const s of STILLS.split(',').map(Number)) {
+    const f = path.join(apercus, `t${s.toFixed(2).padStart(6, '0')}.png`);
+    fs.writeFileSync(f, await photo(page, s)); console.log(f);
   }
-  ecrireWav(chemin, bed);
-}
-function mixer(chemin, tmp) {
-  const bed = path.join(tmp, 'bruitages.wav'); bruitages(bed);
-  const musique = lit_musique(repères.MUSIQUE.id), M = repères.MUSIQUE;
-  const ins = ['-i', bed, '-i', musique, ...repères.VOIX.flatMap(v => ['-i', path.join(ICI, v.f)])];
-  const nv = repères.VOIX.length;
-  const f = [];
-  repères.VOIX.forEach((v, i) => f.push(`[${i + 2}:a]aformat=sample_rates=48000:channel_layouts=stereo,adelay=${Math.round(v.t * 1000)}:all=1,volume=1.35[v${i}]`));
-  f.push(`${repères.VOIX.map((_, i) => `[v${i}]`).join('')}amix=inputs=${nv}:normalize=0:duration=longest[vo]`, `[vo]asplit=2[vo1][vo2]`);
-  f.push(`[1:a]atrim=start=${M.debut},asetpts=PTS-STARTPTS,aformat=sample_rates=48000:channel_layouts=stereo,volume=${M.gain},afade=t=in:st=0:d=2.5,afade=t=out:st=${(DUREE - 3.5).toFixed(2)}:d=3.5[mu]`);
-  f.push(`[mu][vo2]sidechaincompress=threshold=0.015:ratio=7:attack=20:release=450[mud]`);
-  f.push(`[vo1][mud][0:a]amix=inputs=3:normalize=0:duration=longest,loudnorm=I=-15:TP=-1.5:LRA=11,atrim=0:${DUREE.toFixed(2)}[out]`);
-  const r = spawnSync(FFMPEG, ['-y', '-v', 'error', ...ins, '-filter_complex', f.join(';'), '-map', '[out]', '-c:a', 'pcm_s16le', '-ar', '48000', chemin], { maxBuffer: 1 << 28 });
-  if (r.status !== 0) throw new Error('mixage : ' + r.stderr);
-  return chemin;
-}
-
-fs.mkdirSync(path.dirname(OUT), { recursive: true });
-if (STILLS) {
-  const dossier = path.join(ICI, 'apercus'); fs.mkdirSync(dossier, { recursive: true });
-  for (const s of STILLS.split(',').map(Number)) { const f = path.join(dossier, `t${s.toFixed(2).padStart(6, '0')}.png`); fs.writeFileSync(f, await image(s)); console.log(f); }
+  if (BANDE || PLANCHE) {
+    const [a, b, n] = BANDE ? BANDE.split(':').map(Number) : [0.4, duree - 0.6, +PLANCHE];
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ts-bande-')), fichiers = [];
+    for (let i = 0; i < n; i++) { const t = a + (b - a) * i / (n - 1), f = path.join(tmp, `${i}.jpg`); fs.writeFileSync(f, await photo(page, t, 'jpeg')); fichiers.push(f); }
+    const colonnes = +opt('colonnes', BANDE ? Math.min(n, 4) : 6), sortie = path.join(apercus, BANDE ? `bande-${a.toFixed(2)}-${b.toFixed(2)}.jpg` : 'planche.jpg');
+    montagePlanche(fichiers, sortie, colonnes, +opt('largeur', BANDE ? 640 : 480));
+    console.log(sortie, '| instants :', fichiers.map((_, i) => (a + (b - a) * i / (n - 1)).toFixed(2)).join(' '));
+  }
+} else if (drapeau('son')) {
+  const sortie = path.join(ICI, 'sortie'); fs.mkdirSync(sortie, { recursive: true });
+  const page = await ouvrir(1);
+  const duree = await page.evaluate(() => window.DUREE), partition = await page.evaluate(() => ({ ...window.PARTITION, sons: window.SONS }));
+  for (const voix of VOIX) { const f = path.join(sortie, `son-${voix}.wav`); await bandeSon({ voix, partition, duree, sortie: f }); console.log('→', f); }
 } else {
-  const tmp = fs.mkdtempSync(path.join(process.env.TEMP || ICI, 'ts-video-'));
-  const son = MUET ? [] : ['-i', mixer(path.join(tmp, 'son.wav'), tmp), '-map', '0:v', '-map', '1:a', '-c:a', 'aac', '-b:a', '192k', '-shortest'];
-  const n = Math.round(DUREE * FPS);
-  const ff = spawn(FFMPEG, ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'png', '-i', '-', ...son,
-    '-c:v', 'libx264', '-preset', 'slow', '-crf', '18', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-movflags', '+faststart', OUT], { stdio: ['pipe', 'inherit', 'inherit'] });
-  const debut = Date.now();
-  for (let i = 0; i < n; i++) {
-    if (!ff.stdin.write(await image(i / FPS))) await once(ff.stdin, 'drain');
-    if (i % FPS === 0) process.stdout.write(`\r${(i / FPS).toFixed(0)} / ${DUREE.toFixed(0)} s — ${((Date.now() - debut) / 1000).toFixed(0)} s écoulées`);
-  }
-  ff.stdin.end();
+  // ── le film ──
+  const sortie = path.join(ICI, 'sortie'); fs.mkdirSync(sortie, { recursive: true });
+  const pages = await Promise.all(Array.from({ length: TRAVAILLEURS }, () => ouvrir()));
+  const duree = await pages[0].evaluate(() => window.DUREE);
+  const partition = await pages[0].evaluate(() => ({ ...window.PARTITION, sons: window.SONS || [] }));
+  if (partition.alertes.length) console.warn('⚠ partition :', partition.alertes.join(' ; '));
+  const de = +opt('de', 0), a = +opt('a', duree), i0 = Math.round(de * FPS), n = Math.round(a * FPS) - i0;
+  const muet = path.join(os.tmpdir(), `ts-film-${process.pid}.mp4`);
+  const grand = drapeau('4k') && DPR >= 2;
+  const ff = spawn(FFMPEG, ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
+    '-vf', `scale=${grand ? '3840:2160' : '1920:1080'}:flags=lanczos:in_color_matrix=bt601:in_range=pc:out_color_matrix=bt709:out_range=tv,format=yuv420p`,
+    '-c:v', 'libx264', '-preset', 'slow', '-crf', opt('crf', grand ? '20' : '18'), '-profile:v', 'high', '-g', String(FPS * 2), '-bf', '2', '-x264-params', 'aq-mode=3:aq-strength=0.9',
+    '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv', '-movflags', '+faststart', muet], { stdio: ['pipe', 'inherit', 'inherit'] });
+  // Les pages se partagent les images (une sur N chacune) ; on les écrit dans l'ordre.
+  const pretes = new Map(); let suivante = 0; const debut = Date.now();
+  const ecrire = async () => {
+    while (pretes.has(suivante)) {
+      const b = pretes.get(suivante); pretes.delete(suivante);
+      if (!ff.stdin.write(b)) await once(ff.stdin, 'drain');
+      if (suivante % FPS === 0) process.stdout.write(`\r${(de + suivante / FPS).toFixed(0)} / ${a.toFixed(0)} s — ${((Date.now() - debut) / 1000).toFixed(0)} s écoulées   `);
+      suivante++;
+    }
+  };
+  let ecriture = Promise.resolve();
+  await Promise.all(pages.map(async (page, k) => {
+    for (let i = k; i < n; i += TRAVAILLEURS) {
+      while (i - suivante > TRAVAILLEURS * 6) await new Promise(r => setTimeout(r, 15));
+      pretes.set(i, await photo(page, (i0 + i) / FPS, 'jpeg'));
+      ecriture = ecriture.then(ecrire);
+    }
+  }));
+  await ecriture; ff.stdin.end();
   const [code] = await once(ff, 'close');
-  console.log(code === 0 ? `\n→ ${OUT}` : `\nffmpeg a échoué (${code})`);
+  if (code !== 0) throw new Error(`ffmpeg a échoué (${code})`);
+  console.log(`\nimage : ${n} images en ${((Date.now() - debut) / 1000).toFixed(0)} s`);
+  const suffixe = (de > 0 || a < duree) ? `-extrait-${de}-${a}` : '';
+  if (drapeau('muet')) {
+    const f = path.join(sortie, `trimsync-presentation-muet${suffixe}.mp4`); fs.copyFileSync(muet, f); console.log('→', f);
+  } else for (const voix of VOIX) {
+    const wav = path.join(os.tmpdir(), `ts-son-${process.pid}-${voix}.wav`);
+    await bandeSon({ voix, partition, duree, sortie: wav });
+    const f = path.join(sortie, `trimsync-presentation-voix-${voix === 'remy' ? 'homme' : 'femme'}${grand ? '-4k' : ''}${suffixe}.mp4`);
+    const r = spawnSync(FFMPEG, ['-y', '-v', 'error', '-i', muet, ...(de > 0 ? ['-ss', String(de)] : []), '-i', wav, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k', '-shortest', '-movflags', '+faststart', f], { stdio: 'inherit' });
+    if (r.status !== 0) throw new Error('montage du son : échec');
+    fs.rmSync(wav, { force: true });
+    console.log('→', f, `(${(fs.statSync(f).size / 1048576).toFixed(1)} Mio)`);
+  }
+  if (!suffixe) { const srt = path.join(sortie, 'trimsync-presentation.srt'); sousTitres(partition, srt); console.log('→', srt); }
+  fs.rmSync(muet, { force: true });
 }
 await navigateur.close();
-serveur.close();
+serveur.fermer();

@@ -1,0 +1,19 @@
+/* Le film court : la scène de film.css, debout. Les textes sont gros : ils se lisent sur un
+   téléphone tenu à la main, et restent hors des zones que les stories recouvrent
+   (250 px en haut, 300 px en bas). */
+#scene{width:1080px;height:1920px}
+#fond{width:1080px;height:1920px}
+#monde{perspective:2600px;perspective-origin:50% 50%}
+.plateau,.calque{width:1080px;height:1920px}
+#eclair{position:absolute;inset:0;background:var(--a2);opacity:0;pointer-events:none;mix-blend-mode:screen}
+
+.c-titre{position:absolute;left:76px;top:258px;font:800 136px/.98 var(--fd);letter-spacing:-.04em;color:var(--t);white-space:nowrap}
+.c-titre em{font-style:italic;color:var(--a)}
+.c-titre.alerte em{color:var(--alerte)}
+.c-marque{position:absolute;left:80px;top:150px;font:800 58px/1 var(--fd);letter-spacing:-.03em;color:var(--t)}
+.c-marque span{color:var(--a)}
+.c-etapes{position:absolute;left:76px;top:548px;display:flex;gap:14px}
+.c-etape{display:inline-flex;align-items:center;gap:10px;height:66px;padding:0 24px 0 18px;border-radius:33px;border:1.5px solid var(--bd2);font:700 29px var(--fb);letter-spacing:-.01em;color:var(--t3);white-space:nowrap;transform-origin:50% 50%}
+.c-etape .ti{font-size:30px;color:var(--t3)}
+.c-etape.faite{background:var(--a);border-color:var(--a);color:var(--encre)}
+.c-etape.faite .ti{color:var(--encre)}

@@ -22,22 +22,24 @@ import { bandeSon, sousTitres } from './lib/son.mjs';
 import { VOIX } from './temps.mjs';
 
 const FPS = +opt('fps', 60), DPR = +opt('dpr', 2), TRAVAILLEURS = +opt('travailleurs', 4);
+const FILM = opt('film', 'film');   // film : 1 min 41, avec voix · court : 20 s, vertical, sans voix (court.html)
+const [L, H] = FILM === 'court' ? [1080, 1920] : [1920, 1080], NOM = FILM === 'court' ? 'trimsync-20s' : 'trimsync-presentation';
 const STILLS = opt('stills', null), BANDE = opt('bande', null), PLANCHE = opt('planche', null);
 const serveur = await servir({ '/': ICI });
 const navigateur = await chromium.launch({ ...(CHROME ? { executablePath: CHROME } : {}), args: ['--force-color-profile=srgb', '--disable-lcd-text'] });
 
 async function ouvrir(dpr = DPR) {
-  const page = await navigateur.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: dpr });
+  const page = await navigateur.newPage({ viewport: { width: L, height: H }, deviceScaleFactor: dpr });
   page.on('console', m => { if (['error', 'warning'].includes(m.type()) && !/favicon/.test(m.text())) console.error('[page]', m.text().slice(0, 300)); });
   page.on('pageerror', e => console.error('[page]', e.message));
-  await page.goto(`${serveur.origine}/film.html`);
+  await page.goto(`${serveur.origine}/${FILM}.html`);
   await page.waitForFunction(() => window.pret, null, { timeout: 120000 });
   return page;
 }
 const photo = async (page, t, type = 'png') => { await page.evaluate(t => window.seek(t), t); return page.screenshot(type === 'png' ? { type: 'png' } : { type: 'jpeg', quality: 97 }); };
 const apercus = path.join(ICI, 'apercus');
 const montagePlanche = (fichiers, sortie, colonnes, largeur) => spawnSync(FFMPEG, ['-y', '-v', 'error', ...fichiers.flatMap(f => ['-i', f]), '-filter_complex',
-  `${fichiers.map((_, i) => `[${i}:v]scale=${largeur}:-1[v${i}]`).join(';')};${fichiers.map((_, i) => `[v${i}]`).join('')}xstack=inputs=${fichiers.length}:layout=${fichiers.map((_, i) => `${(i % colonnes) * largeur}_${Math.floor(i / colonnes) * Math.round(largeur * 9 / 16)}`).join('|')}`,
+  `${fichiers.map((_, i) => `[${i}:v]scale=${largeur}:-1[v${i}]`).join(';')};${fichiers.map((_, i) => `[v${i}]`).join('')}xstack=inputs=${fichiers.length}:layout=${fichiers.map((_, i) => `${(i % colonnes) * largeur}_${Math.floor(i / colonnes) * Math.round(largeur * H / L)}`).join('|')}`,
   '-frames:v', '1', '-q:v', '3', sortie], { stdio: 'inherit' });
 
 if (STILLS || BANDE || PLANCHE) {
@@ -55,14 +57,14 @@ if (STILLS || BANDE || PLANCHE) {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ts-bande-')), fichiers = [];
     for (let i = 0; i < n; i++) { const t = a + (b - a) * i / (n - 1), f = path.join(tmp, `${i}.jpg`); fs.writeFileSync(f, await photo(page, t, 'jpeg')); fichiers.push(f); }
     const colonnes = +opt('colonnes', BANDE ? Math.min(n, 4) : 6), sortie = path.join(apercus, BANDE ? `bande-${a.toFixed(2)}-${b.toFixed(2)}.jpg` : 'planche.jpg');
-    montagePlanche(fichiers, sortie, colonnes, +opt('largeur', BANDE ? 640 : 480));
+    montagePlanche(fichiers, sortie, colonnes, +opt('largeur', (BANDE ? 640 : 480) * (H > L ? 0.5 : 1)));
     console.log(sortie, '| instants :', fichiers.map((_, i) => (a + (b - a) * i / (n - 1)).toFixed(2)).join(' '));
   }
 } else if (drapeau('son')) {
   const sortie = path.join(ICI, 'sortie'); fs.mkdirSync(sortie, { recursive: true });
   const page = await ouvrir(1);
   const duree = await page.evaluate(() => window.DUREE), partition = await page.evaluate(() => ({ ...window.PARTITION, sons: window.SONS }));
-  for (const voix of VOIX) { const f = path.join(sortie, `son-${voix}.wav`); await bandeSon({ voix, partition, duree, sortie: f }); console.log('→', f); }
+  for (const voix of partition.sansVoix ? [null] : VOIX) { const f = path.join(sortie, `son-${voix || FILM}.wav`); await bandeSon({ voix, partition, duree, sortie: f }); console.log('→', f); }
 } else {
   // ── le film ──
   const sortie = path.join(ICI, 'sortie'); fs.mkdirSync(sortie, { recursive: true });
@@ -76,7 +78,7 @@ if (STILLS || BANDE || PLANCHE) {
   // setparams : sans lui, primaires et transfert restent « non précisés » dans le flux, et ffmpeg
   // range alors dans le mp4 le profil ICC des captures à la place de l'étiquette BT.709 attendue partout.
   const ff = spawn(FFMPEG, ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
-    '-vf', `scale=${grand ? '3840:2160' : '1920:1080'}:flags=lanczos:in_color_matrix=bt601:in_range=pc:out_color_matrix=bt709:out_range=tv,format=yuv420p,setparams=colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=tv`,
+    '-vf', `scale=${grand ? `${L * 2}:${H * 2}` : `${L}:${H}`}:flags=lanczos:in_color_matrix=bt601:in_range=pc:out_color_matrix=bt709:out_range=tv,format=yuv420p,setparams=colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=tv`,
     '-c:v', 'libx264', '-preset', 'slow', '-crf', opt('crf', grand ? '20' : '18'), '-profile:v', 'high', '-g', String(FPS * 2), '-bf', '2', '-x264-params', 'aq-mode=3:aq-strength=0.9',
     '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv', '-movflags', '+faststart', muet], { stdio: ['pipe', 'inherit', 'inherit'] });
   // Les pages se partagent les images (une sur N chacune) ; on les écrit dans l'ordre.
@@ -103,17 +105,17 @@ if (STILLS || BANDE || PLANCHE) {
   console.log(`\nimage : ${n} images en ${((Date.now() - debut) / 1000).toFixed(0)} s`);
   const suffixe = (de > 0 || a < duree) ? `-extrait-${de}-${a}` : '';
   if (drapeau('muet')) {
-    const f = path.join(sortie, `trimsync-presentation-muet${suffixe}.mp4`); fs.copyFileSync(muet, f); console.log('→', f);
-  } else for (const voix of VOIX) {
+    const f = path.join(sortie, `${NOM}-muet${suffixe}.mp4`); fs.copyFileSync(muet, f); console.log('→', f);
+  } else for (const voix of partition.sansVoix ? [null] : VOIX) {
     const wav = path.join(os.tmpdir(), `ts-son-${process.pid}-${voix}.wav`);
     await bandeSon({ voix, partition, duree, sortie: wav });
-    const f = path.join(sortie, `trimsync-presentation-voix-${voix === 'remy' ? 'homme' : 'femme'}${grand ? '-4k' : ''}${suffixe}.mp4`);
+    const f = path.join(sortie, `${NOM}${voix ? `-voix-${voix === 'remy' ? 'homme' : 'femme'}` : ''}${grand ? '-4k' : ''}${suffixe}.mp4`);
     const r = spawnSync(FFMPEG, ['-y', '-v', 'error', '-i', muet, ...(de > 0 ? ['-ss', String(de)] : []), '-i', wav, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k', '-shortest', '-movflags', '+faststart', f], { stdio: 'inherit' });
     if (r.status !== 0) throw new Error('montage du son : échec');
     fs.rmSync(wav, { force: true });
     console.log('→', f, `(${(fs.statSync(f).size / 1048576).toFixed(1)} Mio)`);
   }
-  if (!suffixe) { const srt = path.join(sortie, 'trimsync-presentation.srt'); sousTitres(partition, srt); console.log('→', srt); }
+  if (!suffixe && !partition.sansVoix) { const srt = path.join(sortie, 'trimsync-presentation.srt'); sousTitres(partition, srt); console.log('→', srt); }
   fs.rmSync(muet, { force: true });
 }
 await navigateur.close();

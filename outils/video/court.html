@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TrimSync — le film court</title>
+<link rel="icon" href="data:,">
+<!--
+  Le film court TrimSync : 20 s, vertical (1080 × 1920), sans voix, un geste par temps.
+  Même fabrication que film.html (court.mjs pose l'état exact de l'instant t, rendu.mjs
+  photographie), mêmes pages filmées (clips/), mêmes téléphones (film/decor.mjs).
+    node rendu.mjs --film court            → sortie/trimsync-20s.mp4
+    node rendu.mjs --film court --stills 2.2,4.3
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Figtree:ital,wght@0,300..900;1,300..900&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=block">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="film.css">
+<link rel="stylesheet" href="court.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><filter id="bouge" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur id="bouge-flou" stdDeviation="0 0"/></filter></svg>
+<div id="scene">
+  <canvas id="fond" width="1080" height="1920"></canvas>
+  <div id="cadre">
+    <div id="monde"><div class="plateau" id="p"></div></div>
+    <div id="titres"><div class="calque" id="ti"></div></div>
+  </div>
+  <div id="voile"></div>
+  <canvas id="grain" width="270" height="480" style="width:1080px;height:1920px"></canvas>
+  <div id="eclair"></div>
+  <div id="noir"></div>
+</div>
+<script type="module" src="court.mjs"></script>
+</body>
+</html>

@@ -49,12 +49,12 @@ function ecrireWav(f, pcm) {
 const efficace = (x, a = 0, b = x.length) => { let s = 0; for (let i = a; i < b; i++) s += x[i] * x[i]; return Math.sqrt(s / Math.max(1, b - a)); };
 
 /** La musique, remontée : les mesures de MONTAGE mises bout à bout, fondues aux coupes. */
-function musique(duree) {
+function musique(duree, montage = MONTAGE) {
   const src = decoder(path.join(SONS, MUSIQUE)), n = Math.round(duree * SR), out = new Float32Array(n * 2), X = Math.round(0.010 * SR);
   // L'intro et la pause du morceau n'ont ni basse ni batterie : on les remonte, sinon elles disparaissent sous la voix.
   const relief = mesure => mesure <= 6 ? 1.8 : mesure === 7 ? null : (mesure >= 24 && mesure <= 30) ? 1.7 : mesure === 31 ? null : 1;
   let mesures = 0;
-  for (const [a, b] of MONTAGE) {
+  for (const [a, b] of montage) {
     const pos = Math.round(mesures * MESURE * SR), s0 = Math.round(a * MESURE * SR), len = Math.round((b - a + 1) * MESURE * SR);
     for (let i = -X; i < len + X; i++) {
       const d = pos + i, s = s0 + i;
@@ -72,8 +72,10 @@ function musique(duree) {
 
 /** La voix : chaque phrase posée à son instant. Une phrase trop longue pour sa place est légèrement accélérée. */
 function voixOff(voix, partition, duree) {
+  const n = Math.round(duree * SR), out = new Float32Array(n * 2), parle = [];
+  if (!voix) return { out, parle };   // le film court n'a pas de voix
   const lire = f => JSON.parse(fs.readFileSync(path.join(ICI, 'voix', voix, f), 'utf8'));
-  const d = lire('durees.json'), n = Math.round(duree * SR), out = new Float32Array(n * 2), parle = [];
+  const d = lire('durees.json');
   const lignes = Object.entries(partition.V).sort((x, y) => x[1].t - y[1].t);
   lignes.forEach(([k, v], i) => {
     const suivant = lignes[i + 1], limite = Math.min(suivant ? suivant[1].t - 0.08 : duree, partition.scenes[v.scene].b + 0.25);
@@ -113,9 +115,10 @@ export async function bandeSon({ voix, partition, duree, sortie }) {
   const { out: v, parle } = voixOff(voix, partition, duree);
   // niveau de la voix : mesuré là où elle parle, ramené à une valeur fixe
   let s = 0, c = 0; for (const [a, b] of parle) for (let i = Math.round(a * SR) * 2; i < Math.round(b * SR) * 2 && i < v.length; i++) { s += v[i] * v[i]; c++; }
-  const gv = 0.10 / Math.sqrt(s / Math.max(1, c)); for (let i = 0; i < v.length; i++) v[i] *= gv;
+  if (c) { const gv = 0.10 / Math.sqrt(s / c); for (let i = 0; i < v.length; i++) v[i] *= gv; }
   // la musique : 14 dB sous la voix quand elle parle, 8 dB sous elle dans les silences
-  const m = musique(duree), ref = efficace(m, Math.round(16 * SR) * 2, Math.round(26 * SR) * 2);
+  const [r0, r1] = partition.reference || [16, 26], [ouvre, ferme] = partition.fondus || [0.5, 2.4];   // où mesurer la musique ; ses fondus de début et de fin
+  const m = musique(duree, partition.montage), ref = efficace(m, Math.round(r0 * SR) * 2, Math.round(r1 * SR) * 2);
   // (le nom et la dernière phrase tombent sur les deux moments forts de la musique : elle s'y efface moins)
   const niveau = dB => 0.10 * Math.pow(10, dB / 20) / ref, haut = niveau(-8), sous = k => niveau(k === 'nom' || k === 'fin' ? -10 : -14);
   let env = haut, k = 0; const att = 1 - Math.exp(-1 / (0.10 * SR)), rel = 1 - Math.exp(-1 / (0.45 * SR));
@@ -124,7 +127,7 @@ export async function bandeSon({ voix, partition, duree, sortie }) {
     while (k < parle.length && t > parle[k][1] + 0.12) k++;
     const cible = k < parle.length && t >= parle[k][0] - 0.18 ? sous(parle[k][2]) : haut;
     env += (cible - env) * (cible < env ? att : rel);
-    const fondu = Math.min(1, t / 0.5, (duree - t) / 2.4);
+    const fondu = Math.min(1, t / ouvre, (duree - t) / ferme);
     m[i * 2] *= env * Math.max(0, fondu); m[i * 2 + 1] *= env * Math.max(0, fondu);
   }
   const b = bruitages(partition.sons, duree);

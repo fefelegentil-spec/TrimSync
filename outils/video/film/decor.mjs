@@ -36,7 +36,8 @@ export function decor({ CLIPS, attentes, AMB }) {
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
   const a = gl.getAttribLocation(prog, 'aPos'); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
   const U = Object.fromEntries(['uRes', 'uT', 'uAccent', 'uGain', 'uCam', 'uZoom', 'uSombre'].map(n => [n, gl.getUniformLocation(prog, n)]));
-  gl.viewport(0, 0, 1920, 1080); gl.uniform2f(U.uRes, 1920, 1080);
+  const LF = $('#fond').width, HF = $('#fond').height;   // 1920 × 1080 pour le film, 1080 × 1920 pour le court
+  gl.viewport(0, 0, LF, HF); gl.uniform2f(U.uRes, LF, HF);
   function fond(t, cam) {
     gl.uniform1f(U.uT, 11 + t * 0.85);
     gl.uniform3fv(U.uAccent, AMB.teinte);
@@ -45,7 +46,7 @@ export function decor({ CLIPS, attentes, AMB }) {
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
   { // le grain : tiré une fois, toujours le même
-    const c = $('#grain').getContext('2d'), d = c.createImageData(480, 270); let g = 7;
+    const c = $('#grain').getContext('2d'), d = c.createImageData($('#grain').width, $('#grain').height); let g = 7;
     for (let i = 0; i < d.data.length; i += 4) { g = (g * 1103515245 + 12345) % 2147483648; const v = g / 2147483648 * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
     c.putImageData(d, 0, 0);
   }
